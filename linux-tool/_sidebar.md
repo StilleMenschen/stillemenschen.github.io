@@ -1,5 +1,5 @@
-
-
 * [首页](/)
 * [Linux工具](linux-tool/)
   * [VIM快捷键](linux-tool/vim-keyshots.md)
+  * [ls](linux-tool/ls.md)
+  * [useradd](linux-tool/useradd.md)
