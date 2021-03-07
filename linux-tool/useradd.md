@@ -34,3 +34,5 @@ useradd -D [选项]
 -u, --uid UID                | 新账户的用户 ID
 -U, --user-group             | 创建与用户同名的组
 -Z, --selinux-user SEUSER    | 为 SELinux 用户映射使用指定 SEUSER
+
+Last Modified 2021-03-07
