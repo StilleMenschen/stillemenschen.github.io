@@ -35,4 +35,35 @@ useradd -D [选项]
 -U, --user-group             | 创建与用户同名的组
 -Z, --selinux-user SEUSER    | 为 SELinux 用户映射使用指定 SEUSER
 
-Last Modified 2021-03-07
+## 命令示例
+
+1. 新增一个用户test
+
+```bash
+useradd test
+```
+
+2. 新增用户但不创建HOME目录，并禁止登录
+
+```bash
+useradd -M -s /sbin/nologin test
+```
+
+3. 添加新用户test，指定UID为888，指定归属用户组为root，adm成员，其shell类型为/bin/sh
+
+```bash
+useradd -u 888 -s /bin/sh -G root,adm test
+```
+
+4. 添加新用户test，设置HOME目录为/tmp/test，用户过期时间为2019/05/01.过期后两天停权
+
+```bash
+useradd -e "2019/05/01" -f 2 -d /tmp/test test
+```
+
+5. 添加新用户test，并同时创建同名组
+
+```bash
+useradd -U test
+```
+Last Modified 2021-03-08

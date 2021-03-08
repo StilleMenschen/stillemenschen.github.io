@@ -1,4 +1,4 @@
 * [首页](/)
-* [Linux工具](linux-tool/)
+* [Linux Tool](linux-tool/)
 * [Jenkins](jenkins/)
 * [Windows](windows/)

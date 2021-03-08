@@ -1,6 +1,7 @@
-# Linux 工具
+# Linux Tool
 
 - vim
 - ls
+- grep
 - find
 - useradd
