@@ -1,4 +1,4 @@
-* [首页](/)
+* [Home](/)
 * [Linux Tool](linux-tool/)
   * [vim](linux-tool/vim.md)
   * [ls](linux-tool/ls.md)

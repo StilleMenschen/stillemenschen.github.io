@@ -1,4 +1,7 @@
-* [首页](/)
+* [Home](/)
 * [Linux Tool](linux-tool/)
 * [Jenkins](jenkins/)
+* [Nginx](nginx/)
+* [Docker](docker/)
+* [Docker Compose](docker-compose/)
 * [Windows](windows/)

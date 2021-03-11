@@ -1,3 +1,3 @@
 # Documents
 
-从前端到后端，从运维到部署，从工作到生活
+From front-end to back-end, from operation and maintenance to deployment, from work to life
