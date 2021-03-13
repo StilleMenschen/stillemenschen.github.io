@@ -4,4 +4,5 @@
   * [ls](linux-tool/ls.md)
   * [grep](linux-tool/grep.md)
   * [find](linux-tool/find.md)
+  * [less](linux-tool/less.md)
   * [useradd](linux-tool/useradd.md)

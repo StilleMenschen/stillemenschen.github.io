@@ -4,4 +4,5 @@
 - ls
 - grep
 - find
+- less
 - useradd

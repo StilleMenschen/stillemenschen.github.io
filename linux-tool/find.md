@@ -7,7 +7,7 @@ find命令可以根据给定的路径和表达式查找文件或目录。find参
 find如不加任何参数，表示查找当前路径下的所有文件和目录，如果服务器负载比较高尽量不要在高峰期使用find命令，find命令模糊搜索还是比较消耗系统资源的。表达式包含测试和动作。
 
 ```
-find [-H] [-L] [-P] [路径...] [表达式]
+find [-H] [-L] [-P] [path...] [expression]
 ```
 ## 选项
 
@@ -133,4 +133,4 @@ find /opt -type d \( -name 'test*' -o -name '*admin' \) -exec du -hd 0 {} \;
 find /var/logs -name '*.log' -mtime +7 -size +30M -exec rm -f {} \;
 ```
 
-Last Modified 2021-03-08
+Last Modified 2021-03-13

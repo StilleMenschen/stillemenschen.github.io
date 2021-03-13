@@ -5,7 +5,7 @@
 ls命令就是list的缩写，通过ls命令不仅可以查看linux文件夹包含的文件，而且可以查看文件权限(包括目录、文件夹、文件权限)，查看目录信息等。
 
 ```
-ls [选项]... [文件]...
+ls [OPTION]... [FILE]...
 ```
 
 ## 参数
@@ -89,4 +89,4 @@ ls -lhtr
 ls -Alhgo --sort=time --time-style=long-iso
 ```
 
-Last Modified 2021-03-07
+Last Modified 2021-03-13

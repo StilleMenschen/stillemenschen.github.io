@@ -5,8 +5,8 @@
 搜索指定的输入文件（如果未指定文件或给定单个`'-'`连字符，则搜索标准输入），以查找包含与给定表达式匹配的行。 默认情况下，`grep`打印匹配的行。另外还有另外两种与grep类似的命令，分别是`egrep`（grep -E）和`fgrep`（grep -F），`egrep`支持基本和扩展的正则表达式，`fgrep`不支持正则表达式，按照字符串表面意思进行匹配。
 
 ```
-grep [选项] 表达式 [文件...]
-grep [选项] [-e 表达式 | -f 文件] [文件...]
+grep [OPTIONS] PATTERN [FILE...]
+grep [OPTIONS] [-e PATTERN | -f FILE] [FILE...]
 ```
 
 ## 参数
@@ -105,4 +105,4 @@ grep abc -r test*
 grep -i '2021-0[1-3]-[01][0-9].* Error ' main.log
 ```
 
-Last Modified 2021-03-10
+Last Modified 2021-03-13

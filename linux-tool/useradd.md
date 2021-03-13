@@ -1,10 +1,13 @@
 # useradd
 
-## 用法
+## 简介
+
+如果在不使用-D选项的情况下调用useradd命令，则会使用命令行上指定的值以及系统的默认值来创建新的用户帐户。 根据命令行选项，useradd命令将更新系统文件，并且还可以创建新用户的主目录并复制初始文件。
+
 ```
-useradd [选项] 登录
+useradd [options] LOGIN
 useradd -D
-useradd -D [选项]
+useradd -D [options]
 ```
 
 ## 选项
@@ -66,4 +69,4 @@ useradd -e "2019/05/01" -f 2 -d /tmp/test test
 ```bash
 useradd -U test
 ```
-Last Modified 2021-03-08
+Last Modified 2021-03-13

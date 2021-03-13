@@ -1,0 +1,7 @@
+* [Home](/)
+* [Config](config/)
+  * [bashrc](config/bashrc.md)
+  * [vimrc](config/vimrc.md)
+  * [npmrc](config/npmrc.md)
+  * [pip](config/pip.md)
+  * [vscode](config/vscode.md)
