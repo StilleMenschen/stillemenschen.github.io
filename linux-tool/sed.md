@@ -69,4 +69,33 @@ addr1,~N   | 从地址`addr1`开始向后匹配到N的倍数行的下一行
 
 ## 命令示例
 
-Last Modified 2021-03-15
+1. 在maven的配置文件中添加阿里云镜像
+
+    首先准备一个`aliyun-maven.xml`文件，内容如下，保存文件到`/opt`目录中
+
+    ```xml
+        <mirror>
+          <id>aliyunmaven</id>
+          <mirrorOf>*</mirrorOf>
+          <name>阿里云公共仓库</name>
+          <url>https://maven.aliyun.com/repository/public</url>
+        </mirror>
+    ```
+
+    假设`maven`的路径在`/usr/local/maven3`下，执行如下命令，添加镜像到配置文件中并备份配置文件重命名为`settings.xml.bak`
+
+    ```bash
+    sed -ci.bak '/<mirrors>/r /opt/aliyun-maven.xml' /usr/local/maven3/conf/settings.xml
+    ```
+
+2. 修改文件中所有的链接
+
+    将所有`http://www.example.com`改为`https://linux.org`
+
+    ```bash
+    sed -r 's@http://www.example.com@https://linux.org@g' url.conf
+    ```
+
+    > 注意这里使用`@`符号替代默认的`/`来表示界定符
+
+Last Modified 2021-03-17
