@@ -4,6 +4,7 @@
   * [ls](linux-tool/ls.md)
   * [grep](linux-tool/grep.md)
   * [sed](linux-tool/sed.md)
+  * [awk](linux-tool/awk.md)
   * [find](linux-tool/find.md)
   * [less](linux-tool/less.md)
   * [useradd](linux-tool/useradd.md)

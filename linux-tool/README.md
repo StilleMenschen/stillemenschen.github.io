@@ -4,6 +4,7 @@
 - ls
 - grep
 - sed
+- awk
 - find
 - less
 - useradd
