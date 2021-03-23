@@ -232,6 +232,35 @@ toupper(string)                              | 将`string`中的小写字母全�
 
 ## 命令示例
 
+1. 输出1到10的随机数10次
+
+```bash
+awk 'BEGIN{for (i=0;i<10;i++) print 1+int(rand()*10)}'
+```
+
+2. 找出占用指定端口的java程序的PID
+
+```bash
+netstat -ntlp|awk '/:8088/{sub(/[^0-9]+/,"",$NF);print $NF;exit}'
+```
+
+3. 提取文本数据
+
+    - 先看看示例文本
+
+    ```txt
+    Amelia       555-5553     amelia.zodiacusque@gmail.com    F
+    Anthony      555-3412     anthony.asserturo@hotmail.com   A
+    Becky        555-7685     becky.algebrarum@gmail.com      A
+    Bill         555-1675     bill.drowning@hotmail.com       A
+    Broderick    555-0542     broderick.aliquotiens@yahoo.com R
+    Camilla      555-2912     camilla.infusarum@skynet.be     R
+    Fabius       555-1234     fabius.undevicesimus@ucb.edu    F
+    Julie        555-6699     julie.perscrutabor@skeeve.com   F
+    Martin       555-6480     martin.codicibus@hotmail.com    A
+    Samuel       555-3430     samuel.lanceolis@shu.edu        A
+    Jean-Paul    555-2127     jeanpaul.campanorum@nyu.edu     R
+    ```
 
 更多说明可参考GNU的[awk](https://www.gnu.org/software/gawk/manual/gawk.html)文档
 
