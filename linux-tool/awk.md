@@ -246,8 +246,7 @@ netstat -ntlp|awk '/:8088/{sub(/[^0-9]+/,"",$NF);print $NF;exit}'
 
 3. 提取文本数据
 
-    - 先看看示例文本
-
+    先看看示例文本mail-list
     ```txt
     Amelia       555-5553     amelia.zodiacusque@gmail.com    F
     Anthony      555-3412     anthony.asserturo@hotmail.com   A
@@ -260,6 +259,18 @@ netstat -ntlp|awk '/:8088/{sub(/[^0-9]+/,"",$NF);print $NF;exit}'
     Martin       555-6480     martin.codicibus@hotmail.com    A
     Samuel       555-3430     samuel.lanceolis@shu.edu        A
     Jean-Paul    555-2127     jeanpaul.campanorum@nyu.edu     R
+    ```
+
+    找到第三列所有`edu`邮箱的人员并输出第一列名称
+
+    ```bash
+    awk '$3 ~ /.edu/{print $1}' mail-list
+    ```
+
+    找到第四列字符为`A`的人员，修改第二列号码中`555`为`963`，并输出
+
+    ```bash
+    awk '$4 == "A"{sub(/555/,"963",$2);print}' mail-list
     ```
 
 更多说明可参考GNU的[awk](https://www.gnu.org/software/gawk/manual/gawk.html)文档
