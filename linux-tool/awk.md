@@ -234,15 +234,15 @@ toupper(string)                              | 将`string`中的小写字母全�
 
 1. 输出1到10的随机数10次
 
-```bash
-awk 'BEGIN{for (i=0;i<10;i++) print 1+int(rand()*10)}'
-```
+    ```bash
+    awk 'BEGIN{for (i=0;i<10;i++) print 1+int(rand()*10)}'
+    ```
 
 2. 找出占用指定端口的java程序的PID
 
-```bash
-netstat -ntlp|awk '/:8088/{sub(/[^0-9]+/,"",$NF);print $NF;exit}'
-```
+    ```bash
+    netstat -ntlp|awk '/:8088/{sub(/[^0-9]+/,"",$NF);print $NF;exit}'
+    ```
 
 3. 提取文本数据
 
@@ -275,4 +275,4 @@ netstat -ntlp|awk '/:8088/{sub(/[^0-9]+/,"",$NF);print $NF;exit}'
 
 更多说明可参考GNU的[awk](https://www.gnu.org/software/gawk/manual/gawk.html)文档
 
-Last Modified 2021-03-21
+Last Modified 2021-03-28

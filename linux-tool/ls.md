@@ -55,38 +55,38 @@ SIZE是整数和可选单位（例如：10M是10 * 1024 * 1024）。 单位为K�
 
 1. 列出当前目录以及子目录的详细信息
 
-```bash
-ls -lR
-```
+    ```bash
+    ls -lR
+    ```
 
 2. 列出/opt目录中所有p开头的文件和目录详细信息
 
-```bash
-ls -l /opt/p*
-```
+    ```bash
+    ls -l /opt/p*
+    ```
 
 3. 列出当前目录下的所有子目录的详细信息
 
-```bash
-ls -l | grep ^d
-```
+    ```bash
+    ls -l | grep ^d
+    ```
 
-其实也可以反过来，列出当前目录下的所有文件但不包含目录
+    其实也可以反过来，列出当前目录下的所有文件但不包含目录
 
-```bash
-ls -l | grep -v ^d
-```
+    ```bash
+    ls -l | grep -v ^d
+    ```
 
 4. 列出当前目录下所有文件详细信息，按文件修改时间升序
 
-```bash
-ls -lhtr
-```
+    ```bash
+    ls -lhtr
+    ```
 
 5. 列出当前目录下的所有文件，包括隐藏文件但不包含.和..，不显示文件的所有者信息，并且格式化输出文件的修改时间
 
-```bash
-ls -Alhgo --sort=time --time-style=long-iso
-```
+    ```bash
+    ls -Alhgo --sort=time --time-style=long-iso
+    ```
 
-Last Modified 2021-03-13
+Last Modified 2021-03-28

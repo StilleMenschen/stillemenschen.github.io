@@ -59,50 +59,50 @@ grep [OPTIONS] [-e PATTERN | -f FILE] [FILE...]
 
 1. 输出当前目录下包含`abc`字符串的以`test`开头的所有文件和`/etc/hosts`文件
 
-```bash
-grep abc test* /etc/hosts
-```
+    ```bash
+    grep abc test* /etc/hosts
+    ```
 
 2. 输出当前目录下`test`开头的所有文件中匹配`abc`字符串行的数量
 
-```bash
-grep abc -c test*
-```
+    ```bash
+    grep abc -c test*
+    ```
 
 3. 输出当前目录下`test`开头的所有文件中匹配`abc`字符串的行，并输出匹配行号
 
-```bash
-grep abc -n test*
-```
+    ```bash
+    grep abc -n test*
+    ```
 
 4. 输出当前目录下所有以`test`开头的文件中不包含匹配`abc`字符串的所有行，且不显示文件名
 
-```bash
-grep abc -vh test*
-```
+    ```bash
+    grep abc -vh test*
+    ```
 
 5. 递归搜索当前目录和子目录中以`test`开头的所有文件中包含匹配`abc`字符串的行
 
-```bash
-grep abc -r test*
-```
+    ```bash
+    grep abc -r test*
+    ```
 
 6. 计算一个文件中的空行或非空的行的数量
 
-  空行
-  ```bash
-  grep ^$ -c test.txt
-  ```
+    空行
+    ```bash
+    grep ^$ -c test.txt
+    ```
 
-  非空行
-  ```bash
-  grep -v ^$ -c test.txt
-  ```
+    非空行
+    ```bash
+    grep -v ^$ -c test.txt
+    ```
 
 7. 查找log文件中2021年1月到3月且1号到19号的`Error`级别的信息，同时忽略大小写
 
-```bash
-grep -i '2021-0[1-3]-[01][0-9].* Error ' main.log
-```
+    ```bash
+    grep -i '2021-0[1-3]-[01][0-9].* Error ' main.log
+    ```
 
-Last Modified 2021-03-13
+Last Modified 2021-03-28
