@@ -14,14 +14,14 @@ Docker可以通过阅读Dockerfile中的指令来自动构建映像。Dockerfile
 
 指令`INSTRUCTION`虽然不区分大小写，但是作为一种约定，最好全部使用大写。
 
-```Dockerfile
+```
 # Comment line
 INSTRUCTION arguments
 ```
 
 `Dockerfile`默认只会解析以`#`开头的行作为注释，如果行开头是有效的指令，则后续的`#`不会生效为注释
 
-```Dockerfile
+```
 # Comment line
 RUN echo 'we are running some # of cool things'
 ```
@@ -37,7 +37,7 @@ RUN echo 'we are running some # of cool things'
 
 简单示例
 
-```Dockerfile
+```
 FROM busybox
 ENV FOO=/bar
 WORKDIR ${FOO}   # WORKDIR /bar
@@ -93,7 +93,7 @@ FROM [--platform=<platform>] <image>[@<digest>] [AS <name>]
 
 在`FORM`指令之前使用`ARG`指令：
 
-```Dockerfile
+```
 ARG  CODE_VERSION=latest
 FROM base:${CODE_VERSION}
 CMD  /code/run-app
@@ -104,11 +104,68 @@ CMD  /code/run-extras
 
 在`FROM`之前声明的`ARG`在新构建阶段开始后不再生效。因此，`FROM`之后的任何指令都不能使用它。要使用在第一个`FROM`之前声明的`ARG`的默认值，请使用`ARG`指令，在新的构建阶段内部指定同名的参数，但不需要为参数指定值
 
-```Dockerfile
+```
 ARG VERSION=latest
 FROM busybox:$VERSION
 ARG VERSION
 RUN echo $VERSION > image_version
 ```
 
-Last Modified 2021-03-28
+## RUN
+
+`RUN`指令有两种执行方式
+
+- `RUM <command>`（shell 命令，此命令在终端里执行，`Linux`默认`/bin/sh -c`，`Windows`默认`cmd /S /C`）
+- `RUN ["executable", "param1", "param2"]`（使用JSON数组的形式表示可执行命令和命令参数）
+
+`RUN`指令将在当前镜像顶部的新层中执行任何命令，并提交结果。生成的提交镜像将用于`Dockerfile`中的下一步操作
+
+执行的shell命令比较长时，可以使用`\`换行，如下
+
+```
+RUN /bin/bash -c 'source $HOME/.bashrc; \
+echo $HOME'
+```
+
+如果使用JSON数组形式表示命令，则必须是执行shell命令才可以使用环境变量，否则环境变量将被解析为普通的字符串，如下使用JSON数组的形式调用shell命令执行并且可以正常解析环境变量
+
+```
+RUN [ "sh", "-c", "echo $HOME" ]
+```
+
+## CMD
+
+`CMD`指令有以下三种方式执行
+
+- `CMD ["executable","param1","param2"]`使用JSON数组表示命令和命令的参数
+- `CMD ["param1","param2"]`里面的参数将会作为`ENTRYPOINT`执行命令的默认参数
+- `CMD command param1 param2`执行shell命令
+
+在`Dockerfile`中只能有一个`CMD`指令，如果指定了多个，则有文件中最后一个`CMD`指令生效，如果`CMD`指令中没有指明可执行程序，而只是指定了参数，那么还需要再指定一个`ENTRYPOINT`
+
+如果使用`CMD`来为`ENTRYPOINT`指定参数，则这两个指令都必须以JSON数组的形式来编写
+
+如果在`CMD`指令中执行shell，默认情况下会使用`/bin/sh -c`来执行。在没有shell环境的情况下，必须以JSON数组来表示命令，且必须提供可执行程序的完整路径，如：
+
+```
+FROM ubuntu
+CMD ["/usr/bin/wc","--help"]
+```
+
+## ENV
+
+`ENV`指令可以为容器环境或后续执行的指令提供自定义的环境变量，环境变量以`<key>`对应`<value>`的形式表示
+
+```
+ENV <key>=<value> ...
+```
+
+如果要在`<value>`中使用空格，可以使用`"`双引号或者`\`转义字符
+
+```
+ENV MY_NAME="John Doe"
+ENV MY_DOG=Rex\ The\ Dog
+ENV MY_CAT=fluffy
+```
+
+Last Modified 2021-03-29
