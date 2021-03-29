@@ -14,7 +14,7 @@ docker ps [OPTIONS]
 :--- | :---
 -a, --all    | 列出所有容器（默认只列出运行中的）
 -f, --filter | 根据提供的条件过滤输出
---format     | 使用Go模板美化输出容器
+--format     | 使用Go模板格式化输出容器信息
 -n, --last   | 显示n个最后创建的容器（包括所有状态）
 -l, --latest | 显示最新创建的容器（包括所有状态）
 --no-trunc   | 不截断输出
@@ -90,7 +90,7 @@ is-task           | 筛选作为`task`服务的容器，固定布尔值：`true`
 
 ## 格式化
 
-格式化选项（`--format`）使用Go模板格式化输出容器信息，在格式化字符串最前面加速`table`可以指定以表格的方式输出，包含表头
+格式化选项（`--format`）使用Go模板格式化输出容器信息，在格式化字符串最前面加上`table`可以指定以表格的方式输出，包含表头
 
 格式化参数 | 说明
 :--- | :---
@@ -120,4 +120,4 @@ docker ps -a --format "table {{.ID}} {{.Image}} {{.Command}} {{.CreatedAt}} {{.R
 docker ps -a --no-trunc --format "{{.ID}}: {{.Image}}, {{.Names}}, {{.Networks}}, {{.Size}}, {{.CreatedAt}}\n{{.Command}}\n{{.RunningFor}}, {{.Ports}}, {{.State}}, {{.Status}}\n{{.Mounts}}\n"
 ```
 
-Last Modified 2021-03-28
+Last Modified 2021-03-29
