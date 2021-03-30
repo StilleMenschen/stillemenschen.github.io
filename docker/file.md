@@ -233,6 +233,36 @@ COPY [--chown=<user>:<group>] <src>... <dest>
 COPY [--chown=<user>:<group>] ["<src>",... "<dest>"]
 ```
 
-`COPY`指令与`ADD`指令类似，但`COPY`指令不支持下载URL中的文件，也不支持解压缩使用`tar`归档的文件，只有拷贝`<src>`中本地文件的功能，参考`ADD`指令说明
+`COPY`指令与`ADD`指令类似，但`COPY`指令不支持下载URL中的文件，也不支持解压缩使用`tar`归档的文件，只有拷贝`<src>`文件或目录到容器内的功能，参考`ADD`指令说明
+
+## ENTRYPOINT
+
+`exec`形式
+```
+ENTRYPOINT ["executable", "param1", "param2"]
+```
+`shell`形式
+```
+ENTRYPOINT command param1 param2
+```
+
+`ENTRYPOINT`允许您配置将作为可执行文件运行的容器，`Dockerfile`应该指定`CMD`或`ENTRYPOINT`命令中的至少一个，使用容器作为可执行文件时，应定义`ENTRYPOINT`
+
+`docker run <image>`的命令行参数将附加在`exec`形式`ENTRYPOINT`的所有元素之后，并将覆盖使用`CMD`指定的所有元素。这允许将参数传递给入口点，即`docker run <image> -d`将`-d`参数传递给入口点。您可以使用`docker run --entrypoint`标志覆盖`ENTRYPOINT`指令
+
+`shell`形式可防止使用任何`CMD`或运行命令行参数，但具有以下缺点：`ENTRYPOINT`将作为`/bin/sh -c`的子命令启动，该子命令不传递信号。这意味着可执行文件将不是容器的`PID 1`，并且不会接收`Unix`信号，因此您的可执行文件将不会从`docker stop <container>`接收到`SIGTERM`
+
+> 只有`Dockerfile`中的最后一条`ENTRYPOINT`指令才会生效
+
+下表显示了针对不同的`ENTRYPOINT/CMD`组合执行的命令
+
+`/` | `No ENTRYPOINT` | `ENTRYPOINT exec_entry p1_entry` | `ENTRYPOINT ["exec_entry", "p1_entry"]`
+:--- | :--- | :--- | :---
+`No CMD` | error, not allowed | /bin/sh -c exec_entry p1_entry | exec_entry p1_entry
+`CMD ["exec_cmd", "p1_cmd"]` | exec_cmd p1_cmd | /bin/sh -c exec_entry p1_entry | exec_entry p1_entry exec_cmd p1_cmd
+`CMD ["p1_cmd", "p2_cmd"]` | p1_cmd p2_cmd | /bin/sh -c exec_entry p1_entry | exec_entry p1_entry p1_cmd p2_cmd
+`CMD exec_cmd p1_cmd` | /bin/sh -c exec_cmd p1_cmd | /bin/sh -c exec_entry p1_entry | exec_entry p1_entry /bin/sh -c exec_cmd p1_cmd
+
+> 如果从基本`image`定义了`CMD`，则设置`ENTRYPOINT`会将`CMD`重置为空值。在这种情况下，必须在当前`image`中定义`CMD`以具有值
 
 Last Modified 2021-03-30
