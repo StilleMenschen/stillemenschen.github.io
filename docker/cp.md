@@ -19,6 +19,12 @@ docker cp将`SRC_PATH`的内容复制到`DEST_PATH`。您可以从容器的文�
 docker cp nginx1:/etc/bash.bashrc -
 ```
 
+将某个`tar`打包的文件作为输入源拷贝到容器中的某个目录，tar文件中的内容将会自动解压到容器内指定的目录下
+
+```bash
+docker cp - nginx1:/opt < app.conf.tar
+```
+
 docker cp命令假定容器路径相对于容器的`/`（根）目录。这意味着提供开头`/`是可选的。该命令将`compassionate_darwin:/tmp/foo/myfile.txt`和`compassionate_darwin:tmp/foo/myfile.txt`视为相同的路径。本地机器路径可以是绝对值或相对值。该命令将本地计算机的相对路径解释为相对于运行docker cp的当前工作目录的相对路径。
 
 - `SRC_PATH`是文件
