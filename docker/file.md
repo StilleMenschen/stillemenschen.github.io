@@ -202,17 +202,37 @@ ADD home/aa?.txt /mydir/
 ADD test.txt relativeDir/
 ```
 
-> 如果容器内的文件系统中不存在`/etc/passwd`或`/etc/group`文件，当`--chown`中使用具体的用户名或组名时，会导致`ADD`指令执行失败，而使用数字的`UID`和`GID`不会访问容器进行检查
+如果使用具体的用户名或组名而不是用户ID或用户组ID，则docker会查找容器内的文件系统中`/etc/passwd`和`/etc/group`两个文件来确定具体的`UID`和`GID`，权限示例
 
-`ADD`指令遵循以下原则：
+```
+ADD --chown=55:mygroup files* /somedir/
+ADD --chown=bin files* /somedir/
+ADD --chown=1 files* /somedir/
+ADD --chown=10:11 files* /somedir/
+```
+
+> 如果容器内的文件系统中不存在`/etc/passwd`或`/etc/group`文件，当`--chown`中使用具体的用户名或组名时，会导致`ADD`指令执行失败，而使用数字的`UID`和`GID`不会访问容器进行检查，`ADD`指令可以正常执行
+
+`ADD`指令遵循以下原则
 
 - `<src>`必须是基于上下文路径中的目录或文件，类似`ADD ../something /something`的方式是无效的，因为在`docker build`开始前，当前的上下文路径将首先发送到`docker`的守护进程，再按`Dockerfile`进行构建
 - 如果`<src>`是URL，且`<dest>`不以`/`结尾，则直接下载URL中的文件并复制到`<dest>`
 - 如果`<src>`是URL，并且`<dest>`以`/`结尾，则从URL推断文件名，并将文件下载到`<dest>/<filename>`。例如，添加`http://example.com/foobar /`将创建文件`/foobar`。该URL必须具有非平凡的路径，以便在这种情况下可以找到适当的文件名（如`http://example.com`将不起作用）
+- 如果`<src>`是采用公认压缩格式（identity, gzip, bzip2 或 xz）的本地`tar`归档文件，则将其解压缩为目录。来自远程URL的资源不会被解压缩。复制或解压缩目录时，其行为与tar -x相同
+> 如果一个空的文件恰好以`.tar.gz`结尾，则不会被解压缩，而是被简单地拷贝到容器中，也不会出现解压缩的错误信息
 - 如果`<src>`是目录，则将复制目录中的所有内容到`<dest>`，包括文件系统元数据
 - 如果`<src>`是任何其他类型的文件，则将其与元数据一起单独复制。在这种情况下，如果`<dest>`以`/`结束，则它将被视为目录，并且`<src>`的内容将写入`<dest>/base(<src>)`。
 - 如果直接或由于使用通配符而指定了多个`<src>`资源，则`<dest>`必须是目录，并且必须以`/`结尾
 - 如果`<dest>`不以斜杠结尾，则它将被视为常规文件，并且`<src>`的内容将写入`<dest>`
 - 如果`<dest>`不存在，它将与路径中所有缺少的目录一起创建
+
+## COPY
+
+```
+COPY [--chown=<user>:<group>] <src>... <dest>
+COPY [--chown=<user>:<group>] ["<src>",... "<dest>"]
+```
+
+`COPY`指令与`ADD`指令类似，但`COPY`指令不支持下载URL中的文件，也不支持解压缩使用`tar`归档的文件，只有拷贝`<src>`中本地文件的功能，参考`ADD`指令说明
 
 Last Modified 2021-03-30
