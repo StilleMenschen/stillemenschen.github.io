@@ -141,7 +141,7 @@ RUN [ "sh", "-c", "echo $HOME" ]
 - `CMD ["param1","param2"]`里面的参数将会作为`ENTRYPOINT`执行命令的默认参数
 - `CMD command param1 param2`执行shell命令
 
-在`Dockerfile`中只能有一个`CMD`指令，如果指定了多个，则有文件中最后一个`CMD`指令生效，如果`CMD`指令中没有指明可执行程序，而只是指定了参数，那么还需要再指定一个`ENTRYPOINT`
+在`Dockerfile`中只能有一个`CMD`指令，如果指定了多个，则以文件中最后一个`CMD`指令生效，如果`CMD`指令中没有指明可执行程序，而只是指定了参数，那么还需要再指定一个`ENTRYPOINT`
 
 如果使用`CMD`来为`ENTRYPOINT`指定参数，则这两个指令都必须以JSON数组的形式来编写
 
