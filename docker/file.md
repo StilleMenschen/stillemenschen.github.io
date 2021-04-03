@@ -2,9 +2,9 @@
 
 ## 简介
 
-Docker可以通过阅读Dockerfile中的指令来自动构建映像。Dockerfile是一个文本文档，其中包含用户可以在命令行上调用以组装映像的所有命令。使用`docker build`的用户可以创建自动执行的构建，该构建可以连续执行多个命令行指令。
+Docker可以通过阅读`Dockerfile`中的指令来自动构建镜像。`Dockerfile`是一个文本文档，其中包含用户可以在命令行上调用以组装镜像的所有命令。使用`docker build`的用户可以创建自动执行的构建，该构建可以连续执行多个命令行指令。
 
-`docker build`命令从`Dockerfile`和上下文构建映像。构建的上下文是位于指定位置`PATH`或`URL`的文件集。PATH是本地文件系统上的目录，而`URL`是一个`Git`存储库位置。上下文路径是递归处理的（按目录下的子目录和目录中的文件逐个读入）。因此，`PATH`包括任何子目录，而`URL`包括存储库及其子模块。
+`docker build`命令从`Dockerfile`和上下文构建镜像。构建的上下文是位于指定位置`PATH`或`URL`的文件集。`PATH`是本地文件系统上的目录，而`URL`是一个`Git`存储库位置。上下文路径是递归处理的（按目录下的子目录和目录中的文件逐个读入）。因此，`PATH`包括任何子目录，而`URL`包括存储库及其子模块。
 
 构建是由Docker守护程序而不是CLI运行的。构建过程要做的第一件事是将整个上下文（递归）发送到守护程序。在大多数情况下，最好以空目录作为上下文，并将`Dockerfile`保留在该目录中。仅添加构建`Dockerfile`所需的文件。
 
@@ -68,13 +68,13 @@ temp?
 
 ## FORM
 
-```Dcokerfile
+```
 FROM [--platform=<platform>] <image> [AS <name>]
 ```
-```Dcokerfile
+```
 FROM [--platform=<platform>] <image>[:<tag>] [AS <name>]
 ```
-```Dcokerfile
+```
 FROM [--platform=<platform>] <image>[@<digest>] [AS <name>]
 ```
 
@@ -130,7 +130,7 @@ RUN [ "sh", "-c", "echo $HOME" ]
 
 在`Dockerfile`中只能有一个`CMD`指令，如果指定了多个，则以文件中最后一个`CMD`指令生效，如果`CMD`指令中没有指明可执行程序，而只是指定了参数，那么还需要再指定一个`ENTRYPOINT`
 
-如果使用`CMD`来为`ENTRYPOINT`指定参数，则这两个指令都必须以JSON数组的形式来编写
+如果使用`CMD`来为`ENTRYPOINT`指定参数，则这两个指令**都必须以JSON数组的形式来编写**
 
 如果在`CMD`指令中执行shell，默认情况下会使用`/bin/sh -c`来执行。在没有shell环境的情况下，必须以JSON数组来表示命令，且必须提供可执行程序的完整路径，如：
 ```
@@ -280,7 +280,7 @@ RUN mkdir /myvol
 RUN echo "hello world" > /myvol/greeting
 VOLUME /myvol
 ```
-该`Dockerfile`生成一个映像，该镜像使`docker run`在`/myvol`中创建一个新的挂载点，并将`greeting`文件复制到新创建的卷中。
+该`Dockerfile`生成一个镜像，该镜像使`docker run`在`/myvol`中创建一个新的挂载点，并将`greeting`文件复制到新创建的卷中。
 
 ## USER
 
@@ -320,4 +320,171 @@ RUN pwd
 ```
 最终`pwd`命令会输出`/path/$DIRNAME`
 
-Last Modified 2021-03-31
+## ARG
+
+`ARG`指令定义了一个变量，用户可以在构建时使用`--build-arg <varname>=<value>`标志使用`docker build`命令将其传递给构建器。如果用户指定了未在`Dockerfile`中定义的构建参数，则构建会输出警告
+
+```
+FROM busybox
+ARG user1
+ARG buildno
+# ...
+```
+带有默认值，如果`ARG`指令具有默认值，并且在构建时未传递任何值，则构建器将使用默认值
+```
+FROM busybox
+ARG user1=someuser
+ARG buildno=1
+# ...
+```
+
+> <span style="color: red">不建议使用构建时变量来传递诸如github密钥，用户凭据等机密信息。构建时变量值对于任何使用docker history命令查看镜像的用户都是可见的</span>
+
+
+`ARG`变量定义从`Dockerfile`中定义的行开始生效，而不是该参数在命令行被指定或在其他地方使用了该变量开始生效。例如，考虑以下Dockerfile
+```
+FROM busybox
+USER ${user:-some_user}
+ARG user
+USER $user
+# ...
+```
+使用命令构建
+```bash
+docker build --build-arg user=what_user .
+```
+第2行的`USER`为`some_user`，因为在随后的第3行中定义了`user`变量。第4行的`USER`评估为用户定义的`what_user`，并且在命令行中传递了`what_user`值。在通过ARG指令对其进行定义之前，任何在`ARG`定义之前使用该变量都会返回一个空字符串
+
+`ARG`指令在定义它的构建阶段结束时超出使用范围。要在多个阶段使用`ARG`，每个阶段都必须包含`ARG`指令
+```
+FROM busybox
+ARG SETTINGS
+RUN ./run/setup $SETTINGS
+
+FROM busybox
+ARG SETTINGS
+RUN ./run/other $SETTINGS
+```
+您可以使用`ARG`或`ENV`指令来指定`RUN`指令可用的变量。使用`ENV`指令定义的环境变量始终会覆盖`ARG`指令定义同名的变量。
+
+`Docker`具有一组预定义的`ARG`变量，您可以在`Dockerfile`中使用它们而无需相应的`ARG`指令
+```
+HTTP_PROXY
+http_proxy
+HTTPS_PROXY
+https_proxy
+FTP_PROXY
+ftp_proxy
+NO_PROXY
+no_proxy
+```
+预定义的`ARG`变量在使用`docekr history`查看镜像时，默认被排除输出，但是如果在`Dockerfile`中使用`ARG`定义了与预定义变量同名的变量，则变量定义会保留在`docker history`查看镜像的构建历史中
+
+## ONBUILD
+
+当将镜像用作另一个构建的基础时，`ONBUILD`指令会在镜像上添加一个触发指令，以便稍后执行。该触发器将在子级镜像构建的上下文中执行，就像它已被插入到子级`Dockerfile`中的`FROM`指令之后一样
+
+> 不允许使用链接的`ONBUILD`指令，如`ONBUILD ONBUILD`
+
+使用以下`Dockerfile`构建一个父级镜像运行一个`Spring Boot`程序
+```
+FROM openjdk:8
+WORKDIR /usr/src/myapp
+ONBUILD COPY [ "application.yml", "/usr/src/myapp/config/" ]
+ONBUILD COPY [ "springbootdemo-0.0.1-SNAPSHOT.jar", "/usr/src/myapp/app.jar" ]
+ENV SERVER_PORT=8080
+CMD [ "java", "-jar", "app.jar", "--server.port=${SERVER_PORT}"]
+```
+构建此镜像作为父级
+```
+docker build -t app-parent .
+```
+编写一个子级镜像引用刚刚构建的镜像，并修改启动的服务端口，由于父级已经声明过拷贝的指令，子级的`Dockerfile`不需要再写一次，只需要准备好对应名称的`jar`文件和`yml`配置文件
+```
+FROM app-parent
+ENV SERVER_PORT=8081
+```
+构建此镜像作为继承父级的子级，然后运行子级镜像
+```
+docker build -t app-child .
+docker run -it --name child-instance --rm app-child
+```
+查看容器内的目录，可以看到已经有`app.jar`和`application.yml`这两个文件
+```
+$ docker exec -it child-instance ls -RAhFl
+app.jar
+
+./config:
+application.yml
+```
+
+## STOPSIGNAL
+
+```
+STOPSIGNAL signal
+```
+`STOPSIGNAL`指令设置将被发送到容器退出的系统调用信号。该信号可以是与内核`syscall`表中的位置匹配的有效无符号数字（例如9），也可以是格式为`SIGNAME`的信号名称（例如`SIGKILL`）
+
+## HEALTHCHECK
+
+`HEALTHCHECK`有两种形式表示
+
+- `HEALTHCHECK [OPTIONS] CMD command`（通过在容器内运行命令来检查容器的运行状况）
+- `HEALTHCHECK NONE`（禁用从父级镜像继承的任何健康检查）
+
+`HEALTHCHECK`指令告诉`Docker`如何测试容器以检查其是否仍在工作。这样可以检测到诸如Web服务器陷入无限循环并且无法处理新连接的情况，即使服务器进程仍在运行
+
+在`CMD`之前可以指定的选项包括以下，时间单位支持：`ms`（毫秒），`s`（秒），`m`（分钟），`h`（小时）
+
+* `--interval=DURATION` (检测间隔时间，默认值: 30s)
+* `--timeout=DURATION` (检测命令运行的超时时长，默认值: 30s)
+* `--start-period=DURATION` (开始运行健康检查重试倒计时之前，等待容器初始化的时间，默认值: 0s)
+* `--retries=N` (连续出现`N`次故障需要报告不健康，默认值: 3)
+
+如果容器中启用了健康检查，则检查的状态包含以下三种
+
+- `starting`（初始化）
+- `healthy`（健康检查通过）
+- `unhealthy`（经过一定次数的连续故障之后）
+
+运行状况检查将首先在容器启动后的间隔秒数内运行，然后在之前每次检查完成后的间隔秒数内运行；如果单次检查花费的时间超过超时秒数，则认为检查失败；当重新尝试健康检查连续多次失败后，才能将容器视为`unhealthy`
+
+命令的退出状态指示容器的健康状态。可能的值为
+
+- 0: success - 容器健康且可以使用
+- 1: unhealthy - 容器无法正常工作
+- 2: reserved - 请勿使用此退出代码
+
+如下表示每间隔5分钟检查站点首页在3s内可以被访问到，否则返回不正常
+```
+HEALTHCHECK --interval=5m --timeout=3s \
+  CMD curl -f http://localhost/ || exit 1
+```
+
+## SHELL
+
+```
+SHELL ["executable", "parameters"]
+```
+`SHELL`指令允许覆盖用于命令的`shell`形式的默认`shell`。在Linux上，默认外壳程序是`["/bin/sh"，"-c"]`，在`Windows`上，默认外壳程序是`["cmd"，"/S"，"/C"]`。必须在Dockerfile中以JSON数组形式编写`SHELL`指令
+
+以下是一个基于`windows server`镜像的`Dockerfile`示例
+```
+FROM microsoft/windowsservercore
+
+# 使用 cmd /S /C 执行 echo default
+RUN echo default
+
+# 使用 cmd /S /C powershell -command 执行 Write-Host default
+RUN powershell -command Write-Host default
+
+# 使用 powershell -command 执行 Write-Host hello
+SHELL ["powershell", "-command"]
+RUN Write-Host hello
+
+# 使用 cmd /S /C 执行 echo hello
+SHELL ["cmd", "/S", "/C"]
+RUN echo hello
+```
+
+Last Modified 2021-04-03

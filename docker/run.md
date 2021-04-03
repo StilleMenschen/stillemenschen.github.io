@@ -25,6 +25,7 @@ docker run命令首先在指定映像上创建可写容器层，然后使用指�
 --health-interval       | 健康检查时间间隔（ms、s、m、h）默认0s
 --health-retries        | 连续出现多次故障需要报告不健康，默认3次
 --health-timeout        | 健康检查超时时间（ms、s、m、h）默认0s
+--health-start-period   | 开始运行健康检查重试倒计时之前，等待容器初始化的时间（ms|s|m|h）（默认为0s）
 --help                  | 显示帮助信息
 -h, --hostname          | 容器主机名
 -i, --interactive       | 即使未连接`STDIN`，也应使其保持打开状态
