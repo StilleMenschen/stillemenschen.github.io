@@ -65,7 +65,7 @@ Get-Content Dockerfile | docker build -
 --compress     | 使用`gzip`压缩构建上下文
 -f, --file     | `Dockerfile`的名称（默认为`PATH/Dockerfile`）
 --force-rm     | 始终清理中间容器
---iidfile file | 将镜像ID写入文件`file`
+--iidfile      | 将镜像ID写入文件
 --isolation    | 容器隔离参数（`Linux`平台只支持`default`，`Windows`平台支持：`default`，`process`，`hyperv`）
 --label        | 设置镜像的元数据
 -m, --memory   | 内存限制
