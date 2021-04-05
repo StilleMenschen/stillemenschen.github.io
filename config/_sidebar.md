@@ -4,4 +4,5 @@
   * [vimrc](config/vimrc.md)
   * [npmrc](config/npmrc.md)
   * [pip](config/pip.md)
+  * [php](config/php.md)
   * [vscode](config/vscode.md)

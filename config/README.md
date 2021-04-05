@@ -4,4 +4,5 @@
 - vimrc
 - npmrc
 - pip
+- php
 - vscode
