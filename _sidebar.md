@@ -5,4 +5,5 @@
 * [Docker](docker/)
 * [Docker Compose](docker-compose/)
 * [Windows](windows/)
+* [Windows Tool](windows-tool/)
 * [Config](config/)
