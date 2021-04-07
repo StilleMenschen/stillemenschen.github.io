@@ -7,4 +7,5 @@
 - awk
 - find
 - less
+- chmod
 - useradd
