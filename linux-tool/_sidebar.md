@@ -7,5 +7,6 @@
   * [awk](linux-tool/awk.md)
   * [find](linux-tool/find.md)
   * [less](linux-tool/less.md)
+  * [curl](linux-tool/curl.md)
   * [chmod](linux-tool/chmod.md)
   * [useradd](linux-tool/useradd.md)
