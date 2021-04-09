@@ -8,6 +8,7 @@
 - find
 - less
 - curl
+- tar
 - chmod
 - useradd
 - usermod
