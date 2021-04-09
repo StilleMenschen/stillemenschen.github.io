@@ -10,3 +10,5 @@
   * [curl](linux-tool/curl.md)
   * [chmod](linux-tool/chmod.md)
   * [useradd](linux-tool/useradd.md)
+  * [usermod](linux-tool/usermod.md)
+  * [userdel](linux-tool/userdel.md)

@@ -8,7 +8,7 @@ curl是使用支持的协议之一（DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS,
 
 ## 链接
 
-`URL`语法与协议有关。您会在[`RFC 3986`](http://www.ietf.org/rfc/rfc3986.txt)中找到详细的说明。
+`URL`语法与协议有关。您会在[RFC 3986](http://www.ietf.org/rfc/rfc3986.txt)中找到详细的说明。
 
 您可以通过在大括号内编写单词集合，并按如下所示引用URL来指定多个URL或URL的一部分
 ```

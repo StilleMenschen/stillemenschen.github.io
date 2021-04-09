@@ -10,3 +10,5 @@
 - curl
 - chmod
 - useradd
+- usermod
+- userdel
