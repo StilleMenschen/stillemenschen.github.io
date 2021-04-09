@@ -13,7 +13,7 @@ useradd -D [options]
 ## 选项
 
 参数 | 说明
-:--- | :---
+:- | :-
 -b, --base-dir BASE_DIR      | 新账户的主目录的基目录
 -c, --comment COMMENT        | 新账户的`GECOS`字段
 -d, --home-dir HOME_DIR      | 新账户的主目录
@@ -30,13 +30,12 @@ useradd -D [options]
 -M, --no-create-home         | 不创建用户的主目录
 -N, --no-user-group          | 不创建同名的组
 -o, --non-unique             | 允许使用重复的`UID`创建用户
--p, --password PASSWORD      | 加密后的新账户密码
 -r, --system                 | 创建一个系统账户
 -R, --root CHROOT_DIR        | `chroot`到的目录
 -s, --shell SHELL            | 新账户的登录`shell`
 -u, --uid UID                | 新账户的用户`ID`
 -U, --user-group             | 创建与用户同名的组
--Z, --selinux-user SEUSER    | 为`SELinux`用户映射使用指定 SEUSER
+-Z, --selinux-user SEUSER    | 为`SELinux`用户映射使用指定`SEUSER`
 
 ## 相关文件
 

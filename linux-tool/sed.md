@@ -11,7 +11,7 @@ sed [OPTION]... {script-only-if-no-other-script} [input-file]...
 ## 参数
 
 参数 | 说明
-:--- | :---
+:- | :-
 -n, --quiet, --silent              | 仅显示处理后的结果
 -e script, --expression=script     | 将选项指定的脚本添加到要执行的命令中
 -f script-file, --file=script-file | 将指定脚本文件的内容添加到要执行的命令中
@@ -31,7 +31,7 @@ sed [OPTION]... {script-only-if-no-other-script} [input-file]...
 > 默认情况下，sed会将每一行放入一个模式空间里处理完之后再输出
 
 命令 | 说明
-:--- | :---
+:- | :-
 {                     | 语句块开始符号
 }                     | 语句块结束符号
 a text                | 在找到的行之后添加一行`text`
@@ -58,7 +58,7 @@ x                     | 交换模式空间和临时空间的内容
 在地址（或地址范围）之后，在命令之前，使用`!`可以指定仅当地址（或地址范围）不匹配时才执行命令。
 
 地址 | 说明
-:--- | :---
+:- | :-
 number     | 匹配指定行
 first~step | 从`first`行开始，每间隔`step`步长匹配行
 $          | 匹配最后一行

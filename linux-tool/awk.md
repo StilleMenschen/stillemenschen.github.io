@@ -34,7 +34,7 @@ awk "BEGIN { print \"Don't Panic!\" }" # 转义引号
 ## 参数
 
 参数 | 说明
-:--- | :---
+:- | :-
 -f source-file, --file source-file     | 指定awk脚本文件
 -F fs, --field-separator fs            | 自定义分隔符`fs`（默认以空格作为分隔符）
 -v var=val, --assign var=val           | 自定义变量`key=value`形式
@@ -54,7 +54,7 @@ awk "BEGIN { print \"Don't Panic!\" }" # 转义引号
 > `@include`可以引用其它外部脚本文件，如`@include "/usr/awklib/network"`表示引用`/usr/awklib/network`文件中的awk脚本
 
 语法 | 说明
-:--- | :---
+:- | :-
 /regexp/        | 正则表达式搜索
 exp ~ /regexp/  | 正则表达式搜索指定列，如`$2 ~ /a/`表示搜索以指定分隔符分隔的第二列中包含有小写字母a的文本
 exp !~ /regexp/ | 正则表达式搜索不匹配的列，如`$2 !~ /a/`表示搜索以指定分隔符分隔的第二列中不包含有小写字母a的文本
@@ -77,7 +77,7 @@ $1 == 3 {print "The first field is equal to 3"}
 ## 转义字符
 
 转义 | 说明
-:--- | :---
+:- | :-
 `\\`   | 反斜杠
 `\a`   | 警报字符，Ctrl-g，ASCII码`7`（BEL），（这通常会发出某种可听见的声音）
 `\b`   | 退格键, Ctrl-h, ASCII码`8` (BS).
@@ -94,7 +94,7 @@ $1 == 3 {print "The first field is equal to 3"}
 ## 预定义变量
 
 变量 | 说明
-:--- | :---
+:- | :-
 `FS`       | 输入行的字段分隔符
 `RS`       | 输入行分隔符
 `RT`       | 与输入行分隔符`RS`表示的文本匹配的输入文本，每次读取记录时设置
@@ -202,7 +202,7 @@ BEGIN {
 ### 数字
 
 函数 | 说明
-:-- | :--
+:- | :-
 atan2(y, x) | 求`y / x`的反正切值，例如使用`pi = atan2(0, -1)`求圆周率（Pi）的值
 cos(x)      | 求`x`的余弦值，`x`表示弧度
 sin(x)      | 求`x`的正弦值，`x`表示弧度
@@ -215,7 +215,7 @@ sqrt(x)     | 求`x`的平方根
 ### 字符串
 
 函数 | 说明
-:-- | :--
+:- | :-
 asort(source [, dest [, how ] ])             | 对字符串数组的值进行排序，如果指定了`dest`则将结果输出到`dest`中并保留源数组`source`
 asorti(source [, dest [, how ] ])            | 对数组的字符串索引进行排序，如果指定了`dest`则将结果输出到`dest`中并保留源数组`source`
 gensub(regexp, replacement, how [, target])  | 在目标字符串目标中搜索正则表达式`regexp`的匹配项。如果字符串以`'g'`或`'G'`开头（`global`的缩写），则将所有`regexp`匹配项替换为`replace`。否则，将`how`视为一个数字，该数字指示要替换的`regexp`匹配项。将小于1的数值视为1。如果未提供`target`，默认使用`$0`。返回修改后的字符串作为函数的结果。原始目标字符串不会被更改

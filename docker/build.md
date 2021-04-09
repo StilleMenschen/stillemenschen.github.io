@@ -21,7 +21,7 @@ docker build https://github.com/docker/rootfs.git#container:docker
 下表表示所有有效的后缀及其构建上下文
 
 构建上下文后缀 | 参考提交 | 构建上下文
-:---|:---|:---
+:-|:-|:-
 myrepo.git                   | refs/heads/master   | /
 myrepo.git#mytag             | refs/tags/mytag     | /
 myrepo.git#mybranch          | refs/heads/mybranch | /
@@ -58,7 +58,7 @@ Get-Content Dockerfile | docker build -
 ## 参数
 
 参数 | 说明
-:--- | :---
+:- | :-
 --add-host     | 添加自定义主机到IP的映射（host:ip）
 --build-arg    | 设置构建时变量
 --cache-from   | 视为缓存源的图像

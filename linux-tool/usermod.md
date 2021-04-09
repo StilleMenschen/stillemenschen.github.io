@@ -10,7 +10,7 @@ usermod [options] LOGIN
 ## 参数
 
 参数 | 说明
-:--- | :---
+:- | :-
 -a, --append                   | 将用户添加到补充组。仅与`-G`选项一起使用
 −c, −−comment COMMENT          | 用户密码文件注释字段的新值
 −d, −−home HOME_DIR            | 用户的登录后的默认主目录。如果指定了`-m`选项，则当前主目录的内容将被移至新主目录，如果该主目录不存在，则会创建该新主目录
@@ -22,19 +22,19 @@ usermod [options] LOGIN
 −L, −−lock                     | 锁定用户密码。这会放一个`!`在加密的密码前面，有效地禁用了密码。您不能将此选项与`-p`或`-U`一起使用。注意：如果您想锁定帐户（不仅使用密码访问），还应该将`EXPIRE_DATE`设置为`1`
 −m, −−move−home                | 将用户主目录的内容移动到新位置。该选项仅与`-d, --home`选项结合使用才有效。`usermod`将尝试调整文件的所有权并复制模式，ACL和扩展属性，但是此后可能需要手动更改
 −o, −−non−unique               | 当与`-u`选项一起使用时，此选项允许将用户ID更改为非唯一值
-−p, −−password PASSWORD        | 加密的密码，由[crypt(3)](http://man.stage.gnu.org.ua/manpage/?3+crypt)返回。注意：不建议使用此选项，因为列出进程的用户将看到密码（或加密的密码）。您应该确保密码遵守系统的密码策略
 −R, −−root CHROOT_DIR          | 在`CHROOT_DIR`目录中应用更改，并使用`CHROOT_DIR`目录中的配置文件
 −s, −−shell SHELL              | 用户的新登录Shell的名称。将此字段设置为空白会导致系统选择默认的登录外壳
 −u, −−uid UID                  | 用户`ID`的新数值。除非使用`-o`选项，否则该值必须唯一。该值必须为非负值。用户的邮箱以及用户拥有的所有文件以及位于用户主目录中的所有文件都将自动更改文件用户`ID`。用户主目录之外的文件的所有权必须手动更改
 −U, −−unlock                   | 解锁用户密码。这将删除在加密的密码前面的`!`。您不能将此选项与`-p`或`-L`一起使用。注意：如果要解锁帐户（不仅要使用密码访问），还应该设置一个`EXPIRE_DATE`值（例如，设置为`99999`，或从`/etc/default/useradd`中设置为`EXPIRE`值）
 −Z, −−selinux−user SEUSER      | 用户登录名的新`SELinux`用户。空白的`SEUSER`将删除用户`LOGIN`的`SELinux`用户映射（如果有）
+-h, --help                     | 显示帮助信息并退出
 
 ## 相关文件
 
-- `/etc/group` 用户组信息
+- `/etc/group` 组账户信息
 - `/etc/gshadow` 安全的组帐户信息
 - `/etc/login.defs` 影子密码套件配置
-- `/etc/passwd` 用户信息
+- `/etc/passwd` 用户账户信息
 - `/etc/shadow` 安全的用户帐户信息
 
 ## 命令示例

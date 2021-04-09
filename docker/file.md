@@ -59,7 +59,7 @@ temp?
 ```
 
 规则 | 说明
-:--- | :---
+:- | :-
 `#comment`            | 注释
 `*/temp*`             | 在根的任何直接子目录中排除名称以`temp`开头的文件和目录。例如，排除纯文件`/somedir/temporary.txt`，以及目录`/somedir/temp`
 `*/*/temp*`           | 从根以下两级的任何子目录中排除以`temp`开头的文件和目录。例如，排除`/somedir/subdir/temporary.txt`
@@ -230,7 +230,7 @@ ENTRYPOINT command param1 param2
 下表显示了针对不同的`ENTRYPOINT/CMD`组合执行的命令
 
 `/` | `No ENTRYPOINT` | `ENTRYPOINT exec_entry p1_entry` | `ENTRYPOINT ["exec_entry", "p1_entry"]`
-:--- | :--- | :--- | :---
+:- | :- | :- | :-
 `No CMD` | error, not allowed | /bin/sh -c exec_entry p1_entry | exec_entry p1_entry
 `CMD ["exec_cmd", "p1_cmd"]` | exec_cmd p1_cmd | /bin/sh -c exec_entry p1_entry | exec_entry p1_entry exec_cmd p1_cmd
 `CMD ["p1_cmd", "p2_cmd"]` | p1_cmd p2_cmd | /bin/sh -c exec_entry p1_entry | exec_entry p1_entry p1_cmd p2_cmd

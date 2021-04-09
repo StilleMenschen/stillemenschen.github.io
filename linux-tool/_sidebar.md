@@ -12,3 +12,6 @@
   * [useradd](linux-tool/useradd.md)
   * [usermod](linux-tool/usermod.md)
   * [userdel](linux-tool/userdel.md)
+  * [groupadd](linux-tool/groupadd.md)
+  * [groupmod](linux-tool/groupmod.md)
+  * [groupdel](linux-tool/groupdel.md)

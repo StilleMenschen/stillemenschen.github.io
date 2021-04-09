@@ -14,7 +14,7 @@ chmod [option]… {mode | --reference=ref_file} file…
 ## 参数
 
 参数 | 说明
-:--- | :---
+:- | :-
 -c, --changes         | 详细描述权限实际上发生变化的每个文件的操作
 -f, --silent, --quiet | 不要打印有关其权限无法更改的文件的错误消息
 -v, --verbose         | 详细描述对每个文件采取的措施或不采取的措施

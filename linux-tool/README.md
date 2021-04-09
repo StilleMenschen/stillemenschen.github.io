@@ -12,3 +12,6 @@
 - useradd
 - usermod
 - userdel
+- groupadd
+- groupmod
+- groupdel
