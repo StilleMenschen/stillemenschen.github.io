@@ -9,6 +9,7 @@
 - less
 - curl
 - tar
+- df
 - chmod
 - useradd
 - usermod
