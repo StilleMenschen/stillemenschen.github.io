@@ -8,9 +8,15 @@ ls命令就是list的缩写，通过ls命令不仅可以查看linux文件夹包�
 ls [OPTION]... [FILE]...
 ```
 
-## 参数
+## 选项
 
-参数 | 说明
+<style>
+table th:first-of-type {
+    width: 18%;
+}
+</style>
+
+选项 | 说明
 :- | :-
 -l                    | 使用较长格式列出信息
 -A, --almost-all      | 列出除`.`及`..`以外的任何项目
@@ -18,7 +24,7 @@ ls [OPTION]... [FILE]...
 -b, --escape          | 以八进制溢出序列表示不可打印的字符
 --block-size=SIZE     | 缩放大小，按SIZE进行打印；例如`--block-size=M`以以下单位打印尺寸1,048,576字节；请参阅下面的SIZE格式
 -B, -ignore-backups   | 不列出以`~`结尾的隐含条目
--c                    | 配合`-lt`参数使用：按时间排序并显示ctime（最后修改文件状态信息的时间）；配合 -l 参数使用：显示ctime并按名称排序；否则：按ctime排序，最新的优先
+-c                    | 配合`-lt`选项使用：按时间排序并显示ctime（最后修改文件状态信息的时间）；配合`-l`选项使用：显示ctime并按名称排序；否则：按ctime排序，最新的优先
 --color[=WHEN]        | 为输出内容着色；允许的值为"never"，"auto"或"always"（默认）
 -F, --classify        | 附加指示符（`* / = > @ \|`之一）分类到条目（`*`可执行，`/`目录，`=`套接字，`>`门，`@`符号链接，`\|`命名管道）
 --file-type           | 配合`--classify`类似，但不附加'*'
@@ -33,8 +39,8 @@ ls [OPTION]... [FILE]...
 -R, --recursive       | 递归显示子目录
 -S                    | 按文件大小排序
 --sort=WORD           | 按 WORD来排序而不是根据文件名: none (-U), size (-S,) time (-t), version (-v), extension (-X)
---time=WORD           | 配合`-l`参数，将时间显示为WORD而不是默认的修改时间，有效的参数为："atime", "access", "use", "ctime", "status"，如果使用--sort=time排序
---time-style=STYLE    | 配合`-l`参数, 使用指定的时间格式 STYLE，可用参数为：full-iso, long-iso, iso, locale, 或者+FORMAT +FORMAT与date命令的+FORMAT格式化选项类似
+--time=WORD           | 配合`-l`选项，将时间显示为WORD而不是默认的修改时间，有效的参数为："atime", "access", "use", "ctime", "status"，如果使用--sort=time排序
+--time-style=STYLE    | 配合`-l`选项, 使用指定的时间格式 STYLE，可用参数为：full-iso, long-iso, iso, locale, 或者+FORMAT +FORMAT与date命令的+FORMAT格式化选项类似
 -t                    | 按修改时间排序，最新的优先
 -u                    | 配合`-lt`：按访问时间排序并显示；配合`-l`：显示访问时间并按名称排序；否则：按访问时间排序
 -X                    | 按条目扩展名的字母顺序排序
@@ -49,7 +55,7 @@ SIZE是整数和可选单位（例如：10M是10 * 1024 * 1024）。 单位为K�
 退出状态：
   * 0  正常
   * 1  一般问题 (例如：无法访问子文件夹)
-  * 2  严重问题 (例如：无法使用命令行参数)
+  * 2  严重问题 (例如：无法使用命令行选项)
 
 使用`ls -l`命令列出的文件权限有一个排在第一个位置的字符，它表示的是文件的类型，文件的类型一般有
 
@@ -104,4 +110,4 @@ SIZE是整数和可选单位（例如：10M是10 * 1024 * 1024）。 单位为K�
     ls -Alhgo --sort=time --time-style=long-iso
     ```
 
-Last Modified 2021-03-28
+Last Modified 2021-04-11

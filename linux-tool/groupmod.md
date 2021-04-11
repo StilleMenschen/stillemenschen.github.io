@@ -7,9 +7,15 @@
 groupmod [options] GROUP
 ```
 
-## 参数
+## 选项
 
-参数 | 说明
+<style>
+table th:first-of-type {
+    width: 20%;
+}
+</style>
+
+选项 | 说明
 :- | :-
 −g, −−gid GID            | 给定`GROUP`的组ID将更改为`GID`。`GID`的值必须是非负十进制整数。除非使用`-o`选项，否则该值必须唯一。使用该组作为主要组的用户将被更新，以将该组保留为其主要组。具有旧组ID且必须继续属于`GROUP`的任何文件都必须手动更改其组ID。不会对`/etc/login.defs`中的`GID_MIN`，`GID_MAX`，`SYS_GID_MIN`或`SYS_GID_MAX`进行检查
 −n, −−new−name NEW_GROUP | 该组的名称将从`GROUP`更改为`NEW_GROUP`名称
@@ -31,4 +37,4 @@ groupmod [options] GROUP
     groupmod -n root test
     ```
 
-Last Modified 2021-04-09
+Last Modified 2021-04-11

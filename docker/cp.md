@@ -49,11 +49,17 @@ docker exec CONTAINER tar Ccf $(dirname SRC_PATH) - $(basename SRC_PATH) | tar C
 tar Ccf $(dirname SRC_PATH) - $(basename SRC_PATH) | docker exec -i CONTAINER tar Cxf DEST_PATH -
 ```
 
-## 参数
+## 选项
 
-参数 | 说明
+<style>
+table th:first-of-type {
+    width: 20%;
+}
+</style>
+
+选项 | 说明
 :- | :-
 -a, --archive  | 存档模式（完整复制目录或文件的`UID/GID`信息）
 -L, --follow-link | 跟踪并复制`SRC_PATH`符号链接指向的真实目录或文件
 
-Last Modified 2021-03-27
+Last Modified 2021-04-11

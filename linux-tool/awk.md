@@ -31,9 +31,15 @@ awk 'BEGIN { print "Don\47t Panic!" }' # \47表示单引号
 awk "BEGIN { print \"Don't Panic!\" }" # 转义引号
 ```
 
-## 参数
+## 选项
 
-参数 | 说明
+<style>
+table th:first-of-type {
+    width: 20%;
+}
+</style>
+
+选项 | 说明
 :- | :-
 -f source-file, --file source-file     | 指定awk脚本文件
 -F fs, --field-separator fs            | 自定义分隔符`fs`（默认以空格作为分隔符）
@@ -45,7 +51,7 @@ awk "BEGIN { print \"Don't Panic!\" }" # 转义引号
 -p[file], --profile[=file]             | 启用对awk程序的性能分析。表示`--no-optimize`。默认情况下，配置文件是在名为`awkprof.out`的文件中创建的。可选的file参数使您可以为配置文件指定其他文件名。如果提供了文件，则`-p`和文件之间不允许有空格。该配置文件在左边距中包含程序中每个语句的执行计数，以及每个函数的函数调用计数。
 -S, --sandbox                          | 启用沙盒，禁用`system()`函数，使用`getline`输入重定向，使用`print`和`printf`输出重定向，以及动态扩展。另外，禁止在gawk开始运行时将不存在的文件名添加到`ARGV`。当您要从可疑来源运行awk脚本并且需要确保脚本无法访问系统（指定的输入数据文件除外）时，此功能特别有用
 -V, --version                          | 打印版本信息并退出
---                                     | 标记所有选项的结尾。跟随`-`的所有命令行参数都放在ARGV中，即使它们以减号开头
+--                                     | 标记所有选项的结尾。跟随`-`的所有命令行选项都放在ARGV中，即使它们以减号开头
 
 > 使用`-d`选项列出所有全局变量是在程序中查找错误的好方法。如果您的大型程序具有很多功能，并且还希望确保您的函数不会无意中使用本应是局部变量的全局变量，那么您也可以使用此选项。（使用i，j等简单变量名称时，这是一个特别容易犯的错误）
 
@@ -100,9 +106,9 @@ $1 == 3 {print "The first field is equal to 3"}
 `RT`       | 与输入行分隔符`RS`表示的文本匹配的输入文本，每次读取记录时设置
 `OFS`      | 输出行的字段分隔符
 `ORS`      | 输出行分隔符
-`ARGV`     | 参数数组，第一个为awk本身，索引为0到`ARGC`-1
-`ARGC`     | 参数数量
-`ARGIND`   | 正在处理的参数索引位置，从1开始
+`ARGV`     | 选项数组，第一个为awk本身，索引为0到`ARGC`-1
+`ARGC`     | 选项数量
+`ARGIND`   | 正在处理的选项索引位置，从1开始
 `ENVIRON`  | 环境变量数组，读取当前操作系统的环境变量，如`ENVIRON["JAVA_HOME"]`
 `FILENAME` | 当前正在处理的文件名
 `FNR`      | 当前处理文件的行号
@@ -275,4 +281,4 @@ toupper(string)                              | 将`string`中的小写字母全�
 
 更多说明可参考GNU的[awk](https://www.gnu.org/software/gawk/manual/gawk.html)文档
 
-Last Modified 2021-03-28
+Last Modified 2021-04-11

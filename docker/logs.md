@@ -8,9 +8,15 @@
 docker logs [OPTIONS] CONTAINER
 ```
 
-## 参数
+## 选项
 
-参数 | 说明
+<style>
+table th:first-of-type {
+    width: 20%;
+}
+</style>
+
+选项 | 说明
 :- | :-
 --details        | 显示提供给日志的其他详细信息
 -f, --follow     | 持续跟踪日志输出
@@ -29,4 +35,4 @@ docker logs [OPTIONS] CONTAINER
 docker logs --since=2021-03-01T06:00:00 --until=3h30m15s -t nginx1
 ```
 
-Last Modified 2021-03-28
+Last Modified 2021-04-11

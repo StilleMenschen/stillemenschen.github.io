@@ -7,9 +7,15 @@
 usermod [options] LOGIN
 ```
 
-## 参数
+## 选项
 
-参数 | 说明
+<style>
+table th:first-of-type {
+    width: 18%;
+}
+</style>
+
+选项 | 说明
 :- | :-
 -a, --append                   | 将用户添加到补充组。仅与`-G`选项一起使用
 −c, −−comment COMMENT          | 用户密码文件注释字段的新值
@@ -64,4 +70,4 @@ usermod [options] LOGIN
     usermod -U test
     ```
 
-Last Modified 2021-04-09
+Last Modified 2021-04-11

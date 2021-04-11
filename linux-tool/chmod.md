@@ -11,9 +11,15 @@ chmod [option]… {mode | --reference=ref_file} file…
 [ugoa]*([-+=]([rwxXst]*|[ugo]))+|[-+=][0-7]+
 ```
 
-## 参数
+## 选项
 
-参数 | 说明
+<style>
+table th:first-of-type {
+    width: 16%;
+}
+</style>
+
+选项 | 说明
 :- | :-
 -c, --changes         | 详细描述权限实际上发生变化的每个文件的操作
 -f, --silent, --quiet | 不要打印有关其权限无法更改的文件的错误消息
@@ -144,4 +150,4 @@ SET分别表示`SUID`权限、`SGID`权限、和`sticky`权限，这十二位（
 - `chmod +4001 file`表示为用户添加`SUID`权限，其它用户添加执行权限
 - `chmod -2011 file`表示为用户组去掉`SGID`权限，用户组和其它用户去掉执行权限
 
-Last Modified 2021-04-07
+Last Modified 2021-04-11

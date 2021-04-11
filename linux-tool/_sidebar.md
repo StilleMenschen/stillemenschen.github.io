@@ -8,6 +8,7 @@
   * [find](linux-tool/find.md)
   * [less](linux-tool/less.md)
   * [curl](linux-tool/curl.md)
+  * [lsof](linux-tool/lsof.md)
   * [tar](linux-tool/tar.md)
   * [df](linux-tool/df.md)
   * [chmod](linux-tool/chmod.md)

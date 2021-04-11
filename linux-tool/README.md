@@ -8,6 +8,7 @@
 - find
 - less
 - curl
+- lsof
 - tar
 - df
 - chmod

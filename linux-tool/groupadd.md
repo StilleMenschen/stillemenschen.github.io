@@ -7,9 +7,15 @@
 groupadd [options] group
 ```
 
-## 参数
+## 选项
 
-参数 | 说明
+<style>
+table th:first-of-type {
+    width: 16%;
+}
+</style>
+
+选项 | 说明
 :- | :-
 −f, −−force           | 如果指定的组已经存在，则此选项使命令以成功状态简单地退出。当与`-g`一起使用时，并且指定的`GID`已经存在，则选择另一个（唯一的）GID（即`-g`已关闭）
 −g, −−gid GID         | 组ID的数值。除非使用`-o`选项，否则该值必须唯一。该值必须为非负值。默认值为使用大于或等于`GID_MIN`且大于其他所有组的最小ID值
@@ -27,7 +33,7 @@ groupadd [options] group
 
 ## 命令示例
 
-1. 使用-g参数新建test工作组名，1005是工作组id
+1. 使用`-g`选项新建test工作组名，`1005`是工作组id
     ```
     groupadd -g 1005 test
     ```
@@ -37,4 +43,4 @@ groupadd [options] group
     groupadd -r -g 368 test
     ```
 
-Last Modified 2021-04-09
+Last Modified 2021-04-11

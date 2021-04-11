@@ -12,7 +12,13 @@ useradd -D [options]
 
 ## 选项
 
-参数 | 说明
+<style>
+table th:first-of-type {
+    width: 18%;
+}
+</style>
+
+选项 | 说明
 :- | :-
 -b, --base-dir BASE_DIR      | 新账户的主目录的基目录
 -c, --comment COMMENT        | 新账户的`GECOS`字段
@@ -78,4 +84,4 @@ useradd -D [options]
     useradd -U test
     ```
 
-Last Modified 2021-04-09
+Last Modified 2021-04-11

@@ -57,6 +57,11 @@ CLI将`.dockerignore`文件解释为以换行符分隔的模式列表，类似�
 */*/temp*
 temp?
 ```
+<style>
+table th:first-of-type {
+    width: 24%;
+}
+</style>
 
 规则 | 说明
 :- | :-
@@ -158,7 +163,7 @@ ADD [--chown=<user>:<group>] <src>... <dest>
 ADD [--chown=<user>:<group>] ["<src>",... "<dest>"]
 ```
 
-> `--chown`参数仅在Linux操作系统中生效
+> `--chown`选项仅在Linux操作系统中生效
 
 `ADD`指令可以复制目录、文件或者远程`URL`中的文件，`<src>`允许指定多个，多个`<src>`的情况下，如果是目录或者文件，它们将会按当前构建的上下文路径来解析
 
@@ -221,7 +226,7 @@ ENTRYPOINT command param1 param2
 ```
 `ENTRYPOINT`允许您配置将作为可执行文件运行的容器，`Dockerfile`应该指定`CMD`或`ENTRYPOINT`命令中的至少一个，使用容器作为可执行文件时，应定义`ENTRYPOINT`
 
-`docker run <image>`的命令行参数将附加在`exec`形式`ENTRYPOINT`的所有元素之后，并将覆盖使用`CMD`指定的所有元素。这允许将参数传递给入口点，即`docker run <image> -d`将`-d`参数传递给入口点。您可以使用`docker run --entrypoint`标志覆盖`ENTRYPOINT`指令
+`docker run <image>`的命令行选项将附加在`exec`形式`ENTRYPOINT`的所有元素之后，并将覆盖使用`CMD`指定的所有元素。这允许将参数传递给入口点，即`docker run <image> -d`将`-d`选项传递给入口点。您可以使用`docker run --entrypoint`标志覆盖`ENTRYPOINT`指令
 
 `shell`形式可防止使用任何`CMD`或运行命令行参数，但具有以下缺点：`ENTRYPOINT`将作为`/bin/sh -c`的子命令启动，该子命令不传递信号。这意味着可执行文件将不是容器的`PID 1`，并且不会接收`Unix`信号，因此您的可执行文件将不会从`docker stop <container>`接收到`SIGTERM`
 
@@ -246,7 +251,7 @@ FROM ubuntu
 ENTRYPOINT ["top", "-b"]
 CMD ["-c"]
 ```
-运行镜像`top`，并指定一个额外参数`-H`
+运行镜像`top`，并指定一个额外选项`-H`
 ```
 $ docker run -it --name test  top -H
 
@@ -259,7 +264,7 @@ KiB Swap:  1441840 total,        0 used,  1441840 free.  1324440 cached Mem
   PID USER      PR  NI    VIRT    RES    SHR S %CPU %MEM     TIME+ COMMAND
     1 root      20   0   19744   2336   2080 R  0.0  0.1   0:00.04 top
 ```
-查看镜像内的程序，可以看到用`CMD`指令指定的`-c`参数被忽略了，而是使用run所指定的`-H`参数
+查看镜像内的程序，可以看到用`CMD`指令指定的`-c`选项被忽略了，而是使用run所指定的`-H`选项
 ```
 $ docker exec -it test ps aux
 
@@ -487,4 +492,4 @@ SHELL ["cmd", "/S", "/C"]
 RUN echo hello
 ```
 
-Last Modified 2021-04-03
+Last Modified 2021-04-11

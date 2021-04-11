@@ -9,9 +9,15 @@ grep [OPTIONS] PATTERN [FILE...]
 grep [OPTIONS] [-e PATTERN | -f FILE] [FILE...]
 ```
 
-## 参数
+## 选项
 
-参数 | 说明
+<style>
+table th:first-of-type {
+    width: 12%;
+}
+</style>
+
+选项 | 说明
 :- | :-
 -i | 搜索时忽略大小写
 -c | 只输出匹配行的数量
@@ -23,7 +29,7 @@ grep [OPTIONS] [-e PATTERN | -f FILE] [FILE...]
 -n | 显示行号
 -r | 只有使用命令行执行时，才跟随符号链接递归搜索每个目录下的文件
 -R | 跟随符号链接递归搜索每个目录下的文件
---color[=WHEN], --colour[=WHEN] | 为匹配到的字符着色，`WHEN`的值为`never`，`always`或者`auto`
+--color[=C], --colour[=C] | 为匹配到的字符着色，`C`的值为`never`，`always`或者`auto`
 
 ## 正则表达式
 
@@ -43,15 +49,15 @@ grep [OPTIONS] [-e PATTERN | -f FILE] [FILE...]
 
 ### 重复运算符
 
-```
-?      指定前面的字符出现一次或零次
-*      指定前面的字符出现零次或多次
-+      指定签名档字符出现至少一次以上
-{n}    指定前面的字符出现n次
-{n,}   指定前面的字符出现n次以上
-{,m}   指定前面的字符出现零次且最大出现m次
-{n,m}  指定前面的字符出现至少n次且最大出现m次
-```
+运算符 | 说明
+:- | :-
+?      | 指定前面的字符出现一次或零次
+\*      | 指定前面的字符出现零次或多次
+\+      | 指定签名档字符出现至少一次以上
+{n}    | 指定前面的字符出现n次
+{n,}   | 指定前面的字符出现n次以上
+{,m}   | 指定前面的字符出现零次且最大出现m次
+{n,m}  | 指定前面的字符出现至少n次且最大出现m次
 
 ## 命令示例
 
@@ -105,4 +111,4 @@ grep [OPTIONS] [-e PATTERN | -f FILE] [FILE...]
     grep -i '2021-0[1-3]-[01][0-9].* Error ' main.log
     ```
 
-Last Modified 2021-03-28
+Last Modified 2021-04-11

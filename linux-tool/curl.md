@@ -71,30 +71,36 @@ curl默认情况下会将此数据显示到终端，因此，如果您调用curl
 
 FTP上传的情况不同，因为该操作不会向终端吐出任何响应数据
 
-如果您更喜欢进度条而不是常规的列表，`-#`或`--progress-bar`参数可以改变进度条显示方式。您也可以使用`-s, -silent`选项完全禁用进度表
+如果您更喜欢进度条而不是常规的列表，`-#`或`--progress-bar`选项可以改变进度条显示方式。您也可以使用`-s, -silent`选项完全禁用进度表
 
-## 参数
+## 选项
 
-参数 | 说明
+<style>
+table th:first-of-type {
+    width: 22%;
+}
+</style>
+
+选项 | 说明
 :- | :-
--K, --config `<file>`         | 指定外部参数文件，如果使用`-`，则从输入流中读取参数，参数文件中一个参数一行（如果是双破折号的参数，则可以忽略`--`但指定值必须用`=`号连接，如`url="http://www.example.com"`）
+-K, --config `<file>`         | 指定外部选项文件，如果使用`-`，则从输入流中读取选项，选项文件中一个选项一行（如果是双破折号的选项，则可以忽略`--`但指定值必须用`=`号连接，如`url="http://www.example.com"`）
 --connect-timeout `<seconds>` | 连接超时时间（单位：秒）
 -c, --cookie-jar `<file>`     | (HTTP)将响应的`cookie`写入一个文件，如果指定`-`，则写入`stdout`中
--b, --cookie `<data\|file>`   | (HTTP)指定发送请求携带的`cookie`，以参数形式指定：`-b "NAME1=VALUE1; NAME2=VALUE2"`，以文件形式指定则每行一个指定一个`key=value`形式的`cookie`
+-b, --cookie `<data\|file>`   | (HTTP)指定发送请求携带的`cookie`，以选项形式指定：`-b "NAME1=VALUE1; NAME2=VALUE2"`，以文件形式指定则每行一个指定一个`key=value`形式的`cookie`
 --data-binary `<data>`        | (HTTP)这将完全按照指定的方式发布数据，而不会进行任何额外处理，如果使用`@`符号，则后面必须跟上明确的文件名
 --data-raw `<data>`           | (HTTP)发送原始的请求数据，且不处理`@`符号指定的文件名
---data-urlencode `<data>`     | (HTTP)发送数据并使用`urlencode`编码，一个`key=value`使用一次该参数，多个则需指定多次，支持的表达式：<br>`content` 将内容编码后发送<br>`=content` 将内容编码后发送，不包含`=`符号<br>`@filename` 将文件内容编码后再发送<br>`name@filename` 将文件内容编码，发送内容并指定`name`值，与`application/x-www-form-urlencoded`的表单类似
+--data-urlencode `<data>`     | (HTTP)发送数据并使用`urlencode`编码，一个`key=value`使用一次该选项，多个则需指定多次，支持的表达式：<br>`content` 将内容编码后发送<br>`=content` 将内容编码后发送，不包含`=`符号<br>`@filename` 将文件内容编码后再发送<br>`name@filename` 将文件内容编码，发送内容并指定`name`值，与`application/x-www-form-urlencoded`的表单类似
 -d, --data `<data>`           | (HTTP MQTT)将POST请求中的指定数据发送到HTTP服务器，就像用户填写HTML表单并按Submit按钮时浏览器所做的一样。这将导致curl使用内容类型`application/x-www-form-urlencoded`将数据传递到服务器
 -D, --dump-header `<file>`    | 将服务器响应的标头写入文件
 --fail-early                  | 当指定多个请求时，将会在第一个请求失败后直接退出并返回，不会再继续执行后续请求
 --fail-with-body              | (HTTP)如果服务器错误（HTTP响应代码为400或更大），则返回错误。在正常情况下，当HTTP服务器无法交付文档时，它会返回HTML文档，说明其内容（通常还会说明原因以及更多内容）。此标志仍将允许curl输出并保存该内容，而且还返回错误22
 -f, --fail                    | (HTTP)服务器错误时静默失败（根本没有输出）。这样做主要是为了使脚本等能够更好地处理失败的尝试。在正常情况下，当HTTP服务器无法交付文档时，它会返回HTML文档，说明其内容（通常还会说明原因以及更多内容）。该标志将阻止curl输出该错误并返回错误22
---form-string `<name=string>` | (HTTP SMTP IMAP)与`-F, --form`相似，不同之处在于，原样使用了命名参数的值字符串。 开头的`'@'`和`'<'`字符以及值中的`'; type='`字符串没有特殊含义
+--form-string `<name=string>` | (HTTP SMTP IMAP)与`-F, --form`相似，不同之处在于，原样使用了命名选项的值字符串。 开头的`'@'`和`'<'`字符以及值中的`'; type='`字符串没有特殊含义
 -F, --form <name=content>     | (HTTP SMTP IMAP)对于HTTP协议系列，它可以使curl模仿用户按下提交按钮时所填写的表单。curl会以Content-Type为`multipart/form-data`发送请求，参考[RFC 2388](http://www.ietf.org/rfc/rfc2388.txt)，示例：<br>传输本地文件（使用`@`）并指定文件类型和文件名<br>`curl -F "profile=@portrait.jpg;type=image/jpeg;filename=person.jpg" https://example.com/upload.cgi`<br>读取本地文件内容作为传输数据（使用`<`）<br>`curl -F "story=<hugefile.txt" https://example.com/`
 -G, --get                     | 使用此选项时，将使用`-d, --data`，`--data-binary`或`--data-urlencode`指定的所有数据用于HTTP GET请求中，而不是用于其他情况的POST请求中。数据将以`?`附加到URL
 -I, --head                    | (HTTP FTP) 仅获取响应标头。HTTP服务器具有命令HEAD，该命令用于获取文档的标头。当在FTP或FILE文件上使用时，curl仅显示文件大小和最后修改时间
 -H, --header `<header/@file>` | (HTTP)自定义请求头，如`curl -H "Authorization: token" https://example.com`，或者使用外部文件`curl -H @content.txt http://example.com`，文件内容：<br>`Host: example.com`<br>`Authorization: 123456`
--h, --help `<category>`       | 显示帮助信息后退出，如果指定了分类`<category>`，则只显示该分类下的参数说明，支持的分类：`auth`，`connection`，`curl`，`dns`，`file`，`ftp`，`http`，`imap`，`misc`，`output`，`pop3`，`post`，`proxy`，`scp`，`sftp`，`smtp`，`ssh`，`telnet`，`tftp`，`tls`，`upload`，`verbose`
+-h, --help `<category>`       | 显示帮助信息后退出，如果指定了分类`<category>`，则只显示该分类下的选项说明，支持的分类：`auth`，`connection`，`curl`，`dns`，`file`，`ftp`，`http`，`imap`，`misc`，`output`，`pop3`，`post`，`proxy`，`scp`，`sftp`，`smtp`，`ssh`，`telnet`，`tftp`，`tls`，`upload`，`verbose`
 -i, --include                 | 在输出中包括HTTP响应标头。HTTP响应标头可以包括服务器名称，Cookie，文档日期，HTTP版本等等
 -k, --insecure                | (TLS)默认情况下，将验证每个curl建立的SSL连接的安全性。使用此选项，即使对于服务器连接（如果认为不安全），curl仍可继续进行和操作
 --libcurl `<file>`            | 指定文件将输出一段C语言的源码，此源码的功能与命令行上的操作相同
@@ -110,16 +116,36 @@ FTP上传的情况不同，因为该操作不会向终端吐出任何响应数�
 -J, --remote-header-name      | (HTTP)此选项告诉`-O, --remote-name`选项使用服务器指定的`Content-Disposition`文件名，而不是从URL中提取文件名
 -O, --remote-name             | 将输出写入本地文件，该文件名为获得的远程文件。（仅使用远程文件的文件部分，路径被截断）该文件将保存在当前工作目录中。如果要将文件保存在其他目录中，请确保在使用此选项调用curl之前更改当前工作目录
 -R, --remote-time             | 使用时，这将使curl尝试找出远程文件的时间戳，如果可用，则使本地文件获得相同的时间戳
--X, --request `<command>`     | (HTTP)指定与HTTP服务器通信时要使用的自定义请求方法。将使用指定的请求方法代替其他方法（默认为GET）。阅读HTTP 1.1规范以获取详细信息和说明。一般情况下不需要明确指明此参数。各种各样的GET，HEAD，POST和PUT请求都可以通过使用专用的命令行参数来调用。此参数仅更改HTTP请求中使用的实际单词，不会更改curl的行为方式。例如，如果您想发出适当的HEAD请求，则使用-X HEAD将无法满足要求。您需要使用`-I, --head`参数
+-X, --request `<command>`     | (HTTP)指定与HTTP服务器通信时要使用的自定义请求方法。将使用指定的请求方法代替其他方法（默认为GET）。阅读HTTP 1.1规范以获取详细信息和说明。一般情况下不需要明确指明此选项。各种各样的GET，HEAD，POST和PUT请求都可以通过使用专用的命令行选项来调用。此选项仅更改HTTP请求中使用的实际单词，不会更改curl的行为方式。例如，如果您想发出适当的HEAD请求，则使用-X HEAD将无法满足要求。您需要使用`-I, --head`选项
 -S, --show-error              | 与`-s, --silent`一起使用时，如果curl失败，它将使curl显示一条错误消息
 -s, --silent                  | 静音或安静模式。不显示进度表或错误消息。使curl静音。除非您将其重定向，否则它仍将输出您要求的数据，甚至可能输出到终端/标准输出
 --create-dirs                 | 当与`-o, --output`选项一起使用时，curl将根据需要创建必要的本地目录层次结构
---ftp-create-dirs             | (FTP SFTP)当FTP或SFTP操作使用服务器上当前不存在的路径时，curl的标准行为将失败。使用此参数，curl会尝试创建不存在的目录
---create-file-mode `<mode>`   | (SFTP SCP FILE)当使用curl使用支持的协议之一远程创建文件时，此选项允许用户设置在创建时在文件上设置的`mode`（权限），而不是默认的`0644`（`-rw-r--r--`）。此选项将八进制数作为参数
+--ftp-create-dirs             | (FTP SFTP)当FTP或SFTP操作使用服务器上当前不存在的路径时，curl的标准行为将失败。使用此选项，curl会尝试创建不存在的目录
+--create-file-mode `<mode>`   | (SFTP SCP FILE)当使用curl使用支持的协议之一远程创建文件时，此选项允许用户设置在创建时在文件上设置的`mode`（权限），而不是默认的`0644`（`-rw-r--r--`）。此选项将八进制数作为选项
 -T, --upload-file `<file>`    | 这会将指定的本地文件传输到远程URL，支持指定多文件，如`curl --upload-file "{file1,file2}" http://www.example.com`或`curl -T "img[1-1000].png" ftp://ftp.example.com/upload/`
 --url `<url>`                 | 指定请求链接
 -A, --user-agent `<name>`     | 指定请求头中的`User-Agent`标头
 -v, --verbose                 | 在操作过程中使卷曲变得冗长
 -V, --version                 | 显示版本号后退出
 
-Last Modified 2021-04-08
+## 命令示例
+
+1. 下载文件，并参考链接中的文件名称存储文件
+
+    ```
+    curl -O https://www.example.com/file.zip
+    ```
+
+2. 通过sftp上传文件到服务器`/opt`目录
+
+    ```
+    curl -T file.zip -u "ftpuser:123456" "sftp://192.168.0.2/opt/"
+    ```
+
+3. 发送表单请求且携带有鉴权信息
+
+    ```
+    curl -X POST -H "Authorization: token" -F "user=black" -F "age=18" -F "picture=@p1.jpg" "https://www.example.com/api/user"
+    ```
+
+Last Modified 2021-04-11

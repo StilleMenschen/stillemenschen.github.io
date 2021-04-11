@@ -20,6 +20,12 @@ less [-[+]aABcCdeEfFgGiIJKLmMnNqQrRsSuUVwWX~]
 
 ## 命令
 
+<style>
+table th:first-of-type {
+    width: 20%;
+}
+</style>
+
 使用less打开文件后，默认为查看文件，此时可以直接输入命令
 
 命令 | 说明
@@ -45,9 +51,9 @@ v               | 查找一个编辑器打开当前文件编辑
 
 > 使用键盘上的翻页按键和方向按键也可以移动
 
-## 参数
+## 选项
 
-参数 | 说明
+选项 | 说明
 :- | :-
 -i, --ignore-case         | 指定搜索忽略大小写
 -g, --hilite-search       | 指定每次只高亮下一个查找匹配项
@@ -58,4 +64,4 @@ v               | 查找一个编辑器打开当前文件编辑
 -ppattern                 | 指定从表达式`pattern`搜索到的位置开始查看
 -s, --squeeze-blank-lines | 将连续的空行转换为一个空行
 
-Last Modified 2021-03-13
+Last Modified 2021-04-11

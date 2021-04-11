@@ -8,9 +8,15 @@
 docker ps [OPTIONS]
 ```
 
-## 参数
+## 选项
 
-参数 | 说明
+<style>
+table th:first-of-type {
+    width: 26%;
+}
+</style>
+
+选项 | 说明
 :- | :-
 -a, --all    | 列出所有容器（默认只列出运行中的）
 -f, --filter | 根据提供的条件过滤输出
@@ -24,7 +30,7 @@ docker ps [OPTIONS]
 
 ## 过滤器
 
-过滤标志（`-f`或`--filter`）格式为`kay=value`，多个条件使用多个参数指定，如`--filter "foo=bar" --filter "bif=baz"`
+过滤标志（`-f`或`--filter`）格式为`kay=value`，多个条件使用多个选项指定，如`--filter "foo=bar" --filter "bif=baz"`
 
 过滤条件 | 说明
 :- | :-
@@ -92,7 +98,7 @@ is-task           | 筛选作为`task`服务的容器，固定布尔值：`true`
 
 格式化选项（`--format`）使用Go模板格式化输出容器信息，在格式化字符串最前面加上`table`可以指定以表格的方式输出，包含表头
 
-格式化参数 | 说明
+格式化字段 | 说明
 :- | :-
 .ID         | 容器ID
 .Image      | 镜像
@@ -120,4 +126,4 @@ docker ps -a --format "table {{.ID}} {{.Image}} {{.Command}} {{.CreatedAt}} {{.R
 docker ps -a --no-trunc --format "{{.ID}}: {{.Image}}, {{.Names}}, {{.Networks}}, {{.Size}}, {{.CreatedAt}}\n{{.Command}}\n{{.RunningFor}}, {{.Ports}}, {{.State}}, {{.Status}}\n{{.Mounts}}\n"
 ```
 
-Last Modified 2021-03-29
+Last Modified 2021-04-11

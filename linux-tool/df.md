@@ -8,9 +8,15 @@ df [OPTION]... [FILE]...
 ```
 通常，磁盘空间以`1024`字节为单位，但是可以覆盖此默认单位（请参见块大小）。非整数数量将四舍五入到下一个较高的单位
 
-## 参数
+## 选项
 
-参数 | 说明
+<style>
+table th:first-of-type {
+    width: 20%;
+}
+</style>
+
+选项 | 说明
 :- | :-
 -a, --all                        | 在列表中包括虚拟，重复或不可访问的文件系统，默认情况下将其省略。虚拟文件系统通常是专用的伪文件系统，例如`/proc`，没有关联的存储
 -B size, --block-size=size       | 修改磁盘空间的块大小，如`K`、`M`、`G`，参考[块大小](#块大小)
@@ -71,4 +77,4 @@ df [OPTION]... [FILE]...
     df -h --output=source,target,size,avail,pcent --total
     ```
 
-Last Modified 2021-04-10
+Last Modified 2021-04-11

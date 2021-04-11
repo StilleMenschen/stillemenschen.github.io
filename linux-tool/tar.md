@@ -7,13 +7,19 @@ tar创建和处理档案，这些档案实际上是许多其他文件的集合�
 tar [OPTION...] [FILE]...
 ```
 
-## 参数
+## 选项
 
-参数 | 说明
+<style>
+table th:first-of-type {
+    width: 18%;
+}
+</style>
+
+选项 | 说明
 :- | :-
 -c, --create                 | 创建一个新的tar归档文件
--r, --append                 | 追加文件到归档文件中，仅支持单独以`-c`参数归档的文件（可能会令归档文件中存在同名文件）
--u, --update                 | 追加文件到归档文件中，前提是比归档中的文件新或者不存在，仅支持单独以`-c`参数归档的文件
+-r, --append                 | 追加文件到归档文件中，仅支持单独以`-c`选项归档的文件（可能会令归档文件中存在同名文件）
+-u, --update                 | 追加文件到归档文件中，前提是比归档中的文件新或者不存在，仅支持单独以`-c`选项归档的文件
 -t, --list                   | 列出档案的内容
 -x, --extract                | 从存档中提取一个或多个文件，如果不指定文件名则默认提取所有
 -d, --compare                | 将存档内的文件与文件系统中的文件进行比较，并报告文件大小，模式，所有者，修改日期和内容的差异，如果比较的文件在归档中不存在，则返回错误
@@ -22,12 +28,12 @@ tar [OPTION...] [FILE]...
 -T file, --files-from=file   | 参考文件`file`中指定的目录或文件进行归档（`file`中每一行只能写一个归档项，如果是相对路径要注意执行命令的目录）
 -v, --verbose                | 在tar运行时显示正在处理的文件
 -h, --dereference            | 在读取或写入要归档的文件时，tar访问符号链接指向的文件，而不是符号链接本身
--C dir, --directory=dir      | 指定此参数后，tar将在执行任何操作之前将其当前目录更改为dir，在归档创建期间使用此参数时，它对参数顺序敏感
+-C dir, --directory=dir      | 指定此选项后，tar将在执行任何操作之前将其当前目录更改为dir，在归档创建期间使用此选项时，它对选项顺序敏感
 --exclude=pattern            | 按`pattern`排除目录或文件（`pattern`支持shell中的通配符，如`*`、`?`、`[abc]`、`[a-z]`、`[!a-z]`、`{s1,s2,...}`）
 -X file, --exclude-from=file | 与`--exclude`相似，但tar将使用文件`file`中的模式列表（`file`中每一行只能写一个排除项）
 --exclude-vcs-ignores        | 排除版本控制相关的文件，如`cvsignore`，`.gitignore`，`.bzrignore`，`.hgignore`
 --exclude-vcs                | 排除版本控制相关的目录和文件，如`.git/`，`.gitignore`，`.svn/`等
--z, --gzip, --gunzip         | 此参数告诉tar通过gzip读取或写入档案，从而允许tar透明地直接对多种压缩档案进行操作
+-z, --gzip, --gunzip         | 此选项告诉tar通过gzip读取或写入档案，从而允许tar透明地直接对多种压缩档案进行操作
 --ignore-case                | 忽略`pattern`中的大小写字母
 --no-ignore-case             | 取消忽略`pattern`中的大小写字母
 --index-file=file            | 将tar的详细操作信息写入文件`file`
@@ -61,4 +67,4 @@ tar [OPTION...] [FILE]...
     tar -cvf web.tar -C dist/ $(ls --file-type dist/ | sed 's/[@|=>]$//g')
     ```
 
-Last Modified 2021-04-09
+Last Modified 2021-04-11

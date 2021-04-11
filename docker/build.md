@@ -20,8 +20,20 @@ docker build https://github.com/docker/rootfs.git#container:docker
 ```
 下表表示所有有效的后缀及其构建上下文
 
+<style>
+table th:first-of-type {
+    width: 10%;
+}
+table th:nth-of-type(2) {
+    width: 60%;
+}
+table th:last-of-type {
+    width: 30%;
+}
+</style>
+
 构建上下文后缀 | 参考提交 | 构建上下文
-:-|:-|:-
+:- | :- | :-
 myrepo.git                   | refs/heads/master   | /
 myrepo.git#mytag             | refs/tags/mytag     | /
 myrepo.git#mybranch          | refs/heads/mybranch | /
@@ -55,9 +67,9 @@ Get-Content Dockerfile | docker build -
 
 在大多数情况下，最好将每个Dockerfile放在一个空目录中。 然后，仅将构建Dockerfile所需的文件添加到该目录。 为了提高构建的性能，您还可以通过向该目录添加[.dockerignore](https://docs.docker.com/engine/reference/builder/#dockerignore-file)文件来排除文件和目录
 
-## 参数
+## 选项
 
-参数 | 说明
+选项 | 说明
 :- | :-
 --add-host     | 添加自定义主机到IP的映射（host:ip）
 --build-arg    | 设置构建时变量
@@ -66,7 +78,7 @@ Get-Content Dockerfile | docker build -
 -f, --file     | `Dockerfile`的名称（默认为`PATH/Dockerfile`）
 --force-rm     | 始终清理中间容器
 --iidfile      | 将镜像ID写入文件
---isolation    | 容器隔离参数（`Linux`平台只支持`default`，`Windows`平台支持：`default`，`process`，`hyperv`）
+--isolation    | 容器隔离选项（`Linux`平台只支持`default`，`Windows`平台支持：`default`，`process`，`hyperv`）
 --label        | 设置镜像的元数据
 -m, --memory   | 内存限制
 --memory-swap  | 内存限制加上交换空间的总限制，指定`-1`启用无限制交换空间
@@ -140,4 +152,4 @@ Get-Content Dockerfile | docker build -
     docker build -t mybuildimage --target build-env .
     ```
 
-Last Modified 2021-04-04
+Last Modified 2021-04-11
