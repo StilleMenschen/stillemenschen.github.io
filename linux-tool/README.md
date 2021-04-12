@@ -1,20 +1,20 @@
 # Linux Tool
 
-- vim
-- ls
-- grep
-- sed
-- awk
-- find
-- less
-- curl
-- lsof
-- tar
-- df
-- chmod
-- useradd
-- usermod
-- userdel
-- groupadd
-- groupmod
-- groupdel
+- vim *终端下的文本编辑器*
+- ls *查看指定目录的文件*
+- grep *查找文件中的字符串*
+- sed *基于行处理的文本处理和编辑*
+- awk *可编程的文本分析*
+- find *查找目录或文件*
+- less *文件浏览且支持上下翻页*
+- curl *TCP传输*
+- lsof *列出当前打开的文件*
+- tar *打包*
+- df *磁盘文件查看*
+- chmod *目录或文件的权限变更*
+- useradd *新增用户*
+- usermod *修改用户*
+- userdel *删除用户*
+- groupadd *新增用户组*
+- groupmod *修改用户组*
+- groupdel *删除用户组*
