@@ -6,4 +6,5 @@
 * [Docker Compose](docker-compose/)
 * [Windows](windows/)
 * [Windows Tool](windows-tool/)
+* [JavaScript](javascript/)
 * [Config](config/)
