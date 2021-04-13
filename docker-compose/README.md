@@ -2,3 +2,4 @@
 
 - up
 - down
+- docker-compose.yml

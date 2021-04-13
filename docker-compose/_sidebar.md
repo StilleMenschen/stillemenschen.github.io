@@ -2,3 +2,4 @@
 * [Docker Compose](docker-compose/)
   * [up](docker-compose/up.md)
   * [down](docker-compose/down.md)
+  * [docker-compose.yml](docker-compose/file.md)
