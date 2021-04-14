@@ -6,3 +6,4 @@
   * [logs](docker/logs.md)
   * [build](docker/build.md)
   * [Dockerfile](docker/file.md)
+  * [daemon.json](docker/daemon.md)
