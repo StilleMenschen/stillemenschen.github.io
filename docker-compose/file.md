@@ -632,4 +632,307 @@ volumes:
   mydata:
 ```
 
+## volumes_from
+
+从另一个服务或容器挂载所有卷，可以选择指定只读访问（ro）或读写（rw）。如果未指定访问级别，则使用读写
+```
+volumes_from:
+  - service_name
+  - service_name:ro
+  - container:container_name
+  - container:container_name:rw
+```
+
+## restart
+
+默认的重启策略为`no`，并且在任何情况下都不会重启容器。如果指定了`always`，则容器将始终重新启动。如果退出代码指示失败时错误，则失败时策略将重新启动容器
+```
+restart: no
+```
+```
+restart: always
+```
+```
+restart: on-failure
+```
+```
+restart: unless-stopped
+```
+
+# services常规参数
+
+参数与`docker run`中的选项一致
+## 计算资源限制
+```
+cpu_count: 2
+cpu_percent: 50
+cpus: 0.5
+cpu_shares: 73
+cpu_quota: 50000
+cpu_period: 20ms
+cpuset: 0,1
+```
+## 用户
+```
+user: postgresql
+```
+## 工作目录
+```
+working_dir: /code
+```
+## 域名
+```
+domainname: foo.com
+```
+## 域
+```
+hostname: foo
+```
+## 共享内存
+```
+ipc: host
+```
+## 物理地址
+```
+mac_address: 02:42:ac:11:65:43
+```
+## 内存资源限制
+```
+mem_limit: 1000000000
+memswap_limit: 2000000000
+mem_reservation: 512m
+```
+## 访问权限
+```
+privileged: true
+```
+## 内存溢出控制
+```
+oom_score_adj: 500
+oom_kill_disable: true
+```
+## 容器内文件系统只读
+```
+read_only: true
+```
+## /dev/shm大小
+```
+shm_size: 64M
+```
+## 保持STDIN打开
+```
+stdin_open: true
+```
+## 伪终端
+```
+tty: true
+```
+
+# volumes
+
+## driver
+
+指定该卷应使用哪个卷驱动程序。默认情况下`Docker Engine`配置为使用任何驱动器，在大多数情况下为本地驱动程序。如果驱动程序不可用，则当`docker-compose up`尝试创建卷时，引擎将返回错误
+```
+driver: foobar
+```
+
+## driver_opts
+
+指定选项列表作为键值对，以传递给该卷的驱动程序
+```
+volumes:
+  example:
+    driver_opts:
+      type: "nfs"
+      o: "addr=10.40.0.199,nolock,soft,rw"
+      device: ":/docker/example"
+```
+
+## external
+
+如果设置为`true`，则指定此卷是在Compose之外创建的。`docker-compose up`不会尝试创建它，如果不存在，则会引发错误
+```
+version: "3.9"
+
+services:
+  db:
+    image: postgres
+    volumes:
+      - data:/var/lib/postgresql/data
+
+volumes:
+  data:
+    external: true
+```
+> 对于该格式的`3.3`版及更低版本，外部不能与其他卷配置键（driver，driver_opts，labels）结合使用。对于`3.4`及更高版本，此限制不再存在
+
+## labels
+
+使用Docker标签将元数据添加到容器。您可以使用数组或字典
+```
+labels:
+  com.example.description: "Database volume"
+  com.example.department: "IT/Ops"
+  com.example.label-with-empty-value: ""
+```
+```
+labels:
+  - "com.example.description=Database volume"
+  - "com.example.department=IT/Ops"
+  - "com.example.label-with-empty-value"
+```
+
+## name
+
+为此卷设置一个自定义名称。名称字段可用于引用包含特殊字符的卷
+```
+version: "3.9"
+volumes:
+  data:
+    name: my-app-data
+```
+它也可以与外部属性结合使用
+```
+version: "3.9"
+volumes:
+  data:
+    external: true
+    name: my-app-data
+```
+# networks
+
+## driver
+
+指定该网络应使用哪个驱动程序
+```
+driver: bridge
+```
+
+- `bridge` 桥接
+- `overlay` 集群网络
+- `host` or `none` 使用宿主机的网络，或者不使用网络。相当于`docker run --net=host`或`docker run --net=none`。仅在使用`docker stack`命令时使用。如果使用`docker-compose`命令，请改用`network_mode`
+
+## enable_ipv6
+
+启用`IPv6`寻址，仅限`2.x`版本的Compose文件使用
+## driver_opts
+
+传递给卷驱动程序的参数
+```
+driver_opts:
+  foo: "bar"
+  baz: 1
+```
+
+## attachable
+
+仅在驱动程序设置为`overlay`时使用。如果设置为`true`，则除了服务之外，独立容器还可以连接到此网络。如果独立容器连接到`overlay`网络，则它可以与也从其他Docker守护程序附加到`overlay`网络的服务和独立容器进行通信
+
+## ipam
+
+指定自定义`IPAM`配置（子网划分）。这是一个具有多个属性的对象，每个属性都是可选的
+- `driver` 自定义IPAM驱动程序，而不是默认值。
+- `config` 具有零个或多个config块的列表，每个块包含以下任一键
+  - `subnet` `CIDR`格式的子网，代表一个网段
+
+```
+ipam:
+  driver: default
+  config:
+    - subnet: 172.28.0.0/16
+```
+
+## internal
+
+默认情况下，Docker还将桥接网络连接到它，以提供外部连接。如果要创建外部隔离的网络，可以将此选项设置为`true`
+
+## labels
+
+使用Docker标签将元数据添加到容器。您可以使用数组或字典
+```
+labels:
+  com.example.description: "Database volume"
+  com.example.department: "IT/Ops"
+  com.example.label-with-empty-value: ""
+```
+```
+labels:
+  - "com.example.description=Database volume"
+  - "com.example.department=IT/Ops"
+  - "com.example.label-with-empty-value"
+```
+
+## external
+
+如果设置为`true`，则指定此网络是在Compose之外创建的。`docker-compose up`不会尝试创建它，如果不存在，则会引发错误
+```
+version: "3.9"
+
+services:
+  proxy:
+    build: ./proxy
+    networks:
+      - outside
+      - default
+  app:
+    build: ./app
+    networks:
+      - default
+
+networks:
+  outside:
+    external: true
+```
+
+## name
+
+为此网络设置一个自定义名称。名称字段可用于引用包含特殊字符的网络
+```
+version: "3.9"
+networks:
+  network1:
+    name: my-app-net
+```
+它也可以与外部属性结合使用
+```
+version: "3.9"
+networks:
+  network1:
+    external: true
+    name: my-app-net
+```
+
+# secrets
+
+机密文件，默认位置在`/run/secrets/<secret_name>`（Windows在`C:\ProgramData\Docker\secrets`），可参考[官方文档](https://docs.docker.com/engine/swarm/secrets/)
+
+- `file` 将使用指定路径中的文件内容创建`secret`
+- `external` 如果设置为`true`，则指定此`secret`是在Compose之外创建的。`docker-compose up`不会尝试创建它，如果不存在，则会引发未找到的错误
+- `name` Docker中的`secret`对象的名称。此字段可用于引用包含特殊字符的`secret`。在`3.5`版本中引入
+
+```
+secrets:
+  my_first_secret:
+    file: ./secret_data
+  my_second_secret:
+    external: true
+```
+
+`3.5`以及更高版本的Compose文件
+```
+secrets:
+  my_first_secret:
+    file: ./secret_data
+  my_second_secret:
+    external: true
+    name: redis_secret
+```
+`3.4`以及更低版本的Compose文件
+```
+  my_second_secret:
+    external:
+      name: redis_secret
+```
+
 Last Modified 2021-04-15
