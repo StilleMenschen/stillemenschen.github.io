@@ -5,6 +5,14 @@
 - run *启动容器*
 - logs *查看容器日志*
 - build *构建镜像*
+- exec
+- top
+- inspect
+- stats
+- diff
+- history
+- images
+- pull
 - Dockerfile *镜像构建文件参考*
 - daemon.json *全局配置文件*
 

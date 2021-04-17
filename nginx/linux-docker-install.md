@@ -6,7 +6,7 @@
 - 挂载卷（配置文件、静态文件目录、日志目录）
 
 ```yml
-version: "3.9"
+version: "3.3"
 services:
   nignx1:
     image: nginx:latest
@@ -14,10 +14,10 @@ services:
     ports:
       - "80:80"
     volumes:
-      - "/usr/nginx/nginx.conf:/etc/nginx/nginx.conf"
-      - "/usr/nginx/html:/usr/share/nginx/html"
-      - "/usr/nginx/conf.d:/etc/nginx/conf.d"
-      - "/usr/nginx/logs:/var/log/nginx"
+      - "/usr/local/nginx/nginx.conf:/etc/nginx/nginx.conf"
+      - "/usr/local/nginx/html:/usr/share/nginx/html"
+      - "/usr/local/nginx/conf.d:/etc/nginx/conf.d"
+      - "/usr/local/nginx/logs:/var/log/nginx"
 ```
 
-Last Modified 2021-03-11
+Last Modified 2021-04-17
