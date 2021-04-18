@@ -140,13 +140,66 @@ table th:first-of-type {
 
 - **State** 该字段将包含以下关键字之一：
 
-    - **FREE**
-    - **LISTENING**
-    - **CONNECTING**
-    - **CONNECTED**
-    - **DISCONNECTING**
-    - **(empty)**
-    - **UNKNOWN**
+    - **FREE** 未分配套接字
+    - **LISTENING** 套接字正在监听连接请求。仅当您指定`--listening`（-l）或`--all`（-a）选项时，此类套接字才会包含在输出中
+    - **CONNECTING** 套接字即将建立连接
+    - **CONNECTED** 套接字已连接
+    - **DISCONNECTING** 套接字已断开连接
+    - **(empty)** 套接字未建立任意连接
+    - **UNKNOWN** 套接字的状态未知
 
-- **PID/Program name**
-- **Path**
+- **PID/Program name** 套接字已打开的进程的进程ID（PID）和进程名称
+- **Path** 这是相应进程附加到套接字的路径名
+
+## 相关文件
+
+- /etc/services 服务翻译文件
+- /proc proc文件系统的挂载点，可通过以下文件访问内核状态信息
+- /proc/net/dev 设备信息
+- /proc/net/raw 原始套接字信息
+- /proc/net/tcp **TCP**套接字信息
+- /proc/net/udp **UDP**套接字信息
+- /proc/net/udplite **UDPLite**套接字信息
+- /proc/net/igmp **IGMP**组播信息
+- /proc/net/unix **Unix**域套接字信息
+- /proc/net/ipx **IPX**套接字信息
+- /proc/net/ax25 **AX25**套接字信息
+- /proc/net/appletalk **DDP(appletalk)**套接字信息
+- /proc/net/nr **NET/ROM**套接字信息
+- /proc/net/route **IP**路由信息
+- /proc/net/ax25_route **AX25**路由信息
+- /proc/net/ipx_route **IPX**路由信息
+- /proc/net/nr_nodes **NET/ROM**节点列表
+- /proc/net/nr_neigh **NET/ROM**邻居
+- /proc/net/ip_masquerade
+- /sys/kernel/debug/bluetooth/l2cap 蓝牙**L2CAP**信息
+- /sys/kernel/debug/bluetooth/rfcomm 蓝牙串行连接
+- /proc/net/snmp 统计数据
+
+## 命令示例
+
+1. 显示UDP端口号的使用情况
+
+    ```
+    netstat -apu
+    ```
+
+2. 显示当前监听的连接和相关进程
+
+    ```
+    netstat -nlp
+    ```
+
+3. 显示网卡列表
+
+    ```
+    netstat -i
+    ```
+
+4. 显示组播组的关系
+
+    ```
+    netstat -g
+    ```
+
+Last Modified 2021-04-18
