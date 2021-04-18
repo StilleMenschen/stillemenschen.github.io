@@ -13,10 +13,8 @@ set expandtab
 set tabstop=4
 set softtabstop=4
 # 按键映射
-map <C-X> <Esc>:q!<CR>
+nmap <F2> :q!<CR>
 imap <C-X> <Esc>:q!<CR>
-map <C-R> <Esc>:e!<CR>
-imap <C-R> <Esc>:e!<CR>
 ```
 
 Last Modified 2021-04-12
