@@ -9,11 +9,12 @@
 - [Jenkins](jenkins/)只简述了部署运行，使用相关的还没有具体编写的计划
 - [Nginx](nginx/)仅提供了一个docker部署和配置文件的范例参考
 - [配置文件](config/)这个是平时经常使用的，仅供参考
-- [Docker](docker/)和[Docker Compose](docker-compose/)文档包含了常用命令和配置文件参考
+- [Docker Compose](docker-compose/)文档仅包含启动和停止的命令以及配置文件参考
 
 **补充**
 
-- Linux部分还会再加上一个网络查看的`netstat`，`shell`脚本基础也打算写一下
+- `shell`脚本基础将会尽快补充
+- `Docker CLI`的几个简单的命令也会慢慢补充一些基本参考
 
 **另外**
 
