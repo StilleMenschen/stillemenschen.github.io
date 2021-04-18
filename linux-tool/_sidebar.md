@@ -9,6 +9,7 @@
   * [less](linux-tool/less.md)
   * [curl](linux-tool/curl.md)
   * [lsof](linux-tool/lsof.md)
+  * [netstat](linux-tool/netstat.md)
   * [tar](linux-tool/tar.md)
   * [df](linux-tool/df.md)
   * [chmod](linux-tool/chmod.md)
