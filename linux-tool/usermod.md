@@ -46,27 +46,27 @@ table th:first-of-type {
 ## 命令示例
 
 1. 更改登陆目录：
-    ```
+    ```bash
     usermod -d /home/hnlinux root
     ```
 
 2. 改变用户的uid：
-    ```
+    ```bash
     usermod -u 7001 root
     ```
 
 3. 修改用户名为linux：
-    ```
+    ```bash
     usermod -l linux test
     ```
 
 4. 锁定test的密码：
-    ```
+    ```bash
     usermod -L test
     ```
 
 5. 解锁test的密码：
-    ```
+    ```bash
     usermod -U test
     ```
 

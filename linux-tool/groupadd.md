@@ -34,12 +34,12 @@ table th:first-of-type {
 ## 命令示例
 
 1. 使用`-g`选项新建test工作组名，`1005`是工作组id
-    ```
+    ```bash
     groupadd -g 1005 test
     ```
 
 2. 使用-r创建系统工作组
-    ```
+    ```bash
     groupadd -r -g 368 test
     ```
 

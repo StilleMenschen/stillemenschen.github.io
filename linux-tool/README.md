@@ -19,3 +19,4 @@
 - groupadd *新增用户组*
 - groupmod *修改用户组*
 - groupdel *删除用户组*
+- shell *可执行脚本*

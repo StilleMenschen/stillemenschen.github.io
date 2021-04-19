@@ -49,13 +49,11 @@ isolation         | 筛选Windows守护程序，固定值：`default`，`process
 is-task           | 筛选作为`task`服务的容器，固定布尔值：`true`，`false`
 
 1. 过滤名称（`name`）包含有指定字符串的所有容器
-
     ```bash
     docker ps -a --filter "name=nostalgic"
     ```
 
 2. 过滤退出状态为`137`的所有容器
-
     ```bash
     docker ps -a --filter 'exited=137'
     ```
@@ -65,25 +63,21 @@ is-task           | 筛选作为`task`服务的容器，固定布尔值：`true`
     支持格式：`image`，`image:tag`，`image:tag@digest`，`short-id`，`full-id`。如果不指定`tag`，则默认为`latest`
 
     指定镜像名称
-
     ```bash
     docker ps --filter ancestor=ubuntu
     ```
 
     指定镜像名称和版本
-
     ```bash
     docker ps --filter ancestor=ubuntu:12.04.5
     ```
 
     指定镜像短ID
-
     ```bash
     docker ps --filter ancestor=d0e008c6cf02
     ```
 
 4. 过滤占用指定端口的容器
-
     ```bash
     docker ps --filter publish=80
     ```
@@ -115,13 +109,11 @@ is-task           | 筛选作为`task`服务的容器，固定布尔值：`true`
 .Networks   | 容器网络
 
 以表格形式格式化输出
-
 ```bash
 docker ps -a --format "table {{.ID}} {{.Image}} {{.Command}} {{.CreatedAt}} {{.RunningFor}} {{.Ports}} {{.State}} {{.Status}} {{.Size}} {{.Names}} {{.Labels}} {{.Mounts}} {{.Networks}}"
 ```
 
 自定义格式化输出
-
 ```bash
 docker ps -a --no-trunc --format "{{.ID}}: {{.Image}}, {{.Names}}, {{.Networks}}, {{.Size}}, {{.CreatedAt}}\n{{.Command}}\n{{.RunningFor}}, {{.Ports}}, {{.State}}, {{.Status}}\n{{.Mounts}}\n"
 ```

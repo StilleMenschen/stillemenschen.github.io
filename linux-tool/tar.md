@@ -48,22 +48,22 @@ table th:first-of-type {
 ## 命令示例
 
 1. 打包`test/`目录中的所有文件，但排除与`git`相关的文件和`jpg`、`png`图片
-    ```
+    ```bash
     tar -cvf test.tar --exclude=*.jpg --exclude=*.png --exclude-vcs test/*
     ```
 
 2. 解压文件但排除所有`txt`文件
-    ```
+    ```bash
     tar -xvf test.tar --exclude=*.txt
     ```
 
 3. 追加目录`test/`中的所有文件到归档中，但只追加有变化或不存在的文件
-    ```
+    ```bash
     tar -uvf test.tar test/*
     ```
 
 4. 打包文件夹`dist/`但不包含顶级文件夹（即少一层`dist/`文件夹）
-    ```
+    ```bash
     tar -cvf web.tar -C dist/ $(ls --file-type dist/ | sed 's/[@|=>]$//g')
     ```
 

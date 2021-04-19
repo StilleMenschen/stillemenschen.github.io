@@ -155,27 +155,27 @@ table th:first-of-type {
 ## 命令示例
 
 1. 找出java进程的工作目录
-    ```
+    ```bash
     lsof -c java -a -d cwd
     ```
 
 2. 列出GID号进程详情：
-    ```
+    ```bash
     lsof -g
     ```
 
 3. 列出目录下被打开的文件：
-    ```
+    ```bash
     lsof +d /root
     ```
 
 4. 递归列出目录下被打开的文件：
-    ```
+    ```bash
     lsof +D /home/test
     ```
 
 5. 列出使用NFS的文件：
-    ```
+    ```bash
     lsof -n /root
     ```
 

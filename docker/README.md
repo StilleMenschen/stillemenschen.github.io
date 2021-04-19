@@ -5,7 +5,7 @@
 - run *启动容器*
 - logs *查看容器日志*
 - build *构建镜像*
-- exec
+- exec *在运行容器中执行命令*
 - top
 - inspect
 - stats

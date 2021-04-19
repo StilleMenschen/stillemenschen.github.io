@@ -117,25 +117,21 @@ Linux中文件的权限分为读、写、执行，表示方式有两种分别是
 ## 命令示例
 
 1. 查找当前所在目录下30分钟内有修改且大小小于10M的文件并列出文件信息
-
     ```bash
     find . -mmin -30 -size -10M -ls
     ```
 
 2. 查找用户主目录下一级和二级目录中名称以`a`开头且不为空的文件或目录并列出文件信息
-
     ```bash
     find $HOME -maxdepth 2 -iname 'a*' ! -empty -ls
     ```
 
 3. 查找`/opt`目录下以`test`开头或以`admin`结尾的目录并计算目录大小
-
     ```bash
     find /opt -type d \( -name 'test*' -o -name '*admin' \) -exec du -hd 0 {} \;
     ```
 
 4. 查找`/var/logs`目录中7天前大于30M的log文件并删除
-
     ```bash
     find /var/logs -name '*.log' -mtime +7 -size +30M -exec rm -f {} \;
     ```

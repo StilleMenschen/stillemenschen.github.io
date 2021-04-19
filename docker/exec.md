@@ -36,15 +36,15 @@ table th:first-of-type {
 ## 命令示例
 
 首先创建一个容器并后台运行
-```
+```bash
 docker run --name ubuntu_top -d ubuntu top -bH
 ```
 创建一个文件到容器内
-```
+```bash
 docker exec -d ubuntu_top touch /tmp/execWorks
 ```
 通过`bash`访问容器内部并指定一个环境变量且改变工作目录
-```
+```bash
 docker exec -it -e VAR1=123 -w /tmp/ ubuntu_top bash
 ```
 进入到容器内之后，分别执行`pwd`、`ls -l`和`echo $VAR1`，可以发现刚刚通过`touch`创建的文件`execWorks`就在`/tmp`目录中，工作目录变化了且环境变量与命令中指定的一致，值为`123`

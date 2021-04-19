@@ -179,26 +179,22 @@ table th:first-of-type {
 ## 命令示例
 
 1. 显示UDP端口号的使用情况
-
-    ```
+    ```bash
     netstat -apu
     ```
 
 2. 显示当前监听的连接和相关进程
-
-    ```
+    ```bash
     netstat -nlp
     ```
 
 3. 显示网卡列表
-
-    ```
+    ```bash
     netstat -i
     ```
 
 4. 显示组播组的关系
-
-    ```
+    ```bash
     netstat -g
     ```
 

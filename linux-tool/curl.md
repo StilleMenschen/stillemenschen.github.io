@@ -131,20 +131,17 @@ table th:first-of-type {
 ## 命令示例
 
 1. 下载文件，并参考链接中的文件名称存储文件
-
-    ```
+    ```bash
     curl -O https://www.example.com/file.zip
     ```
 
 2. 通过sftp上传文件到服务器`/opt`目录
-
-    ```
+    ```bash
     curl -T file.zip -u "ftpuser:123456" "sftp://192.168.0.2/opt/"
     ```
 
 3. 发送表单请求且携带有鉴权信息
-
-    ```
+    ```bash
     curl -X POST -H "Authorization: token" -F "user=black" -F "age=18" -F "picture=@p1.jpg" "https://www.example.com/api/user"
     ```
 

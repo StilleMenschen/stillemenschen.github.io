@@ -68,12 +68,12 @@ table th:first-of-type {
 ## 命令示例
 
 1. 以易于阅读的形式显示磁盘使用情况，并且显示出文件系统类型
-    ```
+    ```bash
     df -hT
     ```
 
 2. 自定义输出字段，只输出挂载点来源、挂载点、总容量、可用数、已用百分比；最后输出上述的总计
-    ```
+    ```bash
     df -h --output=source,target,size,avail,pcent --total
     ```
 

@@ -33,7 +33,7 @@ table th:first-of-type {
 ## 命令示例
 
 1. 更改test用户组为root：
-    ```
+    ```bash
     groupmod -n root test
     ```
 

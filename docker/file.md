@@ -18,7 +18,7 @@ Docker可以通过阅读`Dockerfile`中的指令来自动构建镜像。`Dockerf
 INSTRUCTION arguments
 ```
 `Dockerfile`默认只会解析以`#`开头的行作为注释，如果行开头是有效的指令，则后续的`#`不会生效为注释
-```
+```docker
 # Comment line
 RUN echo 'we are running some # of cool things'
 ```
@@ -32,7 +32,7 @@ RUN echo 'we are running some # of cool things'
 `word`可以是任意字符表示的字符串，如果需要正常显示为一个字符串而不是被解析为变量，使用转义字符表示，如`\$foo`或`\${foo}`将分别转换为`$foo`和`${foo}`文字
 
 简单示例
-```
+```docker
 FROM busybox
 ENV FOO=/bar
 WORKDIR ${FOO}   # WORKDIR /bar
@@ -90,7 +90,7 @@ FROM [--platform=<platform>] <image>[@<digest>] [AS <name>]
 在`FROM`引用多平台`image`的情况下，可选的`--platform`标志可用于指定`image`的平台。例如`linux/amd64`，`linux/arm64`或`windows/amd64`。默认情况下，使用构建请求的目标平台。可以在此标志的值中使用全局构建参数，例如，自动平台`ARG`允许您将指令执行强制到本机构建平台（`--platform=$BUILDPLATFORM`），并使用它来交叉编译到目标平台内部
 
 在`FORM`指令之前使用`ARG`指令：
-```
+```docker
 ARG  CODE_VERSION=latest
 FROM base:${CODE_VERSION}
 CMD  /code/run-app
@@ -99,7 +99,7 @@ FROM extras:${CODE_VERSION}
 CMD  /code/run-extras
 ```
 在`FROM`之前声明的`ARG`在新构建阶段开始后不再生效。因此，`FROM`之后的任何指令都不能使用它。要使用在第一个`FROM`之前声明的`ARG`的默认值，请使用`ARG`指令，在新的构建阶段内部指定同名的参数，但不需要为参数指定值
-```
+```docker
 ARG VERSION=latest
 FROM busybox:$VERSION
 ARG VERSION
@@ -116,12 +116,12 @@ RUN echo $VERSION > image_version
 `RUN`指令将在当前镜像顶部的新层中执行任何命令，并提交结果。生成的提交镜像将用于`Dockerfile`中的下一步操作
 
 执行的shell命令比较长时，可以使用`\`换行，如下
-```
+```docker
 RUN /bin/bash -c 'source $HOME/.bashrc; \
 echo $HOME'
 ```
 如果使用JSON数组形式表示命令，则必须是执行shell命令才可以使用环境变量，否则环境变量将被解析为普通的字符串，如下使用JSON数组的形式调用shell命令执行并且可以正常解析环境变量
-```
+```docker
 RUN [ "sh", "-c", "echo $HOME" ]
 ```
 
@@ -138,7 +138,7 @@ RUN [ "sh", "-c", "echo $HOME" ]
 如果使用`CMD`来为`ENTRYPOINT`指定参数，则这两个指令**都必须以JSON数组的形式来编写**
 
 如果在`CMD`指令中执行shell，默认情况下会使用`/bin/sh -c`来执行。在没有shell环境的情况下，必须以JSON数组来表示命令，且必须提供可执行程序的完整路径，如：
-```
+```docker
 FROM ubuntu
 CMD ["/usr/bin/wc","--help"]
 ```
@@ -150,7 +150,7 @@ CMD ["/usr/bin/wc","--help"]
 ENV <key>=<value> ...
 ```
 如果要在`<value>`中使用空格，可以使用`"`双引号或者`\`转义字符
-```
+```docker
 ENV MY_NAME="John Doe"
 ENV MY_DOG=Rex\ The\ Dog
 ENV MY_CAT=fluffy
@@ -170,22 +170,22 @@ ADD [--chown=<user>:<group>] ["<src>",... "<dest>"]
 `<src>`支持Go模板的文件语法[filepath.Match](http://golang.org/pkg/path/filepath#Match)
 
 模糊路径匹配，使用`*`表示一个或多个字母
-```
+```docker
 ADD hom* /mydir/
 ADD *hom /mydir/
 ADD hom/a* /mydir/
 ```
 单字符匹配，使用`?`表示一个任意字母
-```
+```docker
 ADD hom?.txt /mydir/
 ADD home/aa?.txt /mydir/
 ```
 如果`<dest>`不是以`/`开头（即根路径），则会参考当前的工作路径解析，如下示例实际会被解析为`<WORKDIR>/relativeDir/`
-```
+```docker
 ADD test.txt relativeDir/
 ```
 如果使用具体的用户名或组名而不是用户ID或用户组ID，则docker会查找容器内的文件系统中`/etc/passwd`和`/etc/group`两个文件来确定具体的`UID`和`GID`，权限示例
-```
+```docker
 ADD --chown=55:mygroup files* /somedir/
 ADD --chown=bin files* /somedir/
 ADD --chown=1 files* /somedir/
@@ -246,7 +246,7 @@ ENTRYPOINT command param1 param2
 参数覆盖示例
 
 构建一个镜像，名称为`top`，指定入口点和额外命令参数
-```
+```docker
 FROM ubuntu
 ENTRYPOINT ["top", "-b"]
 CMD ["-c"]
@@ -279,7 +279,7 @@ root         7  0.0  0.1  15572  2164 ?        R+   08:25   0:00 ps aux
 VOLUME ["/data"]
 ```
 `VOLUME`指令创建具有指定名称的安装点，并将其标记为保存来自本机主机或其他容器的外部安装的卷。该值可以是`JSON`数组，`VOLUME ["/var/log/"]`或具有多个参数的纯字符串，例如`VOLUME /var/log`或`VOLUME /var/log /var/db`
-```
+```docker
 FROM ubuntu
 RUN mkdir /myvol
 RUN echo "hello world" > /myvol/greeting
@@ -309,7 +309,7 @@ WORKDIR /path/to/workdir
 `WORKDIR`指令为`Dockerfile`中跟随它的所有`RUN`，`CMD`，`ENTRYPOINT`，`COPY`和`ADD`指令设置工作目录。如果`WORKDIR`不存在，即使以后的`Dockerfile`指令中未使用它也将被创建
 
 `WORKDIR`指令可在`Dockerfile`中多次使用。如果提供了相对路径，则它将相对于上一个`WORKDIR`指令的路径。例如
-```
+```docker
 WORKDIR /a
 WORKDIR b
 WORKDIR c
@@ -318,7 +318,7 @@ RUN pwd
 最终`pwd`命令会输出`a/b/c`
 
 `WORKDIR`指令可以解析以前使用`ENV`设置的环境变量。您只能使用在`Dockerfile`中显式设置的环境变量。例如
-```
+```docker
 ENV DIRPATH=/path
 WORKDIR $DIRPATH/$DIRNAME
 RUN pwd
@@ -328,15 +328,14 @@ RUN pwd
 ## ARG
 
 `ARG`指令定义了一个变量，用户可以在构建时使用`--build-arg <varname>=<value>`标志使用`docker build`命令将其传递给构建器。如果用户指定了未在`Dockerfile`中定义的构建参数，则构建会输出警告
-
-```
+```docker
 FROM busybox
 ARG user1
 ARG buildno
 # ...
 ```
 带有默认值，如果`ARG`指令具有默认值，并且在构建时未传递任何值，则构建器将使用默认值
-```
+```docker
 FROM busybox
 ARG user1=someuser
 ARG buildno=1
@@ -347,7 +346,7 @@ ARG buildno=1
 
 
 `ARG`变量定义从`Dockerfile`中定义的行开始生效，而不是该参数在命令行被指定或在其他地方使用了该变量开始生效。例如，考虑以下Dockerfile
-```
+```docker
 FROM busybox
 USER ${user:-some_user}
 ARG user
@@ -361,7 +360,7 @@ docker build --build-arg user=what_user .
 第2行的`USER`为`some_user`，因为在随后的第3行中定义了`user`变量。第4行的`USER`评估为用户定义的`what_user`，并且在命令行中传递了`what_user`值。在通过ARG指令对其进行定义之前，任何在`ARG`定义之前使用该变量都会返回一个空字符串
 
 `ARG`指令在定义它的构建阶段结束时超出使用范围。要在多个阶段使用`ARG`，每个阶段都必须包含`ARG`指令
-```
+```docker
 FROM busybox
 ARG SETTINGS
 RUN ./run/setup $SETTINGS
@@ -392,7 +391,7 @@ no_proxy
 > 不允许使用链接的`ONBUILD`指令，如`ONBUILD ONBUILD`
 
 使用以下`Dockerfile`构建一个父级镜像运行一个`Spring Boot`程序
-```
+```docker
 FROM openjdk:8
 WORKDIR /usr/src/myapp
 ONBUILD COPY [ "application.yml", "/usr/src/myapp/config/" ]
@@ -401,16 +400,16 @@ ENV SERVER_PORT=8080
 CMD [ "java", "-jar", "app.jar", "--server.port=${SERVER_PORT}"]
 ```
 构建此镜像作为父级
-```
+```bash
 docker build -t app-parent .
 ```
 编写一个子级镜像引用刚刚构建的镜像，并修改启动的服务端口，由于父级已经声明过拷贝的指令，子级的`Dockerfile`不需要再写一次，只需要准备好对应名称的`jar`文件和`yml`配置文件
-```
+```docker
 FROM app-parent
 ENV SERVER_PORT=8081
 ```
 构建此镜像作为继承父级的子级，然后运行子级镜像
-```
+```bash
 docker build -t app-child .
 docker run -it --name child-instance --rm app-child
 ```
@@ -461,7 +460,7 @@ STOPSIGNAL signal
 - 2: reserved - 请勿使用此退出代码
 
 如下表示每间隔5分钟检查站点首页在3s内可以被访问到，否则返回不正常
-```
+```docker
 HEALTHCHECK --interval=5m --timeout=3s \
   CMD curl -f http://localhost/ || exit 1
 ```
@@ -474,7 +473,7 @@ SHELL ["executable", "parameters"]
 `SHELL`指令允许覆盖用于命令的`shell`形式的默认`shell`。在Linux上，默认外壳程序是`["/bin/sh"，"-c"]`，在`Windows`上，默认外壳程序是`["cmd"，"/S"，"/C"]`。必须在Dockerfile中以JSON数组形式编写`SHELL`指令
 
 以下是一个基于`windows server`镜像的`Dockerfile`示例
-```
+```docker
 FROM microsoft/windowsservercore
 
 # 使用 cmd /S /C 执行 echo default

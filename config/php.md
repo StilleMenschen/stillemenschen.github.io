@@ -1,6 +1,6 @@
 # php
 
-```ini
+```
 ; 拓展动态库路径
 extension_dir = "ext"
 ; 时区

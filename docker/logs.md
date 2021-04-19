@@ -30,7 +30,6 @@ table th:first-of-type {
 ## 命令示例
 
 查看容器名为`nginx1`自`2021-03-01T06:00:00`以来，并且在3小时30分钟15秒`3h30m15s`之前的容器日志，且显示日志的时间戳
-
 ```bash
 docker logs --since=2021-03-01T06:00:00 --until=3h30m15s -t nginx1
 ```

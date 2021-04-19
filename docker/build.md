@@ -15,7 +15,7 @@ docker build [OPTIONS] PATH | URL | -
 当`URL`参数指向Git存储库的位置时，该存储库充当构建上下文。系统以递归方式获取存储库及其子模块。首先将存储库拉到本地主机上的临时目录中。成功之后，该目录将作为上下文发送到Docker守护程序。本地副本使您能够使用本地用户凭据，VPN等访问私有存储库
 
 `Git URL`在其片段部分接受上下文配置，并用冒号`:`分隔。第一部分代表Git将检出的引用，可以是分支，标签或远程引用。第二部分表示存储库中的一个子目录，该子目录将用作构建上下文
-```
+```bash
 docker build https://github.com/docker/rootfs.git#container:docker
 ```
 下表表示所有有效的后缀及其构建上下文
@@ -46,7 +46,7 @@ myrepo.git#mybranch:myfolder | refs/heads/mybranch | /myfolder
 ## Tarball
 
 如果您将`URL`传递到远程`tarball`，则`URL`本身将发送到守护程序
-```
+```docker
 docker build http://server/context.tar.gz
 ```
 下载操作将在运行`Docker`守护程序的主机上执行，该主机不必与发出`build`命令的主机相同。`Docker`守护程序将获取`context.tar.gz`并将其用作构建上下文。Tarball上下文必须是符合标准`tar UNIX`格式的`tar`归档文件，并且可以使用`xz`，`bzip2`，`gzip`或`identity`（无压缩）格式中的任何一种进行压缩
@@ -54,11 +54,11 @@ docker build http://server/context.tar.gz
 ## Text files
 
 除了指定上下文，您还可以在URL中传递单个`Dockerfile`或通过`STDIN`将文件传递到管道中。要从`STDIN`传递`Dockerfile`
-```
+```bash
 docker build - < Dockerfile
 ```
 使用`Windows`上的`Powershell`，您可以运行
-```
+```powershell
 Get-Content Dockerfile | docker build -
 ```
 如果使用`STDIN`或指定指向`纯文本文件`的`URL`，则系统会将内容放入名为`Dockerfile`的文件中，并且任何`-f`，`--file`选项都将被忽略。在这种情况下执行构建，不会有上下文
@@ -94,25 +94,23 @@ Get-Content Dockerfile | docker build -
 ## 参考示例
 
 1. 指定构建`Dockerfile`文件并以`tar`文件作为上下文构建
-
-    ```
+    ```bash
     docker build -t vieux/apache:2.0 -f ctx/Dockerfile http://server/ctx.tar.gz
     ```
 
 2. 读取输入流中的文件作为构建上下文
-
-    ```
+    ```bash
     docker build - < Dockerfile
     ```
-    ```
+    ```bash
     docker build - < context.tar.gz
     ```
-3. 特殊的`Dockerfile`文件名
 
-    ```
+3. 特殊的`Dockerfile`文件名
+    ```bash
     docker build -f Dockerfile.debug .
     ```
-    ```
+    ```bash
     curl example.com/remote/Dockerfile | docker build -f - .
     ```
 
@@ -121,26 +119,24 @@ Get-Content Dockerfile | docker build -
     您可以在`Dockerfile`中使用`ENV`指令来定义变量值。这些值将保留在生成的镜像中。但是，持久性通常不是您想要的。用户希望根据在其上构建镜像的主机不同来配置不同的变量。
 
     一个很好的例子是`http_proxy`或用于拉取中间文件的源版本。ARG指令允许`Dockerfile`作者使用`--build-arg`标志定义用户可以在构建时设置的值：
-    ```
+    ```bash
     docker build --build-arg HTTP_PROXY=http://10.20.30.2:1234 --build-arg FTP_PROXY=http://40.50.60.5:4567 .
     ```
     该标志允许您传递在`Dockerfile`的`RUN`指令中像常规环境变量一样被访问的构建时变量。而且，这些值不会像`ENV`值那样保留在中间或最终镜像中。您必须为每个构建参数添加`--build-arg`
 
     您也可以使用不带值的`--build-arg`标志，在这种情况下，本地环境变量的值将传入正在构建的`Docker`容器中
-    ```
+    ```bash
     export HTTP_PROXY=http://10.20.30.2:1234
     docker build --build-arg HTTP_PROXY .
     ```
 
 5. 域名映射
-
-    ```
+    ```bash
     docker build --add-host=docker:10.180.0.1 .
     ```
 
 6. 目标构建阶段
-
-    ```
+    ```docker
     FROM debian AS build-env
     ...
 
@@ -148,7 +144,7 @@ Get-Content Dockerfile | docker build -
     ...
     ```
     引用第一个阶段`build-env`开始构建
-    ```
+    ```bash
     docker build -t mybuildimage --target build-env .
     ```
 
