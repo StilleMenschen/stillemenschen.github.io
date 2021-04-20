@@ -137,7 +137,7 @@ command1 || command2
 ```bash
 i=1; sum=0; until (( i>100 )); do (( sum += i )); (( i++ )); done; echo "sum=$sum";
 i=1; sum=0; while (( i<=100 )); do (( sum += i )); (( i++ )); done; echo "sum=$sum";
-sum=0; for (( i=1; i<100; i++)); do (( sum += i )); done; echo "sum=$sum";
+sum=0; for (( i=1; i<=100; i++)); do (( sum += i )); done; echo "sum=$sum";
 ```
 
 使用`break`关键字可以结束循环，使用`continue`可以跳出当前循环
