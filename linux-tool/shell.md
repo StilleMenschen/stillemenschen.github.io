@@ -82,12 +82,16 @@ printf "\n";
 
 echo 数组元素数量 ${#arr1[@]};
 echo 数组元素数量 ${#arr2[@]};
+echo 索引数组最后一个元素 ${arr1[-1]}
 
 for i in `eval echo {0..$((${#name[@]}-1))}`
 do
     echo ${name[i]} phone number is ${phone["${name[i]}"]}
 done
 ```
+
+> shell数组索引越界会导致脚本执行出错
+
 ## 管道
 
 管道是由一个或多个命令组成的序列，这些命令由控制操作符`|`或`|&`分隔
@@ -262,6 +266,7 @@ sum=0; for (( i=1; i<=100; i++)); do (( sum += i )); done; echo "sum=$sum";
 
 > 使用`[`和`]`包裹的表达式，变量名一般都会加上引号，如`[ -r "$var1" ]`。这里需要注意`[`和`[[`是两个不同的指令
 
+> `[`其实是一个命令，使用`type [`可以看出来；`! expr`表示取反，`( expr )`表示提高括号内的运算优先级，`expr1 -a expr2`表示并且，`expr1 -o expr2`表示或者。`expr`代表有效的表达式
 ### 命令组
 
 1. `( list )` 将命令列表放在括号之间会导致创建一个子外壳环境，并且列表中的每个命令都将在该子外壳中执行。由于列表是在子shell中执行的，因此在子shell完成后变量分配不会保持有效
@@ -309,3 +314,111 @@ nnmt2;
 ```
 
 > 注意函数名称不能和shell保留的关键字相同，也尽量不要与系统中的命令名称相同
+
+## 模式匹配
+
+- `*` 匹配零个到多个
+- `?` 匹配零个或一个
+- `[...]` 匹配括号中指定的任意字符
+  - `[abc]` 表示匹配字符a，b，c
+  - `[0-9]` 表示匹配数字字符0到9
+  - `[!a-z]` 表示匹配不是小写字母的其它字符
+  - `[^a-z]` 表示匹配不是小写字母的其它字符
+
+> 如果要在`[`到`]`直接指定匹配`-`字符，可以将`-`放在`[`后面或`]`前面，如`[a-zA-Z0-9-]`
+
+## 拓展
+
+- `echo A{aa,bb,cc}S` 花括号拓展
+- `${parameter:-word}` 如果参数未定义或为null则取`word`作为值返回
+- `${parameter:?word}` 如果参数未定义或为null则取`word`作为值输出到标准错误输出
+- `${parameter:+word}` 如果参数已定义且不为null则取`word`作为值返回
+- `${parameter:offset}`或`${parameter:offset:length}`截取字符串或数组，注意`offset`使用负数需要在负号前有空格，与`:`隔开
+
+  ```
+  $ string=01234567890abcdefgh
+  $ echo ${string:7}
+  7890abcdefgh
+  $ echo ${string:7:0}
+
+  $ echo ${string:7:2}
+  78
+  $ echo ${string:7:-2}
+  7890abcdef
+  $ echo ${string: -7}
+  bcdefgh
+  $ echo ${string: -7:0}
+
+  $ echo ${string: -7:2}
+  bc
+  $ echo ${string: -7:-2}
+  bcdef
+  $ array[0]=01234567890abcdefgh
+  $ echo ${array[0]:7}
+  7890abcdefgh
+  $ echo ${array[0]:7:0}
+
+  $ echo ${array[0]:7:2}
+  78
+  $ echo ${array[0]:7:-2}
+  7890abcdef
+  $ echo ${array[0]: -7}
+  bcdefgh
+  $ echo ${array[0]: -7:0}
+
+  $ echo ${array[0]: -7:2}
+  bc
+  $ echo ${array[0]: -7:-2}
+  bcdef
+  ```
+  ```
+  $ array=(0 1 2 3 4 5 6 7 8 9 0 a b c d e f g h)
+  $ echo ${array[@]:7}
+  7 8 9 0 a b c d e f g h
+  $ echo ${array[@]:7:2}
+  7 8
+  $ echo ${array[@]: -7:2}
+  b c
+  $ echo ${array[@]: -7:-2}
+  bash: -2: substring expression < 0
+  $ echo ${array[@]:0}
+  0 1 2 3 4 5 6 7 8 9 0 a b c d e f g h
+  $ echo ${array[@]:0:2}
+  0 1
+  $ echo ${array[@]: -7:0}
+
+  ```
+- `${!prefix*}`或`${!prefix@}`列出以`prefix`开头的变量名，使用`*`表示以`IFS`作为分隔，使用`@`则以空格作为分隔
+- `${!name[@]}`或`${!name[*]}`列出数组的索引
+- `${#parameter}`列出字符串长度或数组元素数量
+- `${parameter#word}`或`${parameter##word}`匹配开头为`word`的模式（`word`支持使用通配符），如果参数为数组且使用了`*`或`@`则会对每个数组元素进行处理并输出，`##`表示最大范围匹配
+- `${parameter%word}`或`${parameter%%word}`匹配结尾为`word`的模式（`word`支持使用通配符），如果参数为数组且使用了`*`或`@`则会对每个数组元素进行处理并输出，`%%`表示最大范围匹配
+- `${parameter/pattern/string}` 查找模式并替换，如果参数为数组且使用了`*`或`@`则会对每个数组元素进行处理并输出，如果模式以`#`开头，则要求参数的值开头与模式完全匹配；若模式以`%`开头，则要求参数的值结尾与模式完全匹配
+
+  ```
+    a="aabcdaabcdd"
+    echo ${a/aa/TT};
+    echo ${a/#aa/TT};
+    echo ${a/%dd/TT};
+  ```
+- `${parameter^pattern}`、`${parameter^^pattern}`将模式匹配到的字符转换为大写字母，`^`表示仅转换第一个字符，`^^`表示转换所有符合匹配的字符，模式中只能使用一个字符
+- `${parameter,pattern}`、`${parameter,,pattern}`将模式匹配到的字符转换为小写字母，`,`表示仅转换第一个字符，`,,`表示转换所有符合匹配的字符，模式中只能使用一个字符
+
+## 命令替换
+
+使用`$(command)`或者`` `command` ``可暂存命令输出作为其它命令的参数
+```
+echo 今天的日期时间是 `date`
+echo 今天的日期时间是 $(date)
+```
+
+## 算计运算
+
+使用`$(( expression ))`可以对表达式内的数运算求值并暂存作为其它命令的参数
+```
+echo $(( 1 + 2 + 3 ))
+```
+
+更多内容可参考[官方文档](https://www.gnu.org/software/bash/manual/html_node/index.html)，在Linux系统内，可以使用`man command`的方式查看一个命令的参考手册，如`man bash`，很多命令都是有简单的帮助文档的，键入`--help`就可以查看，如`ls --help`
+
+Last Modified 2021-04-21
