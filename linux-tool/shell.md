@@ -14,11 +14,11 @@ case esac  coproc  select  function
 
 ### 常规变量
 
-```
+```bash
 name=[value]
 ```
 或者定义一个变量引用
-```
+```bash
 declare -n ref=$1
 ```
 引用变量可以间接操作被引用变量的值
@@ -39,17 +39,17 @@ declare -n ref=$1
 ### 索引数组
 
 直接为变量指定一个数字下标（`subscript`表示一个算术表达式），即定义了索引数组
-```
+```bash
 name[subscript]=value
 ```
 或者显示的声明一个索引数组
-```
+```bash
 declare -a name
 ```
 
 ### 命名数组
 
-```
+```bash
 declare -A name
 ```
 
@@ -96,6 +96,11 @@ done
 ```
 如果使用了`|&`则表示将标准错误输出转到标准输出上，即`2>&1 |`的简易表示方式
 
+管道可以对命令的输出信息逐级传递，如下表示使用`last`命令将系统内登录过的信息列出，通过`awk`按IP聚合，最后用`sort`按登录次数从大到小排序
+```bash
+last | awk '$3~/[0-9]{1,3}./{sum[$3]+=1}END{for(i in sum) print "IP: "i" Count: "sum[i]}' | sort -rk 4
+```
+
 ## 命令列表
 
 命令列表可通过`;`，`&`,`&&`或`||`分隔开，并且可以`;`，`&`或新行（`\n`）终止
@@ -127,7 +132,7 @@ command1 || command2
 
 3. 同时定义初始值，条件和增量
     ```
-    for name [ [in [words …] ] ; ] do commands; done
+    for name [ [in [words ...] ] ; ] do commands; done
     ```
     ```
     for (( expr1 ; expr2 ; expr3 )) ; do commands; done
@@ -153,6 +158,7 @@ sum=0; for (( i=1; i<=100; i++)); do (( sum += i )); done; echo "sum=$sum";
     [else alternate-consequents;]
     fi
     ```
+    根据数字大小判断输出
     ```bash
     sum=120;
     if ((sum > 120)); then
@@ -185,8 +191,9 @@ sum=0; for (( i=1; i<=100; i++)); do (( sum += i )); done; echo "sum=$sum";
 
 3. `select`选择
     ```
-    select name [in words …]; do commands; done
+    select name [in words ...]; do commands; done
     ```
+    列出当前目录下的文件和子目录并供选择
     ```bash
     select fname in *;
     do
