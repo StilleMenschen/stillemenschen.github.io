@@ -6,9 +6,9 @@
 - logs *查看容器日志*
 - build *构建镜像*
 - exec *在运行容器中执行命令*
-- top
-- inspect
-- stats
+- top *查看容器内进程*
+- inspect *检查Docker对象信息*
+- stats *查看容器资源使用*
 - diff
 - history
 - images
