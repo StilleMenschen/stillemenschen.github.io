@@ -98,7 +98,7 @@ done
 
 管道可以对命令的输出信息逐级传递，如下表示使用`last`命令将系统内登录过的信息列出，通过`awk`按IP聚合，最后用`sort`按登录次数从大到小排序
 ```bash
-last | awk '$3~/[0-9]{1,3}./{sum[$3]+=1}END{for(i in sum) print "IP: "i" Count: "sum[i]}' | sort -rk 4
+last | awk '$3~/[0-9]{1,3}./{sum[$3]+=1}END{for(i in sum) print "IP: "i" Count: "sum[i]}' | sort -rnk 4
 ```
 
 ## 命令列表
