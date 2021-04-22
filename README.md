@@ -4,16 +4,16 @@
 
 **现有**
 
-- [Linux工具](linux-tool/)部分写了一些个人常用的，[shell脚本](linux-tool/shell.md)有一定的参考价值
-- [Docker](docker/)部分只写了主要的构建镜像和运行镜像
+- [Linux工具](linux-tool/)写了一些个人常用的，[shell脚本](linux-tool/shell.md)有一定的参考价值
+- [Docker](docker/)包含构建允许以及查看镜像的命令
 - [Jenkins](jenkins/)只简述了部署运行，使用相关的还没有具体编写的计划
 - [Nginx](nginx/)仅提供了一个docker部署和配置文件的范例参考
-- [配置文件](config/)这个是平时经常使用的，仅供参考
+- [配置文件](config/)是平时经常使用的，仅供参考
 - [Docker Compose](docker-compose/)文档仅包含启动和停止的命令以及配置文件参考
 
 **补充**
 
-- `Docker CLI`的几个简单的命令也会慢慢补充一些基本参考
+- 有时间考虑找资料记录下`Vue`的实现原理
 
 **另外**
 

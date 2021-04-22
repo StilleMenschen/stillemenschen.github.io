@@ -9,10 +9,10 @@
 - top *查看容器内进程*
 - inspect *检查Docker对象信息*
 - stats *查看容器资源使用*
-- diff
-- history
-- images
-- pull
+- diff *检查容器与原始镜像对比的文件变化*
+- history *镜像构建历史记录*
+- images *查看镜像信息*
+- pull *拉取镜像*
 - Dockerfile *镜像构建文件参考*
 - daemon.json *全局配置文件*
 
