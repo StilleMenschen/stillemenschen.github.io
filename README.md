@@ -19,4 +19,4 @@
 
 `:(`心情不好了[网抑云](https://music.163.com/#/user/home?id=247886432)，电子、摇滚和古典；没动力了瞅瞅妹子`:)`（如果有）
 
-> 此文档基于NodeJS的[docsify](https://docsify.js.org/#/zh-cn/)框架生成，源码在[GitHub](https://github.com/StilleMenschen/docs)上，页面也同样托管于GitHub[中](https://stillemenschen.github.io/docs)。
+> 此文档基于NodeJS的[docsify](https://docsify.js.org/#/zh-cn/)框架生成，源码在[GitHub](https://github.com/StilleMenschen/docs)上，页面也同样托管于GitHub[中](https://stillemenschen.github.io/docs)
