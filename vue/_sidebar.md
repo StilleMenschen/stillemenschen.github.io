@@ -3,3 +3,4 @@
   * [自定义Vue插件](vue/custom-vue-plugin.md)
   * [Vue动态渲染](vue/vue-dynamic-render.md)
   * [Vue高阶组件](vue/vue-higher-order-component.md)
+  * [Vue简单状态管理](vue/vue-state-mutations.md)

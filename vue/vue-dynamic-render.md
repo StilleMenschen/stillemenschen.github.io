@@ -17,7 +17,7 @@
         <br><example2 :ok="ok"></example2>
         <button @click="ok = !ok">Toggle</button>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.12/vue.js"></script>
     <script src="index.js"></script>
   </body>
 </html>

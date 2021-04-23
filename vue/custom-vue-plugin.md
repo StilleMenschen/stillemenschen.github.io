@@ -18,7 +18,7 @@
       <button @click="counter++">增加</button><button @click="counter--">减小</button>
       <p class="error" v-if="message.counter">{{ message.counter }}</p>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.12/vue.js"></script>
     <script src="index.js"></script>
   </body>
 </html>
