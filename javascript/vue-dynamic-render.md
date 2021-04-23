@@ -1,0 +1,75 @@
+# Vue动态渲染
+
+## index.html
+
+```html
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="app">
+        <example :tags="['p', 'h1', 'h2', 'h3', 'span']"></example>
+        <br><example2 :ok="ok"></example2>
+        <button @click="ok = !ok">Toggle</button>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+    <script src="index.js"></script>
+  </body>
+</html>
+```
+
+## index.js
+
+```javascript
+Vue.component("example", {
+  render(h) {
+    return h(
+      "div",
+      this.tags.map((e, i) => h(e, `${e} index is ${i}`))
+    );
+  },
+  props: {
+    tags: {
+      type: Array,
+      required: true,
+    },
+  },
+});
+
+const Foo = {
+  render(h) {
+    return h("div", "foo");
+  },
+};
+const Bar = {
+  render(h) {
+    return h("div", "bar");
+  },
+};
+
+Vue.component("example2", {
+  render(h) {
+    return h(this.ok ? Foo : Bar);
+  },
+  props: {
+    ok: {
+      type: Boolean,
+      required: true,
+    },
+  },
+});
+
+const app = new Vue({
+  el: "#app",
+  data() {
+    return {
+      ok: true,
+    };
+  },
+});
+```

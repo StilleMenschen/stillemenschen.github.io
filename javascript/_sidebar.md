@@ -4,3 +4,4 @@
   * [依赖跟踪](javascript/dependency-tracking.md)
   * [迷你观察者](javascript/mini-watchers.md)
   * [自定义Vue插件](javascript/custom-vue-plugin.md)
+  * [Vue动态渲染](javascript/vue-dynamic-render.md)
