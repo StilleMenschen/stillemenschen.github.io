@@ -27,10 +27,11 @@
 
 ```javascript
 Vue.component("example", {
-  render(h) {
+  functional: true,
+  render(h, { props: { tags } }) {
     return h(
       "div",
-      this.tags.map((e, i) => h(e, `${e} index is ${i}`))
+      tags.map((e, i) => h(e, `${e} index is ${i}`))
     );
   },
   props: {
@@ -43,12 +44,28 @@ Vue.component("example", {
 
 const Foo = {
   render(h) {
-    return h("div", "foo");
+    return h(
+      "div",
+      {
+        style: {
+          color: "red",
+        },
+      },
+      "foo"
+    );
   },
 };
 const Bar = {
   render(h) {
-    return h("div", "bar");
+    return h(
+      "div",
+      {
+        style: {
+          fontWeight: "bold",
+        },
+      },
+      "bar"
+    );
   },
 };
 
@@ -73,3 +90,5 @@ const app = new Vue({
   },
 });
 ```
+
+Last Modified 2021-04-23

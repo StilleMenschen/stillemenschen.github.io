@@ -1,5 +1,6 @@
 # 迷你观察者
 
+将**依赖跟踪**和**对象属性监听**的两个整合到一起，实现一个小型的观察者，通过在`getter`和`setter`中调用`depend`方法和`notfiy`方法，就可以实现自动更新数据的目的了，这也是Vue实现自动更新的核心原理
 ```javascript
 class Dep {
   constructor() {
@@ -60,7 +61,7 @@ const state = {
 observe(state);
 
 autorun(() => {
-  console.log(state.count);
+  console.log(`count is: ${state.count}`);
 });
 // 打印"count is: 0"
 

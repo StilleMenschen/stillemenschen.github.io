@@ -7,4 +7,5 @@
 * [Windows](windows/)
 * [Windows Tool](windows-tool/)
 * [JavaScript](javascript/)
+* [Vue](vue/)
 * [Config](config/)
