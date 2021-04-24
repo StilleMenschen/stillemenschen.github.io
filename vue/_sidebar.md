@@ -8,3 +8,4 @@
   * [简单路由](vue/route-table.md)
   * [动态路由](vue/dynamic-route.md)
   * [表单验证](vue/form-validation.md)
+  * [国际化](vue/internationalization.md)
