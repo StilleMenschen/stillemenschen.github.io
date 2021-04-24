@@ -1,4 +1,4 @@
-# 自定义Vue插件
+# Vue插件自定义
 
 ## index.html
 
