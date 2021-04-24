@@ -1,6 +1,6 @@
-# Vue高阶组件
+# 高阶组件
 
-# index.html
+## index.html
 
 ```html
 <!DOCTYPE html>
@@ -21,7 +21,7 @@
 </html>
 ```
 
-# index.js
+## index.js
 
 ```javascript
 function fetchURL(username, callback) {

@@ -5,4 +5,6 @@
   * [高阶组件](vue/higher-order-component.md)
   * [简单状态管理](vue/state-mutations.md)
   * [函数式编程](vue/functional-programming.md)
-  * [简单路由表](vue/router-table.md)
+  * [简单路由](vue/route-table.md)
+  * [动态路由](vue/dynamic-route.md)
+  * [表单验证](vue/form-validation.md)
