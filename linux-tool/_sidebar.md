@@ -20,3 +20,4 @@
   * [groupmod](linux-tool/groupmod.md)
   * [groupdel](linux-tool/groupdel.md)
   * [shell](linux-tool/shell.md)
+  * [keyshot](linux-tool/keyboard-shortcuts.md)

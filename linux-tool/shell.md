@@ -395,7 +395,7 @@ nnmt2;
 - `${parameter%word}`或`${parameter%%word}`匹配结尾为`word`的模式（`word`支持使用通配符）并删除参数值中与`word`匹配的字符，如果参数为数组且使用了`*`或`@`则会对每个数组元素进行处理并输出，`%%`表示最大范围匹配
 - `${parameter/pattern/string}` 查找模式并替换，如果参数为数组且使用了`*`或`@`则会对每个数组元素进行处理并输出，如果模式以`#`开头，则要求参数的值开头与模式完全匹配；若模式以`%`开头，则要求参数的值结尾与模式完全匹配
 
-  ```
+  ```bash
     a="aabcdaabcdd"
     echo ${a/aa/TT};
     echo ${a/#aa/TT};
@@ -407,7 +407,7 @@ nnmt2;
 ## 命令替换
 
 使用`$(command)`或者`` `command` ``可暂存命令输出作为其它命令的参数
-```
+```bash
 echo 今天的日期时间是 `date`
 echo 今天的日期时间是 $(date)
 ```
@@ -415,10 +415,96 @@ echo 今天的日期时间是 $(date)
 ## 算计运算
 
 使用`$(( expression ))`可以对表达式内的数运算求值并暂存作为其它命令的参数
-```
+```bash
 echo $(( 1 + 2 + 3 ))
 ```
 
 更多内容可参考[官方文档](https://www.gnu.org/software/bash/manual/html_node/index.html)，在Linux系统内，可以使用`man command`的方式查看一个命令的参考手册，如`man bash`，很多命令都是有简单的帮助文档的，键入`--help`就可以查看，如`ls --help`
 
-Last Modified 2021-04-21
+## 重定向
+
+在Linux中输入输出分为三种
+
+- 标准输入（文件描述符为0）
+- 标准输出（文件描述符为1）
+- 标准错误输出（文件描述符为2）
+### 标准输入重定向
+
+最简单的输入重定向使用`<`表示，比如要将`package.list`文件中的包使用`yum`安装
+```bash
+sudo yum install $(<package.list)
+sudo yum install `<package.list`
+```
+
+### 追加输入重定向
+
+追加输入重定向使用`<<`或`<<<`表示，最常用的应该是**Here-document**和**Here-string**，**Here-document**使用`EOF`表示开始和结束符，如下命令表示输入多行文本后输出。标记符号不一定固定就是`EOF`，也可以使用别的英文字母（仅）表示，单字符或字符串都可
+```bash
+cat <<EOF
+This
+is
+multi-line
+text
+EOF
+```
+> 大部分支持读取标准输入的程序都可以使用到追加输入重定向，如`cat`、`sed`、`grep`等
+
+而**Here-string**则是用到了`<<<`，命令如下
+```bash
+cat <<<"This is a single line of text"
+```
+> 如果**Here-string**中包含有空格，需要使用双引号包裹
+
+### 标准输出重定向
+
+标准输出（文件描述符`1`）重定向使用`>`表示，最简单的方式就是将命令的输出转到文件中（若文件已存在且有内容，则原有内容将被清空），如
+```bash
+ps -ef > process.list
+```
+> 如果使用了`set -o noclobber`开启了**noclobber**，则在使用输出重定向覆盖一个已经存在的文件时，将会发出警告，而使用`>|`来重定向输出则会忽略**noclobber**选项，即使文件存在也会直接覆盖其内容
+
+### 标准输出和错误输出重定向
+
+程序运行输出结果时使用除了标准输出，发生错误反显在终端时还使用到了标准错误输出（文件描述符为`2`），如果想希望输出全部指向同一流可以使用如下命令
+```bash
+find /opt -name file 2>&1
+find /opt -name file > find.out 2>&1
+```
+> `>word 2>&1`还有一个比较简便的表示方法，即`&>word`
+
+如果不想看到错误输出，可以将错误输出到`/dev/null`中，
+```bash
+ls 2>/dev/null
+```
+
+### 追加输出重定向
+
+追加输出重定向使用`>>`表示，如果想把程序的输出内容追加到某个文件，可以使用这种方式
+```bash
+ps -aux >> exists-file.txt
+```
+
+### 追加标准输出和错误输出重定向
+
+在追加输出的基础上再重定向标准错误输出，如
+```bash
+find /opt -name file >> find.out 2>&1
+find /opt -name file &>> find.out
+```
+其实，结合输出和输出的重定向，还可以利用`cat`命令修改文件内容或追加多行内容到文件中，如
+```bash
+# 修改文件内容
+cat > file <<EOF
+aaa
+bbb
+ccc
+EOF
+# 追加多行内容到文件
+cat >> file <<EOF
+aaa
+bbb
+ccc
+EOF
+```
+
+Last Modified 2021-04-26
