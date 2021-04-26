@@ -20,3 +20,5 @@ table th:first-of-type {
 <kbd>Ctrl</kbd>+<kbd>w</kbd> | 从光标处向前删除到前一个空格处
 <kbd>Ctrl</kbd>+<kbd>y</kbd> | 将最近一次删除的字符还原
 <kbd>Ctrl</kbd>+<kbd>r</kbd> | 快速搜索历史命令
+
+Last Modified 2021-04-25
