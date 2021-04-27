@@ -1,5 +1,6 @@
 * [Home](/)
 * [Linux Tool](linux-tool/)
+* [Python](python/)
 * [Jenkins](jenkins/)
 * [Nginx](nginx/)
 * [Docker](docker/)
@@ -8,4 +9,5 @@
 * [Windows Tool](windows-tool/)
 * [JavaScript](javascript/)
 * [Vue](vue/)
+* [Cloud](cloud/)
 * [Config](config/)
