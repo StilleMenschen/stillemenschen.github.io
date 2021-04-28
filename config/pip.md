@@ -23,4 +23,16 @@ trusted-host=mirrors.aliyun.com
 timeout=10
 ```
 
-Last Modified 2021-04-12
+如果想要修改`site-packages`的位置，需要进入`Python`的安装目录找到文件`$PYTHON_HOME/Lib/site.py`，修改`ENABLE_USER_SITE`、`USER_SITE`和`USER_BASE`变量
+```
+# ...
+ENABLE_USER_SITE = True
+# ...
+USER_SITE = r'D:\Program\Python37\site-packages'
+USER_BASE = r'D:\Program'
+# ...
+```
+
+> 文件夹中的`Python37`中的`37`数字一般是取当前安装的Python版本号前两位
+
+Last Modified 2021-04-28
