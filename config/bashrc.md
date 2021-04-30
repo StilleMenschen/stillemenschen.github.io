@@ -10,6 +10,7 @@ export LANG=zh_CN.UTF-8
 alias ll='ls -AlhtF --color=auto --time-style=long-iso'
 alias grep='grep --color=auto'
 alias less='less -gM'
+alias lsn='less -gMN'
 ```
 
 Last Modified 2021-04-12
