@@ -1,3 +1,5 @@
 * [Home](/)
 * [Python](python/)
   * [Built-in](python/built-in.md)
+  * [Multiprocessing](python/multiprocessing.md)
+  * [Threading](python/threading.md)
