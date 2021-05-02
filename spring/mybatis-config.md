@@ -239,7 +239,7 @@ class SpringBootDemoApplicationTests {
                 .from(TJobDynamicSqlSupport.TJob)
                 .where(TJobDynamicSqlSupport.jobName, isLike(findJobName)
                         .when(Objects::nonNull).then(s -> s.concat("%")))
-                .build().render(RenderingStrategy.MYBATIS3);
+                .build().render(RenderingStrategies.MYBATIS3);
         // 通过Mapper操作接口统计数据数量
         final long size = jobMapper.count(provider);
         assertEquals(size, 10);
@@ -270,7 +270,7 @@ class SpringBootDemoApplicationTests {
                     .and(TCollegeDynamicSqlSupport.companyId, isEqualTo(companyId))
                     /* 按名称找出某个班级 */
                     .and(TClassDynamicSqlSupport.className, isEqualTo("班级001"))
-                    .build().render(RenderingStrategy.MYBATIS3);
+                    .build().render(RenderingStrategies.MYBATIS3);
             // 通过自定义Mapper操作接口执行多表查询，并通过自定义的实体类来接收数据
             final List<TCollegeMajorClass> collegeMajorClassList = collegeMajorClassMapper.selectMany(provider);
             assertTrue(collegeMajorClassList.size() > 0);
