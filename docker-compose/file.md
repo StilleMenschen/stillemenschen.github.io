@@ -825,6 +825,10 @@ driver_opts:
 - `driver` 自定义IPAM驱动程序，而不是默认值。
 - `config` 具有零个或多个config块的列表，每个块包含以下任一键
   - `subnet` `CIDR`格式的子网，代表一个网段
+  - `ip_range` 从中分配容器IP的IP范围
+  - `gateway` 主子网的IPv4或IPv6网关
+  - `axu_addresses` 网络驱动程序使用的辅助IPv4或IPv6地址，作为从主机名到IP的映射
+- `config` 特定于驱动程序的选项作为键值映射
 
 ```yml
 ipam:
