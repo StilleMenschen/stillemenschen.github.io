@@ -94,6 +94,8 @@ services:
   zabbix-agent:
     image: zabbix/zabbix-agent:alpine-5.2-latest
     container_name: zabbix-agent
+    user: root
+    privileged: true
     environment:
       ZBX_HOSTNAME: "zabbix-agent"
       ZBX_SERVER_HOST: "zabbix-server-mysql"
