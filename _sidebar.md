@@ -12,4 +12,5 @@
 * [Spring](spring/)
 * [Vue](vue/)
 * [Cloud](cloud/)
+* [Zabbix](zabbix/)
 * [Config](config/)
