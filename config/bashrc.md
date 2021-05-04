@@ -1,6 +1,7 @@
 # bashrc
 
-Unix系统`/etc/bashrc`（Redhat内核），`/etc/bash.bashrc`（Debian内核）
+Unix 系统`/etc/bashrc`（Redhat 内核），`/etc/bash.bashrc`（Debian 内核）
+
 ```
 # 终端的字符编码
 export LANG=zh_CN.UTF-8

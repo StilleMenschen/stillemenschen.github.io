@@ -1,4 +1,4 @@
-# SSL配置
+# SSL 配置
 
 ```nginx
 # For more information on configuration, see:

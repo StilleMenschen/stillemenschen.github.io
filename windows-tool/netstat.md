@@ -40,21 +40,21 @@ Status          | 指示`TCP`连接的状态，包括：<br>CLOSE_WAIT<br>CLOSED
 
 ## 示例
 
-若要显示以太网统计信息和所有协议的统计信息，请键入
-```
-netstat -e -s
-```
-若要仅显示`TCP`和`UDP`协议的统计信息，请键入
-```
-netstat -s -p tcp udp
-```
-若要`每隔5秒`显示一次活动`TCP`连接和`进程ID`，请键入
-```
-netstat -o 5
-```
-若要使用数字形式显示活动`TCP`连接和`进程ID`，请键入
-```
-netstat -n -o
-```
+- 若要显示以太网统计信息和所有协议的统计信息，请键入
+    ```batch
+    netstat -e -s
+    ```
+- 若要仅显示`TCP`和`UDP`协议的统计信息，请键入
+    ```batch
+    netstat -s -p tcp udp
+    ```
+- 若要`每隔5秒`显示一次活动`TCP`连接和`进程ID`，请键入
+    ```batch
+    netstat -o 5
+    ```
+- 若要使用数字形式显示活动`TCP`连接和`进程ID`，请键入
+    ```batch
+    netstat -n -o
+    ```
 
 Last Modified 2021-04-07

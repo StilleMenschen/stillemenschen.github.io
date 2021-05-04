@@ -1,10 +1,11 @@
 # daemon.json
 
-docker全局配置文件
+docker 全局配置文件
 
 ## Linux
 
 默认在`/etc/docker/daemon.json`，可以使用`--config-file`指定其它位置的文件
+
 ```json
 {
   "allow-nondistributable-artifacts": [],
@@ -79,10 +80,7 @@ docker全局配置文件
   "max-download-attempts": 5,
   "mtu": 0,
   "no-new-privileges": false,
-  "node-generic-resources": [
-    "NVIDIA-GPU=UUID1",
-    "NVIDIA-GPU=UUID2"
-  ],
+  "node-generic-resources": ["NVIDIA-GPU=UUID1", "NVIDIA-GPU=UUID2"],
   "oom-score-adjust": -500,
   "pidfile": "",
   "raw-logs": false,
@@ -93,9 +91,7 @@ docker全局配置文件
     },
     "custom": {
       "path": "/usr/local/bin/my-runc-replacement",
-      "runtimeArgs": [
-        "--debug"
-      ]
+      "runtimeArgs": ["--debug"]
     }
   },
   "seccomp-profile": "",

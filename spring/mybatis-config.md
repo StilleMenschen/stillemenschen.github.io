@@ -1,10 +1,11 @@
 # Mybatis
 
-- 使用生成器生成动态SQL所需的实体类、Mapper操作接口
+- 使用生成器生成动态 SQL 所需的实体类、Mapper 操作接口
 
 ## pom.xml
 
-Maven依赖文件
+Maven 依赖文件
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -92,7 +93,8 @@ Maven依赖文件
 
 ## application.yml
 
-Spring配置文件
+Spring 配置文件
+
 ```yml
 spring:
   datasource:
@@ -106,7 +108,8 @@ spring:
 
 ## mybatis-generator.xml
 
-Mybatis生成器配置文件
+Mybatis 生成器配置文件
+
 ```xml
 <!DOCTYPE generatorConfiguration PUBLIC
         "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
@@ -139,9 +142,10 @@ Mybatis生成器配置文件
 
 ## 简单示例
 
-Mybatis会根据生成器配置文件中指定的表名来创建实体类和Mapper，如果不做特殊配置，一般按驼峰式命名类和接口
+Mybatis 会根据生成器配置文件中指定的表名来创建实体类和 Mapper，如果不做特殊配置，一般按驼峰式命名类和接口
 
-由于下面的示例中使用了表连接，首先来创建用来接收表连接查询结果的实体类和Mapper操作接口，因为Mybatis无法预知你需要如何连接表，所以需要自己定义
+由于下面的示例中使用了表连接，首先来创建用来接收表连接查询结果的实体类和 Mapper 操作接口，因为 Mybatis 无法预知你需要如
+何连接表，所以需要自己定义
 
 ### 实体类
 
@@ -159,9 +163,11 @@ public class TCollegeMajorClass {
 }
 ```
 
-### Mapper接口
+### Mapper 接口
 
-这里要注意`@Results`注解中指定的实体类字段名和数据库表字段名（或者连接查询自定义的别名）对应，实体类的数据类型和数据库表字段类型对应
+这里要注意`@Results`注解中指定的实体类字段名和数据库表字段名（或者连接查询自定义的别名）对应，实体类的数据类型和数据库表
+字段类型对应
+
 ```java
 package com.example.springbootdemo.mapper;
 
@@ -193,7 +199,9 @@ public interface TCollegeMajorClassMapper {
 
 ### JUnit Test
 
-Mybatis生成的Mapper文件有两个，以`DynamicSqlSupport`结尾的类是用以支持动态SQL的，而以`Mapper`结尾的接口则是调用动态SQL类来操作数据库的
+Mybatis 生成的 Mapper 文件有两个，以`DynamicSqlSupport`结尾的类是用以支持动态 SQL 的，而以`Mapper`结尾的接口则是调用动态
+SQL 类来操作数据库的
+
 ```java
 package com.example.springbootdemo;
 
@@ -282,11 +290,11 @@ class SpringBootDemoApplicationTests {
 
 ## 参考文档
 
-- Mybatis3基础配置 https://mybatis.org/mybatis-3/
-- Mybatis生成器 http://mybatis.org/generator/
-- Mybatis动态SQL https://mybatis.org/mybatis-dynamic-sql/docs/introduction.html
+- Mybatis3 基础配置 https://mybatis.org/mybatis-3/
+- Mybatis 生成器 http://mybatis.org/generator/
+- Mybatis 动态 SQL https://mybatis.org/mybatis-dynamic-sql/docs/introduction.html
 - Spring http://mybatis.org/spring/
 - Spring Boot Starter http://mybatis.org/spring-boot-starter/mybatis-spring-boot-autoconfigure/
-- Mybatis博客的产品列表 https://blog.mybatis.org/p/products.html
+- Mybatis 博客的产品列表 https://blog.mybatis.org/p/products.html
 
 Last Modified 2021-05-02

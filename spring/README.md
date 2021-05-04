@@ -1,3 +1,3 @@
 # Spring
 
-- Mybatis配置
+- Mybatis 配置

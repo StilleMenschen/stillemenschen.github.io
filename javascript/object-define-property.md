@@ -1,6 +1,9 @@
 # 监听对象数据变化
 
-ES5的[Object.defineProperty](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty)提供监听属性变更的功能，下面将演示如何通过covert函数修改传入对象的getter和setter实现修改对象属性时打印日志的功能
+ES5
+的[Object.defineProperty](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty)提
+供监听属性变更的功能，下面将演示如何通过 covert 函数修改传入对象的 getter 和 setter 实现修改对象属性时打印日志的功能
+
 ```javascript
 function convert(obj) {
   // 遍历对象中的属性

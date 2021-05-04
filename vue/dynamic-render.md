@@ -13,9 +13,9 @@
   </head>
   <body>
     <div id="app">
-        <example :tags="['p', 'h1', 'h2', 'h3', 'span']"></example>
-        <br><example2 :ok="ok"></example2>
-        <button @click="ok = !ok">Toggle</button>
+      <example :tags="['p', 'h1', 'h2', 'h3', 'span']"></example>
+      <br /><example2 :ok="ok"></example2>
+      <button @click="ok = !ok">Toggle</button>
     </div>
     <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.12/vue.js"></script>
     <script src="index.js"></script>

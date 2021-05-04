@@ -1,6 +1,7 @@
 # pip
 
-现在国内镜像挺多的，可以多问问搜索引擎。文件放在在用户目录下，Linux在`$HOME/.config/pip/pip.conf`或`$HOME/.pip/pip.conf`，Windows在`%USERPROFILE%\.npmrc`，全局路径在哪里可以问问搜索引擎
+现在国内镜像挺多的，可以多问问搜索引擎。文件放在在用户目录下，Linux
+在`$HOME/.config/pip/pip.conf`或`$HOME/.pip/pip.conf`，Windows 在`%USERPROFILE%\.npmrc`，全局路径在哪里可以问问搜索引擎
 
 ```
 [global]
@@ -23,7 +24,9 @@ trusted-host=mirrors.aliyun.com
 timeout=10
 ```
 
-如果想要修改`site-packages`的位置，需要进入`Python`的安装目录找到文件`$PYTHON_HOME/Lib/site.py`，修改`ENABLE_USER_SITE`、`USER_SITE`和`USER_BASE`变量
+如果想要修改`site-packages`的位置，需要进入`Python`的安装目录找到文件`$PYTHON_HOME/Lib/site.py`，修
+改`ENABLE_USER_SITE`、`USER_SITE`和`USER_BASE`变量
+
 ```
 # ...
 ENABLE_USER_SITE = True
@@ -33,6 +36,6 @@ USER_BASE = r'D:\Program'
 # ...
 ```
 
-> 文件夹中的`Python37`中的`37`数字一般是取当前安装的Python版本号前两位
+> 文件夹中的`Python37`中的`37`数字一般是取当前安装的 Python 版本号前两位
 
 Last Modified 2021-04-28

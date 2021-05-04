@@ -1,12 +1,12 @@
-# Docker安装Zabbix Server
+# Docker 安装 Zabbix Server
 
 ## 安装
 
 - 使用基于`alpine`的镜像
 - 使用`MySQL`数据库，指定`UTF-8`字符集
-- 定义多个服务连接到同一个Docker桥接网络，使用网络别名（aliases）相互访问
+- 定义多个服务连接到同一个 Docker 桥接网络，使用网络别名（aliases）相互访问
 - 开放`10051`服务注册端口到宿主机
-- 开放`80`监控服务的Web页面端口到宿主机
+- 开放`80`监控服务的 Web 页面端口到宿主机
 - 添加一个`Agent`客户端到宿主机
 
 ```yml
@@ -16,7 +16,12 @@ services:
   zabbix-mysql-server:
     image: mysql:8.0.22
     container_name: zabbix-mysql-server
-    command: ["--character-set-server=utf8", "--collation-server=utf8_bin", "--default-authentication-plugin=mysql_native_password"]
+    command:
+      [
+        "--character-set-server=utf8",
+        "--collation-server=utf8_bin",
+        "--default-authentication-plugin=mysql_native_password",
+      ]
     restart: unless-stopped
     tty: true
     environment:
@@ -113,16 +118,18 @@ networks:
         - subnet: 172.22.0.0/16
 ```
 
-> 使用此compose文件安装服务时，默认的Web服务登录账号密码为`Admin/zabbix`，如果默认密码有变更，可关注[Zabbix登录配置参考页](https://www.zabbix.com/documentation/current/manual/quickstart/login)
+> 使用此 compose 文件安装服务时，默认的 Web 服务登录账号密码为`Admin/zabbix`，如果默认密码有变更，可关
+> 注[Zabbix 登录配置参考页](https://www.zabbix.com/documentation/current/manual/quickstart/login)
 
-> 如果宿主机上有其它正在运行的docker容器，自定义的网卡子网（网段）可能会存在冲突的情况，需要找出与宿主机和当前服务器网络环境中不冲突的网段进行设置
+> 如果宿主机上有其它正在运行的 docker 容器，自定义的网卡子网（网段）可能会存在冲突的情况，需要找出与宿主机和当前服务器网
+> 络环境中不冲突的网段进行设置
 
 ## 参考文档
 
-- 官方Docker安装参考 https://www.zabbix.com/documentation/current/manual/installation/containers
-- 基于MySQL的服务镜像 https://hub.docker.com/r/zabbix/zabbix-server-mysql/
-- Java网关镜像 https://hub.docker.com/r/zabbix/zabbix-java-gateway/
-- 基于MySQL和Nginx的Web服务镜像 https://hub.docker.com/r/zabbix/zabbix-web-nginx-mysql/
-- Docker官方MySQL镜像（不是MySQL官方） https://hub.docker.com/_/mysql
+- 官方 Docker 安装参考 https://www.zabbix.com/documentation/current/manual/installation/containers
+- 基于 MySQL 的服务镜像 https://hub.docker.com/r/zabbix/zabbix-server-mysql/
+- Java 网关镜像 https://hub.docker.com/r/zabbix/zabbix-java-gateway/
+- 基于 MySQL 和 Nginx 的 Web 服务镜像 https://hub.docker.com/r/zabbix/zabbix-web-nginx-mysql/
+- Docker 官方 MySQL 镜像（不是 MySQL 官方） https://hub.docker.com/_/mysql
 
 Last Modified 2021-05-03

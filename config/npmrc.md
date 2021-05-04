@@ -1,6 +1,6 @@
 # npmrc
 
-文件放在在用户目录下，Linux在`$HOME/.npmrc`，Windows在`%USERPROFILE%\.npmrc`，全局路径在哪里可以问问搜索引擎
+文件放在在用户目录下，Linux 在`$HOME/.npmrc`，Windows 在`%USERPROFILE%\.npmrc`，全局路径在哪里可以问问搜索引擎
 
 ```
 # 全局包路径

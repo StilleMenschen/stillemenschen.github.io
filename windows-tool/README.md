@@ -1,3 +1,4 @@
 # Windows Tool
 
 - netstat
+- findstr

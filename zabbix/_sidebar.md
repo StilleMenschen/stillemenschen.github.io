@@ -1,4 +1,4 @@
-* [Home](/)
-* [Zabbix](zabbix/)
-  * [Docker安装Server](zabbix/docker-install-server.md)
-  * [Docker安装Agent](zabbix/docker-install-agent.md)
+- [Home](/)
+- [Zabbix](zabbix/)
+  - [Docker 安装 Server](zabbix/docker-install-server.md)
+  - [Docker 安装 Agent](zabbix/docker-install-agent.md)
