@@ -13,4 +13,5 @@
 - [Vue](vue/)
 - [Cloud](cloud/)
 - [Zabbix](zabbix/)
+- [Prometheus](prometheus/)
 - [Config](config/)
