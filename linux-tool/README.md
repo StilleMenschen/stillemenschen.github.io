@@ -13,6 +13,7 @@
 - tar _打包_
 - df _磁盘文件查看_
 - chmod _目录或文件的权限变更_
+- ps _查看当前进程_
 - useradd _新增用户_
 - usermod _修改用户_
 - userdel _删除用户_

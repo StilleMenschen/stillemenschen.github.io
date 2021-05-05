@@ -13,6 +13,7 @@
   - [tar](linux-tool/tar.md)
   - [df](linux-tool/df.md)
   - [chmod](linux-tool/chmod.md)
+  - [ps](linux-tool/ps.md)
   - [useradd](linux-tool/useradd.md)
   - [usermod](linux-tool/usermod.md)
   - [userdel](linux-tool/userdel.md)
