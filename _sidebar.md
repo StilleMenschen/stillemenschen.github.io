@@ -1,6 +1,7 @@
 - [Home](/)
 - [Linux Tool](linux-tool/)
 - [Python](python/)
+- [Jmeter](jmeter/)
 - [Jenkins](jenkins/)
 - [Nginx](nginx/)
 - [Docker](docker/)
