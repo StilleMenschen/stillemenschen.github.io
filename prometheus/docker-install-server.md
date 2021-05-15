@@ -40,16 +40,11 @@ services:
     ports:
       - "9100:9100"
     volumes:
-      - "/proc:/host/proc"
-      - "/sys:/host/sys"
+      - "/:/host:ro,rslave"
       - "/etc/localtime:/etc/localtime:ro"
     # 由于转义的问题，$字符需要使用两个来表示
     command:
-      [
-        "--path.procfs=/host/proc",
-        "--path.sysfs=/host/sys",
-        '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)/?$$"'
-      ]
+      - "--path.rootfs=/host"
     networks:
       prometheus-net:
         aliases:
@@ -120,5 +115,6 @@ curl -IL http://localhost:3000
 - Prometheus 监控 Linux 虚拟机 https://lixinkuan.blog.csdn.net/article/details/113631550
 - Prometheus 监控 docker 容器 https://blog.csdn.net/lixinkuan328/article/details/107780118
 - Grafana 仪表盘 https://grafana.com/grafana/dashboards
+- Node Exporter GitHub https://github.com/prometheus/node_exporter
 
 Last Modified 2021-05-15
