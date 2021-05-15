@@ -43,11 +43,12 @@ services:
       - "/proc:/host/proc"
       - "/sys:/host/sys"
       - "/etc/localtime:/etc/localtime:ro"
+    # 由于转义的问题，$字符需要使用两个来表示
     command:
       [
         "--path.procfs=/host/proc",
         "--path.sysfs=/host/sys",
-        '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)/?"'
+        '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)/?$$"'
       ]
     networks:
       prometheus-net:
