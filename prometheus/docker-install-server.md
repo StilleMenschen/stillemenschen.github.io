@@ -13,7 +13,7 @@
 首先是 docker-compose 文件
 
 ```yml
-version: "3.3"
+version: "3.5"
 services:
   prom-server:
     image: prom/prometheus:v2.26.0
@@ -47,7 +47,7 @@ services:
       [
         "--path.procfs=/host/proc",
         "--path.sysfs=/host/sys",
-        '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)/?"',
+        '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)/?"'
       ]
     networks:
       prometheus-net:
@@ -100,6 +100,7 @@ scrape_configs:
 ```
 
 可以在宿主机运行以下命令测试
+
 ```bash
 # 采集客户端 Node Exporter
 curl -sL http://localhost:9100/metrics | tail
@@ -109,6 +110,8 @@ curl -sL http://localhost:9090/api/v1/query?query=up | python -m json.tool
 curl -IL http://localhost:3000
 ```
 
+在 Grafana 中配置好 Data Source 和 Dashboard 就可以以之间看了
+
 ## 参考文档
 
 - Prometheus 安装 https://prometheus.io/docs/prometheus/latest/installation/
@@ -117,4 +120,4 @@ curl -IL http://localhost:3000
 - Prometheus 监控 docker 容器 https://blog.csdn.net/lixinkuan328/article/details/107780118
 - Grafana 仪表盘 https://grafana.com/grafana/dashboards
 
-Last Modified 2021-05-05
+Last Modified 2021-05-15

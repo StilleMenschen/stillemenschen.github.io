@@ -1,3 +1,4 @@
 - [Home](/)
 - [Prometheus](prometheus/)
   - [Docker 安装 Server](prometheus/docker-install-server.md)
+  - [多机器部署 Exporter](prometheus/ansible-multiple-install-exporter.md)
