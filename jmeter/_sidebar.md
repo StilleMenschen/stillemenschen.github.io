@@ -1,3 +1,4 @@
 - [Home](/)
 - [Jmeter](jmeter/)
   - [Config Element](jmeter/config-element.md)
+  - [Functions Variables](jmeter/functions_variables.md)
