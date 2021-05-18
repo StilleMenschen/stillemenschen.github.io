@@ -47,5 +47,20 @@
 - `${__RandomDate(d/M/yyyy,,8/7/2050,,)}` 生成随机的日期时间，第一个参数表示格式化字符串，第二个参数表示开始时间（默认当
   前时间），第三个参数表示结束时间
 - `${__RandomString(10,abcdefg)}` 参考给定的字符串，生成指定数量的随机字符串
-- `${__UUID()}` 返回一个UUID
+- `${__UUID()}` 返回一个 UUID
 - `${__isPropDefined(START.MS)}` 判断属性是否存在
+- `${__property(user.dir)}` 返回 jmeter 的属性值，第二个参数可以指定将获得的值赋给自定义变量
+- `${__P(ThreadGroup1.threads)}` 简化的`__property`
+- `${__setProperty(var1, abc123)}` 设置一个属性值，这个是 jmeter 全局属性，可以在线程和线程组中共享
+- `${__split(${val3},val_t,&)}` 以指定的分隔符拆分字符串并赋值给变量
+
+  假设变量`val3`的值为`aa&bb&cc&dd`，使用该函数拆分`${__split(${val3},val_t,&)}`，可以获得 5 个变量，分别
+  为`val_t_1=aa`、`val_t_2=bb`、`val_t_3=cc`、`val_t_4=dd`、`val_t_n=4`
+
+- `${__eval(${val})}` 解析变量中的变量，如`${val}`的值为`This is a ${name}`，`${name}`的值为`Tom`，使用 eval
+  后`${val}`将会被解析为`This is a Tom`
+
+- `${__evalVar(val)}` 与`__eval`类似，但不需要写变量符号包裹`${}`
+- `${__V(This is a ${name})}` 解析参数字符串中的变量，替换实际的变量值后返回
+- `${__char(65,66)}` 将数字转为实际的`Unicode`字符，也支持十六进制和八进制的字符，
+  如`${__char(0x41, 0x42)}`、`${__char(0101, 0102)}`
