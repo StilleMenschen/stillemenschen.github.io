@@ -64,3 +64,14 @@
 - `${__V(This is a ${name})}` 解析参数字符串中的变量，替换实际的变量值后返回
 - `${__char(65,66)}` 将数字转为实际的`Unicode`字符，也支持十六进制和八进制的字符，
   如`${__char(0x41, 0x42)}`、`${__char(0101, 0102)}`
+- `${__changeCase(abc,UPPER,)}`、`${__changeCase(ABC,LOWER,)}`、`${__changeCase(abc,CAPITALIZE,)}`转换字母大写、小写和首
+  字母大写
+- `${__escapeHtml("bread" & "butter")}` 使用 HTML 实体对字符串中的字符进行转义的函数。支持 HTML 4.0 实体
+- `${__escapeOroRegexpChars([^"].+?,)}` 转义 `ORO Regexp`元字符的函数，等效于 Java Regexp Engine 中的`\Q\E`
+- `${__escapeXml("bread" & 'butter')}` 使用 XML 1.0 实体对字符串中的字符进行转义的函数
+- `${__unescapeHtml(&lt;Fran&ccedil;ais&gt;)}` 将包含 HTML 实体转义符的字符串取消转义为包含与转义符相对应的实际 Unicode
+  `${__urldecode(Word+%22school%22+is+%22%C3%A9cole%22+in+french)}` 解码`application/x-www-form-urlencoded`字符串的函数
+  。 注意：使用 UTF-8 作为编码方案
+- `${__urlencode(Word "school" is "école" in french)}` 将字符串编码为`application/x-www-form-urlencoded`字符串的函数
+
+Last Modified 2021-05-19
