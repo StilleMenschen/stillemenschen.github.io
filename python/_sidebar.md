@@ -4,3 +4,4 @@
   - [Multiprocessing](python/multiprocessing.md)
   - [Threading](python/threading.md)
   - [ConfigParser](python/config-parser.md)
+  - [SQLite3](python/sqlite3.md)

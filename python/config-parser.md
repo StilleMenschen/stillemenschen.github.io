@@ -122,7 +122,7 @@ print config.get('Section1', 'foo')  # -> "Life is hard!"
 
 ## 参考文档
 
-- Python 3.7 Configuration file parser https://docs.python.org/zh-cn/3.7/library/configparser.html
-- Python 2.7 Configuration file parser https://docs.python.org/zh-cn/2.7/library/configparser.html
+- Configuration file parser https://docs.python.org/zh-cn/3.7/library/configparser.html
+- Configuration file parser https://docs.python.org/zh-cn/2.7/library/configparser.html
 
 Last Modified 2021-05-22
