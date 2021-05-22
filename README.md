@@ -10,10 +10,11 @@
 - [Nginx](nginx/)仅提供了一个 docker 部署和配置文件的范例参考
 - [配置文件](config/)是平时经常使用的，仅供参考
 - [Docker Compose](docker-compose/)文档仅包含启动和停止的命令以及配置文件参考
+- [Python](python/)包含了个人常用模块的参考
 
 **补充**
 
-- 接下来准备写`Python`相关的例子
+- 最近可能会研究下Java Web的注册中心和负载均衡
 
 **另外**
 
