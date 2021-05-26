@@ -66,15 +66,10 @@ services:
     ports:
       - "59100:9100"
     volumes:
-      - "/proc:/host/proc"
-      - "/sys:/host/sys"
+      - "/:/host:ro,rslave"
       - "/etc/localtime:/etc/localtime:ro"
     command:
-      [
-        "--path.procfs=/host/proc",
-        "--path.sysfs=/host/sys",
-        '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)/?"',
-      ]
+      - "--path.rootfs=/host"
 ```
 
 ## PlayBooks 配置
