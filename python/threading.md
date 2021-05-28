@@ -1,5 +1,7 @@
 # 多线程
 
+## 直接使用
+
 ```python
 from threading import Thread
 from random import randint
@@ -84,4 +86,42 @@ if __name__ == '__main__':
     make_thread()
 ```
 
-Last Modified 2021-05-01
+## 线程池
+
+> 需要 Python 3.7 及以上的版本
+
+```python
+import concurrent.futures
+import math
+import os
+
+PRIMES = [
+    112272535095293, 112582705942171, 112272535095293, 115280095190773,
+    115797848077099, 1099726899285419, 112545606449, 4894348954034, 4236544062,
+    11112324353465, 12134123432, 423578924023, 12433323433, 12334452364
+]
+
+
+def is_prime(n):
+    if n % 2 == 0:
+        return False
+
+    sqrt_n = int(math.floor(math.sqrt(n)))
+    for i in range(3, sqrt_n + 1, 2):
+        if n % i == 0:
+            return False
+    return True
+
+
+def main():
+    max_thread = os.cpu_count() * 2
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_thread) as executor:
+        for number, prime in zip(PRIMES, executor.map(is_prime, PRIMES)):
+            print('%d is prime: %s' % (number, prime))
+
+
+if __name__ == '__main__':
+    main()
+```
+
+Last Modified 2021-05-28
