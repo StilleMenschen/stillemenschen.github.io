@@ -189,4 +189,9 @@ if __name__ == '__main__':
     asyncio.run(main())
 ```
 
+## 参考文档
+
+- 协程与任务 https://docs.python.org/zh-cn/3.7/library/asyncio-task.html
+- 事件循环 https://docs.python.org/zh-cn/3.7/library/asyncio-eventloop.html
+
 Last Modified 2021-05-28

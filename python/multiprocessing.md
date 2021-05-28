@@ -127,5 +127,9 @@ def main():
 if __name__ == '__main__':
     main()
 ```
+## 参考文档
+
+- 基于进程的并行 https://docs.python.org/zh-cn/3.7/library/multiprocessing.html
+- 启动并行任务 https://docs.python.org/zh-cn/3.7/library/concurrent.futures.html
 
 Last Modified 2021-05-28
