@@ -18,6 +18,7 @@ public class SocketServer extends Thread {
     private boolean isRunning = true;
     private static final int BLOCK_SIZE = 1024;
     private static final String END_FLAG = "\r\n";
+    private static final int END_FLAG_LENGTH = END_FLAG.length();
 
     public SocketServer(int port) {
         this.port = port;
@@ -41,13 +42,16 @@ public class SocketServer extends Thread {
                 while ((len = in.read(buf, 0, BLOCK_SIZE)) != -1) {
                     builder.append(buf, 0, len);
                     // Receipt of this mark indicates the end of data transmission
-                    if (END_FLAG.equals(builder.substring(builder.length() - END_FLAG.length()))) break;
+                    if (len < BLOCK_SIZE) {
+                        final String END_LINE = builder.substring(builder.length() - END_FLAG_LENGTH);
+                        if (END_FLAG.equals(END_LINE)) break;
+                    }
                 }
                 final String message = builder.toString();
                 out.print("Server: ".concat(message));
                 out.print(END_FLAG);
                 out.flush();
-                System.out.println("Client: ".concat(message));
+                System.out.print("Client: ".concat(message));
                 in.close();
                 out.close();
                 clientSocket.close();
@@ -97,6 +101,7 @@ public class SocketClient {
     private final int port;
     private static final int BLOCK_SIZE = 1024;
     private static final String END_FLAG = "\r\n";
+    private static final int END_FLAG_LENGTH = END_FLAG.length();
 
     public SocketClient(String ip, int port) {
         this.ip = ip;
@@ -119,7 +124,10 @@ public class SocketClient {
         while ((len = in.read(buf, 0, BLOCK_SIZE)) != -1) {
             builder.append(buf, 0, len);
             // Receipt of this mark indicates the end of data transmission
-            if (END_FLAG.equals(builder.substring(builder.length() - END_FLAG.length()))) break;
+            if (len < BLOCK_SIZE) {
+                final String END_LINE = builder.substring(builder.length() - END_FLAG_LENGTH);
+                if (END_FLAG.equals(END_LINE)) break;
+            }
         }
         return builder.toString();
     }
@@ -135,8 +143,8 @@ public class SocketClient {
         final SocketClient client = new SocketClient("::1", 51984);
         try {
             client.startConnection();
-            System.out.println(client.sendMessage("这是一些文本消息"));
-            // System.out.println(client.sendMessage("close"));
+            System.out.print(client.sendMessage("这是一些文本消息"));
+//             System.out.print(client.sendMessage("close"));
             client.stopConnection();
         } catch (IOException e) {
             e.printStackTrace();
