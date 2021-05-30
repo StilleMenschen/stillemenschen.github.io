@@ -15,7 +15,6 @@ import java.net.Socket;
 public class SocketServer extends Thread {
     private ServerSocket serverSocket;
     private final int port;
-    private boolean isRunning = true;
     private static final int BLOCK_SIZE = 1024;
     private static final String END_FLAG = "\r\n";
     private static final int END_FLAG_LENGTH = END_FLAG.length();
@@ -31,6 +30,7 @@ public class SocketServer extends Thread {
 
     @Override
     public void run() {
+        boolean isRunning = true;
         while (isRunning) {
             try {
                 final Socket clientSocket = serverSocket.accept();
@@ -57,18 +57,13 @@ public class SocketServer extends Thread {
                 clientSocket.close();
                 // If the 'close' string is received, it means that the server is stopped
                 if (message.contains("close")) {
+                    isRunning = false;
                     serverSocket.close();
-                    stopServer();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-    }
-
-    public void stopServer() throws IOException {
-        isRunning = false;
-        interrupt();
         System.out.println("Server is stop");
     }
 
