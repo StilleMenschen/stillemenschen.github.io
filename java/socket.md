@@ -41,7 +41,7 @@ public class SocketServer extends Thread {
                 while ((len = in.read(buf, 0, BLOCK_SIZE)) != -1) {
                     builder.append(buf, 0, len);
                     // Receipt of this mark indicates the end of data transmission
-                    if (END_FLAG.equals(builder.substring(builder.length() - 2))) break;
+                    if (END_FLAG.equals(builder.substring(builder.length() - END_FLAG.length()))) break;
                 }
                 final String message = builder.toString();
                 out.print("Server: ".concat(message));
@@ -119,7 +119,7 @@ public class SocketClient {
         while ((len = in.read(buf, 0, BLOCK_SIZE)) != -1) {
             builder.append(buf, 0, len);
             // Receipt of this mark indicates the end of data transmission
-            if (END_FLAG.equals(builder.substring(builder.length() - 2))) break;
+            if (END_FLAG.equals(builder.substring(builder.length() - END_FLAG.length()))) break;
         }
         return builder.toString();
     }
