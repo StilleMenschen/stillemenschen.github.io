@@ -1,0 +1,2 @@
+* [Home](/)
+* [Talk](talk/)
