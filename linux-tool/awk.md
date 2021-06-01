@@ -289,6 +289,12 @@ BEGIN {
    awk '$4 == "A"{sub(/555/,"963",$2);print}' mail-list
    ```
 
+4. 提取Maven`pom.xml`文件中的版本号
+
+   ```bash
+   awk -v RS="</*version>" 'NR==2{print}' pom.xml
+   ```
+
 更多说明可参考 GNU 的[awk](https://www.gnu.org/software/gawk/manual/gawk.html)文档
 
 Last Modified 2021-04-11
