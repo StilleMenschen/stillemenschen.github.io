@@ -127,9 +127,44 @@ def main():
 if __name__ == '__main__':
     main()
 ```
+
+*Python 2 的简单进程池*
+
+```python
+from multiprocessing import Pool
+from math import floor
+from math import sqrt
+from random import randint
+from time import time
+
+
+def is_prime(n):
+    if n % 2 == 0:
+        return False
+
+    sqrt_n = int(floor(sqrt(n)))
+    for i in range(3, sqrt_n + 1, 2):
+        if n % i == 0:
+            return False
+    return True
+
+
+def main():
+    start_time = time()
+    primes = []
+    while len(primes) < 1e4:
+        primes.append(randint(1e10, 9e10))
+    pool = Pool(processes=2)
+    pool.map(is_prime, primes)
+    print 'total time is', time() - start_time
+
+
+if __name__ == '__main__':
+    main()
+```
 ## 参考文档
 
 - 基于进程的并行 https://docs.python.org/zh-cn/3.7/library/multiprocessing.html
 - 启动并行任务 https://docs.python.org/zh-cn/3.7/library/concurrent.futures.html
 
-Last Modified 2021-05-28
+Last Modified 2021-05-30
