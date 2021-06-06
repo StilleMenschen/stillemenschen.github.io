@@ -198,7 +198,7 @@ public class SocketChannelClient extends Thread {
         System.out.println("Write to server...");
         final SocketChannel channel = (SocketChannel) key.channel();
         channel.write(ByteBuffer.wrap(message.getBytes()));
-        channel.register(key.selector(), SelectionKey.OP_READ);
+        key.interestOps(SelectionKey.OP_READ);
     }
 
     public static void startClient(final String message, final int port) throws IOException {
