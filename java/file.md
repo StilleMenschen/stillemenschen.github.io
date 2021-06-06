@@ -167,4 +167,82 @@ public class Tests {
 }
 ```
 
-Last Modified 2021-05-29
+## 异步非阻塞方式
+
+```java
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousFileChannel;
+import java.nio.channels.CompletionHandler;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+
+public class Tests {
+
+    public static void main(String[] args) {
+        Tests tests = new Tests();
+        tests.createAndWrite();
+        tests.readAndDelete();
+    }
+
+    public void createAndWrite() {
+        final Path path = Paths.get("test.txt");
+        final String txt = "This is some text data\n";
+        final ByteBuffer buffer = ByteBuffer.allocate(4096);
+        try {
+            AsynchronousFileChannel channel = AsynchronousFileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+            buffer.put(txt.getBytes());
+            buffer.flip();
+            channel.write(buffer, 0, buffer, new CompletionHandler<Integer, ByteBuffer>() {
+                @Override
+                public void completed(Integer result, ByteBuffer attachment) {
+                    System.out.println("completed");
+                }
+
+                @Override
+                public void failed(Throwable exc, ByteBuffer attachment) {
+                    System.err.println(exc.getMessage());
+                }
+            });
+            if (channel.isOpen()) {
+                channel.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void readAndDelete() {
+        final Path path = Paths.get("test.txt");
+        final ByteBuffer buffer = ByteBuffer.allocate(4096);
+        try {
+            AsynchronousFileChannel channel = AsynchronousFileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.DELETE_ON_CLOSE);
+            channel.read(buffer, 0, buffer, new CompletionHandler<Integer, ByteBuffer>() {
+                @Override
+                public void completed(Integer result, ByteBuffer attachment) {
+                    attachment.flip();
+                    final int limit = attachment.limit();
+                    final byte[] buf = new byte[limit];
+                    attachment.get(buf, 0, limit);
+                    final String txt = new String(buf);
+                    System.out.println("File content: " + txt);
+                    System.out.println("completed");
+                }
+
+                @Override
+                public void failed(Throwable exc, ByteBuffer attachment) {
+                    System.err.println(exc.getMessage());
+                }
+            });
+            if (channel.isOpen()) {
+                channel.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+Last Modified 2021-06-06
