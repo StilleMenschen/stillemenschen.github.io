@@ -121,9 +121,8 @@ public class DatagramChannelClient {
         final ByteBuffer buffer = ByteBuffer.allocate(256);
         client.receive(buffer);
         buffer.flip();
-        final int limit = buffer.limit();
-        final byte[] bits = new byte[limit];
-        buffer.get(bits, 0, limit);
+        final byte[] bits = new byte[buffer.remaining()];
+        buffer.get(bits, 0, buffer.remaining());
         System.out.println(new String(bits));
     }
 

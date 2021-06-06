@@ -81,7 +81,7 @@ public class SocketChannelServer extends Thread {
             doClose(socketChannel);
         } else {
             byteBuffer.flip(); // put buffer in read mode by setting pos=0 and limit=numberOfBytes
-            final byte[] buf = new byte[byteBuffer.limit()];
+            final byte[] buf = new byte[byteBuffer.remaining()];
             byteBuffer.get(buf, 0, read);
             dataMap.get(socketChannel).add(buf); // find socket channel and add new byteBuffer queue
             selectionKey.interestOps(SelectionKey.OP_WRITE); // set mode to WRITE to send data

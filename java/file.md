@@ -188,7 +188,7 @@ public class Tests {
 
     public void createAndWrite() {
         final Path path = Paths.get("test.txt");
-        final String txt = "This is some text data\n";
+        final String txt = "This is some text data";
         final ByteBuffer buffer = ByteBuffer.allocate(4096);
         try {
             AsynchronousFileChannel channel = AsynchronousFileChannel.open(path, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
@@ -197,6 +197,7 @@ public class Tests {
             channel.write(buffer, 0, buffer, new CompletionHandler<Integer, ByteBuffer>() {
                 @Override
                 public void completed(Integer result, ByteBuffer attachment) {
+                    System.out.println("write " + result + " bits");
                     System.out.println("completed");
                 }
 
@@ -220,11 +221,10 @@ public class Tests {
             AsynchronousFileChannel channel = AsynchronousFileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.DELETE_ON_CLOSE);
             channel.read(buffer, 0, buffer, new CompletionHandler<Integer, ByteBuffer>() {
                 @Override
-                public void completed(Integer result, ByteBuffer attachment) {
+                public void completed(final Integer result, ByteBuffer attachment) {
                     attachment.flip();
-                    final int limit = attachment.limit();
-                    final byte[] buf = new byte[limit];
-                    attachment.get(buf, 0, limit);
+                    final byte[] buf = new byte[result];
+                    attachment.get(buf, 0, result);
                     final String txt = new String(buf);
                     System.out.println("File content: " + txt);
                     System.out.println("completed");
