@@ -1,4 +1,4 @@
-# 异步Socket
+# 异步 Socket
 
 ## 服务端
 
@@ -208,7 +208,7 @@ public class SocketChannelClient extends Thread {
 }
 ```
 
-## 测试类
+## 单元测试
 
 ```java
 import org.junit.jupiter.api.AfterAll;
@@ -265,6 +265,6 @@ public class SocketChannelTests {
 }
 ```
 
-> 由于传输的数据包含了`Unicode`字符，运行此示例代码前请保证Java文件编码为`UTF-8`
+> 由于传输的数据包含了`Unicode`字符，运行此示例代码前请保证 Java 文件编码为`UTF-8`
 
 Last Modified 2021-06-03

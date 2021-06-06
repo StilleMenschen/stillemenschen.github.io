@@ -102,7 +102,7 @@ public class DatagramSocketTests {
     }
 
     @Test
-    public void whenCanSendAndReceivePacket_thenCorrect() {
+    public void message() {
         try {
             String echo = client.sendMessage("hello server");
             assertEquals("hello server", echo);
