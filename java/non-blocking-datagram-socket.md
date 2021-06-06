@@ -1,4 +1,4 @@
-# 异步 DatagramSocket
+# 非阻塞 DatagramSocket
 
 ## 服务端
 
@@ -11,7 +11,6 @@ import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.util.Iterator;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DatagramChannelServer extends Thread {
     private final DatagramChannel datagramChannel;
@@ -33,8 +32,8 @@ public class DatagramChannelServer extends Thread {
 
     @Override
     public void run() {
-        final AtomicBoolean isRunning = new AtomicBoolean(Boolean.TRUE);
-        while (isRunning.get()) {
+        boolean isRunning = Boolean.TRUE;
+        while (isRunning) {
             try {
                 if (selector.select() > 0) {
                     final Iterator<SelectionKey> keys = selector.selectedKeys().iterator();
@@ -50,7 +49,7 @@ public class DatagramChannelServer extends Thread {
                             System.out.println("Server: " + clientMessage.address);
                             final String message = new String(clientMessage.buffer.array());
                             if (message.length() > 0 && message.contains("close")) {
-                                isRunning.set(Boolean.FALSE);
+                                isRunning = Boolean.FALSE;
                                 continue;
                             }
                             if (clientMessage.address != null) {
@@ -178,4 +177,4 @@ public class DatagramChannelTests {
 
 > 由于传输的数据包含了`Unicode`字符，运行此示例代码前请保证 Java 文件编码为`UTF-8`
 
-Last Modified 2021-06-06
+Last Modified 2021-06-07
