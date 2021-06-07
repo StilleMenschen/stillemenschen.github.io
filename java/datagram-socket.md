@@ -28,10 +28,13 @@ public class DatagramSocketServer extends Thread {
                 socket.receive(packet);
                 final InetAddress address = packet.getAddress();
                 final int port = packet.getPort();
-                packet = new DatagramPacket(buf, buf.length, address, port);
                 final String received = new String(packet.getData(), 0, packet.getLength());
+                System.out.printf("Client: %s\n", received);
+                packet = new DatagramPacket(buf, packet.getLength(), address, port);
                 if (received.equals("end")) {
                     isRunning = false;
+                    System.out.println("Server closing...");
+                    socket.send(packet);
                     continue;
                 }
                 socket.send(packet);
