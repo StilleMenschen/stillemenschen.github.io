@@ -13,6 +13,7 @@
 - [Vue](vue/)
 - [Spring](spring/)
 - [Java](java/)
+- [Algorithm](algorithm/)
 - [Config](config/)
 - [Talk](talk/)
 - [Cloud](cloud/)
