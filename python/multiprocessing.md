@@ -95,9 +95,10 @@ if __name__ == '__main__':
 > 需要 Python 3.7 及以上的版本
 
 ```python
-import concurrent.futures
-import math
-import os
+from concurrent.futures import ProcessPoolExecutor
+from math import sqrt
+from math import floor
+from os import cpu_count
 
 PRIMES = [
     112272535095293, 112582705942171, 112272535095293, 115280095190773,
@@ -110,7 +111,7 @@ def is_prime(n):
     if n % 2 == 0:
         return False
 
-    sqrt_n = int(math.floor(math.sqrt(n)))
+    sqrt_n = int(floor(sqrt(n)))
     for i in range(3, sqrt_n + 1, 2):
         if n % i == 0:
             return False
@@ -118,10 +119,9 @@ def is_prime(n):
 
 
 def main():
-    max_process = os.cpu_count() // 2
-    with concurrent.futures.ProcessPoolExecutor(max_workers=max_process) as executor:
-        for number, prime in zip(PRIMES, executor.map(is_prime, PRIMES)):
-            print('%d is prime: %s' % (number, prime))
+    max_process = cpu_count() // 2
+    with ProcessPoolExecutor(max_workers=max_process) as pool:
+        pool.map(is_prime, PRIMES)
 
 
 if __name__ == '__main__':
@@ -152,10 +152,12 @@ def is_prime(n):
 def main():
     start_time = time()
     primes = []
-    while len(primes) < 1e4:
+    while len(primes) < 1e3:
         primes.append(randint(1e10, 9e10))
     pool = Pool(processes=2)
     pool.map(is_prime, primes)
+    pool.close()
+    pool.join()
     print 'total time is', time() - start_time
 
 
@@ -167,4 +169,4 @@ if __name__ == '__main__':
 - 基于进程的并行 https://docs.python.org/zh-cn/3.7/library/multiprocessing.html
 - 启动并行任务 https://docs.python.org/zh-cn/3.7/library/concurrent.futures.html
 
-Last Modified 2021-05-30
+Last Modified 2021-06-12

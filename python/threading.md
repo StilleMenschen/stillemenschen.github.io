@@ -91,9 +91,10 @@ if __name__ == '__main__':
 > 需要 Python 3.7 及以上的版本
 
 ```python
-import concurrent.futures
-import math
-import os
+from concurrent.futures import ThreadPoolExecutor
+from math import sqrt
+from math import floor
+from os import cpu_count
 
 PRIMES = [
     112272535095293, 112582705942171, 112272535095293, 115280095190773,
@@ -105,8 +106,7 @@ PRIMES = [
 def is_prime(n):
     if n % 2 == 0:
         return False
-
-    sqrt_n = int(math.floor(math.sqrt(n)))
+    sqrt_n = int(floor(sqrt(n)))
     for i in range(3, sqrt_n + 1, 2):
         if n % i == 0:
             return False
@@ -114,10 +114,9 @@ def is_prime(n):
 
 
 def main():
-    max_thread = os.cpu_count() * 2
-    with concurrent.futures.ThreadPoolExecutor(max_workers=max_thread) as executor:
-        for number, prime in zip(PRIMES, executor.map(is_prime, PRIMES)):
-            print('%d is prime: %s' % (number, prime))
+    max_thread = cpu_count() * 2
+    with ThreadPoolExecutor(max_workers=max_thread) as pool:
+        pool.map(is_prime, PRIMES)
 
 
 if __name__ == '__main__':
@@ -129,4 +128,4 @@ if __name__ == '__main__':
 - 基于线程的并行 https://docs.python.org/zh-cn/3.7/library/threading.html
 - 启动并行任务 https://docs.python.org/zh-cn/3.7/library/concurrent.futures.html
 
-Last Modified 2021-05-28
+Last Modified 2021-06-12
