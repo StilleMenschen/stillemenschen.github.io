@@ -1,3 +1,3 @@
 - [Home](/)
 - [Algorithm](algorithm/)
-  - [Complexity analysis](algorithm/complexity-analysis.md)
+  - [Data structure](algorithm/data-structure.md.md)
