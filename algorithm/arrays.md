@@ -154,3 +154,225 @@ if __name__ == '__main__':
     b = [26, 134, 135, 15, 17]
     print(smallest_difference(a, b))
 ```
+
+## 移动元素至末尾
+
+指定一个序列和一个存在于序列中的数，将所有与指定的数相等的数全部移动到序列的末尾
+
+```python
+# O(n) time | O(1) space
+def move_element_ti_end(array, to_move):
+    i = 0
+    j = len(array) - 1
+    while i < j:
+        while i < j and array[j] == to_move:
+            j -= 1
+        if array[i] == to_move:
+            array[i], array[j] = array[j], array[i]
+        i += 1
+    return array
+
+
+if __name__ == '__main__':
+    a = [4, 1, 5, 8, 8, 8, 5, 8, 8, 3]
+    print(move_element_ti_end(a, 8))
+```
+
+## 单调数组
+
+判断一个整型数组，是否是升序排序或者降序排序，如果满足两个条件中的一个，就表示它是单调的
+
+```python
+# O(n) time | O(1) space
+def is_monotonic(array):
+    length = len(array)
+    if length <= 2:
+        return True
+    direction = array[1] - array[0]
+    for i in range(2, length):
+        if direction == 0:
+            direction = array[i] - array[i - 1]
+            continue
+        if not break_direction(direction, array[i - 1], array[i]):
+            return False
+    return True
+
+
+def break_direction(direction, previous_int, current_int):
+    difference = current_int - previous_int
+    if direction > 0:
+        return difference > 0
+    return difference < 0
+
+
+if __name__ == '__main__':
+    a = [872, 743, 65, 30, 14, 10, 5, 3, 1, -3]
+    # a.reverse()
+    print(is_monotonic(a))
+```
+
+## 螺旋线
+
+将一个类似顺时针向内螺旋的特殊二维序列转为一维序列
+
+```python
+# O(n) time | O(n) space
+def spiral_traverse1(array):
+    result = list()
+    start_row, end_row = 0, len(array) - 1
+    start_col, end_col = 0, len(array[0]) - 1
+    while start_row <= end_row and start_col <= end_col:
+        for col in range(start_col, end_col + 1):
+            result.append(array[start_row][col])
+        for row in range(start_row + 1, end_row + 1):
+            result.append(array[row][end_col])
+        # for col in reversed(range(start_col, end_col)):
+        for col in range(end_col - 1, start_col - 1, -1):
+            result.append(array[end_row][col])
+        # for row in reversed(range(start_row + 1, end_row)):
+        for row in range(end_row - 1, start_row, -1):
+            result.append(array[row][start_col])
+        start_row += 1
+        end_row -= 1
+        start_col += 1
+        end_col -= 1
+    return result
+
+
+# O(n) time | O(n) space
+def spiral_traverse2(array):
+    result = list()
+    spiral_fill(array, 0, len(array) - 1, 0, len(array[0]) - 1, result)
+    return result
+
+
+def spiral_fill(array, start_row, end_row, start_col, end_col, result):
+    if start_row > end_row and start_col > end_col:
+        return False
+    for col in range(start_col, end_col + 1):
+        result.append(array[start_row][col])
+    for row in range(start_row + 1, end_row + 1):
+        result.append(array[row][end_col])
+    for col in range(end_col - 1, start_col - 1, -1):
+        result.append(array[end_row][col])
+    for row in range(end_row - 1, start_row, -1):
+        result.append(array[row][start_col])
+    spiral_fill(array, start_row + 1, end_row - 1, start_col + 1, end_col - 1, result)
+
+
+if __name__ == '__main__':
+    a = [
+        [ 1,  2,  3, 4],
+        [12, 13, 14, 5],
+        [11, 16, 15, 6],
+        [10,  9,  8, 7],
+    ]
+    print(spiral_traverse1(a))
+    print(spiral_traverse2(a))
+```
+
+## 最宽（长）波峰
+
+给出一个整数序列，将序列的索引作为x坐标，每个索引的数组作为y坐标，将所有的点连接起来形成一个波谱，找出一个波谱中波峰宽度最长的
+
+```python
+# O(n) time | O(1) space
+def longest_peak(array):
+    longest_peak_length = 0
+    length = len(array)
+    i = 0
+    while i < length - 1:
+        is_peak = array[i - 1] < array[i] and array[i] > array[i + 1]
+        if not is_peak:
+            i += 1
+            continue
+
+        left_idx = i - 2
+        while left_idx >= 0 and array[left_idx] < array[left_idx + 1]:
+            left_idx -= 1
+        right_idx = i + 2
+        while right_idx < length and array[right_idx] < array[right_idx - 1]:
+            right_idx += 1
+
+        current_peak_length = right_idx - left_idx - 1
+        longest_peak_length = max(longest_peak_length, current_peak_length)
+        i = right_idx
+    return longest_peak_length
+
+
+if __name__ == '__main__':
+    a = [1, 2, 3, 3, 4, 0, 10, 6, 5, -1, -3, 2, 3]
+    print(longest_peak(a))
+```
+
+## 数组消费者
+
+给定一个整数序列，求出另一个序列满足第n个元素是除了其本身之外的其它元素的乘积
+
+```python
+# O(n^2) time | O(n) space
+def array_of_products1(array):
+    length = len(array)
+    products = [1 for _ in range(length)]
+
+    for i in range(length):
+        running_product = 1
+        for j in range(length):
+            if i != j:
+                running_product *= array[j]
+        products[i] = running_product
+
+    return products
+
+
+# O(n) time | O(n) space
+def array_of_products2(array):
+    length = len(array)
+    products = [1 for _ in range(length)]
+    left_products = [1 for _ in range(length)]
+    right_products = [1 for _ in range(length)]
+
+    left_running_product = 1
+    for i in range(length):
+        left_products[i] = left_running_product
+        left_running_product *= array[i]
+
+    right_running_product = 1
+    # for i in reversed(range(length)):
+    for i in range(length - 1, -1, -1):
+        right_products[i] = right_running_product
+        right_running_product *= array[i]
+
+    for i in range(length):
+        products[i] = left_products[i] * right_products[i]
+
+    return products
+
+
+# O(n) time | O(n) space
+def array_of_products3(array):
+    length = len(array)
+    products = [1 for _ in range(length)]
+
+    left_running_product = 1
+    for i in range(length):
+        products[i] = left_running_product
+        left_running_product *= array[i]
+
+    right_running_product = 1
+    # for i in reversed(range(length)):
+    for i in range(length - 1, -1, -1):
+        products[i] *= right_running_product
+        right_running_product *= array[i]
+
+    return products
+
+
+if __name__ == '__main__':
+    a = [1, 5, 10, 20]
+    print(array_of_products1(a))
+    print(array_of_products2(a))
+    print(array_of_products3(a))
+```
+
+Last Modified 2021-06-15
