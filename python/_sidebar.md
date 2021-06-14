@@ -7,3 +7,4 @@
   - [SQLite3](python/sqlite3.md)
   - [Logging](python/logging.md)
   - [AsyncIO](python/asyncio.md)
+  - [Decorator](python/decorator.md)

@@ -1,3 +1,4 @@
 - [Home](/)
 - [Algorithm](algorithm/)
-  - [Data structure](algorithm/data-structure.md.md)
+  - [Data structure](algorithm/data-structure.md)
+  - [Arrays](algorithm/arrays.md)
