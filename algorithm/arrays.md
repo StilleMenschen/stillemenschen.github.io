@@ -118,7 +118,7 @@ if __name__ == '__main__':
 
 ## 最小差异
 
-在两个序列中分别找出序列1和序列2中相差最小的两个数
+在两个序列中分别找出序列 1 和序列 2 中相差最小的两个数
 
 ```python
 # O(n*log(n) + m*log(m)) time | O(1) space
@@ -180,7 +180,7 @@ if __name__ == '__main__':
 
 ## 单调数组
 
-判断一个整型数组，是否是升序排序或者降序排序，如果满足两个条件中的一个，就表示它是单调的
+判断一个整型序列，是否是升序排序或者降序排序，如果满足两个条件中的一个，就表示它是单调的
 
 ```python
 # O(n) time | O(1) space
@@ -273,7 +273,8 @@ if __name__ == '__main__':
 
 ## 最宽（长）波峰
 
-给出一个整数序列，将序列的索引作为x坐标，每个索引的数组作为y坐标，将所有的点连接起来形成一个波谱，找出一个波谱中波峰宽度最长的
+给出一个整数序列，将序列的索引作为 x 坐标，每个索引的数值作为 y 坐标，将所有的点连接起来形成一个波谱，找出一个波谱中波峰
+宽度最长的
 
 ```python
 # O(n) time | O(1) space
@@ -307,7 +308,7 @@ if __name__ == '__main__':
 
 ## 数组消费者
 
-给定一个整数序列，求出另一个序列满足第n个元素是除了其本身之外的其它元素的乘积
+给定一个整数序列，求出另一个序列满足第 n 个元素是除了其本身之外的其它元素的乘积
 
 ```python
 # O(n^2) time | O(n) space
@@ -374,6 +375,76 @@ if __name__ == '__main__':
     print(array_of_products2(a))
     a = [5, 1, 4, 2]
     print(array_of_products3(a))
+```
+
+## 四数求和
+
+在一个序列中找出符合相加的和等于某个指定的数的四个数，这四个数不能重复，需要找出所有可能的组合
+
+```python
+# O(n^2) time | O(n^2) space
+def four_number_sum(array, target_sum):
+    length = len(array)
+    all_pair_sums = dict()
+    quadruplets = list()
+    for i in range(1, length - 1):
+        for j in range(i + 1, length):
+            current_sum = array[i] + array[j]
+            difference = target_sum - current_sum
+            if difference in all_pair_sums:
+                for pair in all_pair_sums[difference]:
+                    quadruplets.append(pair + [array[i], array[j]])
+        for k in range(0, i):
+            current_sum = array[i] + array[k]
+            if current_sum not in all_pair_sums:
+                all_pair_sums[current_sum] = [[array[k], array[i]]]
+            else:
+                all_pair_sums[current_sum].append([array[k], array[i]])
+    return quadruplets
+
+
+if __name__ == '__main__':
+    a = [7, 6, 4, -1, 1, 2]
+    print(four_number_sum(a, 16))
+```
+
+## 子序列排序
+
+编写一个函数，该函数接受一个至少包含两个整数的序列，并返回一个包含输入序列中最小子序列的开始和结束索引的序列，该子序列进
+行排序后可以使整个输入序列按升序排序。如果输入数组已经排序，函数应该返回 [-1, -1]
+
+```python
+# O(n) time | O(1) space
+def sub_array_sort(array):
+    min_out_of_order = float("inf")
+    max_out_of_order = float("-inf")
+    for i in range(len(array)):
+        num = array[i]
+        if is_out_of_order(i, num, array):
+            min_out_of_order = min(min_out_of_order, num)
+            max_out_of_order = max(max_out_of_order, num)
+    if min_out_of_order == float("inf"):
+        return [-1, -1]
+    sub_array_left_idx = 0
+    while min_out_of_order >= array[sub_array_left_idx]:
+        sub_array_left_idx += 1
+    sub_array_right_idx = len(array) - 1
+    while max_out_of_order <= array[sub_array_right_idx]:
+        sub_array_right_idx -= 1
+    return sub_array_left_idx, sub_array_right_idx
+
+
+def is_out_of_order(i, num, array):
+    if i == 0:
+        return num > array[i + 1]
+    if i == len(array) - 1:
+        return num < array[i - 1]
+    return num > array[i + 1] or num < array[i - 1]
+
+
+if __name__ == '__main__':
+    a = [1, 2, 4, 7, 10, 11, 7, 12, 6, 7, 16, 18, 19]
+    print(sub_array_sort(a))
 ```
 
 Last Modified 2021-06-15
