@@ -372,6 +372,7 @@ if __name__ == '__main__':
     a = [1, 5, 10, 20]
     print(array_of_products1(a))
     print(array_of_products2(a))
+    a = [5, 1, 4, 2]
     print(array_of_products3(a))
 ```
 
