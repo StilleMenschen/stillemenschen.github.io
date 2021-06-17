@@ -447,4 +447,145 @@ if __name__ == '__main__':
     print(sub_array_sort(a))
 ```
 
+## 最大连续范围
+
+找出一个序列中最长的连续数字范围，并返回开始值和结束值
+
+```python
+# O(n) time | O(n) space
+def largest_range(array):
+    best_range = list()
+    longest_length = 0
+    nums = dict()
+    for num in array:
+        nums[num] = True
+    for num in array:
+        if not nums[num]:
+            continue
+        nums[num] = False
+        current_length = 1
+        left = num - 1
+        right = num + 1
+        while left in nums:
+            nums[left] = False
+            current_length += 1
+            left -= 1
+        while right in nums:
+            nums[right] = False
+            current_length += 1
+            right += 1
+        if current_length > longest_length:
+            longest_length = current_length
+            best_range = [left + 1, right - 1]
+    return best_range
+
+
+if __name__ == '__main__':
+    a = [1, 11, 3, 0, 15, 5, 2, 4, 10, 7, 12, 6]
+    print(largest_range(a))
+```
+
+## 最少奖励
+
+老师有一系列学生的分数，老师必须根据学生的分数购买奖励给他们。奖励金额必须遵循 2 个标准：1. 每个学生必须至少获得一项奖励
+；2. 两个相邻学生中排名较高的学生必须比另一个获得更多的奖励。
+
+```python
+# O(n^2) time | O(n) space
+def min_rewards1(scores):
+    rewards = [1 for _ in scores]
+    for i in range(1, len(scores)):
+        j = i - 1
+        if scores[i] > scores[j]:
+            rewards[i] = rewards[j] + 1
+        else:
+            while j >= 0 and scores[j] > scores[j + 1]:
+                rewards[j] = max(rewards[j], rewards[j + 1] + 1)
+                j -= 1
+    return sum(rewards)
+
+
+# O(n^2) time | O(n) space
+def min_rewards4(scores):
+    length = len(scores)
+    rewards = [1 for _ in scores]
+    position = 0
+    while position < length:
+        plus_rewards(position, rewards, scores)
+        position += 1
+    return sum(rewards)
+
+
+def plus_rewards(i, rewards, array):
+    if i == 0 or i == len(array) - 1:
+        return False
+    n = i - 1
+    if array[n] > array[i]:
+        rewards[n] = rewards[n] + 1
+        plus_rewards(n, rewards, array)
+    n = i + 1
+    if array[n] > array[i]:
+        rewards[n] = rewards[n] + 1
+        plus_rewards(n, rewards, array)
+
+
+# O(n) time | O(n) space
+def min_rewards2(scores):
+    rewards = [1 for _ in scores]
+    local_min_idx_list = get_local_min_idx(scores)
+    for local_min_idx in local_min_idx_list:
+        expand_from_local_min_idx(local_min_idx, scores, rewards)
+    return sum(rewards)
+
+
+def get_local_min_idx(array):
+    length = len(array)
+    if length == 1:
+        return [0]
+    local_min_idx = []
+    for i in range(length):
+        if i == 0 and array[i] < array[i + 1]:
+            local_min_idx.append(i)
+        if i == length - 1 and array[i] < array[i - 1]:
+            local_min_idx.append(i)
+        if i == 0 or i == length - 1:
+            continue
+        if array[i] < array[i + 1] and array[i] + array[i - 1]:
+            local_min_idx.append(i)
+    return local_min_idx
+
+
+def expand_from_local_min_idx(local_min_idx, scores, rewards):
+    left_idx = local_min_idx - 1
+    while left_idx >= 0 and scores[left_idx] > scores[left_idx + 1]:
+        rewards[left_idx] = max(rewards[left_idx], rewards[left_idx + 1] + 1)
+        left_idx -= 1
+    right_idx = local_min_idx + 1
+    length = len(scores)
+    while right_idx < length and scores[right_idx] > scores[right_idx - 1]:
+        rewards[right_idx] = rewards[right_idx - 1] + 1
+        right_idx += 1
+
+
+# O(n) time | O(n) space
+def min_rewards3(scores):
+    rewards = [1 for _ in range(len(scores))]
+    for i in range(1, len(scores)):
+        if scores[i] > scores[i - 1]:
+            rewards[i] = rewards[i - 1] + 1
+    # for i in reversed(range(len(scores) - 1)):
+    for i in range(len(scores) - 2, -1, -1):
+        if scores[i] > scores[i + 1]:
+            rewards[i] = max(rewards[i], rewards[i + 1] + 1)
+    return sum(rewards)
+
+
+if __name__ == '__main__':
+    a = [8, 4, 2, 1, 3, 6, 7, 9, 5]
+    print(min_rewards1(a))
+    print(min_rewards2(a))
+    print(min_rewards3(a))
+    print(min_rewards4(a))
+```
+
 Last Modified 2021-06-15
