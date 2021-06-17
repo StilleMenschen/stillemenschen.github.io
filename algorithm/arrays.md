@@ -588,4 +588,8 @@ if __name__ == '__main__':
     print(min_rewards4(a))
 ```
 
+<<<<<<< HEAD
 Last Modified 2021-06-18
+=======
+Last Modified 2021-06-15
+>>>>>>> 620c4f52e758b680d0020e51c4dd10ca66e026c7
