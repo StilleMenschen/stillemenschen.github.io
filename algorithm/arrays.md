@@ -638,4 +638,78 @@ if __name__ == '__main__':
     print(zigzag_traverse(a))
 ```
 
-Last Modified 2021-06-18
+## ApartmentHunting
+
+```python
+# O(b^2 * r) time | O(b) space
+def apartment_hunting1(blocks, request_lists):
+    max_distances_at_blocks = [float('-inf') for _ in blocks]
+    length = len(blocks)
+    for i in range(length):
+        for req in request_lists:
+            closest_req_distance = float('inf')
+            for j in range(length):
+                if blocks[j][req]:
+                    closest_req_distance = min(closest_req_distance, distance_between(i, j))
+            max_distances_at_blocks[i] = max(max_distances_at_blocks[i], closest_req_distance)
+    return get_idx_at_min_value(max_distances_at_blocks)
+
+
+def get_idx_at_min_value(array):
+    idx_at_min_value = 0
+    min_value = float('inf')
+    for i in range(len(array)):
+        current_value = array[i]
+        if current_value < min_value:
+            min_value = current_value
+            idx_at_min_value = i
+    return idx_at_min_value
+
+
+def distance_between(a, b):
+    return abs(a - b)
+
+
+# O(br) time | O(b * r) space
+def apartment_hunting2(blocks, request_lists):
+    min_distances_from_blocks = list(map(lambda req: get_min_distances(blocks, req), request_lists))
+    max_distance_at_blocks = get_max_distance_at_blocks(blocks, min_distances_from_blocks)
+    return get_idx_at_min_value(max_distance_at_blocks)
+
+
+def get_min_distances(blocks, req):
+    min_distances = [0 for _ in blocks]
+    closest_req_idx = float('inf')
+    for i in range(len(blocks)):
+        if blocks[i][req]:
+            closest_req_idx = i
+        min_distances[i] = distance_between(i, closest_req_idx)
+    for i in reversed(range(len(blocks))):
+        if blocks[i][req]:
+            closest_req_idx = i
+        min_distances[i] = min(min_distances[i], distance_between(i, closest_req_idx))
+    return min_distances
+
+
+def get_max_distance_at_blocks(blocks, min_distance_form_blocks):
+    max_distance_at_blocks = [0 for _ in blocks]
+    for i in range(len(blocks)):
+        min_distance_at_block = list(map(lambda distances: distances[i], min_distance_form_blocks))
+        max_distance_at_blocks[i] = max(min_distance_at_block)
+    return max_distance_at_blocks
+
+
+if __name__ == '__main__':
+    block = [
+        {'School': True, 'Gym': False, 'Store': False},
+        {'School': False, 'Gym': True, 'Store': False},
+        {'School': True, 'Gym': True, 'Store': False},
+        {'School': True, 'Gym': False, 'Store': False},
+        {'School': True, 'Gym': False, 'Store': True}
+    ]
+    r = ['Gym', 'School', 'Store']
+    print(apartment_hunting1(block, r))
+    print(apartment_hunting2(block, r))
+```
+
+Last Modified 2021-06-20
