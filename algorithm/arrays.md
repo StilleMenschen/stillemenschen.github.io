@@ -638,7 +638,7 @@ if __name__ == '__main__':
     print(zigzag_traverse(a))
 ```
 
-## ApartmentHunting
+## Apartment Hunting
 
 ```python
 # O(b^2 * r) time | O(b) space
@@ -712,4 +712,104 @@ if __name__ == '__main__':
     print(apartment_hunting2(block, r))
 ```
 
-Last Modified 2021-06-20
+## 日程表匹配
+
+在两个日程表以及对应日程表的工作时间范围内，找出符合指定会议时间的可用会议时段
+
+```python
+# O(c1 + c2) time | O(c1 + c2) space
+def calendar_matching(calendar1, daily_bounds1, calendar2, daily_bounds2, meeting_duration):
+    updated_calendar1 = update_calendar(calendar1, daily_bounds1)
+    updated_calendar2 = update_calendar(calendar2, daily_bounds2)
+    merged_calendar = merge_calendar(updated_calendar1, updated_calendar2)
+    flattened_calendar = flatten_calendar(merged_calendar)
+    return get_matching_availabilities(flattened_calendar, meeting_duration)
+
+
+def update_calendar(calendar, daily_bounds):
+    updated_calendar = calendar[:]
+    updated_calendar.insert(0, ('0:00', daily_bounds[0],))
+    updated_calendar.append((daily_bounds[1], '23:59',))
+    return list(map(lambda m: (time_to_minutes(m[0]), time_to_minutes(m[1]),), updated_calendar))
+
+
+def merge_calendar(calendar1, calendar2):
+    merged = list()
+    i, j = 0, 0
+    length1 = len(calendar1)
+    length2 = len(calendar2)
+    while i < length1 and j < length2:
+        meeting1, meeting2 = calendar1[i], calendar2[j]
+        if meeting1[0] < meeting2[0]:
+            merged.append(meeting1)
+            i += 1
+        else:
+            merged.append(meeting2)
+            j += 1
+    while i < length1:
+        merged.append(calendar1[i])
+        i += 1
+    while j < length2:
+        merged.append(calendar2[j])
+        j += 1
+    return merged
+
+
+def flatten_calendar(calendar):
+    flattened = [calendar[0][:]]
+    for i in range(1, len(calendar)):
+        current_meeting = calendar[i]
+        previous_meeting = flattened[-1]
+        current_start, current_end = current_meeting
+        previous_start, previous_end = previous_meeting
+        if previous_end >= current_start:
+            new_previous_meeting = (previous_start, max(previous_end, current_end),)
+            flattened[-1] = new_previous_meeting
+        else:
+            flattened.append(current_meeting[:])
+    return flattened
+
+
+def get_matching_availabilities(calendar, meeting_duration):
+    matching_availabilities = list()
+    for i in range(1, len(calendar)):
+        start = calendar[i - 1][1]
+        end = calendar[i][0]
+        availabilities_duration = end - start
+        if availabilities_duration >= meeting_duration:
+            matching_availabilities.append((start, end,))
+    return list(map(lambda m: (minutes_to_time(m[0]), minutes_to_time(m[1]),), matching_availabilities))
+
+
+def time_to_minutes(time):
+    hours, minutes = list(map(int, time.split(':')))
+    return hours * 60 + minutes
+
+
+def minutes_to_time(minutes):
+    hours = minutes // 60
+    minute = minutes % 60
+    hours_string = str(hours)
+    minute_string = '0' + str(minute) if minute < 10 else str(minute)
+    return ':'.join((hours_string, minute_string,))
+
+
+if __name__ == '__main__':
+    cal1 = [
+        ('9:00', '10:30',),
+        ('12:00', '13:00',),
+        ('16:00', '18:00',)
+    ]
+    db1 = ('9:00', '20:00',)
+    cal2 = [
+        ('10:00', '11:30',),
+        ('12:30', '14:30',),
+        ('14:30', '15:00',),
+        ('16:00', '17:00',)
+    ]
+    db2 = ('10:00', '18:30',)
+    duration = 30
+    print(calendar_matching(cal1, db1, cal2, db2, duration))
+```
+
+Last Modified 2021-06-22
