@@ -16,13 +16,9 @@
 
 - 最近在研究[算法](algorithm/)相关的内容
 
-**另外**
-
-`:(`心情不好了[网抑云](https://music.163.com/#/user/home?id=247886432)，电子、摇滚和古典；没动力了瞅瞅妹子`:)`（如果有）
-
 
 > 此文档基于 NodeJS 的[docsify](https://docsify.js.org/#/zh-cn/)框架生成，源码
 > 在[GitHub](https://github.com/StilleMenschen/docs)上，页面也同样托管于
-> GitHub[中](https://stillemenschen.github.io/docs)
+> [GitHub](https://stillemenschen.github.io/docs)中
 
-[关于撰写人](about/ "撰写人自述")
+[关于撰写人](about/ "撰写人自述")，[网抑云主页](https://music.163.com/#/user/home?id=247886432)
