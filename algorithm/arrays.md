@@ -588,7 +588,7 @@ if __name__ == '__main__':
     print(min_rewards4(a))
 ```
 
-## Z型遍历
+## Z 型遍历
 
 ```python
 # O(n) time | O(n) space
@@ -812,4 +812,68 @@ if __name__ == '__main__':
     print(calendar_matching(cal1, db1, cal2, db2, duration))
 ```
 
-Last Modified 2021-06-22
+## 瀑布流
+
+假设有一个二维序列表示一个向下的瀑布，瀑布的某些地方存在石头会阻碍水流，给定一个开始位置让 100%的水向下流动，遇到石头一
+分为二向左和向右流动，遇到可以向下流动的位置后继续往下，计算出最后到达瀑布底部剩余的水量百分比
+
+```python
+# O(w^2 * h) time | O(w) space
+def waterfall_streams(array, source):
+    row_above = array[0][:]
+    row_above[source] = -1
+
+    for row in range(1, len(array)):
+        current_row = array[row][:]
+
+        for idx in range(len(row_above)):
+            value_above = row_above[idx]
+
+            has_water_above = value_above < 0
+            has_block = current_row[idx] == 1
+
+            if not has_water_above:
+                continue
+
+            if not has_block:
+                current_row[idx] += value_above
+                continue
+
+            split_water = value_above / 2
+            right_idx = idx
+            length = len(row_above) - 1
+            while right_idx < length:
+                right_idx += 1
+                if row_above[right_idx] == 1:
+                    break
+                if current_row[right_idx] != 1:
+                    current_row[right_idx] += split_water
+                    break
+
+            left_idx = idx
+            while left_idx > 1:
+                left_idx -= 1
+                if row_above[left_idx] == 1:
+                    break
+                if current_row[left_idx] != 1:
+                    current_row[left_idx] += split_water
+                    break
+        row_above = current_row
+
+    final_percentages = list(map(lambda num: num * -100, row_above))
+
+    return final_percentages
+
+
+if __name__ == '__main__':
+    a = [[0, 0, 0, 0, 0, 0, 0],
+         [1, 0, 0, 0, 0, 0, 0],
+         [0, 0, 1, 1, 1, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0],
+         [1, 1, 1, 0, 0, 1, 0],
+         [0, 0, 0, 0, 0, 0, 1],
+         [0, 0, 0, 0, 0, 0, 0]]
+    print(waterfall_streams(a, 3))
+```
+
+Last Modified 2021-06-23
