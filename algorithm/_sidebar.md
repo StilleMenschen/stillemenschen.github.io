@@ -2,3 +2,4 @@
 - [Algorithm](algorithm/)
   - [Data structure](algorithm/data-structure.md)
   - [Arrays](algorithm/arrays.md)
+  - [Sorting](algorithm/sorting.md)
