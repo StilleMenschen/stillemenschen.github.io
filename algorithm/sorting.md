@@ -193,4 +193,49 @@ if __name__ == '__main__':
     print(quick_sort(a))
 ```
 
-Last Modified 2021-06-26
+## 堆排序
+
+堆是一棵完全二叉树，堆的每个节点的值都大于或等于其子节点的值，为最大堆；反之为最小堆。
+
+```python
+# O(n * log(n)) time | O(1) space
+def heap_sort(array):
+    build_max_heap(array)
+    for end_idx in reversed(range(1, len(array))):
+        swap(0, end_idx, array)
+        sift_down(0, end_idx - 1, array)
+    return array
+
+
+def build_max_heap(array):
+    first_parent_idx = (len(array) - 1) // 2
+    for current_idx in reversed(range(first_parent_idx + 1)):
+        sift_down(current_idx, len(array) - 1, array)
+
+
+def sift_down(current_idx, end_idx, heap):
+    child_one_idx = current_idx * 2 + 1
+    while child_one_idx <= end_idx:
+        child_two_idx = current_idx * 2 + 2 if current_idx * 2 + 2 <= end_idx else -1
+        if child_two_idx > -1 and heap[child_two_idx] > heap[child_one_idx]:
+            idx_to_swap = child_two_idx
+        else:
+            idx_to_swap = child_one_idx
+        if heap[idx_to_swap] > heap[current_idx]:
+            swap(current_idx, idx_to_swap, heap)
+            current_idx = idx_to_swap
+            child_one_idx = current_idx * 2 + 1
+        else:
+            return False
+
+
+def swap(i, j, array):
+    array[i], array[j] = array[j], array[i]
+
+
+if __name__ == '__main__':
+    a = [8, 5, 2, 9, 5, 6, 3]
+    print(heap_sort(a))
+```
+
+Last Modified 2021-06-27
