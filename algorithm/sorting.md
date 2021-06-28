@@ -1,5 +1,7 @@
 # 排序
 
+> 所谓的稳定排序是指原来相等的两个元素前后相对位置在排序后依然不变
+
 ## 冒泡排序
 
 ```python
@@ -74,6 +76,9 @@ if __name__ == '__main__':
     a = [8, 5, 2, 9, 5, 6, 3]
     print(selection_sort(a))
 ```
+
+> 选择排序是不稳定的排序算法，在一趟选择时，如果当前锁定元素比后面一个元素大，而后面较小的那个元素又出现在一个与当前锁定
+> 元素相等的元素后面，那么交换后位置顺序显然改变了。
 
 ## 三数排序
 
@@ -193,6 +198,8 @@ if __name__ == '__main__':
     print(quick_sort(a))
 ```
 
+> 快速排序是不稳定的，快速算法是找出一个中枢元素来分开排序，当中枢元素发生交换时元素的相对位置发生变化了
+
 ## 堆排序
 
 堆是一棵完全二叉树，堆的每个节点的值都大于或等于其子节点的值，为最大堆；反之为最小堆。
@@ -238,4 +245,93 @@ if __name__ == '__main__':
     print(heap_sort(a))
 ```
 
-Last Modified 2021-06-27
+> 堆排序是不稳定的排序算法，堆的结构是节点 i 的孩子为 2 _ i 和 2 _ i + 1 节点，大顶堆要求父节点大于等于其 2 个子节点，小
+> 顶堆要求父节点小于等于其 2 个子节点。在一个长为 n 的序列，堆排序的过程是从第 n / 2 开始和其子节点共 3 个值选择最大(大
+> 顶堆)或者最小(小顶堆),这 3 个元素之间的选择当然不会破坏稳定性。但当为 n / 2 - 1, n / 2 - 2, … 1 这些个父节点选择元素时
+> ，就会破坏稳定性。有可能第 n / 2 个父节点交换把后面一个元素交换过去了，而第 n / 2 - 1 个父节点把后面一个相同的元素没有
+> 交换，那么这 2 个相同的元素之间的稳定性就被破坏了。
+
+## 归并排序
+
+先拆分为较小的子序列，然后对子序列排序，再慢慢将每个子序列按大小对比后合并到主序列中
+
+```python
+# O(n * log(n)) time | O(n * log(n)) space
+def merge_sort1(array):
+    if len(array) == 1:
+        return array
+    middle_idx = len(array) // 2
+    left_half = array[:middle_idx]
+    right_half = array[middle_idx:]
+    return merge_sorted_arrays(merge_sort1(left_half), merge_sort1(right_half))
+
+
+def merge_sorted_arrays(left_half, right_half):
+    sorted_array = [None] * (len(left_half) + len(right_half))
+    i = j = k = 0
+    while i < len(left_half) and j < len(right_half):
+        if left_half[i] <= right_half[j]:
+            sorted_array[k] = left_half[i]
+            i += 1
+        else:
+            sorted_array[k] = right_half[j]
+            j += 1
+        k += 1
+    while i < len(left_half):
+        sorted_array[k] = left_half[i]
+        i += 1
+        k += 1
+    while j < len(right_half):
+        sorted_array[k] = right_half[j]
+        j += 1
+        k += 1
+    return sorted_array
+
+
+# O(n * log(n)) time | O(n) space
+def merge_sort2(array):
+    if len(array) <= 1:
+        return array
+    auxiliary_array = array[:]
+    merge_sort_helper(array, 0, len(array) - 1, auxiliary_array)
+    return array
+
+
+def merge_sort_helper(main_array, start_idx, end_idx, auxiliary_array):
+    if start_idx == end_idx:
+        return False
+    middle_idx = (start_idx + end_idx) // 2
+    merge_sort_helper(auxiliary_array, start_idx, middle_idx, main_array)
+    merge_sort_helper(auxiliary_array, middle_idx + 1, end_idx, main_array)
+    do_merge(main_array, start_idx, middle_idx, end_idx, auxiliary_array)
+
+
+def do_merge(main_array, start_idx, middle_idx, end_idx, auxiliary_array):
+    k = start_idx
+    i = start_idx
+    j = middle_idx + 1
+    while i <= middle_idx and j <= end_idx:
+        if auxiliary_array[i] <= auxiliary_array[j]:
+            main_array[k] = auxiliary_array[i]
+            i += 1
+        else:
+            main_array[k] = auxiliary_array[j]
+            j += 1
+        k += 1
+    while i <= middle_idx:
+        main_array[k] = auxiliary_array[i]
+        i += 1
+        k += 1
+    while j <= end_idx:
+        main_array[k] = auxiliary_array[j]
+        j += 1
+        k += 1
+
+
+if __name__ == '__main__':
+    a = [8, 5, 2, 9, 5, 6, 3]
+    print(merge_sort1(a))
+    print(merge_sort2(a))
+```
+
+Last Modified 2021-06-28
