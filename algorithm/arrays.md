@@ -34,6 +34,56 @@ if __name__ == '__main__':
     print(validate_subsequence2(a, b))
 ```
 
+```cpp
+#include<vector>
+#include<iostream>
+
+using namespace std;
+
+// O(n) time | O(1) space - where n is the length of the array
+bool isValidSubsequence1(vector<int> array, vector<int> sequence)
+{
+    int arrIdx = 0;
+    int seqIdx = 0;
+    const int arrSize = array.size();
+    const int seqSize = sequence.size();
+    while (arrIdx < arrSize && seqIdx < seqSize)
+    {
+        if (array[arrIdx] == sequence[seqIdx])
+        {
+            seqIdx++;
+        }
+        arrIdx++;
+    }
+    return seqIdx == seqSize;
+}
+
+
+// O(n) time | O(1) space - where n is the length of the array
+bool isValidSubsequence2(vector<int> array, vector<int> sequence)
+{
+    int seqIdx = 0;
+    const int seqSize = sequence.size();
+    for (auto value : array)
+    {
+        if (seqIdx == seqSize)
+            break;
+        if (sequence[seqIdx] == value)
+            seqIdx++;
+    }
+    return seqIdx == seqSize;
+}
+
+int main()
+{
+    const vector<int> array = {5, 1, 22, 25, 6, -1, 8, 10};
+    const vector<int> sequence = {1, 6, -1, 10};
+    cout << isValidSubsequence1(array, sequence) << endl;
+    cout << isValidSubsequence2(array, sequence) << endl;
+    return 0;
+}
+```
+
 ## 两数求和
 
 假设在一个序列中存在两个数相加的值等于一个给出的数，现在要快速找出序列中的这两个数并返回其值
