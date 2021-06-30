@@ -287,7 +287,6 @@ void initLinkedList(LinkedList** list)
         node->value = i;
         tail->next = node;
         node->prev = tail;
-        node->next = NULL;
         tail = node;
     }
     tail->next = NULL;
@@ -317,4 +316,4 @@ int main()
 }
 ```
 
-Last Modified 2021-06-30
+Last Modified 2021-07-01
