@@ -13,18 +13,18 @@ typedef struct Node
     int value = -1;
 } Node;
 
-struct Node *head = NULL;
-struct Node *tail = NULL;
+Node *head = NULL;
+Node *tail = NULL;
 int listSize = 0;
 
-void setHead(Node *node);
-void removeNodeBindings(Node *node);
-void remove(Node *node);
-void insertBefore(Node *node, Node *nodeToInsert);
-void insertAfter(Node *node, Node *nodeToInsert);
+void setHead(Node* node);
+void removeNodeBindings(Node* node);
+void remove(Node* node);
+void insertBefore(Node* node, Node* nodeToInsert);
+void insertAfter(Node* node, Node* nodeToInsert);
 
 /* O(1) time | O(1) space */
-void setHead(Node *node)
+void setHead(Node* node)
 {
     if ( head == NULL )
     {
@@ -36,7 +36,7 @@ void setHead(Node *node)
     insertBefore(head, node);
 }
 /* O(1) time | O(1) space */
-void setTail(Node *node)
+void setTail(Node* node)
 {
     if ( tail == NULL )
     {
@@ -46,7 +46,7 @@ void setTail(Node *node)
     insertAfter(tail, node);
 }
 /* O(1) time | O(1) space */
-void insertBefore(Node *node, Node *nodeToInsert)
+void insertBefore(Node* node, Node* nodeToInsert)
 {
     if ( nodeToInsert == head && nodeToInsert == tail )
     {
@@ -67,7 +67,7 @@ void insertBefore(Node *node, Node *nodeToInsert)
     listSize++;
 }
 /* O(1) time | O(1) space */
-void insertAfter(Node *node, Node *nodeToInsert)
+void insertAfter(Node* node, Node* nodeToInsert)
 {
     if ( nodeToInsert == head && nodeToInsert == tail )
     {
@@ -91,7 +91,7 @@ void insertAfter(Node *node, Node *nodeToInsert)
    O(p) time | O(1) space
    p is position
 */
-void insertAtPosition(int position, Node *nodeToInsert)
+void insertAtPosition(int position, Node* nodeToInsert)
 {
     if ( position == 0)
     {
@@ -131,7 +131,7 @@ void removeNodesWithValue(int value)
     }
 }
 /* O(1) time | O(1) space */
-void remove(Node *node)
+void remove(Node* node)
 {
     if ( node == head )
     {
@@ -153,7 +153,7 @@ int containsNodeWithValue(int value)
     }
     return node != NULL;
 }
-void removeNodeBindings(Node *node)
+void removeNodeBindings(Node* node)
 {
     if ( node->prev != NULL )
     {
@@ -181,7 +181,7 @@ void initLinkedList()
     }
 }
 
-void toString(Node *node)
+void printLinkedLists(Node* node)
 {
     while ( node != NULL )
     {
@@ -209,7 +209,7 @@ void clearList()
 int main()
 {
     initLinkedList();
-    toString(head);
+    printLinkedLists(head);
     if ( containsNodeWithValue(3) == 1 )
     {
         printf("containsNodeWithValue(3) is true \n");
@@ -222,11 +222,99 @@ int main()
     removeNodesWithValue(3);
     printf("removeNodesWithValue(9)\n");
     removeNodesWithValue(9);
-    toString(head);
+    printLinkedLists(head);
     printf("list size is %d \n", listSize);
     clearList();
     return 0;
 }
 ```
 
-Last Modified 2021-06-29
+## 从末尾删除节点
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node
+{
+    struct Node *prev;
+    struct Node *next;
+    int value = -1;
+} Node;
+
+typedef struct LinkedList
+{
+    Node* head;
+    Node* tail;
+    int size;
+} LinkedList;
+
+/* O(n) time | O(1) space */
+void removeNthNodeFromEnd(Node* head, int n)
+{
+    int counter = 0;
+    Node *first = head;
+    Node *second = head;
+    while ( counter < n )
+    {
+        second = second->next;
+        counter++;
+    }
+    if ( second == NULL )
+    {
+        head->value = head->next->value;
+        head->next = head->next->next;
+        return;
+    }
+    while ( second->next != NULL )
+    {
+        second = second->next;
+        first = first->next;
+    }
+    first->next = first->next->next;
+}
+
+void initLinkedList(LinkedList** list)
+{
+    Node *head, *tail, *node;
+    head = (Node*)malloc(sizeof(Node));
+    head->value = 0;
+    tail = head;
+    int i = 1;
+    for (; i<10; i++)
+    {
+        node = (Node*)malloc(sizeof(Node));
+        node->value = i;
+        tail->next = node;
+        node->prev = tail;
+        node->next = NULL;
+        tail = node;
+    }
+    tail->next = NULL;
+    (*list)->head = head;
+    (*list)->tail = tail;
+    (*list)->size = 10;
+}
+
+void printLinkedLists(Node* node)
+{
+    while ( node != NULL )
+    {
+        printf("%d ", node->value);
+        node = node->next;
+    }
+    printf("\n");
+}
+
+int main()
+{
+    LinkedList* list = (LinkedList*)malloc(sizeof(LinkedList));
+    initLinkedList(&list);
+    printLinkedLists(list->head);
+    removeNthNodeFromEnd(list->head, 4);
+    printLinkedLists(list->head);
+    return 0;
+}
+```
+
+Last Modified 2021-06-30
