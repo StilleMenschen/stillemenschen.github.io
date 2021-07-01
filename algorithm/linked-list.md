@@ -316,4 +316,178 @@ int main()
 }
 ```
 
+## 找出循环节点
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#define N 9
+
+typedef struct Node
+{
+    struct Node *prev;
+    struct Node *next;
+    int value = -1;
+} Node;
+
+typedef struct LinkedList
+{
+    Node* head;
+    Node* tail;
+    int size;
+} LinkedList;
+
+void initLinkedList(LinkedList** list, const int n)
+{
+    Node *head, *tail, *node;
+    head = (Node*)malloc(sizeof(Node));
+    head->value = 0;
+    tail = head;
+    int i = 1;
+    for (; i <= n; i++)
+    {
+        node = (Node*)malloc(sizeof(Node));
+        node->value = i;
+        tail->next = node;
+        node->prev = tail;
+        tail = node;
+    }
+    node = head;
+    while ( node->value != 4 )
+    {
+        node = node->next;
+    }
+    tail->next = node;
+    (*list)->head = head;
+    (*list)->tail = tail;
+    (*list)->size = 10;
+}
+
+void printLinkedLists(Node* node, const int n)
+{
+    while ( node != NULL )
+    {
+        printf("%d ", node->value);
+        if ( node->value == n) {
+            break;
+        }
+        node = node->next;
+    }
+    printf("\n");
+}
+
+/* O(n) time | O(1) space */
+Node* findLoop(Node* head)
+{
+    Node *first = head->next;
+    Node *second = head->next->next;
+    while ( first != second )
+    {
+        first = first->next;
+        second = second->next->next;
+    }
+    first = head;
+    while ( first != second )
+    {
+        first = first->next;
+        second = second->next;
+    }
+    return first;
+}
+
+int main()
+{
+    LinkedList* list = (LinkedList*)malloc(sizeof(LinkedList));
+    initLinkedList(&list, N);
+    printLinkedLists(list->head, N);
+    Node *node = findLoop(list->head);
+    printf("loop value is %d\n", node->value);
+    return 0;
+}
+```
+
+## 反转单链表
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#define N 9
+
+typedef struct Node
+{
+    struct Node *prev;
+    struct Node *next;
+    int value = -1;
+} Node;
+
+typedef struct LinkedList
+{
+    Node* head;
+    Node* tail;
+    int size;
+} LinkedList;
+
+void initLinkedList(LinkedList** list, const int n)
+{
+    Node *head, *tail, *node;
+    head = (Node*)malloc(sizeof(Node));
+    head->value = 0;
+    tail = head;
+    int i = 1;
+    for (; i <= n; i++)
+    {
+        node = (Node*)malloc(sizeof(Node));
+        node->value = i;
+        tail->next = node;
+        node->prev = tail;
+        tail = node;
+    }
+    tail->next = NULL;
+    (*list)->head = head;
+    (*list)->tail = tail;
+    (*list)->size = i;
+}
+
+void printLinkedLists(Node* node)
+{
+    while ( node != NULL )
+    {
+        printf("%d ", node->value);
+        node = node->next;
+    }
+    printf("\n");
+}
+
+/* O(n) time | O(1) space */
+Node* reverseLinkedList(Node* head)
+{
+    if ( head == NULL )
+    {
+        return head;
+    }
+    Node *p1, *p2, *p3;
+    p1 = head;
+    p2 = p1->next;
+    head->next = NULL;
+    while ( p2 != NULL )
+    {
+        p3 = p2->next;
+        p2->next = p1;
+        p1 = p2;
+        p2 = p3;
+    }
+    return p1;
+}
+
+int main()
+{
+    LinkedList* list = (LinkedList*)malloc(sizeof(LinkedList));
+    initLinkedList(&list, N);
+    printLinkedLists(list->head);
+    Node *node = reverseLinkedList(list->head);
+    printLinkedLists(node);
+    return 0;
+}
+```
+
 Last Modified 2021-07-01
