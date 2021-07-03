@@ -490,4 +490,99 @@ int main()
 }
 ```
 
+## 合并单链表
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#define GET_ARRAY_LEN(array, len) { len = sizeof(array)/sizeof(array[0]); }
+
+typedef struct Node
+{
+    struct Node *prev;
+    struct Node *next;
+    int value = -1;
+} Node;
+
+typedef struct LinkedList
+{
+    Node* head;
+    Node* tail;
+    int size;
+} LinkedList;
+
+void initLinkedList(LinkedList** list, const int array[], const int n)
+{
+    Node *head, *tail, *node;
+    head = (Node*)malloc(sizeof(Node));
+    head->value = array[0];
+    tail = head;
+    int i = 0;
+    while ( ++i < n )
+    {
+        node = (Node*)malloc(sizeof(Node));
+        node->value = array[i];
+        tail->next = node;
+        tail = node;
+    }
+    tail->next = NULL;
+    (*list)->head = head;
+    (*list)->tail = tail;
+    (*list)->size = i;
+}
+
+void printLinkedLists(Node* node)
+{
+    while ( node != NULL )
+    {
+        printf("%d ", node->value);
+        node = node->next;
+    }
+    printf("\n");
+}
+
+/* O(n+m) time | O(1) space */
+Node* mergeLinkedList(Node* head1, Node* head2)
+{
+    Node *p1, *p2, *prev;
+    p1 = head1;
+    p2 = head2;
+    while ( p1 != NULL && p2 != NULL )
+    {
+        if ( p1->value <= p2->value )
+        {
+            prev = p1;
+            p1 = p1->next;
+        }
+        else
+        {
+            if ( prev != NULL ) prev->next = p2;
+            prev = p2;
+            p2 = p2->next;
+            prev->next = p1;
+        }
+    }
+    if ( p1 == NULL ) prev->next = p2;
+    return head1->value <= head2->value ? head1 : head2;
+}
+
+int main()
+{
+    const int arr1[] = {2, 6, 7, 8};
+    const int arr2[] = {1, 3, 4, 5, 9, 10};
+    unsigned int len1, len2;
+    GET_ARRAY_LEN(arr1, len1);
+    GET_ARRAY_LEN(arr2, len2);
+    LinkedList* list1 = (LinkedList*)malloc(sizeof(LinkedList));
+    LinkedList* list2 = (LinkedList*)malloc(sizeof(LinkedList));
+    initLinkedList(&list1, arr1, len1);
+    initLinkedList(&list2, arr2, len2);
+    printLinkedLists(list1->head);
+    printLinkedLists(list2->head);
+    Node *node = mergeLinkedList(list1->head, list2->head);
+    printLinkedLists(node);
+    return 0;
+}
+```
+
 Last Modified 2021-07-01
