@@ -585,4 +585,115 @@ int main()
 }
 ```
 
-Last Modified 2021-07-01
+## 最近最少使用 (LRU)
+
+```cpp
+#include <iostream>
+#include <list>
+#include <map>
+
+using namespace std;
+
+typedef struct Node
+{
+    char key;
+    int value;
+} Node;
+
+class LeastRecentlyUsed
+{
+private:
+    int MAX_SIZE = -1;
+    int currentSize = 0;
+    map<char, Node> cache;
+    list<Node> listOfMostRecent;
+    bool containesKeyInCache(char key)
+    {
+        const auto search = this->cache.find(key);
+        return search != this->cache.end();
+    }
+public:
+    LeastRecentlyUsed(int maxSize)
+    {
+        if ( maxSize < 0 )
+            this->MAX_SIZE = 1;
+        else
+            this->MAX_SIZE = maxSize;
+    }
+
+    // O(1) time | O(1) space
+    void insertKeyValuePair(char key, int value)
+    {
+
+        if (this->containesKeyInCache(key))
+        {
+            this->replaceKey(key,value);
+        }
+        else
+        {
+            if ( this->currentSize >= this->MAX_SIZE )
+                this->evictLeastRecent();
+            else
+                this->currentSize++;
+            Node node = { key, value };
+            this->cache[key] = node;
+        }
+        this->updateMostRecent(this->cache[key]);
+    }
+
+    // O(1) time | O(1) space
+    int getValueFromKey(char key)
+    {
+        if ( ! this->containesKeyInCache(key) )
+            return -1;
+        this->updateMostRecent(this->cache[key]);
+        const int value = this->cache[key].value;
+        return value;
+    }
+
+    // O(1) time | O(1) space
+    char getMostRecentKey(void)
+    {
+        const Node node = this->listOfMostRecent.front();
+        return node.key;
+    }
+    void replaceKey(char key, int value)
+    {
+        if ( ! this->containesKeyInCache(key) )
+            throw "The provide key isn't in the cache!";
+        this->cache[key].value = value;
+    }
+    void evictLeastRecent(void)
+    {
+        const Node nodeToRemove = this->listOfMostRecent.back();
+        this->listOfMostRecent.pop_back();
+        this->cache.erase(nodeToRemove.key);
+    }
+    void updateMostRecent(Node node)
+    {
+        this->listOfMostRecent.push_front(node);
+    }
+};
+
+int main(void)
+{
+    LeastRecentlyUsed lru(3);
+    lru.insertKeyValuePair('a', 1);
+    lru.insertKeyValuePair('b', 2);
+    lru.insertKeyValuePair('c', 3);
+    lru.insertKeyValuePair('d', 4);
+    cout << "Add multiple data { { a: 1 }, { b: 2 }, { c: 3 }, { d: 4 } }" << endl;
+    cout << "The key 'c' value is " << lru.getValueFromKey('c') << endl;
+    cout << "The key 'c' value is " << lru.getValueFromKey('c') << endl;
+    cout << "Most recently key is " << lru.getMostRecentKey() << endl;
+    cout << "Update { d: 40 }" << endl;
+    lru.insertKeyValuePair('d', 40);
+    cout << "Update { d: 41 }" << endl;
+    lru.insertKeyValuePair('d', 41);
+    cout << "Most recently key is " << lru.getMostRecentKey() << endl;
+    cout << "The key 'd' value is " << lru.getValueFromKey('d') << endl;
+    return 0;
+}
+```
+
+Last Modified 2021-07-03
