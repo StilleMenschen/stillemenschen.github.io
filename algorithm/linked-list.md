@@ -696,4 +696,234 @@ int main(void)
 }
 ```
 
-Last Modified 2021-07-03
+## 提取末尾元素到头节点
+
+根据给定数量提取末尾倒数第 N 个节点到头节点
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#define N 9
+
+typedef struct Node
+{
+    struct Node *prev;
+    struct Node *next;
+    int value = -1;
+} Node;
+
+typedef struct LinkedList
+{
+    Node* head;
+    Node* tail;
+    int size;
+} LinkedList;
+
+void initLinkedList(LinkedList** list, const int n)
+{
+    Node *head, *tail, *node;
+    head = (Node*)malloc(sizeof(Node));
+    head->value = 0;
+    tail = head;
+    int i = 1;
+    for (; i <= n; i++)
+    {
+        node = (Node*)malloc(sizeof(Node));
+        node->value = i;
+        tail->next = node;
+        node->prev = tail;
+        tail = node;
+    }
+    tail->next = NULL;
+    (*list)->head = head;
+    (*list)->tail = tail;
+    (*list)->size = i;
+}
+
+void printLinkedLists(Node* node)
+{
+    while ( node != NULL )
+    {
+        printf("%d ", node->value);
+        node = node->next;
+    }
+    printf("\n");
+}
+
+int abs(const int num)
+{
+    return ((num >> 31) ^ num) - (num >> 31);
+}
+
+/* O(n) time | O(1) space */
+Node* shiftLinkedList(Node* head, const int k)
+{
+    int listLength = 0;
+    Node *listTail = head;
+    while ( listTail->next != NULL )
+    {
+        listTail = listTail->next;
+        listLength++;
+    }
+    const int offset = abs(k) % listLength;
+    if ( offset == 0 ) return head;
+
+    const int newTailPosition = k > 0 ? listLength - offset : offset;
+    Node *newTail = head;
+    int i = 0;
+    while ( i++ < newTailPosition )
+    {
+        newTail = newTail->next;
+    }
+    Node *newHead = newTail->next;
+    newTail->next = NULL;
+    listTail->next = head;
+    return newHead;
+}
+
+int main()
+{
+    LinkedList* list = (LinkedList*)malloc(sizeof(LinkedList));
+    initLinkedList(&list, N);
+    printLinkedLists(list->head);
+    Node *node = shiftLinkedList(list->head, 2);
+    printLinkedLists(node);
+    return 0;
+}
+```
+
+## 重排链表
+
+给定链表中的某个元素值，根据元素值重新排布链表，小于该值的节点在前，等于该值的节点在中间，大于该值的节点在后
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#define GET_ARRAY_LEN(array, len) { len = sizeof(array)/sizeof(array[0]); }
+
+typedef struct Node
+{
+    struct Node *prev, *next;
+    int value;
+} Node;
+
+typedef struct LinkedList
+{
+    Node *head, *tail;
+    int size;
+} LinkedList, *pLinkedList;
+
+void initLinkedList(pLinkedList* list, const int array[], const int n)
+{
+    Node *head, *tail, *node;
+    head = (Node*)malloc(sizeof(Node));
+    head->value = array[0];
+    tail = head;
+    int i = 0;
+    while ( ++i < n )
+    {
+        node = (Node*)malloc(sizeof(Node));
+        node->value = array[i];
+        tail->next = node;
+        tail = node;
+    }
+    tail->next = NULL;
+    (*list)->head = head;
+    (*list)->tail = tail;
+    (*list)->size = i;
+}
+
+void printLinkedLists(Node* node)
+{
+    while ( node != NULL )
+    {
+        printf("%d ", node->value);
+        node = node->next;
+    }
+    printf("\n");
+}
+
+
+LinkedList* growLinkedList(Node* head, Node* tail, Node* node)
+{
+    LinkedList* list = (LinkedList*)malloc(sizeof(LinkedList));
+    Node *newHead = head;
+    Node *newTail = node;
+
+    if ( newHead == NULL )
+        newHead = node;
+    if ( tail != NULL )
+        tail->next = node;
+
+    list->head = newHead;
+    list->tail = newTail;
+
+    return list;
+}
+
+LinkedList* connectLinkedLists(Node* head1, Node* tail1, Node* head2, Node* tail2)
+{
+    LinkedList* list = (LinkedList*)malloc(sizeof(LinkedList));
+    list->head = head1 == NULL ? head2 : head1;
+    list->tail = tail2 == NULL ? tail1 : tail2;
+
+    if ( tail1 != NULL )
+        tail1->next = head2;
+
+    return list;
+}
+
+/* O(n) time | O(1) space */
+Node* rearrangeLinkedList(Node* head, const int k)
+{
+    LinkedList *smallerList = (LinkedList*)malloc(sizeof(LinkedList));
+    smallerList->head = NULL;
+    smallerList->tail = NULL;
+    LinkedList *equalList = (LinkedList*)malloc(sizeof(LinkedList));
+    equalList->head = NULL;
+    equalList->tail = NULL;
+    LinkedList *greaterList = (LinkedList*)malloc(sizeof(LinkedList));
+    greaterList->head = NULL;
+    greaterList->tail = NULL;
+
+    Node *node = head;
+
+    while ( node != NULL )
+    {
+        if ( node->value < k )
+        {
+            smallerList = growLinkedList(smallerList->head, smallerList->tail, node);
+        }
+        else if ( node->value > k )
+        {
+            greaterList = growLinkedList(greaterList->head, greaterList->tail, node);
+        }
+        else
+        {
+            equalList = growLinkedList(equalList->head, equalList->tail, node);
+        }
+        Node *prevNode = node;
+        node = node->next;
+        prevNode->next = NULL;
+    }
+
+    LinkedList *firstList = connectLinkedLists(smallerList->head, smallerList->tail, equalList->head, equalList->tail);
+    LinkedList *finalList = connectLinkedLists(firstList->head, firstList->tail, greaterList->head, greaterList->tail);
+    return finalList->head;
+}
+
+int main()
+{
+    const int arr[] = {3, 0, 5, 2, 1, 4};
+    unsigned int len;
+    GET_ARRAY_LEN(arr, len);
+    LinkedList* list = (LinkedList*)malloc(sizeof(LinkedList));
+    initLinkedList(&list, arr, len);
+    printLinkedLists(list->head);
+    Node *node = rearrangeLinkedList(list->head, 3);
+    printLinkedLists(node);
+    return 0;
+}
+```
+
+Last Modified 2021-07-05
