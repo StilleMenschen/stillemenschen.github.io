@@ -3,4 +3,5 @@
   - [Data structure](algorithm/data-structure.md)
   - [Arrays](algorithm/arrays.md)
   - [Linked List](algorithm/linked-list.md)
+  - [Stack](algorithm/stack.md)
   - [Sorting](algorithm/sorting.md)
