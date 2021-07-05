@@ -406,7 +406,7 @@ int main()
 }
 ```
 
-## 反转单链表
+## 反转链表
 
 ```c
 #include <stdio.h>
@@ -490,7 +490,7 @@ int main()
 }
 ```
 
-## 合并单链表
+## 合并链表
 
 ```c
 #include <stdio.h>
@@ -922,6 +922,147 @@ int main()
     printLinkedLists(list->head);
     Node *node = rearrangeLinkedList(list->head, 3);
     printLinkedLists(node);
+    return 0;
+}
+```
+
+## 链表回文
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#define GET_ARRAY_LEN(array, len) { len = sizeof(array)/sizeof(array[0]); }
+
+typedef struct Node
+{
+    struct Node *prev, *next;
+    int value;
+} Node, *pNode;
+
+typedef struct LinkedList
+{
+    Node *head, *tail;
+    int size;
+} LinkedList, *pLinkedList;
+
+typedef struct LinkedListInfo
+{
+    int outerNodesAreEqual;
+    Node *leftNodeToCompare;
+} LinkedListInfo, *pLinkedListInfo;
+
+void initLinkedList(pLinkedList* list, const int array[], const int n)
+{
+    pNode head, tail, node;
+    head = (Node*)malloc(sizeof(Node));
+    head->value = array[0];
+    tail = head;
+    int i = 0;
+    while ( ++i < n )
+    {
+        node = (Node*)malloc(sizeof(Node));
+        node->value = array[i];
+        tail->next = node;
+        node->prev = tail;
+        tail = node;
+    }
+    tail->next = NULL;
+    (*list)->head = head;
+    (*list)->tail = tail;
+    (*list)->size = i;
+}
+
+void printLinkedLists(pNode node)
+{
+    while ( node != NULL )
+    {
+        printf("%d ", node->value);
+        node = node->next;
+    }
+    printf("\n");
+}
+
+pLinkedListInfo isPalindrome(pNode leftNode, pNode rightNode)
+{
+    pLinkedListInfo info;
+    if ( rightNode == NULL )
+    {
+        info = (LinkedListInfo*)malloc(sizeof(LinkedListInfo));
+        info->outerNodesAreEqual = 1;
+        info->leftNodeToCompare = leftNode;
+        return info;
+    }
+    info = isPalindrome(leftNode, rightNode->next);
+    pNode leftNodeToCompare = info->leftNodeToCompare;
+    int outerNodesAreEqual = info->outerNodesAreEqual;
+
+    int recursiveIsEqual = outerNodesAreEqual && leftNodeToCompare->value == rightNode->value;
+    pNode nextMatchingLeftNode = leftNodeToCompare->next;
+
+    info->outerNodesAreEqual = recursiveIsEqual;
+    info->leftNodeToCompare = nextMatchingLeftNode;
+    return info;
+}
+
+pNode reverseLinkedList(pNode head)
+{
+    pNode previousNode, currentNode, nextNode;
+    previousNode = NULL;
+    currentNode = head;
+    while ( currentNode != NULL )
+    {
+        nextNode = currentNode->next;
+        currentNode->next = previousNode;
+        previousNode = currentNode;
+        currentNode = nextNode;
+    }
+    return previousNode;
+}
+
+/* O(n) time | O(n) space */
+int linkedListPalindrome1(pNode head)
+{
+    pLinkedListInfo isPalindromeResult = isPalindrome(head, head);
+    return isPalindromeResult->outerNodesAreEqual;
+}
+
+/* O(n) time | O(1) space */
+int linkedListPalindrome2(pNode head)
+{
+    pNode slowNode, fastNode;
+    slowNode = fastNode = head;
+    while ( fastNode != NULL && fastNode->next != NULL )
+    {
+        slowNode = slowNode->next;
+        fastNode = fastNode->next->next;
+    }
+
+    pNode reverseSecondHalfNode = reverseLinkedList(slowNode);
+    pNode firstHalfNode = head;
+
+    while ( reverseSecondHalfNode != NULL )
+    {
+        if ( reverseSecondHalfNode->value != firstHalfNode->value )
+            return 0;
+        reverseSecondHalfNode = reverseSecondHalfNode->next;
+        firstHalfNode = firstHalfNode->next;
+    }
+
+    return 1;
+}
+
+int main()
+{
+    const int arr[] = {1, 3, 5, 5, 3, 1};
+    unsigned int len, isPalindrome;
+    GET_ARRAY_LEN(arr, len);
+    pLinkedList list = (LinkedList*)malloc(sizeof(LinkedList));
+    initLinkedList(&list, arr, len);
+    printLinkedLists(list->head);
+    isPalindrome = linkedListPalindrome1(list->head);
+    printf("isPalindrome One = %d\n", isPalindrome);
+    isPalindrome = linkedListPalindrome2(list->head);
+    printf("isPalindrome Two = %d\n", isPalindrome);
     return 0;
 }
 ```
