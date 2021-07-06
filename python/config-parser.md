@@ -55,7 +55,7 @@ top_secret = config['Frameworks']
 print('path:', top_secret.get('path'))
 ```
 
-> 单行注释为`#`或`;`
+> 配置文件的单行注释为`#`或`;`
 
 ## Python 2
 
@@ -125,4 +125,4 @@ print config.get('Section1', 'foo')  # -> "Life is hard!"
 - Configuration file parser https://docs.python.org/zh-cn/3.7/library/configparser.html
 - Configuration file parser https://docs.python.org/zh-cn/2.7/library/configparser.html
 
-Last Modified 2021-05-22
+Last Modified 2021-07-06
