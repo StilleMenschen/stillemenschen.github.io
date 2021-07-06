@@ -103,4 +103,80 @@ int main()
 }
 ```
 
+## 平衡括号
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node
+{
+    struct Node *next;
+    char value;
+} Node, *pNode;
+
+/* O(n) time | O(n) space */
+int balancedBrackets(char* brackets)
+{
+    pNode head, node;
+    head = node = NULL;
+    while  ( *brackets != '\0' )
+    {
+        if ( *brackets == '[' || *brackets == '(' || *brackets == '{' || *brackets == '<' )
+        {
+            if ( head == NULL )
+            {
+                head = (Node*)malloc(sizeof(Node));
+                head->value = *brackets;
+                head->next = NULL;
+            }
+            else
+            {
+                node = (Node*)malloc(sizeof(Node));
+                node->value = *brackets;
+                node->next = head;
+                head = node;
+            }
+        }
+        else if ( *brackets == ']' || *brackets == ')' || *brackets == '}' || *brackets == '>' )
+        {
+            if ( head == NULL ) return 0;
+            else
+            {
+                switch (*brackets)
+                {
+                case ']':
+                    if ( head->value != '[') return 0;
+                    break;
+                case ')':
+                    if ( head->value != '(') return 0;
+                    break;
+                case '}':
+                    if ( head->value != '{') return 0;
+                    break;
+                case '>':
+                    if ( head->value != '<') return 0;
+                    break;
+                }
+                head = head->next;
+            }
+        }
+        else
+        {
+            return 0;
+        }
+        *brackets++;
+    }
+    if ( head != NULL ) return 0;
+    return 1;
+}
+
+int main()
+{
+    char brackets[] = "[[<>(())]]{}{()}";
+    printf("%s is %d", brackets, balancedBrackets(brackets));
+    return 0;
+}
+```
+
 Last Modified 2021-07-06
