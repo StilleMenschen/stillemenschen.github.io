@@ -24,17 +24,17 @@ table th:first-of-type {
 }
 </style>
 
-| 选项              | 说明                                                |
-| :---------------- | :-------------------------------------------------- |
-| -d, --detach      | 在后台运行命令                                      |
-| --detach-keys     | 覆盖后台运行容器的键序列                            |
-| -e, --env         | 指定环境变量                                        |
-| --env-file        | 指定环境变量文件                                    |
-| -i, --interactive | 即使未连接`STDIN`，也应使其保持打开状态             |
-| --privileged      | 赋予命令扩展权限                                    |
-| -t, --tty         | 分配伪 TTY                                          |
-| -u, --user        | 用户名或`UID`（格式：`<name\|uid>[:<group\|gid>]`） |
-| -w, --workdir     | 指定容器内的工作目录                                |
+| 选项              | 说明                                                    |
+| :---------------- | :------------------------------------------------------ |
+| -d, --detach      | 在后台运行命令                                          |
+| --detach-keys     | 覆盖后台运行容器的键序列                                |
+| -e, --env         | 指定环境变量                                            |
+| --env-file        | 指定环境变量文件                                        |
+| -i, --interactive | 即使未连接`STDIN`，也应使其保持打开状态                 |
+| --privileged      | 赋予命令扩展权限                                        |
+| -t, --tty         | 分配伪 TTY                                              |
+| -u, --user        | 用户名或`UID`（格式：`<name \| uid>[:<group \| gid>]`） |
+| -w, --workdir     | 指定容器内的工作目录                                    |
 
 ## 命令示例
 
@@ -69,4 +69,4 @@ root@14715fb054c8:/tmp# echo $VAR1
 123
 ```
 
-Last Modified 2021-04-19
+Last Modified 2021-07-06

@@ -21,7 +21,7 @@ table th:first-of-type {
 </style>
 
 | 选项                    | 说明                                                                            |
-| :---------------------- | :------------------------------------------------------------------------------ | ------------ | -------- | ---------------- |
+| :---------------------- | :------------------------------------------------------------------------------ |
 | --add-host              | 添加自定义域名 IP 映射（`host:ip`）                                             |
 | --cidfile               | 将容器 ID 写入文件                                                              |
 | -d, --detach            | 在后台运行容器并打印容器 ID                                                     |
@@ -33,7 +33,7 @@ table th:first-of-type {
 | --health-interval       | 健康检查时间间隔（ms、s、m、h）默认 0s                                          |
 | --health-retries        | 连续出现多次故障需要报告不健康，默认 3 次                                       |
 | --health-timeout        | 健康检查超时时间（ms、s、m、h）默认 0s                                          |
-| --health-start-period   | 开始运行健康检查重试倒计时之前，等待容器初始化的时间（ms                        | s            | m        | h）（默认为 0s） |
+| --health-start-period   | 开始运行健康检查重试倒计时之前，等待容器初始化的时间（ms,s,m,h）（默认为 0s）   |
 | --help                  | 显示帮助信息                                                                    |
 | -h, --hostname          | 容器主机名                                                                      |
 | -i, --interactive       | 即使未连接`STDIN`，也应使其保持打开状态                                         |
@@ -62,7 +62,7 @@ table th:first-of-type {
 | --stop-signal           | 停止容器的信号，默认`SIGTERM`                                                   |
 | --tmpfs                 | 挂载`tmpfs`目录                                                                 |
 | -t, --tty               | 分配伪`TTY`                                                                     |
-| -u, --user              | 用户名或 UID（格式：`<name                                                      | uid>[:<group | gid>]`） |
+| -u, --user              | 用户名或 UID（格式：`<name \| uid>[:<group \| gid>]`）                          |
 | -v, --volume            | 绑定挂载卷                                                                      |
 | --volumes-from          | 从指定的容器挂载卷                                                              |
 | -w, --workdir           | 容器内的工作目录                                                                |
@@ -123,4 +123,4 @@ JAVA_HOME=/path/to/java/home
 docker run --env-file debian.env debian env
 ```
 
-Last Modified 2021-04-11
+Last Modified 2021-07-06
