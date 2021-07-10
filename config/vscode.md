@@ -16,8 +16,6 @@ settings.json
     "python.pythonPath": "python.exe",
     "php.validate.executablePath": "php.exe",
     "php.executablePath": "php.exe",
-    "prettier.printWidth": 120,
-    "prettier.proseWrap": "always",
     "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
     "typescript.format.insertSpaceBeforeFunctionParenthesis": true,
     "vetur.format.defaultFormatter.html": "js-beautify-html",
@@ -25,14 +23,11 @@ settings.json
         "js-beautify-html": {
             "wrap_attributes": "preserve-aligned",
             "indent_size": 4
-        },
-        "prettier": {
-            "singleQuote": true
         }
     },
     "eslint.options": {
         "env": {
-            "es2019": true
+            "es2020": true
         },
         "parserOptions": {
             "ecmaVersion": 2020,
@@ -74,7 +69,8 @@ settings.json
     "editor.linkedEditing": true,
     "python.analysis.completeFunctionParens": true,
     "editor.codeActionsOnSave": {
-        "source.fixAll": true
+        "source.fixAll": true,
+        "source.fixAll.eslint": true
     },
     "workbench.editorAssociations": {
         "*.ipynb": "jupyter.notebook.ipynb"
@@ -89,7 +85,6 @@ settings.json
         "192.168.0.1": "linux"
     },
     "workbench.colorTheme": "Remedy - Dark (Straight)",
-    "workbench.startupEditor": "gettingStarted",
     "terminal.integrated.profiles.windows": {
         "Git-Bash": {
             "path": "bash.exe",
@@ -99,8 +94,9 @@ settings.json
             "icon": "terminal-bash"
         },
     },
-    "terminal.integrated.defaultProfile.windows": "Git-Bash"
+    "terminal.integrated.defaultProfile.windows": "Git-Bash",
+    "eslint.format.enable": true
 }
 ```
 
-Last Modified 2021-03-13
+Last Modified 2021-07-10
