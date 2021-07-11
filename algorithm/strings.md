@@ -215,4 +215,124 @@ int main()
 }
 ```
 
+## 分组字谜
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node
+{
+    const char *value;
+    int code;
+} Node, *pNode;
+
+typedef struct Stack
+{
+    struct Stack *next;
+    int array[2];
+} Stack, *pStack;
+
+pStack pushStack(pStack stack, int leftIdx, int rightIdx)
+{
+    pStack node = (Stack*)malloc(sizeof(Stack));
+    node->array[0] = leftIdx;
+    node->array[1] = rightIdx;
+    if ( stack != NULL )
+        node->next = stack;
+    else
+        node->next = NULL;
+    return node;
+}
+
+int compareCode(Node array[], int i, int j)
+{
+    return array[i].code - array[j].code;
+}
+
+pNode quickSort(Node array[], int length)
+{
+    pStack stack = (Stack*)malloc(sizeof(Stack));
+    stack->array[0] = 0;
+    stack->array[1] = length - 1;
+    stack->next = NULL;
+    int startIdx, endIdx;
+    while ( stack != NULL )
+    {
+        startIdx = stack->array[0];
+        endIdx = stack->array[1];
+        stack = stack->next;
+        if ( startIdx >= endIdx )
+            continue;
+        int pivotIdx = startIdx;
+        int leftIdx = startIdx + 1;
+        int rightIdx = endIdx;
+        while ( rightIdx >= leftIdx )
+        {
+            if ( compareCode(array, leftIdx, pivotIdx) > 0 && compareCode(array, pivotIdx, rightIdx) > 0 )
+            {
+                const Node node = array[leftIdx];
+                array[leftIdx] = array[rightIdx];
+                array[rightIdx] = node;
+            }
+            if ( compareCode(array, leftIdx, pivotIdx) <= 0 )
+                leftIdx++;
+            if ( compareCode(array, rightIdx, pivotIdx) >= 0 )
+                rightIdx--;
+        }
+        const Node node = array[pivotIdx];
+        array[pivotIdx] = array[rightIdx];
+        array[rightIdx] = node;
+        if ( rightIdx - 1 - startIdx < endIdx - (rightIdx + 1) )
+        {
+            stack = pushStack(stack, startIdx, rightIdx - 1);
+            stack = pushStack(stack, rightIdx + 1, endIdx);
+        }
+        else
+        {
+            stack = pushStack(stack, rightIdx + 1, endIdx);
+            stack = pushStack(stack, startIdx, rightIdx - 1);
+        }
+    }
+    return array;
+}
+
+int wordCode(const char *word)
+{
+    int code = 0;
+    while ( *word )
+        code += (int)*word++;
+    return code;
+}
+
+/* O(w * n * log(n)) time | O(w * n) space */
+Node* groupAnagrams(Node words[], int wordsLength)
+{
+    int i = 0;
+    for ( ; i < wordsLength; i++)
+        words[i].code = wordCode( words[i].value );
+    return quickSort(words, wordsLength);
+}
+
+int main()
+{
+    Node words[] =
+    {
+        { "yo", -1 },
+        { "act", -1 },
+        { "blop", -1 },
+        { "tac", -1 },
+        { "cat", -1 },
+        { "oy", -1 },
+        { "olbp", -1 }
+    };
+    int wordsLength = sizeof(words) / sizeof(words[0]);
+    int i = 0;
+    pNode sortedWords = groupAnagrams(words, wordsLength);
+    for ( ; i < wordsLength ; i++)
+        printf("%s ", sortedWords[i].value );
+    return 0;
+}
+```
+
 Last Modified 2021-07-11

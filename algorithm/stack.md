@@ -66,9 +66,10 @@ public:
         this->minMaxStack = newMinMax;
         pNode top = new Node;
         top->value = number;
-        top->next = NULL;
         if ( this->stack != NULL )
             top->next = this->stack;
+        else
+            top->next = NULL;
         this->stack = top;
     }
     /* O(1) time | O(1) space */
