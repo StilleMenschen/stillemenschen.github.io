@@ -92,44 +92,51 @@ table th:first-of-type {
 
 以下为部分字段的简单说明
 
-- _PID_ 进程 ID
-- _USER_ 有效用户名
-- _PR_ 进程优先级
-- _NI_ CPU 调度优先级
-- _VIRT_ 虚拟映像 (KiB)
-- _RES_ 驻留大小 (KiB)
-- _SHR_ 共享内存 (KiB)
-- _S_ 进程状态
-- _%CPU_ CPU 使用率
-- _%MEM_ 内存使用率 (RES)
-- _TIME+_ CPU 时间，百分之一
-- _COMMAND_ 命令
-- _PPID_ 父进程 PID
-- _UID_ 有效用户 ID
-- _GID_ 组 ID
-- _GROUP_ 组名
-- _PGRP_ 进程组 ID
-- _TTY_ 伪终端
-- _TPGID_ 伪终端进程组 ID
-- _SID_ 会话 ID
-- _nTH_ 线程数
-- _P_ 上次使用的 CPU (SMP)
-- _TIME_ CPU 时间
-- _SWAP_ 交换大小 (KiB)
-- _CODE_ 代码大小 (KiB)
-- _DATA_ 数据+堆栈 (KiB)
-- _nMaj_ 主要页面错误
-- _nMin_ 次要页面错误
-- _nDRT_ 脏页数
-- _Flags_ 任务标志 <sched.h>
-- _CGROUPS_ 控制组
-- _SUPGIDS_ 支持组 ID
-- _SUPGRPS_ 支持组名称
-- _TGID_ 线程组 ID
-- _ENVIRON_ 环境变量
-- _vMj_ 主要故障增量
-- _vMn_ 次要故障增量
-- _USED_ 分辨率+交换大小 (KiB)
+- `PID` 进程 ID
+- `USER` 有效用户名
+- `PR` 进程优先级
+- `NI` CPU 调度优先级
+- `VIRT` 虚拟映像 (KiB)
+- `RES` 驻留大小 (KiB)
+- `SHR` 共享内存 (KiB)
+- `S` 进程状态
+   - `D` 不间断的睡眠
+   - `I` 空闲
+   - `R` 运行中
+   - `S` 睡眠
+   - `T` 由作业控制信号停止
+   - `t` 在跟踪期间被调试器停止
+   - `Z` 僵尸进程
+- `%CPU` CPU 使用率
+- `%MEM` 内存使用率 (RES)
+- `TIME+` CPU 时间，百分之一
+- `COMMAND` 命令
+- `PPID` 父进程 PID
+- `UID` 有效用户 ID
+- `GID` 组 ID
+- `GROUP` 组名
+- `PGRP` 进程组 ID
+- `TTY` 伪终端
+- `TPGID` 伪终端进程组 ID
+- `SID` 会话 ID
+- `nTH` 线程数
+- `P` 上次使用的 CPU (SMP)
+- `TIME` CPU 时间
+- `SWAP` 交换大小 (KiB)
+- `CODE` 代码大小 (KiB)
+- `DATA` 数据+堆栈 (KiB)
+- `nMaj` 主要页面错误
+- `nMin` 次要页面错误
+- `nDRT` 脏页数
+- `Flags` 任务标志 <sched.h>
+- `CGROUPS` 控制组
+- `SUPGIDS` 支持组 ID
+- `SUPGRPS` 支持组名称
+- `TGID` 线程组 ID
+- `ENVIRON` 环境变量
+- `vMj` 主要故障增量
+- `vMn` 次要故障增量
+- `USED` 驻留大小+交换大小 (KiB)
 
 ## 数据单位
 
