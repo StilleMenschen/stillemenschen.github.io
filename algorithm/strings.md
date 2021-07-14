@@ -359,7 +359,7 @@ char* longestSubstringWithoutDuplication(char string[])
     moveIdx = 0;
     for ( ; moveIdx < length; moveIdx++ )
     {
-        position = string[moveIdx] - '\032';
+        position = string[moveIdx] - ' ';
         if ( map[position] >= 0 && map[position] + 1 > startIdx )
             startIdx = map[position] + 1;
         if ( stop - start < moveIdx + 1 - startIdx)
