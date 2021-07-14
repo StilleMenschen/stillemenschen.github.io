@@ -6,3 +6,4 @@
   - [pip](config/pip.md)
   - [php](config/php.md)
   - [vscode](config/vscode.md)
+  - [linux proxy](config/linux-proxy.md)
