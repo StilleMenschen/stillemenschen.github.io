@@ -335,4 +335,51 @@ int main()
 }
 ```
 
-Last Modified 2021-07-11
+## 不重复子字符串
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int getStringLength(char* string)
+{
+    char *p = string;
+    int length = 0;
+    while ( *p++ ) length++;
+    return length;
+}
+
+char* longestSubstringWithoutDuplication(char string[])
+{
+    int map[95];
+    int moveIdx = 0;
+    while ( moveIdx < 95 ) map[moveIdx++] = -1;
+    const int length = getStringLength(string);
+    int startIdx = -1, position, start = 0, stop = 0;
+    moveIdx = 0;
+    for ( ; moveIdx < length; moveIdx++ )
+    {
+        position = string[moveIdx] - '\032';
+        if ( map[position] >= 0 && map[position] + 1 > startIdx )
+            startIdx = map[position] + 1;
+        if ( stop - start < moveIdx + 1 - startIdx)
+        {
+            start = startIdx;
+            stop = moveIdx + 1;
+        }
+        map[position] = moveIdx;
+    }
+    char *p = &string[start];
+    string[stop] = '\0';
+    return p;
+}
+
+int main()
+{
+    char words[] = "cleMent3isacap";
+    printf("%s", longestSubstringWithoutDuplication(words));
+    return 0;
+}
+```
+
+Last Modified 2021-07-14
