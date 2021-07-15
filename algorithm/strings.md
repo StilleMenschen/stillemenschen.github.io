@@ -349,6 +349,7 @@ int getStringLength(char* string)
     return length;
 }
 
+/* O(n) time | O(min(n, a)) space */
 char* longestSubstringWithoutDuplication(char string[])
 {
     int map[95];
@@ -382,4 +383,112 @@ int main()
 }
 ```
 
-Last Modified 2021-07-14
+## 标记子字符串
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node
+{
+    struct Node *next;
+    int position[2];
+} Node, *pNode;
+
+int getStringLength(char* string)
+{
+    char *p = string;
+    int length = 0;
+    while ( *p++ ) length++;
+    return length;
+}
+
+int findSubstring(char string[], int startIdx, int length1, char substring[], int length2)
+{
+    int j = 0, position = 0;
+    length1 = length1 - length2 + 1;
+    while ( startIdx < length1 )
+    {
+        if ( string[startIdx] == substring[j] )
+        {
+            position = startIdx;
+            while ( j < length2 && string[++position] == substring[++j] ) {} ;
+            if ( j == length2 ) return startIdx;
+            j = 0;
+        }
+        startIdx++;
+    }
+    return -1;
+}
+
+char* underscorify(char string[], int stringLength, int realLength, pNode head)
+{
+    char *p = (char*)malloc((realLength + 1) * sizeof(char));
+    char *q = p;
+    int startIdx = 0;
+    while ( head != NULL )
+    {
+        while ( startIdx < head->position[0] )
+            *q++ = string[startIdx++];
+        *q++ = '_';
+        while ( startIdx < head->position[1] )
+            *q++ = string[startIdx++];
+        *q++ = '_';
+        head = head->next;
+    }
+    while ( startIdx < stringLength )
+        *q++ = string[startIdx++];
+    *q = '\0';
+    return p;
+}
+
+/* O(n + m) time | O(n) space */
+char* underscorifySubstring(char string[], char substring[])
+{
+    int stringLength = getStringLength(string);
+    int substringLength = getStringLength(substring);
+    if ( stringLength <= 0 || substringLength <= 0 || stringLength < substringLength) return string;
+    int startIdx = 0, total = 0, locate;
+    pNode head = NULL, tail = NULL;
+    while ( startIdx < stringLength )
+    {
+        locate = findSubstring(string, startIdx, stringLength, substring, substringLength);
+        if ( locate < 0 ) break;
+        if ( head == NULL )
+        {
+            head = (Node*)malloc(sizeof(Node));
+            tail = head;
+            tail->position[0] = locate;
+            tail->position[1] = locate + substringLength;
+        }
+        else
+        {
+            if ( locate <= tail->position[1] )
+            {
+                tail->position[1] = locate + substringLength;
+            }
+            else
+            {
+                tail->next = (Node*)malloc(sizeof(Node));
+                tail = tail->next;
+                tail->position[0] = locate;
+                tail->position[1] = locate + substringLength;
+            }
+        }
+        startIdx = locate + 1;
+        total++;
+    }
+    tail->next = NULL;
+    return underscorify(string, stringLength, total * 2 + stringLength, head);
+}
+
+int main()
+{
+    char string[] = "alpha a that a alphaalpha pre to seen if alphalphalpha it works";
+    char substring[] = "alpha";
+    printf("%s", underscorifySubstring(string, substring));
+    return 0;
+}
+```
+
+Last Modified 2021-07-16
