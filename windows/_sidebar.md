@@ -2,3 +2,5 @@
 - [Windows](windows/)
   - [删除此电脑网盘图标](windows/delete-my-computer-pan.md)
   - [删除远程桌面历史](windows/delete-remote-desktop-history.md)
+  - [写入引导](windows/write-efi-boot.md)
+  - [转换MBR为GPT](windows/mbr-to-gpt.md)
