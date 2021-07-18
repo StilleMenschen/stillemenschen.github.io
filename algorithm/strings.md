@@ -562,4 +562,94 @@ if __name__ == '__main__':
     print(pattern_matcher('xxyxxy', 'gogopowerrangegogopowerrange'))
 ```
 
-Last Modified 2021-07-16
+## 找出最小子字符串
+
+```python
+# O(b + s) time | O(b + s) space
+def smallest_substring_containing(big_string, small_string):
+    target_char_counts = get_char_counts(small_string)
+    substring_bounds = get_substring_bounds(big_string, target_char_counts)
+    return get_string_from_bounds(big_string, substring_bounds)
+
+
+def get_substring_bounds(string, target_char_counts):
+    # 初始最小范围为无限大
+    substring_bounds = (0, float('inf'),)
+    substring_char_counts = dict()
+    # 计算待查找的字符数
+    num_unique_chars = len(target_char_counts.keys())
+    num_unique_chars_done = 0
+    # 创建左右指针不停地缩小范围查找
+    left_idx = 0
+    right_idx = 0
+    string_length = len(string)
+    while right_idx < string_length:
+        # 移动右指针递增找到的字符数
+        right_char = string[right_idx]
+        if right_char not in target_char_counts:
+            # 不存在于待查找字符串的字符直接跳过
+            right_idx += 1
+            continue
+        # 递增待查找字符数
+        increase_char_count(right_char, substring_char_counts)
+        if substring_char_counts[right_char] == target_char_counts[right_char]:
+            # 如果找到了符合条件的字符则待查找字符总计数加1
+            num_unique_chars_done += 1
+        # 移动左指针缩小字符串范围
+        while num_unique_chars_done == num_unique_chars and left_idx <= right_idx:
+            substring_bounds = get_closer_bounds(left_idx, right_idx, substring_bounds[0], substring_bounds[1])
+            left_char = string[left_idx]
+            if left_char not in target_char_counts:
+                # 不存在于待查找字符串的字符直接跳过
+                left_idx += 1
+                continue
+            if substring_char_counts[left_char] == target_char_counts[left_char]:
+                # 如果找到了符合条件的字符则待查找字符总计数减1 (停止移动左指针)
+                num_unique_chars_done -= 1
+            # 递减待查找字符数
+            decrease_char_count(left_char, substring_char_counts)
+            left_idx += 1
+        right_idx += 1
+    return substring_bounds
+
+
+def get_closer_bounds(first_idx1, first_idx2, second_idx1, second_idx2):
+    """求出范围最小的字符串"""
+    if first_idx2 - first_idx1 < second_idx2 - second_idx1:
+        return first_idx1, first_idx2
+    else:
+        return second_idx1, second_idx2
+
+
+def get_string_from_bounds(string, substring_bounds):
+    """返回找到的子字符串"""
+    start, end = substring_bounds
+    if end == float('inf'):
+        # 如果最大值仍然是无限大则表示没有找到
+        return ""
+    return string[start:end + 1]
+
+
+def get_char_counts(string):
+    """统计待查找子字符串的字符个数"""
+    char_counts = dict()
+    for char in string:
+        increase_char_count(char, char_counts)
+    return char_counts
+
+
+def increase_char_count(char, char_counts):
+    if char not in char_counts:
+        char_counts[char] = 0
+    char_counts[char] += 1
+
+
+def decrease_char_count(char, char_counts):
+    char_counts[char] -= 1
+
+
+if __name__ == '__main__':
+    print(smallest_substring_containing('abcd#ef#axb#c#', '##abf'))
+```
+
+Last Modified 2021-07-18
