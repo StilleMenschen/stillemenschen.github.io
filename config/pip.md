@@ -1,7 +1,7 @@
 # pip
 
 现在国内镜像挺多的，可以多问问搜索引擎。文件放在在用户目录下，Linux
-在`$HOME/.config/pip/pip.conf`或`$HOME/.pip/pip.conf`，Windows 在`%USERPROFILE%\.npmrc`，全局路径在哪里可以问问搜索引擎
+在`$HOME/.config/pip/pip.conf`或`$HOME/.pip/pip.conf`，Windows 在`%USERPROFILE%\pip\pip.ini`，全局路径在哪里可以问问搜索引擎
 
 ```
 [global]

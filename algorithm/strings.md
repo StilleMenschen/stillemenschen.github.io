@@ -495,6 +495,7 @@ int main()
 
 ```python
 def get_new_pattern(pattern):
+    """调换模式中的x和y的位置"""
     pattern_letters = list(pattern)
     if pattern[0] == 'x':
         return pattern_letters
@@ -503,6 +504,7 @@ def get_new_pattern(pattern):
 
 
 def get_counts_and_first_y_pos(pattern, counts):
+    """找出y的第一次出现位置"""
     first_y_pos = None
     for i, char in enumerate(pattern):
         counts[char] += 1
@@ -516,29 +518,42 @@ def pattern_matcher(pattern, string):
     if len(pattern) > len(string):
         return list()
     new_pattern = get_new_pattern(pattern)
+    # 由于下面是从x开始猜测, 所以此处确定是否在最后猜出字符串时将x和y调换回来
     did_switch = new_pattern[0] != pattern[0]
     counts = {'x': 0, 'y': 0}
     first_y_pos = get_counts_and_first_y_pos(new_pattern, counts)
     string_length = len(string)
+    # 如果x和y都有
     if counts['y'] != 0:
+        # 从长度1开始猜测x单词的长度
         for len_of_x in range(1, string_length):
+            # 逆向算出y的长度
             len_of_y = (string_length - len_of_x * counts['x']) / counts['y']
+            # y的长度必须是正整数
             if len_of_y <= 0 or len_of_y % 1 != 0:
                 continue
+            # 切片源字符串并填充x和y
             len_of_y = int(len_of_y)
             y_idx = first_y_pos * len_of_x
             x = string[:len_of_x]
             y = string[y_idx:y_idx + len_of_y]
             potential_match = map(lambda char: x if char == 'x' else y, new_pattern)
+            # 比较拼接好的字符串是否与源字符串完全相等
             if string == ''.join(potential_match):
+                # 完全相等则表示猜测正确
                 return [x, y] if not did_switch else [y, x]
+    # 如果只有x
     else:
+        # 得出x单词的长度
         len_of_x = string_length / counts['x']
         if len_of_x % 1 == 0:
             len_of_x = int(len_of_x)
+            # 切片源字符串并填充x
             x = string[:len_of_x]
             potential_match = map(lambda char: x, new_pattern)
+            # 比较拼接好的字符串是否与源字符串完全相等
             if string == ''.join(potential_match):
+                # 完全相等则表示猜测正确
                 return [x, ''] if not did_switch else ['', x]
     return list()
 
