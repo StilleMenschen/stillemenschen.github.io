@@ -652,4 +652,139 @@ if __name__ == '__main__':
     print(smallest_substring_containing('abcd#ef#axb#c#', '##abf'))
 ```
 
-Last Modified 2021-07-18
+## 最长匹配括号数
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node
+{
+    struct Node *next;
+    int value;
+} Node, *pNode;
+
+int getStringLength(char* string)
+{
+    char *p = string;
+    int length = 0;
+    while ( *p++ ) length++;
+    return length;
+}
+
+int max(int one, int two)
+{
+    if ( one > two )
+        return one;
+    return two;
+}
+
+/* O(n) time | O(n) space */
+int longestBalancedSubstring1(char string[])
+{
+    int i, maxLength = 0;
+    const int length = getStringLength(string);
+    pNode idxStack = (Node*)malloc(sizeof(Node));
+    idxStack->value = -1;
+    idxStack->next = NULL;
+    for ( i=0; i<length; i++)
+    {
+        if ( string[i] == '(' )
+        {
+            pNode node = (Node*)malloc(sizeof(Node));
+            node->value = i;
+            node->next = idxStack;
+            idxStack = node;
+        }
+        else
+        {
+            idxStack = idxStack->next;
+            if ( idxStack == NULL )
+            {
+                idxStack = (Node*)malloc(sizeof(Node));
+                idxStack->value = i;
+                idxStack->next = NULL;
+            }
+            else
+            {
+                const int balancedSubstringStartIdx = idxStack->value;
+                const int currentLength = i - balancedSubstringStartIdx;
+                maxLength = max(maxLength, currentLength);
+            }
+        }
+    }
+    return maxLength;
+}
+
+/* O(n) time | O(1) space */
+int longestBalancedSubstring2(char string[])
+{
+    int i, maxLength = 0;
+    const int length = getStringLength(string);
+    int openingCount = 0, closingCount = 0;
+    for ( i=0; i<length; i++)
+    {
+        if ( string[i] == '(' )
+            openingCount++;
+        else
+            closingCount++;
+        if ( openingCount == closingCount )
+            maxLength = max(maxLength, openingCount + closingCount);
+        else if ( closingCount > openingCount )
+            openingCount = closingCount = 0;
+    }
+    openingCount = closingCount = 0;
+    for ( i=length-1; i>=0; i--)
+    {
+        if ( string[i] == '(' )
+            openingCount++;
+        else
+            closingCount++;
+        if ( openingCount == closingCount )
+            maxLength = max(maxLength, openingCount + closingCount);
+        else if ( openingCount > closingCount )
+            openingCount = closingCount = 0;
+    }
+    return maxLength;
+}
+
+int getLongestBalancedInRange(char string[], int start, int stop, int step)
+{
+    const char openingParens = step > 0 ? '(' : ')';
+    int maxLength = 0;
+    int openingCount = 0, closingCount = 0;
+    for ( ; start <= stop; start+=step )
+    {
+        if ( string[start] == openingParens )
+            openingCount++;
+        else
+            closingCount++;
+        if ( openingCount == closingCount )
+            maxLength = max(maxLength, openingCount + closingCount);
+        else if ( closingCount > openingCount )
+            openingCount = closingCount = 0;
+    }
+    return maxLength;
+}
+
+/* O(n) time | O(1) space */
+int longestBalancedSubstring3(char string[])
+{
+    const int length = getStringLength(string);
+    return max(
+               getLongestBalancedInRange(string, 0, length - 1, 1),
+               getLongestBalancedInRange(string, length - 1, 0, -1)
+           );
+}
+
+int main(void)
+{
+    char string[] = ")((()))()";
+    printf("%d ", longestBalancedSubstring1(string));
+    printf("%d ", longestBalancedSubstring2(string));
+    printf("%d ", longestBalancedSubstring3(string));
+    return 0;
+}
+```
+
+Last Modified 2021-07-19
