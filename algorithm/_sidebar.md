@@ -6,3 +6,4 @@
   - [Stack](algorithm/stack.md)
   - [Sorting](algorithm/sorting.md)
   - [Strings](algorithm/strings.md)
+  - [Dynamic programming](algorithm/dynamic-programming.md)

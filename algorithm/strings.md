@@ -50,7 +50,7 @@ int getStringLength(const char *string)
 }
 
 /* O(n) time | O(1) space */
-char* caesarCipherEncryptor(char string[], int key)
+void caesarCipherEncryptor(char string[], int key)
 {
     const int length = getStringLength(string);
     const int firstLetters = 'a', lastLetters = 'z';
@@ -63,7 +63,6 @@ char* caesarCipherEncryptor(char string[], int key)
             c = ( firstLetters + c ) % lastLetters;
         string[i] = c;
     }
-    return string;
 }
 
 int main()
