@@ -39,4 +39,47 @@ int main(void)
 }
 ```
 
-Last Modified 2021-07-20
+## 组成金额的所有可能
+
+给定一个金额，如 5，给定几种面额的硬币 如 1 2 5，硬币的数量没有限制，找出这几种硬币组合成金额的所有可能
+
+```
+F(5) = 5
+F(5) = 2 + 2 + 1
+F(5) = 2 + 1 + 1 + 1
+F(5) = 1 + 1 + 1 + 1 + 1
+```
+
+```
+F(X, [dₒ..dᵢ]) = F(X, [dₒ..dᵢ-₁]) + F(X - dᵢ, [dₒ..dᵢ])
+Fᵢ(X) = Fᵢ-₁(X) + Fᵢ(X - dᵢ)
+```
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+/* O(n * d) time | O(n) space */
+int numberOfWaysToMakeChange(int n, int denoms[], int denomsLength)
+{
+    if ( n <=0 ) return 0;
+    int ways[n + 1] = {0};
+    int i, j;
+    ways[0] = 1;
+    for ( i=0; i<denomsLength; i++)
+        for ( j=1; j<=n; j++)
+            if ( denoms[i] <= j )
+                ways[j] += ways[j - denoms[i]];
+    return ways[n];
+}
+
+int main(void)
+{
+    int denoms[] = {3, 5, 10};
+    int length = sizeof(denoms) / sizeof(denoms[0]);
+    printf("%d", numberOfWaysToMakeChange(15, denoms, length));
+    return 0;
+}
+```
+
+Last Modified 2021-07-21
