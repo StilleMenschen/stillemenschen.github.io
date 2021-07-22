@@ -104,19 +104,21 @@ int minNumberOfCoinsForChange(int n, int denoms[], int denomsLength)
     int numOfCoins[n + 1] = {0};
     int i, amount;
     for ( i=1; i<=n; i++)
-        numOfCoins[i] = 99999;
+        numOfCoins[i] = 2147483646;
     for ( i=0; i<denomsLength; i++)
         for ( amount=0; amount<=n; amount++)
             if ( denoms[i] <= amount )
                 numOfCoins[amount] = min( numOfCoins[amount], 1 + numOfCoins[amount - denoms[i]] );
-    return numOfCoins[n];
+    if ( numOfCoins[n] != 2147483646 )
+        return numOfCoins[n];
+    return -1;
 }
 
 int main(void)
 {
-    int denoms[] = {1, 2, 4};
+    int denoms[] = {2, 4, 9, 25, 11};
     int length = sizeof(denoms) / sizeof(denoms[0]);
-    printf("%d", minNumberOfCoinsForChange(6, denoms, length));
+    printf("%d", minNumberOfCoinsForChange(7, denoms, length));
     return 0;
 }
 ```
