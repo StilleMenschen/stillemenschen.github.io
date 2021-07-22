@@ -64,12 +64,12 @@ int numberOfWaysToMakeChange(int n, int denoms[], int denomsLength)
 {
     if ( n <=0 ) return 0;
     int ways[n + 1] = {0};
-    int i, j;
+    int i, amount;
     ways[0] = 1;
     for ( i=0; i<denomsLength; i++)
-        for ( j=1; j<=n; j++)
-            if ( denoms[i] <= j )
-                ways[j] += ways[j - denoms[i]];
+        for ( amount=1; amount<=n; amount++)
+            if ( denoms[i] <= amount )
+                ways[amount] += ways[amount - denoms[i]];
     return ways[n];
 }
 
@@ -82,4 +82,43 @@ int main(void)
 }
 ```
 
-Last Modified 2021-07-21
+## 组成金额的最小组合
+
+给定一个金额，如 6，给定几种面额的硬币 如 1 2 4，硬币的数量没有限制，找出这几种硬币组合成金额的最小组合数，即 `F(6) = 2 + 4`，最少为 `2` 个数组合
+
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int min(int a, int b)
+{
+    if ( a < b ) return a;
+    return b;
+}
+
+/* O(n * d) time | O(n) space */
+int minNumberOfCoinsForChange(int n, int denoms[], int denomsLength)
+{
+    if ( n <=0 ) return 0;
+    int numOfCoins[n + 1] = {0};
+    int i, amount;
+    for ( i=1; i<=n; i++)
+        numOfCoins[i] = 99999;
+    for ( i=0; i<denomsLength; i++)
+        for ( amount=0; amount<=n; amount++)
+            if ( denoms[i] <= amount )
+                numOfCoins[amount] = min( numOfCoins[amount], 1 + numOfCoins[amount - denoms[i]] );
+    return numOfCoins[n];
+}
+
+int main(void)
+{
+    int denoms[] = {1, 2, 4};
+    int length = sizeof(denoms) / sizeof(denoms[0]);
+    printf("%d", minNumberOfCoinsForChange(6, denoms, length));
+    return 0;
+}
+```
+
+Last Modified 2021-07-22
