@@ -123,4 +123,115 @@ int main(void)
 }
 ```
 
-Last Modified 2021-07-22
+## 莱文斯坦距离
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int getStringLength(char* string)
+{
+    char *p = string;
+    int length = 0;
+    while ( *p++ ) length++;
+    return length;
+}
+
+int min(int a, int b, int c)
+{
+    if ( b < a ) a = b;
+    if ( c < a ) a = c;
+    return a;
+}
+
+/* O(n * m) time | O(n * m) space */
+int levenshteinDistance1(char str1[], char str2[])
+{
+    int str1Length = getStringLength(str1) + 1;
+    int str2Length = getStringLength(str2) + 1;
+    int edits[str1Length][str2Length], row, col;
+    for ( col=0; col<str2Length; col++)
+        edits[0][col] = col;
+    for ( row=0; row<str1Length; row++)
+        edits[row][0] = row;
+    for ( row=1; row<str1Length; row++)
+    {
+        for ( col=1; col<str2Length; col++)
+        {
+            if ( str1[row - 1] == str2[col - 1] )
+            {
+                edits[row][col] = edits[row - 1][col - 1];
+            }
+            else
+            {
+                edits[row][col] = 1 + min(edits[row][col - 1], edits[row - 1][col], edits[row - 1][col - 1]);
+            }
+        }
+    }
+    return edits[str1Length - 1][str2Length - 1];
+}
+
+/* O(n * m) time | O(min(n,m)) space */
+int levenshteinDistance2(char str1[], char str2[])
+{
+    int str1Length = getStringLength(str1) + 1;
+    int str2Length = getStringLength(str2) + 1;
+    int smallLength = str1Length, bigLength = str2Length;
+    char *small, *big;
+    int i, j;
+    int evenEdits[smallLength], oddEdits[smallLength];
+    int *currentEdits, *previousEdits;
+    for ( i=0; i<smallLength; i++)
+    {
+        evenEdits[i] = i;
+        oddEdits[i] = -1;
+    }
+    if ( str1Length < str2Length )
+    {
+        small = str1;
+        big = str2;
+    }
+    else
+    {
+        big = str1;
+        small = str2;
+        smallLength = str2Length;
+        bigLength = str1Length;
+    }
+    for ( i=1; i<bigLength; i++)
+    {
+        if ( i % 2 == 1)
+        {
+            currentEdits = oddEdits;
+            previousEdits = evenEdits;
+        }
+        else
+        {
+            currentEdits = evenEdits;
+            previousEdits = oddEdits;
+        }
+        currentEdits[0] = i;
+        for ( j=0; j<smallLength; j++)
+        {
+            if ( big[i - 1] == small[j - 1] )
+                currentEdits[j] = previousEdits[j - 1];
+            else
+                currentEdits[j] = 1 + min( previousEdits[j - 1], previousEdits[j], currentEdits[j -1] );
+        }
+    }
+    if ( bigLength % 2 == 0)
+        return evenEdits[smallLength - 1];
+    return oddEdits[smallLength - 1];
+}
+
+int main()
+{
+    char str1[] = "abc5";
+    char str2[] = "yabcd";
+    printf("%d ", levenshteinDistance1(str1, str2));
+    printf("%d ", levenshteinDistance2(str1, str2));
+    return 0;
+}
+```
+
+Last Modified 2021-07-25
