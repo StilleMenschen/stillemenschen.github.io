@@ -72,9 +72,6 @@ settings.json
         "source.fixAll": true,
         "source.fixAll.eslint": true
     },
-    "workbench.editorAssociations": {
-        "*.ipynb": "jupyter.notebook.ipynb"
-    },
     "editor.wordBasedSuggestionsMode": "allDocuments",
     "path-intellisense.mappings": {
         "@": "${workspaceRoot}/src"
@@ -95,8 +92,11 @@ settings.json
         },
     },
     "terminal.integrated.defaultProfile.windows": "Git-Bash",
-    "eslint.format.enable": true
+    "eslint.format.enable": true,
+    "security.workspace.trust.startupPrompt": "never",
+    "security.workspace.trust.emptyWindow": false,
+    "security.workspace.trust.enabled": false
 }
 ```
 
-Last Modified 2021-07-10
+Last Modified 2021-07-26
