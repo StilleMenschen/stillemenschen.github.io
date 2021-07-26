@@ -460,6 +460,8 @@ nnmt2;
 ```bash
 echo 今天的日期时间是 `date`
 echo 今天的日期时间是 $(date)
+curpath=`echo current path is \`pwd\``
+echo $curpath
 ```
 
 ## 算计运算
