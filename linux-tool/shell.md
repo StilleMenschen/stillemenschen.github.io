@@ -464,9 +464,9 @@ curpath=`echo current path is \`pwd\``
 echo $curpath
 ```
 
-## 算计运算
+## 算术运算
 
-使用`$(( expression ))`可以对表达式内的数运算求值并暂存作为其它命令的参数
+使用`$(( expression ))`可以对表达式内的数学运算求值并暂存作为其它命令的参数
 
 ```bash
 echo $(( 1 + 2 + 3 ))
