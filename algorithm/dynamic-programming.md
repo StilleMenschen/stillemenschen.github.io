@@ -241,35 +241,44 @@ int main()
 #include <stdio.h>
 #include <stdlib.h>
 
-int* buildSequence(int array[], int sequence[], int maxSumIdx, int *length)
+typedef struct Result
 {
-    int subSequenceLength = 0, i;
+    int sequenceLength;
+    int sum;
+    int *sequence;
+} Result, *pResult;
+
+pResult buildSequence(int array[], int sequence[], int maxSumIdx)
+{
+    pResult r = (Result*)malloc(sizeof(Result));
+    r->sequenceLength = r->sum = 0;
+    int i;
     for ( i=maxSumIdx; i>=0; )
     {
-        subSequenceLength++;
+        r->sequenceLength++;
         i = sequence[i];
     }
-    *length = subSequenceLength;
-    int *subSequence = (int*)malloc(subSequenceLength * sizeof(int));
-    for ( i=subSequenceLength-1; i>=0; i--)
+    r->sequence = (int*)malloc(r->sequenceLength * sizeof(int));
+    for ( i=r->sequenceLength-1; i>=0; i--)
     {
-        subSequence[i] = array[maxSumIdx];
+        r->sequence[i] = array[maxSumIdx];
+        r->sum += array[maxSumIdx];
         maxSumIdx = sequence[maxSumIdx];
     }
-    return subSequence;
+    return r;
 }
 
 /* O(n^2) time | O(n) space */
-int* maxSumIncreasingSubsequence(int array[], int *length)
+pResult maxSumIncreasingSubsequence(int array[], int length)
 {
-    int sequence[*length] = {0}, sums[*length] = {0};
+    int sequence[length] = {0}, sums[length] = {0};
     int i, j, currentNum, otherNum, maxSumIdx = 0;
-    for ( i=0; i<*length; i++)
+    for ( i=0; i<length; i++)
     {
         sequence[i] = -1;
         sums[i] = array[i];
     }
-    for ( i=0; i<*length; i++)
+    for ( i=0; i<length; i++)
     {
         currentNum = array[i];
         for ( j=0; j<i; j++)
@@ -286,18 +295,18 @@ int* maxSumIncreasingSubsequence(int array[], int *length)
             maxSumIdx = i;
         }
     }
-    return buildSequence(array, sequence, maxSumIdx, length);
+    return buildSequence(array, sequence, maxSumIdx);
 }
 
 int main(void)
 {
     int array[] = {8, 13, 2, 3, 15, 2, 6};
     int length = sizeof(array) / sizeof(array[0]);
-    int *p = maxSumIncreasingSubsequence(array, &length), i = 0;
-    while ( i++ < length )
-    {
-        printf("%d ", *p++);
-    }
+    pResult result = maxSumIncreasingSubsequence(array, length);
+    int i = 0;
+    printf("%d, ", result->sum);
+    while ( i < result->sequenceLength )
+        printf("%d ", result->sequence[i++]);
     return 0;
 }
 ```
