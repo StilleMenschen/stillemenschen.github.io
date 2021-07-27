@@ -90,6 +90,7 @@ int main(void)
 ```c
 #include <stdio.h>
 #include <stdlib.h>
+#define MAX_INTEGER_VALUE 2147483646
 
 int min(int a, int b)
 {
@@ -104,12 +105,12 @@ int minNumberOfCoinsForChange(int n, int denoms[], int denomsLength)
     int numOfCoins[n + 1] = {0};
     int i, amount;
     for ( i=1; i<=n; i++)
-        numOfCoins[i] = 2147483646;
+        numOfCoins[i] = MAX_INTEGER_VALUE;
     for ( i=0; i<denomsLength; i++)
         for ( amount=0; amount<=n; amount++)
             if ( denoms[i] <= amount )
                 numOfCoins[amount] = min( numOfCoins[amount], 1 + numOfCoins[amount - denoms[i]] );
-    if ( numOfCoins[n] != 2147483646 )
+    if ( numOfCoins[n] != MAX_INTEGER_VALUE )
         return numOfCoins[n];
     return -1;
 }
@@ -234,4 +235,71 @@ int main()
 }
 ```
 
-Last Modified 2021-07-25
+## 最大递增子序列
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int* buildSequence(int array[], int sequence[], int maxSumIdx, int *length)
+{
+    int subSequenceLength = 0, i;
+    for ( i=maxSumIdx; i>=0; )
+    {
+        subSequenceLength++;
+        i = sequence[i];
+    }
+    *length = subSequenceLength;
+    int *subSequence = (int*)malloc(subSequenceLength * sizeof(int));
+    for ( i=subSequenceLength-1; i>=0; i--)
+    {
+        subSequence[i] = array[maxSumIdx];
+        maxSumIdx = sequence[maxSumIdx];
+    }
+    return subSequence;
+}
+
+/* O(n^2) time | O(n) space */
+int* maxSumIncreasingSubsequence(int array[], int *length)
+{
+    int sequence[*length] = {0}, sums[*length] = {0};
+    int i, j, currentNum, otherNum, maxSumIdx = 0;
+    for ( i=0; i<*length; i++)
+    {
+        sequence[i] = -1;
+        sums[i] = array[i];
+    }
+    for ( i=0; i<*length; i++)
+    {
+        currentNum = array[i];
+        for ( j=0; j<i; j++)
+        {
+            otherNum = array[j];
+            if ( otherNum < currentNum && sums[j] + currentNum >= sums[i] )
+            {
+                sums[i] = sums[j] + currentNum;
+                sequence[i] = j;
+            }
+        }
+        if ( sums[i] >= sums[maxSumIdx] )
+        {
+            maxSumIdx = i;
+        }
+    }
+    return buildSequence(array, sequence, maxSumIdx, length);
+}
+
+int main(void)
+{
+    int array[] = {8, 13, 2, 3, 15, 2, 6};
+    int length = sizeof(array) / sizeof(array[0]);
+    int *p = maxSumIncreasingSubsequence(array, &length), i = 0;
+    while ( i++ < length )
+    {
+        printf("%d ", *p++);
+    }
+    return 0;
+}
+```
+
+Last Modified 2021-07-28
