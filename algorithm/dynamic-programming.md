@@ -311,4 +311,88 @@ int main(void)
 }
 ```
 
-Last Modified 2021-07-28
+## 最长公共子序列
+
+```python
+# O(n * m * min(n, m)) time | O(n * m * min(n, m)) space
+def longest_common_subsequence1(s1, s2):
+    lcs = [[[] for _ in range(len(s1) + 1)] for _ in range(len(s2) + 1)]
+    for i in range(1, len(s2) + 1):
+        for j in range(len(s1) + 1):
+            if s2[i - 1] == s1[j - 1]:
+                lcs[i][j] = lcs[i - 1][j - 1] + [s2[i - 1]]
+            else:
+                lcs[i][j] = max(lcs[i - 1][j], lcs[i][j - 1], key=len)
+    return lcs[-1][-1]
+
+
+# O(n * m) time | O(n * m) space
+def longest_common_subsequence2(s1, s2):
+    lcs = [[[None, 0, None, None] for _ in range(len(s1) + 1)] for _ in range(len(s2) + 1)]
+    for i in range(len(s2) + 1):
+        for j in range(len(s1) + 1):
+            if s2[i - 1] == s1[j - 1]:
+                lcs[i][j] = [s2[i - 1], lcs[i - 1][j - 1][1] + 1, i - 1, j - 1]
+            else:
+                if lcs[i - 1][j][1] > lcs[i][j - 1][1]:
+                    lcs[i][j] = [None, lcs[i - 1][j][1], i - 1, j]
+                else:
+                    lcs[i][j] = [None, lcs[i][j - 1][1], i, j - 1]
+    return build_sequence(lcs)
+
+
+def build_sequence(lcs):
+    sequence = []
+    i = len(lcs) - 1
+    j = len(lcs[0]) - 1
+    while i != 0 and j != 0:
+        current_entry = lcs[i][j]
+        if current_entry[0] is not None:
+            sequence.append(current_entry[0])
+        i = current_entry[2]
+        j = current_entry[3]
+    return list(reversed(sequence))
+
+
+if __name__ == '__main__':
+    print(longest_common_subsequence1('zxvAyzw', 'xkykzpw'))
+    print(longest_common_subsequence2('zxvAyzw', 'xkykzpw'))
+```
+
+```cpp
+#include <iostream>
+#include <set>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+/* O(n + m) time | O(min(n, m)) space */
+vector<char> longestCommonSubsequence(string s1, string s2)
+{
+    set<char> lcs;
+    vector<char> result;
+    unsigned int i;
+    for ( i=0; i<s1.size(); i++ )
+        lcs.insert(s1[i]);
+    for ( i=0; i<s2.size(); i++ )
+    {
+        if ( lcs.count(s2[i]) > 0 )
+            result.push_back(s2[i]);
+    }
+    return result;
+}
+
+int main()
+{
+    string s1 = "zxvvyzw";
+    string s2 = "xkykzpw";
+    vector<char> result = longestCommonSubsequence(s1, s2);
+    vector<char>::iterator iter = result.begin();
+    while ( iter != result.end() )
+        cout << *iter++ << " ";
+    return 0;
+}
+```
+
+Last Modified 2021-08-01
