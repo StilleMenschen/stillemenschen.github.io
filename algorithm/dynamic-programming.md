@@ -90,7 +90,7 @@ int main(void)
 ```c
 #include <stdio.h>
 #include <stdlib.h>
-#define MAX_INTEGER_VALUE 2147483646
+#define MAX_INTEGER 2147483646
 
 int min(int a, int b)
 {
@@ -105,12 +105,12 @@ int minNumberOfCoinsForChange(int n, int denoms[], int denomsLength)
     int numOfCoins[n + 1] = {0};
     int i, amount;
     for ( i=1; i<=n; i++)
-        numOfCoins[i] = MAX_INTEGER_VALUE;
+        numOfCoins[i] = MAX_INTEGER;
     for ( i=0; i<denomsLength; i++)
         for ( amount=0; amount<=n; amount++)
             if ( denoms[i] <= amount )
                 numOfCoins[amount] = min( numOfCoins[amount], 1 + numOfCoins[amount - denoms[i]] );
-    if ( numOfCoins[n] != MAX_INTEGER_VALUE )
+    if ( numOfCoins[n] != MAX_INTEGER )
         return numOfCoins[n];
     return -1;
 }
@@ -395,4 +395,72 @@ int main()
 }
 ```
 
-Last Modified 2021-08-01
+## 最小跳跃数
+
+给定一个整数数组，数组中的值表示可前进的步数，计算出穿过数组的最小步数
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#define MAX_INTEGER 2147483647
+
+int max(int a, int b)
+{
+    if ( a > b ) return a;
+    return b;
+}
+
+int min(int a, int b)
+{
+    if ( a < b ) return a;
+    return b;
+}
+
+/* O(n^2) time | O(n) space */
+int minNumberOfJumps1(int array[], int length)
+{
+    int jumps[length] = {0}, i, j;
+    for ( i=1; i<length; i++) jumps[i] = MAX_INTEGER;
+    for ( i=1; i<length; i++)
+    {
+        for ( j=0; j<i; j++ )
+        {
+            if ( array[j] + j >= i )
+                jumps[i] = min(jumps[j] + 1, jumps[i]);
+        }
+    }
+    if ( jumps[length - 1] == MAX_INTEGER ) return 1;
+    return jumps[length - 1];
+}
+
+/* O(n) time | O(1) space */
+int minNumberOfJumps2(int array[], int length)
+{
+    if ( length == 1 ) return 1;
+    length--;
+    int maxReach = array[0], steps = array[0], jumps = 0, i;
+    for ( i=1; i<length; i++)
+    {
+        maxReach = max(maxReach, array[i] + i);
+        steps -= 1;
+        if ( steps == 0 )
+        {
+            jumps += 1;
+            steps = maxReach - i;
+        }
+        else if ( steps < 0 ) break;
+    }
+    return jumps + 1;
+}
+
+int main()
+{
+    int array[] = {3, 4, 2, 1, 2, 3, 7, 1, 1, 1, 3};
+    int length = sizeof(array) / sizeof(array[0]);
+    printf("%d ", minNumberOfJumps1(array, length));
+    printf("%d ", minNumberOfJumps2(array, length));
+    return 0;
+}
+```
+
+Last Modified 2021-08-03
