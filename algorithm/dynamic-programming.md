@@ -86,7 +86,6 @@ int main(void)
 
 给定一个金额，如 6，给定几种面额的硬币 如 1 2 4，硬币的数量没有限制，找出这几种硬币组合成金额的最小组合数，即 `F(6) = 2 + 4`，最少为 `2` 个数组合
 
-
 ```c
 #include <stdio.h>
 #include <stdlib.h>
@@ -463,4 +462,68 @@ int main()
 }
 ```
 
-Last Modified 2021-08-03
+## 水域面积
+
+传入一个整数数组，数组的元素值表示墙高度，求出墙内的水域面积，如下表示水域面积为`11`
+
+```
+            x
+            x
+  x ~ ~ ~ ~ x
+  x ~ ~ ~ ~ x
+  x ~ ~ x ~ x
+---------------
+0 3 0 0 1 0 5 0
+```
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int max(int a, int b)
+{
+    if ( a > b ) return a;
+    return b;
+}
+
+int min(int a, int b)
+{
+    if ( a < b ) return a;
+    return b;
+}
+
+/* O(n) time | O(n) space */
+int waterArea(int heights[], int length)
+{
+    int maxes[length] = {0};
+    int leftMax=0, rigthMax=0, i, sum;
+    for ( i=0; i<length; i++ )
+    {
+        maxes[i] = leftMax;
+        leftMax = max(leftMax, heights[i]);
+    }
+    for ( i=length - 1; i>=0; i-- )
+    {
+        sum = heights[i];
+        leftMax = min(rigthMax, maxes[i]);
+        if ( sum < leftMax )
+            maxes[i] = leftMax - sum;
+        else
+            maxes[i] = 0;
+        rigthMax = max(rigthMax, sum);
+    }
+    for ( i=0,sum=0; i<length; i++ )
+        sum += maxes[i];
+    return sum;
+}
+
+int main()
+{
+    int heights[] = {0, 8, 0, 0, 5, 0, 0, 10, 0, 0, 1, 1, 0, 3};
+    int length = sizeof(heights) / sizeof(heights[0]);
+    printf("%d", waterArea(heights, length));
+    return 0;
+}
+```
+
+Last Modified 2021-08-06
