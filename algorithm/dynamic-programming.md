@@ -526,4 +526,43 @@ int main()
 }
 ```
 
-Last Modified 2021-08-06
+## 背包问题
+
+给定一组物品，每种物品都有自己的重量和价格，在限定的总重量内，我们如何选择，才能使得物品的总价格最高
+
+```python
+def knapsack_problem(items, capacity):
+    knapsack_values = [[0 for _ in range(capacity + 1)] for _ in range(len(items) + 1)]
+    for i in range(1, len(items) + 1):
+        current_weight = items[i - 1][1]
+        current_value = items[i - 1][0]
+        for c in range(capacity + 1):
+            if current_weight > c:
+                knapsack_values[i][c] = knapsack_values[i - 1][c]
+            else:
+                knapsack_values[i][c] = max(knapsack_values[i - 1][c],
+                                            knapsack_values[i - 1][c - current_weight] + current_value)
+    return [knapsack_values[-1][-1], get_knapsack_items(knapsack_values, items)]
+
+
+def get_knapsack_items(knapsack_values, items):
+    sequence = list()
+    i = len(knapsack_values) - 1
+    c = len(knapsack_values[0]) - 1
+    while i > 0:
+        if knapsack_values[i][c] == knapsack_values[i - 1][c]:
+            i -= 1
+        else:
+            sequence.append(i - 1)
+            c -= items[i - 1][1]
+            i -= 1
+        if c == 0:
+            break
+    return list(reversed(sequence))
+
+
+if __name__ == '__main__':
+    print(knapsack_problem([(60, 10,), (100, 20,), (120, 30,)], 50))
+```
+
+Last Modified 2021-08-08
