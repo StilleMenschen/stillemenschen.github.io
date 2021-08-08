@@ -606,4 +606,64 @@ if __name__ == '__main__':
     print(disk_problem([(2, 2, 1,), (2, 1, 2,), (2, 3, 4,), (3, 2, 3,), (2, 2, 8,), (4, 4, 5,), ]))
 ```
 
-Last Modified 2021-08-08
+## 圆周率中的数字
+
+```python
+# O(n^3 + m) time | O(n + m) space
+def numbers_in_pi1(pi, numbers):
+    numbers_set = set(numbers)
+    min_space = get_min_space(pi, numbers_set, dict(), 0)
+    return -1 if min_space == float('inf') else min_space
+
+
+# O(n^3 + m) time | O(n + m) space
+def numbers_in_pi2(pi, numbers):
+    numbers_set = set(numbers)
+    cache = dict()
+    for i in reversed(range(len(pi))):
+        get_min_space(pi, numbers_set, cache, i)
+    return -1 if cache[0] == float('inf') else cache[0]
+
+
+def get_min_space(pi, numbers_set, cache, idx):
+    if idx == len(pi):
+        return -1
+    if idx in cache:
+        return cache[idx]
+    min_space = float('inf')
+    for i in range(idx, len(pi)):
+        prefix = pi[idx: i + 1]
+        if prefix in numbers_set:
+            min_space_in_suffix = get_min_space(pi, numbers_set, cache, i + 1)
+            min_space = min(min_space, min_space_in_suffix + 1)
+    cache[idx] = min_space
+    return cache[idx]
+
+
+# O(n^2 + m) time | O(m) space
+def numbers_in_pi3(pi, numbers):
+    numbers_set = set(numbers)
+    count = 0
+    for i in range(len(pi) + 1):
+        if pi[:i] in numbers_set:
+            if helper(i, pi, numbers_set):
+                count += 1
+    return count
+
+
+def helper(start, pi, numbers_set):
+    i = start + 1
+    while i <= len(pi):
+        if pi[start:i] in numbers_set:
+            start = i
+        i += 1
+    return start == i - 1
+
+
+if __name__ == '__main__':
+    print(numbers_in_pi1("3141592", ["3141", "5", "31", "2", "4159", "9", "42", "314"]))
+    print(numbers_in_pi2("3141592", ["3141", "5", "31", "2", "4159", "9", "42", "314"]))
+    print(numbers_in_pi3("3141592", ["3141", "5", "31", "2", "4159", "9", "42", "314"]))
+```
+
+Last Modified 2021-08-09
