@@ -531,6 +531,7 @@ int main()
 给定一组物品，每种物品都有自己的重量和价格，在限定的总重量内，我们如何选择，才能使得物品的总价格最高
 
 ```python
+# O(n * c) time | O(n * c) space
 def knapsack_problem(items, capacity):
     knapsack_values = [[0 for _ in range(capacity + 1)] for _ in range(len(items) + 1)]
     for i in range(1, len(items) + 1):
