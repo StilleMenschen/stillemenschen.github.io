@@ -666,4 +666,48 @@ if __name__ == '__main__':
     print(numbers_in_pi3("3141592", ["3141", "5", "31", "2", "4159", "9", "42", "314"]))
 ```
 
-Last Modified 2021-08-09
+## 第K次投资最大利润
+
+```python
+# O(nk) time | O(nk) space
+def max_profit_with_k_transactions1(prices, k):
+    if not len(prices):
+        return 0
+    profits = [[0 for _ in prices] for _ in range(k + 1)]
+    for t in range(1, k + 1):
+        max_thus_far = float('-inf')
+        for d in range(1, len(prices)):
+            max_thus_far = max(max_thus_far,
+                               profits[t - 1][d - 1] - prices[d - 1])
+            profits[t][d] = max(profits[t][d - 1], max_thus_far + prices[d])
+    return profits[-1][-1]
+
+
+# O(nk) time | O(n) space
+def max_profit_with_k_transactions2(prices, k):
+    if not len(prices):
+        return 0
+    even_profits = [0 for _ in prices]
+    odd_profits = [0 for _ in prices]
+    for t in range(1, k + 1):
+        max_thus_far = float('-inf')
+        if t % 2 == 1:
+            current_profits = odd_profits
+            previous_profits = even_profits
+        else:
+            current_profits = even_profits
+            previous_profits = odd_profits
+        for d in range(1, len(prices)):
+            max_thus_far = max(max_thus_far,
+                               previous_profits[d - 1] - prices[d - 1])
+            current_profits[d] = max(current_profits[d - 1],
+                                     max_thus_far + prices[d])
+    return even_profits[-1] if k % 2 == 0 else odd_profits[-1]
+
+
+if __name__ == '__main__':
+    print(max_profit_with_k_transactions1([5, 11, 3, 50, 60, 90], 2))
+    print(max_profit_with_k_transactions2([5, 11, 3, 50, 60, 90], 2))
+```
+
+Last Modified 2021-08-15
