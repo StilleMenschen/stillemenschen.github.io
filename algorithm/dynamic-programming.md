@@ -200,7 +200,7 @@ int levenshteinDistance2(char str1[], char str2[])
     }
     for ( i=1; i<bigLength; i++)
     {
-        if ( i % 2 == 1)
+        if ( i & 1 == 1 )
         {
             currentEdits = oddEdits;
             previousEdits = evenEdits;
@@ -219,7 +219,7 @@ int levenshteinDistance2(char str1[], char str2[])
                 currentEdits[j] = 1 + min( previousEdits[j - 1], previousEdits[j], currentEdits[j -1] );
         }
     }
-    if ( bigLength % 2 == 0)
+    if ( bigLength & 1 == 0)
         return evenEdits[smallLength - 1];
     return oddEdits[smallLength - 1];
 }
@@ -691,7 +691,7 @@ def max_profit_with_k_transactions2(prices, k):
     odd_profits = [0 for _ in prices]
     for t in range(1, k + 1):
         max_thus_far = float('-inf')
-        if t % 2 == 1:
+        if t & 1 == 1:
             current_profits = odd_profits
             previous_profits = even_profits
         else:
@@ -702,7 +702,7 @@ def max_profit_with_k_transactions2(prices, k):
                                previous_profits[d - 1] - prices[d - 1])
             current_profits[d] = max(current_profits[d - 1],
                                      max_thus_far + prices[d])
-    return even_profits[-1] if k % 2 == 0 else odd_profits[-1]
+    return even_profits[-1] if k & 1 == 0 else odd_profits[-1]
 
 
 if __name__ == '__main__':
