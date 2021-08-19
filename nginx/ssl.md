@@ -79,7 +79,7 @@ http {
     # for more information.
     include /etc/nginx/conf.d/*.conf;
 
-    # 开启gzip压缩以加快传输速度，静态文件必须有同名称并以.gz结尾的压缩文件
+    # 开启gzip压缩以加快传输速度，静态文件有同名称并以.gz结尾的压缩文件则可以减少nginx每次传输都压缩内容的CPU资源占用
     gzip on;
     gzip_min_length  128k;
     gzip_buffers     4 16k;
