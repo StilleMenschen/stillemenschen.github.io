@@ -710,4 +710,96 @@ if __name__ == '__main__':
     print(max_profit_with_k_transactions2([5, 11, 3, 50, 60, 90], 2))
 ```
 
-Last Modified 2021-08-15
+## 回文字符串最小分割次数
+
+```python
+# O(n^3) time | O(n^2) space
+def palindrome_partitioning_min_cuts(string):
+    palindromes = [[False for _ in string] for _ in string]
+    for i in range(len(string)):
+        for j in range(i, len(string)):
+            palindromes[i][j] = is_palindrome(string[i:j + 1])
+    cuts = [float("inf") for _ in string]
+    for i in range(len(string)):
+        if palindromes[0][i]:
+            cuts[i] = 0
+        else:
+            cuts[i] = cuts[i - 1] + 1
+            for j in range(1, i):
+                if palindromes[j][i] and cuts[j - 1] + 1 < cuts[i]:
+                    cuts[i] = cuts[j - 1] + 1
+    return cuts[-1]
+
+
+def is_palindrome(string):
+    left_idx = 0
+    right_idx = len(string) - 1
+    while left_idx < right_idx:
+        if string[left_idx] != string[right_idx]:
+            return False
+        left_idx += 1
+        right_idx -= 1
+    return True
+
+
+if __name__ == '__main__':
+    print(palindrome_partitioning_min_cuts('noonaddab'))
+```
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int getStringLength(char* string)
+{
+    char *p = string;
+    int length = 0;
+    while ( *p++ ) length++;
+    return length;
+}
+
+int isPalindorme(char string[], int i, int j)
+{
+    for ( ; i < j; i++, j--)
+        if ( string[i] != string[j] )
+            return 0;
+    return 1;
+}
+
+/* O(n^3) time | O(1) space */
+int palindromePartitioningMinCuts(char string[])
+{
+    int length = getStringLength(string);
+    int i = 0, j, countOfCuts = 0, leftIdx = 0, rightIdx = 0;
+    for ( ; i<length; i++)
+    {
+        for ( j=i+1; j<length; j++)
+        {
+            if ( isPalindorme(string, i, j) )
+            {
+                if ( i >= leftIdx && j <= rightIdx )
+                    continue;
+                if ( i > leftIdx && i < rightIdx && rightIdx - leftIdx <= j - i )
+                {
+                    leftIdx = i;
+                    rightIdx = j;
+                    continue;
+                }
+                countOfCuts++;
+                leftIdx = i;
+                rightIdx = j;
+            }
+        }
+    }
+    return countOfCuts;
+}
+
+int main()
+{
+    char string[] = "noonaddab";
+    printf("%d", palindromePartitioningMinCuts(string));
+    return 0;
+}
+```
+
+Last Modified 2021-08-21
