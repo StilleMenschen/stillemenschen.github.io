@@ -778,16 +778,16 @@ int palindromePartitioningMinCuts(char string[])
             if ( isPalindorme(string, i, j) )
             {
                 if ( i >= leftIdx && j <= rightIdx )
+                {
                     continue;
+                }
+                leftIdx = i;
+                rightIdx = j;
                 if ( i > leftIdx && i < rightIdx && rightIdx - leftIdx <= j - i )
                 {
-                    leftIdx = i;
-                    rightIdx = j;
                     continue;
                 }
                 countOfCuts++;
-                leftIdx = i;
-                rightIdx = j;
             }
         }
     }
