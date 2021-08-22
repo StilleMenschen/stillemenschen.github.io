@@ -827,4 +827,61 @@ int main()
 }
 ```
 
-Last Modified 2021-08-21
+## 最长递增子序列
+
+```python
+# O(n^2) time | O(n) space
+def longest_increasing_subsequence1(array):
+    sequences = [None for _ in array]
+    lengths = [1 for _ in array]
+    max_length_idx = 0
+    for i in range(len(array)):
+        current_num = array[i]
+        for j in range(0, i):
+            other_num = array[j]
+            if other_num < current_num and lengths[j] + 1 >= lengths[i]:
+                lengths[i] = lengths[j] + 1
+                sequences[i] = j
+        if lengths[i] >= lengths[max_length_idx]:
+            max_length_idx = i
+    return build_sequence(array, sequences, max_length_idx)
+
+
+# O(n * log(n)) time | O(n) space
+def longest_increasing_subsequence2(array):
+    sequences = [None for _ in array]
+    indices = [None for _ in range(len(array) + 1)]
+    length = 0
+    for i, num in enumerate(array):
+        new_length = binary_search(1, length, indices, array, num)
+        sequences[i] = indices[new_length - 1]
+        indices[new_length] = i
+        length = max(length, new_length)
+    return build_sequence(array, sequences, indices[length])
+
+
+def binary_search(start_idx, end_idx, indices, array, num):
+    if start_idx > end_idx:
+        return start_idx
+    middle_idx = (start_idx + end_idx) // 2
+    if array[indices[middle_idx]] < num:
+        start_idx = middle_idx + 1
+    else:
+        end_idx = middle_idx - 1
+    return binary_search(start_idx, end_idx, indices, array, num)
+
+
+def build_sequence(array, sequences, current_idx):
+    sequence = list()
+    while current_idx is not None:
+        sequence.append(array[current_idx])
+        current_idx = sequences[current_idx]
+    return list(reversed(sequence))
+
+
+if __name__ == '__main__':
+    print(longest_increasing_subsequence1([5, 7, -24, 12, 10, 2, 3, 12, 5, 6, 35]))
+    print(longest_increasing_subsequence2([5, 7, -24, 12, 10, 2, 3, 12, 5, 6, 35]))
+```
+
+Last Modified 2021-08-22
