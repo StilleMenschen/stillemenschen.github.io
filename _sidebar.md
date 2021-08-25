@@ -15,6 +15,7 @@
 - [Java](java/)
 - [Algorithm](algorithm/)
 - [Config](config/)
+- [VCS](vcs/)
 - [Talk](talk/)
 - [Cloud](cloud/)
 - [Windows](windows/)
