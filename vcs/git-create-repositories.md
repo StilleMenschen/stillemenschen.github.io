@@ -81,9 +81,69 @@ git clone [--template=<template_directory>]
 | -c \<key\>=\<value\>, --config \<key\>=\<value\> | 指定初始化之后的 Git 配置项                                        |
 | --depth \<depth\>                                | 浅克隆，仅克隆指定次数的变更历史记录                               |
 | --[no-]single-branch                             | 仅克隆通过`--branch`指定的分支的浅克隆，忽略其它分支的更新历史记录 |
+| --no-tags                                        | 不克隆标签                                                         |
+
+### URL
+
+Git URL 支持多种协议，SSH 协议支持指定登录服务器的账号名
+
+- ssh://[user@]host.xz[:port]/path/to/repo.git/
+- git://host.xz[:port]/path/to/repo.git/
+- http[s]://host.xz[:port]/path/to/repo.git/
+- ftp[s]://host.xz[:port]/path/to/repo.git/
+
+> HTTP 协议还支持直接在 URL 中指定账户和密码，如 `https://user:password@repositores.com/path/to/repo.git` 但要注意用户名和密码出现了特殊字符时要先使用 URL 编码，如账户名是一个邮箱，则邮箱的 `@` 符号要经过 URL 编码，如 `user%40example.net` 表示 `user@example.net`
+
+### 例子
+
+1. 克隆一个指定的分支并且只跟踪指定的分支的提交历史
+
+   ```bash
+   git clone -b V1.0 --single-branch git@www.example.com:path/to/repo.git
+   ```
+
+2. 克隆到一个指定的空文件夹
+
+   ```bash
+   git clone http://192.168.1.1:9527/path/to/repo.git /usr/local/src/repo/
+   ```
 
 ## status
 
 仓库状态
 
-Last Modified 2021-08-25
+```
+git status [<options>…​] [--] [<pathspec>…​]
+```
+
+### 选项
+
+| 选项                 | 说明   |
+| :------------------- | :---------------------- |
+| -s, --short          | 展示较少的信息 |
+| -b, --branch         | 展示分支 |
+| --long               | 展示更多信息 |
+| -v, --verbose        | 除了展示变更的文件外，还展示变更的文件内容，指定两次此选项还会展示尚未暂存的更改 |
+| --ignored[=\<mode\>] | 也展示被忽略的文件，mode 支持的值为<br>traditional - 显示忽略的文件和目录，除非指定了 --untracked-files=all，在这种情况下显示忽略目录中的单个文件<br>no - 不显示被忽略的文件<br>matching - 显示与忽略模式匹配的忽略文件和目录。 |
+| --renames, --no-renames | 文件被重命名检测 |
+| --find-renames[=\<n\>] | 打开重命名检测 |
+| \<pathspec\> | 指定路径的变化状态（路径描述支持相对路径和通配符） |
+
+> 一般路径通配符最常用的是`*`和`?`，`*`表示零个或多个字符，`?`表示零个或一个字符；还有一种特殊的`**`表示，这个表示仅在使用路径分隔符时有效，如`**/a`代表任意目录中的一个子目录a，
+> `/opt/**/abc.conf`代表/opt目录中任意深度层级下的文件abc.conf，而`/a/b/**`代表目录/a/b下的任意深度的文件和目录
+
+### 例子
+
+1. 查看指定前缀路径下的文件变化状态
+
+   ```bash
+   git status config*
+   ```
+
+2. 查看所有变更的文件且包含忽略的文件，以简短的方式展示
+
+   ```bash
+   git status --ignored=traditional -s
+   ```
+
+Last Modified 2021-08-26
