@@ -15,6 +15,7 @@
 **补充**
 
 - 最近在研究[算法](algorithm/)相关的内容
+- 近期会看看[版本控制系统](vcs/)的基本使用
 
 > 此文档基于 NodeJS 的 [docsify](https://docsify.js.org/#/zh-cn/) 框架生成
 
