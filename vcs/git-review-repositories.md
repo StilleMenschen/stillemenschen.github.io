@@ -200,4 +200,31 @@ git show [<options>] [<object>…​]
    git show 7de3107
    ```
 
+## diff
+
+对比文件内容差异
+
+```
+git diff [<options>] [<commit>] [--] [<path>…​]
+git diff [<options>] --cached [--merge-base] [<commit>] [--] [<path>…​]
+git diff [<options>] [--merge-base] <commit> [<commit>…​] <commit> [--] [<path>…​]
+git diff [<options>] <commit>…​<commit> [--] [<path>…​]
+git diff [<options>] <blob> <blob>
+git diff [<options>] --no-index [--] <path> <path>
+```
+
+### 例子
+
+1. 对比同一个文件在两个分支中的差异
+
+   ```
+   git diff remotes/origin/a..remotes/origin/b index.html
+   ```
+
+2. 对比当前修改的文件和某次提交的差异
+
+   ```
+   git diff 04baf0f index.html
+   ```
+
 Last Modified 2021-08-27
