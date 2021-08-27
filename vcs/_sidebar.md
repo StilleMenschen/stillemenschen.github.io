@@ -1,4 +1,5 @@
 * [Home](/)
 * [VCS](vcs/)
-  * [create](vcs/git-create-repositories.md)
-  * [review](vcs/git-review-repositories.md)
+  * [Create](vcs/git-create-repositories.md)
+  * [Review](vcs/git-review-repositories.md)
+  * [Message Style](vcs/git-commit-message-style.md.md)
