@@ -192,4 +192,12 @@ table th:first-of-type {
 git show [<options>] [<object>…​]
 ```
 
+### 例子
+
+1. 查看某次提交的信息
+
+   ```
+   git show 7de3107
+   ```
+
 Last Modified 2021-08-27
