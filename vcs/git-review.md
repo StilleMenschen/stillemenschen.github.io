@@ -227,4 +227,10 @@ git diff [<options>] --no-index [--] <path> <path>
    git diff 04baf0f index.html
    ```
 
-Last Modified 2021-08-27
+3. 对比当前分支所有未提交的文件差异
+
+   ```
+   git diff
+   ```
+
+Last Modified 2021-08-29
