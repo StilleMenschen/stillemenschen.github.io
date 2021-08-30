@@ -63,6 +63,8 @@ git branch (-d | -D) [-r] <branchname>…​
 git branch --edit-description [<branchname>]
 ```
 
+### 选项
+
 | 选项                                | 说明                                                                         |
 | :---------------------------------- | :--------------------------------------------------------------------------- |
 | -d, --delete                        | 删除已存在的标记                                                             |
@@ -122,6 +124,22 @@ git checkout [-f|--ours|--theirs|-m|--conflict=<style>] [<tree-ish>] --pathspec-
 git checkout (-p|--patch) [<tree-ish>] [--] [<pathspec>…​]
 ```
 
+### 选项
+
+| 选项                                      | 说明                                                                                                                                                |
+| :---------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- |
+| -q, --quiet                               | 安静模式，仅输出错误信息                                                                                                                            |
+| --progress, --no-progress                 | 除非指定了`--quiet`选项，否则展示处理进度                                                                                                           |
+| --ours, --theirs                          | 发生冲突时，选择保留本地的（ours）还是保留远端的（theirs）                                                                                          |
+| -f, --force                               | 切换分支时，即使索引或工作树与 HEAD 不同，也继续执行。用于丢弃本地更改。从索引中检出路径时，不会因未合并的条目而失败；相反，未合并的条目将被忽略    |
+| -b \<new_branch\>                         | 创建一个新分支并从指定的提交点开始，默认情况下\<start_point\>为当前 HEAD                                                                            |
+| -B \<new_branch\>                         | 创建一个新分支并从指定的提交点开始，默认情况下\<start_point\>为当前 HEAD，如果分支已经存在则将其重置到指定的提交点                                  |
+| -l                                        | 创建新分支的 reflog                                                                                                                                 |
+| --orphan \<new_branch\>                   | 创建一个新分支并从指定的提交点开始，且不包含任何提交记录，默认情况下\<start_point\>为当前 HEAD                                                      |
+| -m, --merge                               | 如果检出的分支与当前工作树和要检出的分支一个或多个文件存在差异时则执行合并，合并存在冲突时将保留冲突的文件，需要使用 `git add` 标记已解决冲突的路径 |
+| --conflict=\<style\>                      | 与 `--merge` 选项相同，但改变了冲突块的显示方式，可能的值为 merge（默认）和 diff3（除了 merge 样式显示的内容外，还显示原始内容）                    |
+| --overwrite-ignore, --no-overwrite-ignore | 切换分支时静默覆盖被忽略的文件（默认）当新分支包含被忽略的文件时，使用 `--no-overwrite-ignore`中止操作                                              |
+
 ## merge
 
 将两个或多个开发历史连接在一起
@@ -134,4 +152,31 @@ git merge [-n] [--stat] [--no-commit] [--squash] [--[no-]edit]
 git merge (--continue | --abort | --quit)
 ```
 
-Last Modified 2021-08-29
+## 附录
+
+| Commit-ish/Tree-ish       | Examples                                   |
+| :------------------------ | :----------------------------------------- |
+| 1. \<sha1\>               | `dae86e1950b1277e545cee180551750029cfe735` |
+| 2. \<describeOutput\>     | `v1.7.4.2-679-g3bee7fb`                    |
+| 3. \<refname\>            | `master, heads/master, refs/heads/master`  |
+| 4. \<refname\>@{\<date\>} | `master@{yesterday}, HEAD@{5 minutes ago}` |
+| 5. \<refname\>@{\<n\>}    | `master@{1}`                               |
+| 6. @{\<n\>}               | `@{1}`                                     |
+| 7. @{-\<n\>}              | `@{-1}`                                    |
+| 8. \<refname\>@{upstream} | `master@{upstream}, @{u}`                  |
+| 9. \<rev\>^               | `HEAD^, v1.5.1^0`                          |
+| 10. \<rev\>~\<n\>         | `master~3`                                 |
+| 11. \<rev\>^{\<type\>}    | `v0.99.8^{commit}`                         |
+| 12. \<rev\>^{}            | `v0.99.8^{}`                               |
+| 13. \<rev\>^{/\<text\>}   | `HEAD^{/fix nasty bug}`                    |
+| 14. :/\<text\>            | `:/fix nasty bug`                          |
+
+| Tree-ish only        | Examples                                |
+| :------------------- | :-------------------------------------- |
+| 15. \<rev\>:\<path\> | `HEAD:README, :README, master:./README` |
+
+| Tree-ish?           | Examples             |
+| :------------------ | :------------------- |
+| 16. :\<n\>:\<path\> | `:0:README, :README` |
+
+Last Modified 2021-08-30
