@@ -152,6 +152,44 @@ git merge [-n] [--stat] [--no-commit] [--squash] [--[no-]edit]
 git merge (--continue | --abort | --quit)
 ```
 
+### 选项
+
+| 选项                                        | 说明                                                                                                                                                                                                                                   |
+| :------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| --commit, --no-commit                       | 合并且提交                                                                                                                                                                                                                             |
+| --edit, -e, --no-edit                       | 合并时可以进一步编辑生成的消息，如果指定了 `--no-edit` 则直接使用生成的消息                                                                                                                                                            |
+| --stat, -n, --no-stat                       | 合并结束后显示对比差异                                                                                                                                                                                                                 |
+| --squash, --no-squash                       | 生成工作树和索引状态，就像真正的合并发生一样（合并信息除外），但实际上不进行提交、移动 HEAD 或记录 $GIT_DIR/MERGE_HEAD（导致下一个 git commit 命令创建一个 合并提交）。 这允许您在当前分支之上创建单个提交，其效果与合并另一个分支相同 |
+| -q, --quiet                                 | 安静模式，仅输出错误信息                                                                                                                                                                                                               |
+| -v, --verbose                               | 详细处理过程                                                                                                                                                                                                                           |
+| --progress, --no-progress                   | 查看或关闭进度                                                                                                                                                                                                                         |
+| -m \<msg\>                                  | 合并的消息                                                                                                                                                                                                                             |
+| -s \<strategy\>, --strategy=\<strategy\>    | 指定合并策略，支持的值 resolve、recursive、octopus（默认）、ours、subtree                                                                                                                                                                      |
+| -X \<option\>, --strategy-option=\<option\> | 传递给合并策略的选项                                                                                                                                                                                                                   |
+| --abort                                     | 中止当前的冲突解决过程，并尝试重建合并前的状态                                                                                                                                                                                         |
+| --continue                                  | 在 `git merge` 由于冲突而停止后，您可以通过运行 `git merge --continue` 来结束合并                                                                                                                                                      |
+| \<commit\>…​                                | 指定多个要合并的提交，若没有指定则合并当前分支配置为用作其上游的远程跟踪分支                                                                                                                                                           |
+
+### 例子
+
+1. 合并分支 fixes 和 enhancements 到当前分支之上，使用 octopus 合并策略
+
+   ```bash
+   git merge fixes enhancements
+   ```
+
+2. 合并分支 obsolete 到当前分支之上，使用 ours 合并策略
+
+   ```bash
+   git merge -s ours obsolete
+   ```
+
+3. 将分支 maint 合并到当前分支中，但不自动执行提交
+
+   ```bash
+   git merge --no-commit maint
+   ```
+
 ## 附录
 
 | Commit-ish/Tree-ish       | Examples                                   |
@@ -179,4 +217,4 @@ git merge (--continue | --abort | --quit)
 | :------------------ | :------------------- |
 | 16. :\<n\>:\<path\> | `:0:README, :README` |
 
-Last Modified 2021-08-30
+Last Modified 2021-09-05
