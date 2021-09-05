@@ -41,7 +41,7 @@ table th:first-of-type {
 ### 例子
 
 1. 创建一个 /path/to/my/codebase/.git 目录
-2. 将所有现有文件添加到索引中
+2. 将所有现有文件添加到暂存区中
 3. 将原始状态记录为历史上的第一次提交
 
 ```bash
@@ -144,7 +144,23 @@ git commit [-a | --interactive | --patch] [-s] [-v] [-u<mode>] [--amend]
 | --dty-run                                  | 不创建提交，而是显示要提交的路径列表，具有将保留未提交的本地更改的路径以及未跟踪的路径                                                                                                                                                  |
 | --status                                   | 使用编辑器准备提交消息时，将`git status`的输出包含在提交消息模板中                                                                                                                                                                      |
 | --no-status                                | 使用编辑器准备默认提交消息时，不在提交消息模板中包含`git status`的输出                                                                                                                                                                  |
-| \<pathspec\>…​                             | 在命令行上给出 pathspec 时，提交与 pathspec 匹配的文件的内容，而不记录已添加到索引中的更改                                                                                                                                              |
+| \<pathspec\>…​                             | 在命令行上给出 pathspec 时，提交与 pathspec 匹配的文件的内容，而不记录已添加到暂存区中的更改                                                                                                                                              |
+
+
+### 例子
+
+1. 仅提交指定文件的变化
+
+   ```bash
+   git add index.html
+   git commit index.html -m "Change index.html file"
+   ```
+
+2. 提交当前所有已追踪的发生变化或被删除的文件（未追踪的文件不会受到影响）
+
+   ```bash
+   git commit -a -m "change many file"
+   ```
 
 ## status
 
@@ -185,4 +201,4 @@ git status [<options>…​] [--] [<pathspec>…​]
    git status --ignored=traditional -s
    ```
 
-Last Modified 2021-08-26
+Last Modified 2021-09-05

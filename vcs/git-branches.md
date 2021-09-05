@@ -131,7 +131,7 @@ git checkout (-p|--patch) [<tree-ish>] [--] [<pathspec>…​]
 | -q, --quiet                               | 安静模式，仅输出错误信息                                                                                                                            |
 | --progress, --no-progress                 | 除非指定了`--quiet`选项，否则展示处理进度                                                                                                           |
 | --ours, --theirs                          | 发生冲突时，选择保留本地的（ours）还是保留远端的（theirs）                                                                                          |
-| -f, --force                               | 切换分支时，即使索引或工作树与 HEAD 不同，也继续执行。用于丢弃本地更改。从索引中检出路径时，不会因未合并的条目而失败；相反，未合并的条目将被忽略    |
+| -f, --force                               | 切换分支时，即使暂存区或工作树与 HEAD 不同，也继续执行。用于丢弃本地更改。从暂存区中检出路径时，不会因未合并的条目而失败；相反，未合并的条目将被忽略    |
 | -b \<new_branch\>                         | 创建一个新分支并从指定的提交点开始，默认情况下\<start_point\>为当前 HEAD                                                                            |
 | -B \<new_branch\>                         | 创建一个新分支并从指定的提交点开始，默认情况下\<start_point\>为当前 HEAD，如果分支已经存在则将其重置到指定的提交点                                  |
 | -l                                        | 创建新分支的 reflog                                                                                                                                 |
@@ -159,7 +159,7 @@ git merge (--continue | --abort | --quit)
 | --commit, --no-commit                       | 合并且提交                                                                                                                                                                                                                             |
 | --edit, -e, --no-edit                       | 合并时可以进一步编辑生成的消息，如果指定了 `--no-edit` 则直接使用生成的消息                                                                                                                                                            |
 | --stat, -n, --no-stat                       | 合并结束后显示对比差异                                                                                                                                                                                                                 |
-| --squash, --no-squash                       | 生成工作树和索引状态，就像真正的合并发生一样（合并信息除外），但实际上不进行提交、移动 HEAD 或记录 $GIT_DIR/MERGE_HEAD（导致下一个 git commit 命令创建一个 合并提交）。 这允许您在当前分支之上创建单个提交，其效果与合并另一个分支相同 |
+| --squash, --no-squash                       | 生成工作树和暂存区状态，就像真正的合并发生一样（合并信息除外），但实际上不进行提交、移动 HEAD 或记录 $GIT_DIR/MERGE_HEAD（导致下一个 git commit 命令创建一个 合并提交）。 这允许您在当前分支之上创建单个提交，其效果与合并另一个分支相同 |
 | -q, --quiet                                 | 安静模式，仅输出错误信息                                                                                                                                                                                                               |
 | -v, --verbose                               | 详细处理过程                                                                                                                                                                                                                           |
 | --progress, --no-progress                   | 查看或关闭进度                                                                                                                                                                                                                         |
