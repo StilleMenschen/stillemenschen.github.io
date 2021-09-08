@@ -11,11 +11,11 @@
 - [配置文件](config/)是平时经常使用的，仅供参考
 - [Docker Compose](docker-compose/)文档仅包含启动和停止的命令以及配置文件参考
 - [Python](python/)包含了个人常用模块的参考
+- [Git](vcs/)的基本使用已经完成
 
 **补充**
 
 - 最近在研究[算法](algorithm/)相关的内容
-- 近期会看看[版本控制系统](vcs/)的基本使用
 
 > 此文档基于 NodeJS 的 [docsify](https://docsify.js.org/#/zh-cn/) 框架生成
 
