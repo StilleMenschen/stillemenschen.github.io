@@ -84,7 +84,13 @@ docker 全局配置文件
   "oom-score-adjust": -500,
   "pidfile": "",
   "raw-logs": false,
-  "registry-mirrors": [],
+  "registry-mirrors": [
+    "https://docker.mirrors.ustc.edu.cn",
+    "https://registry.docker-cn.com",
+    "https://hub-mirror.c.163.com",
+    "https://cr.console.aliyun.com",
+    "https://reg-mirror.qiniu.com"
+  ],
   "runtimes": {
     "cc-runtime": {
       "path": "/usr/bin/cc-runtime"
