@@ -884,4 +884,64 @@ if __name__ == '__main__':
     print(longest_increasing_subsequence2([5, 7, -24, 12, 10, 2, 3, 12, 5, 6, 35]))
 ```
 
-Last Modified 2021-08-22
+## 最长字符串链
+
+```python
+def get_smaller_string(string, index):
+    return string[0:index] + string[index + 1:]
+
+
+def try_update_longest_string_chain(current_string, smaller_string, string_chain):
+    smaller_string_chain_length = string_chain[smaller_string]["maxChainLength"]
+    current_string_chain_length = string_chain[current_string]["maxChainLength"]
+    if smaller_string_chain_length + 1 > current_string_chain_length:
+        string_chain[current_string]["maxChainLength"] = smaller_string_chain_length + 1
+        string_chain[current_string]["nextString"] = smaller_string
+
+
+def find_longest_string_chain(string, string_chain):
+    for i in range(len(string)):
+        smaller_string = get_smaller_string(string, i)
+        if smaller_string not in string_chain:
+            continue
+        try_update_longest_string_chain(string, smaller_string, string_chain)
+
+
+def build_longest_string_chain(strings, string_chain):
+    max_chain_length = 0
+    chain_starting_string = ""
+    for string in strings:
+        if string_chain[string]["maxChainLength"] > max_chain_length:
+            max_chain_length = string_chain[string]["maxChainLength"]
+            chain_starting_string = string
+
+    our_longest_string_chain = list()
+    current_string = chain_starting_string
+    while current_string != "":
+        our_longest_string_chain.append(current_string)
+        current_string = string_chain[current_string]["nextString"]
+
+    return list() if len(our_longest_string_chain) == 1 else our_longest_string_chain
+
+
+# O(n * m^2 + n * log(n)) time | O(nm) space
+# n is the number of elements in strings
+# m is the element length of strings
+def longest_string_chain(strings):
+    string_chain = {}
+    for string in strings:
+        string_chain[string] = {"nextString": "", "maxChainLength": 1}
+
+    sorted_string = sorted(strings, key=len)
+    for string in sorted_string:
+        find_longest_string_chain(string, string_chain)
+
+    return build_longest_string_chain(strings, string_chain)
+
+
+if __name__ == '__main__':
+    strings = ["abde", "abc", "abd", "abcde", "ade", "ae", "labde", "abcdeg"]
+    print(longest_string_chain(strings))
+```
+
+Last Modified 2021-09-11
