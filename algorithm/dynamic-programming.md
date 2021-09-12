@@ -944,4 +944,142 @@ if __name__ == '__main__':
     print(longest_string_chain(strings))
 ```
 
-Last Modified 2021-09-11
+## 方形的零
+
+```python
+def is_square_of_zeroes1(matrix, r1, c1, r2, c2):
+    for row in range(r1, r2 + 1):
+        if matrix[row][c1] != 0 or matrix[row][c2] != 0:
+            return False
+    for col in range(c1, c2 + 1):
+        if matrix[r1][col] != 0 or matrix[r2][col] != 0:
+            return False
+    return True
+
+
+def is_square_of_zeroes2(info_matrix, r1, c1, r2, c2):
+    square_length = c2 - c1 + 1
+    has_top_border = info_matrix[r1][c1]['numZeroesRight'] >= square_length
+    has_left_border = info_matrix[r1][c1]['numZeroesBelow'] >= square_length
+    has_bottom_border = info_matrix[r2][c1]['numZeroesRight'] >= square_length
+    has_right_border = info_matrix[r1][c2]['numZeroesBelow'] >= square_length
+    return all((has_top_border, has_left_border, has_bottom_border, has_right_border,))
+
+
+def has_square_of_zeroes1(matrix, r1, c1, r2, c2, cache):
+    if r1 >= r2 or c1 >= c2:
+        return False
+    key = f'{r1}-{c1}-{r2}-{c2}'
+    if key in cache:
+        return cache[key]
+    return any(
+        (is_square_of_zeroes1(matrix, r1, c1, r2, c2),
+         has_square_of_zeroes1(matrix, r1 + 1, c1 + 1, r2 - 1, c2 - 1, cache),
+         has_square_of_zeroes1(matrix, r1, c1 + 1, r2 - 1, c2, cache),
+         has_square_of_zeroes1(matrix, r1 + 1, c1, r2, c2 - 1, cache),
+         has_square_of_zeroes1(matrix, r1 + 1, c1 + 1, r2, c2, cache),
+         has_square_of_zeroes1(matrix, r1, c1, r2 - 1, c2 - 1, cache),)
+    )
+
+
+def has_square_of_zeroes2(info_matrix, r1, c1, r2, c2, cache):
+    if r1 >= r2 or c1 >= c2:
+        return False
+    key = f'{r1}-{c1}-{r2}-{c2}'
+    if key in cache:
+        return cache[key]
+    return any(
+        (is_square_of_zeroes2(info_matrix, r1, c1, r2, c2),
+         has_square_of_zeroes2(info_matrix, r1 + 1, c1 + 1, r2 - 1, c2 - 1, cache),
+         has_square_of_zeroes2(info_matrix, r1, c1 + 1, r2 - 1, c2, cache),
+         has_square_of_zeroes2(info_matrix, r1 + 1, c1, r2, c2 - 1, cache),
+         has_square_of_zeroes2(info_matrix, r1 + 1, c1 + 1, r2, c2, cache),
+         has_square_of_zeroes2(info_matrix, r1, c1, r2 - 1, c2 - 1, cache),)
+    )
+
+
+# O(n^4) time | O(n^3) space
+def square_of_zeroes1(matrix):
+    last_idx = len(matrix) - 1
+    return has_square_of_zeroes1(matrix, 0, 0, last_idx, last_idx, dict())
+
+
+# O(n^4) time | O(1) space
+def square_of_zeroes2(matrix):
+    n = len(matrix)
+    for top_row in range(n):
+        for left_col in range(n):
+            square_length = 2
+            while square_length <= n - left_col and square_length <= n - top_row:
+                bottom_row = top_row + square_length - 1
+                right_col = left_col + square_length - 1
+                if is_square_of_zeroes1(matrix, top_row, left_col, bottom_row, right_col):
+                    return True
+                square_length += 1
+    return False
+
+
+def pre_compute_num_of_zeroes(matrix):
+    info_matrix = [[dict() for _ in row] for row in matrix]
+    n = len(matrix)
+    for row in range(n):
+        for col in range(n):
+            num_zeroes = 1 if matrix[row][col] == 0 else 0
+            info_matrix[row][col] = {
+                "numZeroesBelow": num_zeroes,
+                "numZeroesRight": num_zeroes
+            }
+
+    last_idx = len(matrix) - 1
+    for row in reversed(range(n)):
+        for col in reversed(range(n)):
+            if matrix[row][col] == 1:
+                continue
+            if row < last_idx:
+                info_matrix[row][col]['numZeroesBelow'] += info_matrix[row + 1][col]['numZeroesBelow']
+            if col < last_idx:
+                info_matrix[row][col]['numZeroesRight'] += info_matrix[row][col + 1]['numZeroesRight']
+
+    return info_matrix
+
+
+# O(n^3) time | O(n^3) space
+def square_of_zeroes3(matrix):
+    info_matrix = pre_compute_num_of_zeroes(matrix)
+    last_idx = len(matrix) - 1
+    return has_square_of_zeroes2(info_matrix, 0, 0, last_idx, last_idx, dict())
+
+
+# O(n^3) time | O(n^2) space
+def square_of_zeroes4(matrix):
+    info_matrix = pre_compute_num_of_zeroes(matrix)
+    n = len(matrix)
+    for top_row in range(n):
+        for left_col in range(n):
+            square_length = 2
+            while square_length <= n - left_col and square_length <= n - top_row:
+                bottom_row = top_row + square_length - 1
+                right_col = left_col + square_length - 1
+                if is_square_of_zeroes2(info_matrix, top_row, left_col, bottom_row, right_col):
+                    return True
+                square_length += 1
+    return False
+
+
+if __name__ == '__main__':
+    matrix1 = [
+        (1, 1, 1, 0, 1, 0,),
+        (0, 0, 0, 0, 0, 1,),
+        (0, 1, 1, 1, 0, 1,),
+        (0, 0, 0, 1, 0, 1,),
+        (0, 1, 1, 1, 0, 1,),
+        (0, 0, 0, 0, 0, 1,),
+    ]
+    # (1, 0) (1, 4) (5, 0) (5, 4)
+    print(square_of_zeroes1(matrix1))
+    print(square_of_zeroes2(matrix1))
+    print(square_of_zeroes3(matrix1))
+    print(square_of_zeroes4(matrix1))
+```
+
+Last Modified 2021-09-12
