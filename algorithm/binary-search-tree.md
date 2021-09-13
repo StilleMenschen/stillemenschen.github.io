@@ -91,15 +91,15 @@ int abs(const int num)
 
 int findClosestValueInBSTHelper(pTree tree, int target, int closest)
 {
-    pTree current_node = tree;
-    while ( current_node != NULL )
+    pTree currentNode = tree;
+    while ( currentNode != NULL )
     {
-        if ( abs(target - closest) > abs(target - current_node->value) )
-            closest = current_node->value;
-        if ( target < current_node->value )
-            current_node = current_node->left;
-        else if ( target > current_node->value )
-            current_node = current_node->right;
+        if ( abs(target - closest) > abs(target - currentNode->value) )
+            closest = currentNode->value;
+        if ( target < currentNode->value )
+            currentNode = currentNode->left;
+        else if ( target > currentNode->value )
+            currentNode = currentNode->right;
         else
             break;
     }
@@ -124,23 +124,23 @@ pTree newNode(int value)
     return t;
 }
 
-pTree init_bst_tree()
+pTree initBSTTree()
 {
-    pTree bst_tree = newNode(10);
-    bst_tree->left = newNode(5);
-    bst_tree->right = newNode(15);
-    bst_tree->left->left = newNode(2);
-    bst_tree->left->right = newNode(5);
-    bst_tree->right->left = newNode(13);
-    bst_tree->right->right = newNode(22);
-    bst_tree->left->left->left = newNode(1);
-    bst_tree->right->left->right = newNode(14);
-    return bst_tree;
+    pTree bstTree = newNode(10);
+    bstTree->left = newNode(5);
+    bstTree->right = newNode(15);
+    bstTree->left->left = newNode(2);
+    bstTree->left->right = newNode(5);
+    bstTree->right->left = newNode(13);
+    bstTree->right->right = newNode(22);
+    bstTree->left->left->left = newNode(1);
+    bstTree->right->left->right = newNode(14);
+    return bstTree;
 }
 
 int main(void)
 {
-    pTree tree = init_bst_tree();
+    pTree tree = initBSTTree();
     printf("%d", findClosestValueInBST(tree, 12));
     return 0;
 }
