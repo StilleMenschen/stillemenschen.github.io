@@ -6,6 +6,7 @@
   - [sed](linux-tool/sed.md)
   - [awk](linux-tool/awk.md)
   - [find](linux-tool/find.md)
+  - [diff](linux-tool/diff.md)
   - [less](linux-tool/less.md)
   - [curl](linux-tool/curl.md)
   - [lsof](linux-tool/lsof.md)
