@@ -196,6 +196,8 @@ def pre_order_traverse2(tree, array):
 
 # O(n) time | O(n) space
 def post_order_traverse2(tree, array):
+    if tree is None:
+        return array
     arr = list()
     cur, pre = None, None
     arr.append(tree)
