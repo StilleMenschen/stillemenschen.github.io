@@ -91,13 +91,13 @@ class BST:
 def traverse_bst_by_middle(parent_node=None):
     if parent_node is None:
         return False
-    q = deque()
-    while parent_node is not None or len(q) > 0:
+    stack = list()
+    while parent_node is not None or len(stack) > 0:
         while parent_node is not None:
-            q.append(parent_node)
+            stack.append(parent_node)
             parent_node = parent_node.left
-        if len(q) > 0:
-            item = q.pop()
+        if len(stack) > 0:
+            item = stack.pop()
             print(item.value, end=' ')
             parent_node = item.right
 
@@ -109,6 +109,119 @@ if __name__ == '__main__':
     root_node.remove(5)
     print(root_node.contains(5))
     traverse_bst_by_middle(root_node)
+```
+
+## 遍历二叉数
+
+```python
+class BST:
+
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+    def insert(self, value):
+        current_node = self
+        while True:
+            if value < current_node.value:
+                if current_node.left is None:
+                    current_node.left = BST(value)
+                    break
+                else:
+                    current_node = current_node.left
+            else:
+                if current_node.right is None:
+                    current_node.right = BST(value)
+                    break
+                else:
+                    current_node = current_node.right
+        return self
+
+
+# O(n) time | O(n) space
+def in_order_traverse1(tree, array):
+    if tree is not None:
+        in_order_traverse1(tree.left, array)
+        array.append(tree.value)
+        in_order_traverse1(tree.right, array)
+    return array
+
+
+# O(n) time | O(n) space
+def pre_order_traverse1(tree, array):
+    if tree is not None:
+        array.append(tree.value)
+        pre_order_traverse1(tree.left, array)
+        pre_order_traverse1(tree.right, array)
+    return array
+
+
+# O(n) time | O(n) space
+def post_order_traverse1(tree, array):
+    if tree is not None:
+        post_order_traverse1(tree.left, array)
+        post_order_traverse1(tree.right, array)
+        array.append(tree.value)
+    return array
+
+
+# O(n) time | O(n) space
+def in_order_traverse2(tree, array):
+    arr = list()
+    while tree is not None or len(arr) > 0:
+        while tree is not None:
+            arr.append(tree)
+            tree = tree.left
+        if len(arr) > 0:
+            tree = arr.pop()
+            array.append(tree.value)
+            tree = tree.right
+    return array
+
+
+# O(n) time | O(n) space
+def pre_order_traverse2(tree, array):
+    arr = list()
+    while tree is not None or len(arr) > 0:
+        while tree is not None:
+            array.append(tree.value)
+            arr.append(tree)
+            tree = tree.left
+        if len(arr) > 0:
+            tree = arr.pop()
+            tree = tree.right
+    return array
+
+
+# O(n) time | O(n) space
+def post_order_traverse2(tree, array):
+    arr = list()
+    cur, pre = None, None
+    arr.append(tree)
+    while len(arr) > 0:
+        cur = arr[-1]
+        if (cur.left is None and cur.right is None) or (pre is not None and (pre == cur.left or pre == cur.right)):
+            array.append(cur.value)
+            pre = arr.pop()
+        else:
+            if cur.right is not None:
+                arr.append(cur.right)
+            if cur.left is not None:
+                arr.append(cur.left)
+    return array
+
+
+if __name__ == '__main__':
+    _tree = BST(10)
+    for e in [2, 5, 5, 1, 14, 22, 13, 15]:
+        _tree = _tree.insert(e)
+    print(in_order_traverse1(_tree, list()))
+    print(in_order_traverse2(_tree, list()))
+    print(pre_order_traverse1(_tree, list()))
+    print(pre_order_traverse2(_tree, list()))
+    print(post_order_traverse1(_tree, list()))
+    print(post_order_traverse2(_tree, list()))
 ```
 
 ## 查找最相近的值
