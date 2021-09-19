@@ -88,18 +88,17 @@ class BST:
         return current_node.value
 
 
-def traverse_bst_by_middle(parent_node=None):
-    if parent_node is None:
-        return False
-    stack = list()
-    while parent_node is not None or len(stack) > 0:
-        while parent_node is not None:
-            stack.append(parent_node)
-            parent_node = parent_node.left
-        if len(stack) > 0:
-            item = stack.pop()
-            print(item.value, end=' ')
-            parent_node = item.right
+def in_order_traverse(tree, array):
+    arr = list()
+    while tree is not None or len(arr) > 0:
+        while tree is not None:
+            arr.append(tree)
+            tree = tree.left
+        if len(arr) > 0:
+            tree = arr.pop()
+            array.append(tree.value)
+            tree = tree.right
+    return array
 
 
 if __name__ == '__main__':
@@ -108,7 +107,7 @@ if __name__ == '__main__':
         root_node = root_node.insert(e)
     root_node.remove(5)
     print(root_node.contains(5))
-    traverse_bst_by_middle(root_node)
+    print(in_order_traverse(root_node, list()))
 ```
 
 ## 遍历二叉数
@@ -369,4 +368,113 @@ int main(void)
 }
 ```
 
-Last Modified 2021-09-16
+## 最小高度二叉搜索树
+
+```python
+class BST:
+
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+    def insert(self, value):
+        current_node = self
+        while True:
+            if value < current_node.value:
+                if current_node.left is None:
+                    current_node.left = BST(value)
+                    break
+                else:
+                    current_node = current_node.left
+            else:
+                if current_node.right is None:
+                    current_node.right = BST(value)
+                    break
+                else:
+                    current_node = current_node.right
+        return self
+
+
+# O(n * log(n)) time | O(n) space
+def min_height_bst1(array):
+    return construct_min_height_bst1(array, None, 0, len(array) - 1)
+
+
+def construct_min_height_bst1(array, bst, start_idx, end_idx):
+    if end_idx < start_idx:
+        return None
+    mid_idx = (start_idx + end_idx) // 2
+    value_to_add = array[mid_idx]
+    if bst is None:
+        bst = BST(value_to_add)
+    else:
+        bst.insert(value_to_add)
+    construct_min_height_bst1(array, bst, start_idx, mid_idx - 1)
+    construct_min_height_bst1(array, bst, mid_idx + 1, end_idx)
+    return bst
+
+
+# O(n) time | O(n) space
+def min_height_bst2(array):
+    return construct_min_height_bst2(array, None, 0, len(array) - 1)
+
+
+def construct_min_height_bst2(array, bst, start_idx, end_idx):
+    if end_idx < start_idx:
+        return None
+    mid_idx = (start_idx + end_idx) // 2
+    new_bst_node = BST(array[mid_idx])
+    if bst is None:
+        bst = new_bst_node
+    else:
+        if array[mid_idx] < bst.value:
+            bst.left = new_bst_node
+            bst = bst.left
+        else:
+            bst.right = new_bst_node
+            bst = bst.right
+    construct_min_height_bst2(array, bst, start_idx, mid_idx - 1)
+    construct_min_height_bst2(array, bst, mid_idx + 1, end_idx)
+    return bst
+
+
+# O(n) time | O(n) space
+def min_height_bst3(array):
+    return construct_min_height_bst3(array, 0, len(array) - 1)
+
+
+def construct_min_height_bst3(array, start_idx, end_idx):
+    if end_idx < start_idx:
+        return None
+    mid_idx = (start_idx + end_idx) // 2
+    bst = BST(array[mid_idx])
+    bst.left = construct_min_height_bst3(array, start_idx, mid_idx - 1)
+    bst.right = construct_min_height_bst3(array, mid_idx + 1, end_idx)
+    return bst
+
+
+def in_order_traverse(tree, array):
+    arr = list()
+    while tree is not None or len(arr) > 0:
+        while tree is not None:
+            arr.append(tree)
+            tree = tree.left
+        if len(arr) > 0:
+            tree = arr.pop()
+            array.append(tree.value)
+            tree = tree.right
+    return array
+
+
+if __name__ == '__main__':
+    source = [1, 2, 5, 6, 9, 10, 13, 14, 15, 16]
+    b = min_height_bst1(source)
+    print(in_order_traverse(b, list()))
+    b = min_height_bst2(source)
+    print(in_order_traverse(b, list()))
+    b = min_height_bst3(source)
+    print(in_order_traverse(b, list()))
+```
+
+Last Modified 2021-09-19
