@@ -477,4 +477,84 @@ if __name__ == '__main__':
     print(in_order_traverse(b, list()))
 ```
 
-Last Modified 2021-09-19
+## 相同二叉搜索树
+
+```python
+def get_smaller(array):
+    smaller = list()
+    for i in range(1, len(array)):
+        if array[i] < array[0]:
+            smaller.append(array[i])
+    return smaller
+
+
+def get_bigger_or_equal(array):
+    bigger_or_equal = list()
+    for i in range(1, len(array)):
+        if array[i] >= array[0]:
+            bigger_or_equal.append(array[i])
+    return bigger_or_equal
+
+
+def get_idx_of_first_smaller(array, starting_idx, min_val):
+    for i in range(starting_idx + 1, len(array)):
+        if array[starting_idx] > array[i] >= min_val:
+            return i
+    return -1
+
+
+def get_idx_of_first_bigger_or_equal(array, starting_idx, max_val):
+    for i in range(starting_idx + 1, len(array)):
+        if array[starting_idx] <= array[i] < max_val:
+            return i
+    return -1
+
+
+def are_same_bst_s(array1, array2, root_idx1, root_idx2, min_val, max_val):
+    if root_idx1 == -1 or root_idx2 == -1:
+        return root_idx1 == root_idx2
+
+    if array1[root_idx1] != array2[root_idx2]:
+        return False
+
+    left_root_idx1 = get_idx_of_first_smaller(array1, root_idx1, min_val)
+    left_root_idx2 = get_idx_of_first_smaller(array2, root_idx2, min_val)
+    right_root_idx1 = get_idx_of_first_bigger_or_equal(array1, root_idx1, max_val)
+    right_root_idx2 = get_idx_of_first_bigger_or_equal(array2, root_idx2, max_val)
+
+    current_value = array1[root_idx1]
+    left_are_same = are_same_bst_s(array1, array2, left_root_idx1, left_root_idx2, min_val, current_value)
+    right_are_same = are_same_bst_s(array1, array2, right_root_idx1, right_root_idx2, current_value, max_val)
+
+    return left_are_same and right_are_same
+
+
+# O(n^2) time | O(n^2) space
+def same_bst_s1(array1, array2):
+    if len(array1) != len(array2):
+        return False
+    if len(array1) == 0 and len(array2) == 0:
+        return True
+    if array1[0] != array2[0]:
+        return False
+    left1 = get_smaller(array1)
+    left2 = get_smaller(array1)
+    right1 = get_bigger_or_equal(array1)
+    right2 = get_bigger_or_equal(array2)
+
+    return same_bst_s1(left1, left2) and same_bst_s1(right1, right2)
+
+
+# O(n^2) time | O(d) space
+def same_bst_s2(array1, array2):
+    return are_same_bst_s(array1, array2, 0, 0, float('-inf'), float('inf'))
+
+
+if __name__ == '__main__':
+    source1 = [10, 15, 8, 12, 94, 81, 5, 2, 11]
+    source2 = [10, 8, 5, 15, 2, 12, 11, 94, 81]
+    print(same_bst_s1(source1, source2))
+    print(same_bst_s2(source1, source2))
+```
+
+Last Modified 2021-09-20
