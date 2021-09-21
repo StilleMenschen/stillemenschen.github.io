@@ -6,9 +6,6 @@
 ## 构建二叉搜索数
 
 ```python
-from collections import deque
-
-
 class BST:
 
     def __init__(self, value):
@@ -669,6 +666,74 @@ if __name__ == '__main__':
     print(right_smaller_than1(source))
     print(right_smaller_than2(source))
     print(right_smaller_than3(source))
+```
+
+## 验证二叉搜索树
+
+```python
+class BST:
+
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+    def insert(self, value):
+        current_node = self
+        while True:
+            if value < current_node.value:
+                if current_node.left is None:
+                    current_node.left = BST(value)
+                    break
+                else:
+                    current_node = current_node.left
+            else:
+                if current_node.right is None:
+                    current_node.right = BST(value)
+                    break
+                else:
+                    current_node = current_node.right
+        return self
+
+
+def init_bst(array):
+    tree = BST(array[0])
+    for i in range(1, len(array)):
+        tree.insert(array[i])
+    return tree
+
+
+def validate_binary_search_helper(tree, min_value, max_value):
+    if tree is None:
+        return True
+    if tree.value < min_value or tree.value >= max_value:
+        return False
+    left_is_valid = validate_binary_search_helper(tree.left, min_value, tree.value)
+    return left_is_valid and validate_binary_search_helper(tree.right, tree.value, max_value)
+
+
+# O(n) time | O(d) space
+# d is tree depth
+def validate_binary_search_tree1(tree):
+    return validate_binary_search_helper(tree, float('-inf'), float('inf'))
+
+
+# O(n) time | O(d) space
+# d is tree depth
+def validate_binary_search_tree2(tree):
+    if tree is None:
+        return True
+    if tree.left is not None and tree.left.value > tree.value:
+        return False
+    if tree.right is not None and tree.right.value < tree.value:
+        return False
+    return validate_binary_search_tree2(tree.left) and validate_binary_search_tree2(tree.right)
+
+
+if __name__ == '__main__':
+    bst = init_bst([10, 5, 5, 2, 1, 15, 13, 22, 14])
+    print(validate_binary_search_tree1(bst))
+    print(validate_binary_search_tree2(bst))
 ```
 
 Last Modified 2021-09-21
