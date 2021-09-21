@@ -557,4 +557,118 @@ if __name__ == '__main__':
     print(same_bst_s2(source1, source2))
 ```
 
-Last Modified 2021-09-20
+## 右侧小于数量
+
+```python
+class SpecialBST1:
+
+    def __init__(self, value, idx, num_smaller_at_insert_time):
+        self.value = value
+        self.idx = idx
+        self.num_smaller_at_insert_time = num_smaller_at_insert_time
+        self.left_subtree_size = 0
+        self.left = None
+        self.right = None
+
+    def insert(self, value, idx, num_smaller_at_insert_time=0):
+        if value < self.value:
+            self.left_subtree_size += 1
+            if self.left is None:
+                self.left = SpecialBST1(value, idx, num_smaller_at_insert_time)
+            else:
+                self.left.insert(value, idx, num_smaller_at_insert_time)
+        else:
+            num_smaller_at_insert_time += self.left_subtree_size
+            if value > self.value:
+                num_smaller_at_insert_time += 1
+            if self.right is None:
+                self.right = SpecialBST1(value, idx, num_smaller_at_insert_time)
+            else:
+                self.right.insert(value, idx, num_smaller_at_insert_time)
+
+
+class SpecialBST2:
+
+    def __init__(self, value):
+        self.value = value
+        self.left_subtree_size = 0
+        self.left = None
+        self.right = None
+
+    def insert(self, value, idx, right_smaller_counts, num_smaller_at_insert_time=0):
+        if value < self.value:
+            self.left_subtree_size += 1
+            if self.left is None:
+                self.left = SpecialBST2(value)
+                right_smaller_counts[idx] = num_smaller_at_insert_time
+            else:
+                self.left.insert(value, idx, right_smaller_counts, num_smaller_at_insert_time)
+        else:
+            num_smaller_at_insert_time += self.left_subtree_size
+            if value > self.value:
+                num_smaller_at_insert_time += 1
+            if self.right is None:
+                self.right = SpecialBST2(value)
+                right_smaller_counts[idx] = num_smaller_at_insert_time
+            else:
+                self.right.insert(value, idx, right_smaller_counts, num_smaller_at_insert_time)
+
+
+def get_right_smaller_counts(bst, right_smaller_counts):
+    if bst is None:
+        return False
+    right_smaller_counts[bst.idx] = bst.num_smaller_at_insert_time
+    get_right_smaller_counts(bst.left, right_smaller_counts)
+    get_right_smaller_counts(bst.right, right_smaller_counts)
+
+
+# O(n^2) time | O(n) space
+def right_smaller_than1(array):
+    right_smaller_counts = list()
+    for i in range(len(array)):
+        right_smaller_count = 0
+        for j in range(i + 1, len(array)):
+            if array[j] < array[i]:
+                right_smaller_count += 1
+        right_smaller_counts.append(right_smaller_count)
+    return right_smaller_counts
+
+
+# O(n * log(n)) time | O(n) space
+def right_smaller_than2(array):
+    if len(array) == 0:
+        return list()
+
+    last_idx = len(array) - 1
+    bst = SpecialBST1(array[last_idx], last_idx, 0)
+    for i in reversed(range(len(array) - 1)):
+        bst.insert(array[i], i)
+
+    right_smaller_counts = array[:]
+    get_right_smaller_counts(bst, right_smaller_counts)
+    return right_smaller_counts
+
+
+# O(n * log(n)) time | O(n) space
+def right_smaller_than3(array):
+    if len(array) == 0:
+        return list()
+
+    right_smaller_counts = array[:]
+    last_idx = len(array) - 1
+    bst = SpecialBST2(array[last_idx])
+    right_smaller_counts[last_idx] = 0
+    for i in reversed(range(len(array) - 1)):
+        bst.insert(array[i], i, right_smaller_counts)
+
+    return right_smaller_counts
+
+
+if __name__ == '__main__':
+    source = [8, 5, 11, -1, 3, 4, 2]
+    print(right_smaller_than1(source))
+    print(right_smaller_than2(source))
+    print(right_smaller_than3(source))
+```
+
+Last Modified 2021-09-21
