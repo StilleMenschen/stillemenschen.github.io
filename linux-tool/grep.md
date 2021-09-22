@@ -15,7 +15,7 @@ grep [OPTIONS] [-e PATTERN | -f FILE] [FILE...]
 
 <style>
 table th:first-of-type {
-    width: 12%;
+    width: 20%;
 }
 </style>
 
@@ -30,6 +30,9 @@ table th:first-of-type {
 | -h                        | 查询多文件时不显示文件名                                     |
 | -n                        | 显示行号                                                     |
 | -r                        | 只有使用命令行执行时，才跟随符号链接递归搜索每个目录下的文件 |
+| --exclude=GLOB            | 排除指定的文件，支持通配符                                   |
+| --exclude-dir=DIR         | 递归搜索时，排除指定的目录，支持通配符                       |
+| --include=GLOB            | 包含指定的文件，支持通配符                                   |
 | -R                        | 跟随符号链接递归搜索每个目录下的文件                         |
 | --color[=C], --colour[=C] | 为匹配到的字符着色，`C`的值为`never`，`always`或者`auto`     |
 
