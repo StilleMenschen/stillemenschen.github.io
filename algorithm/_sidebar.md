@@ -6,5 +6,6 @@
   - [Stack](algorithm/stack.md)
   - [Sorting](algorithm/sorting.md)
   - [Strings](algorithm/strings.md)
+  - [Binary Tree](algorithm/binary-tree.md)
   - [Binary Search Tree](algorithm/binary-search-tree.md)
   - [Dynamic Programming](algorithm/dynamic-programming.md)
