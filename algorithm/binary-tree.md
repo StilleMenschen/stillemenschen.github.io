@@ -207,4 +207,55 @@ public class BinaryTreeAlgorithm {
 }
 ```
 
-Last Modified 2021-09-25
+## 节点高度求和
+
+根节点的高度为0，第二层的节点高度为1，以此类推。
+
+```python
+class BinaryTree:
+
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+
+def insert_level_order(array, tree, index, length):
+    if index < length:
+        tree = BinaryTree(array[index])
+        tree.left = insert_level_order(array, tree.left, 2 * index + 1, length)
+        tree.right = insert_level_order(array, tree.right, 2 * index + 2, length)
+    return tree
+
+
+# O(n) time | O(h) space
+# h is binary tree height
+def node_depths1(root):
+    node_depths_sums = 0
+    stack = [(root, 0,)]
+    while len(stack) > 0:
+        node_info = stack.pop()
+        node, depth = node_info
+        if node is None:
+            continue
+        node_depths_sums += depth
+        stack.append((node.left, depth + 1,))
+        stack.append((node.right, depth + 1,))
+    return node_depths_sums
+
+
+# O(n) time | O(h) space
+def node_depths2(root, depth=0):
+    if root is None:
+        return 0
+    return depth + node_depths2(root.left, depth + 1) + node_depths2(root.right, depth + 1)
+
+
+if __name__ == '__main__':
+    source = list(range(1, 10))
+    parent = insert_level_order(source, None, 0, len(source))
+    print(node_depths1(parent))
+    print(node_depths2(parent))
+```
+
+Last Modified 2021-10-09
