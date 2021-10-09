@@ -4,6 +4,8 @@ application.yml
 
 ```yml
 spring:
+  application:
+    name: demo
   datasource:
     url: jdbc:mariadb://localhost:3306/db
     username: root
@@ -38,6 +40,8 @@ logging:
     <property scope="context" name="LOG_HOME" value="/opt"/>
     <!-- 读取配置文件中的路径 -->
     <springProperty scope="context" name="log.path" source="logging.file.path"/>
+    <!-- 读取配置文件中的名称 -->
+    <springProperty scope="context" name="app.name" source="spring.application.name"/>
     <!-- 日志格式化 -->
     <property name="FILE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{39} %msg%n"/>
 
@@ -59,9 +63,9 @@ logging:
             <!-- <onMatch>ACCEPT</onMatch> -->
             <!-- <onMismatch>DENY</onMismatch> -->
         </filter>
-        <file>${LOG_HOME}/test/demo.warn.log</file>
+        <file>${LOG_HOME}/${app.name}-info.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_HOME}/test/demo-%d{yyyy-MM-dd}-%i.warn.log</fileNamePattern>
+            <fileNamePattern>${LOG_HOME}/${app.name}-info-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
             <maxHistory>30</maxHistory>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>30MB</maxFileSize>
@@ -75,7 +79,7 @@ logging:
     <!-- 时间滚动输出 level 为 ERROR 日志 -->
     <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!-- 正在记录的日志文件的路径及文件名 -->
-        <file>${log.path}/demo-error.log</file>
+        <file>${log.path}/${app.name}-error.log</file>
         <!--日志文件输出格式 -->
         <encoder>
             <pattern>${FILE_LOG_PATTERN}</pattern>
@@ -83,7 +87,7 @@ logging:
         </encoder>
         <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${log.path}/ERROR/demo-error-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>${log.path}/${app.name}-error-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>${LOG_FILE_MAX_SIZE}</maxFileSize>
             <!--日志文件保留天数 -->
             <maxHistory>${LOG_FILE_MAX_HISTORY}</maxHistory>
@@ -116,8 +120,6 @@ logging:
     </logger>
     <logger name="org.apache" level="WARN"/>
     <logger name="httpclient" level="WARN"/>
-    <logger name="com.zaxxer.hikari.pool" level="DEBUG"/>
-    <logger name="org.springframework" level="INFO"/>
     <root level="INFO">
         <appender-ref ref="stdout"/>
         <appender-ref ref="INFO_FILE"/>
@@ -137,4 +139,4 @@ logging:
 </configuration>
 ```
 
-Last Modified 2021-10-01
+Last Modified 2021-10-09
