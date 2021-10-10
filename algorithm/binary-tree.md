@@ -233,7 +233,7 @@ def insert_level_order(array, tree, index, length):
 def node_depths1(root):
     node_depths_sums = 0
     stack = [(root, 0,)]
-    while len(stack) > 0:
+    while len(stack):
         node_info = stack.pop()
         node, depth = node_info
         if node is None:
@@ -258,4 +258,67 @@ if __name__ == '__main__':
     print(node_depths2(parent))
 ```
 
-Last Modified 2021-10-09
+## 反转二叉数
+
+```python
+class BinaryTree:
+
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+
+def insert_level_order(array, tree, index, length):
+    if index < length:
+        tree = BinaryTree(array[index])
+        tree.left = insert_level_order(array, tree.left, 2 * index + 1, length)
+        tree.right = insert_level_order(array, tree.right, 2 * index + 2, length)
+    return tree
+
+
+def in_order_traverse(tree, array):
+    if tree is not None:
+        in_order_traverse(tree.left, array)
+        array.append(tree.value)
+        in_order_traverse(tree.right, array)
+    return array
+
+
+def swap_left_and_right(tree):
+    tree.left, tree.right = tree.right, tree.left
+
+
+# O(n) time | O(n) space
+def invert_binary_tree1(tree):
+    queue = [tree]
+    while len(queue):
+        current = queue.pop(0)
+        if current is None:
+            continue
+        swap_left_and_right(current)
+        queue.append(current.left)
+        queue.append(current.right)
+
+
+# O(n) time | O(d) space
+# d is tree depth
+def invert_binary_tree2(tree):
+    if tree is not None:
+        swap_left_and_right(tree)
+        invert_binary_tree2(tree.left)
+        invert_binary_tree2(tree.right)
+
+
+if __name__ == '__main__':
+    source = list(range(1, 10))
+    root_node = insert_level_order(source, None, 0, len(source))
+    print(in_order_traverse(root_node, list()))
+    invert_binary_tree1(root_node)
+    print(in_order_traverse(root_node, list()))
+    root_node = insert_level_order(source, None, 0, len(source))
+    invert_binary_tree2(root_node)
+    print(in_order_traverse(root_node, list()))
+```
+
+Last Modified 2021-10-10
