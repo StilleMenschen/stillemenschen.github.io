@@ -321,4 +321,62 @@ if __name__ == '__main__':
     print(in_order_traverse(root_node, list()))
 ```
 
+## 二叉树最大直径
+
+```python
+class BinaryTree:
+
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+
+class TreeInfo:
+
+    def __init__(self, diameter, height):
+        self.diameter = diameter
+        self.height = height
+
+
+def init_tree():
+    root_node = BinaryTree(1)
+    temp_node = root_node
+    temp_node.left = BinaryTree(3)
+    temp_node.right = BinaryTree(2)
+    temp_node = root_node.left
+    for e in [7, 8, 9]:
+        temp_node.left = BinaryTree(e)
+        temp_node = temp_node.left
+    temp_node = root_node.left
+    for e in [4, 5, 6]:
+        temp_node.right = BinaryTree(e)
+        temp_node = temp_node.right
+    return root_node
+
+
+def get_tree_info(tree):
+    if tree is None:
+        return TreeInfo(0, 0)
+    left_tree = get_tree_info(tree.left)
+    right_tree = get_tree_info(tree.right)
+
+    longest_path_through_root = left_tree.height + right_tree.height
+    max_diameter_so_far = max(left_tree.diameter, right_tree.diameter)
+    current_diameter = max(longest_path_through_root, max_diameter_so_far)
+    current_height = 1 + max(left_tree.height, right_tree.height)
+
+    return TreeInfo(current_diameter, current_height)
+
+
+# O(n) time | O(n) space
+def binary_tree_diameter(tree):
+    return get_tree_info(tree).diameter
+
+
+if __name__ == '__main__':
+    root = init_tree()
+    print(binary_tree_diameter(root))
+```
+
 Last Modified 2021-10-10
