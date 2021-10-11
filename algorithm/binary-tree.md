@@ -379,4 +379,51 @@ if __name__ == '__main__':
     print(binary_tree_diameter(root))
 ```
 
-Last Modified 2021-10-10
+## 线性前序遍历
+
+```python
+class BinaryTree:
+
+    def __init__(self, value, parent=None):
+        self.value = value
+        self.parent = parent
+        self.left = None
+        self.right = None
+
+
+def init_tree():
+    tree = BinaryTree(1)
+    tree.left = BinaryTree(2, tree)
+    tree.left.left = BinaryTree(4, tree.left)
+    tree.left.left.right = BinaryTree(9, tree.left.left)
+    tree.right = BinaryTree(3, tree)
+    tree.right.left = BinaryTree(6, tree.right)
+    tree.right.right = BinaryTree(7, tree.right)
+    return tree
+
+
+# O(n) time | O(1) space
+def iterative_in_order_traversal(tree, callback):
+    previous_node, next_node = None, None
+    current_node = tree
+    while current_node is not None:
+        if previous_node is None or previous_node == current_node.parent:
+            if current_node.left is not None:
+                next_node = current_node.left
+            else:
+                callback(current_node.value)
+                next_node = current_node.right if current_node.right is not None else current_node.parent
+        elif previous_node == current_node.left:
+            callback(current_node.value)
+            next_node = current_node.right if current_node.right is not None else current_node.parent
+        else:
+            next_node = current_node.parent
+        previous_node = current_node
+        current_node = next_node
+
+
+if __name__ == '__main__':
+    iterative_in_order_traversal(init_tree(), lambda e: print(e, end=' '))
+```
+
+Last Modified 2021-10-11
