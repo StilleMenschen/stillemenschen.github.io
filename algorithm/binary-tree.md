@@ -339,20 +339,12 @@ class TreeInfo:
         self.height = height
 
 
-def init_tree():
-    root_node = BinaryTree(1)
-    temp_node = root_node
-    temp_node.left = BinaryTree(3)
-    temp_node.right = BinaryTree(2)
-    temp_node = root_node.left
-    for e in [7, 8, 9]:
-        temp_node.left = BinaryTree(e)
-        temp_node = temp_node.left
-    temp_node = root_node.left
-    for e in [4, 5, 6]:
-        temp_node.right = BinaryTree(e)
-        temp_node = temp_node.right
-    return root_node
+def insert_level_order(array, tree, index, length):
+    if index < length and array[index] is not None:
+        tree = BinaryTree(array[index])
+        tree.left = insert_level_order(array, tree.left, 2 * index + 1, length)
+        tree.right = insert_level_order(array, tree.right, 2 * index + 2, length)
+    return tree
 
 
 def get_tree_info(tree):
@@ -375,8 +367,56 @@ def binary_tree_diameter(tree):
 
 
 if __name__ == '__main__':
-    root = init_tree()
-    print(binary_tree_diameter(root))
+    source = [1, 3, 2, 7, 4, None, None, 8, None, None, 5, None, None,
+              None, None, 9, None, None, None, None, None, None, 6]
+    root_node = insert_level_order(source, None, 0, len(source))
+    print(binary_tree_diameter(root_node))
+```
+
+## 最大路径之和
+
+```python
+class BinaryTree:
+
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+
+def insert_level_order(array, tree, index, length):
+    if index < length:
+        tree = BinaryTree(array[index])
+        tree.left = insert_level_order(array, tree.left, 2 * index + 1, length)
+        tree.right = insert_level_order(array, tree.right, 2 * index + 2, length)
+    return tree
+
+
+def find_max_sum(tree):
+    if tree is None:
+        return 0, 0
+    left_max_sum_as_branch, left_max_path_sum = find_max_sum(tree.left)
+    right_max_sum_as_branch, right_max_path_sum = find_max_sum(tree.right)
+    max_child_sum_as_branch = max(left_max_sum_as_branch, right_max_sum_as_branch)
+
+    value = tree.value
+    max_sum_as_branch = max(max_child_sum_as_branch + value, value)
+    max_sum_as_root_node = max(left_max_sum_as_branch + value + right_max_sum_as_branch, max_sum_as_branch)
+    max_path_sum = max(left_max_path_sum, right_max_path_sum, max_sum_as_root_node)
+
+    return max_sum_as_branch, max_path_sum
+
+
+# O(n) time | O(log(n)) space
+def get_max_path_sum(tree):
+    _, max_sum = find_max_sum(tree)
+    return max_sum
+
+
+if __name__ == '__main__':
+    source = [1, 2, 3, 4, 5, 6, 7]
+    root = insert_level_order(source, None, 0, len(source))
+    print(get_max_path_sum(root))
 ```
 
 ## 线性前序遍历
@@ -391,14 +431,11 @@ class BinaryTree:
         self.right = None
 
 
-def init_tree():
-    tree = BinaryTree(1)
-    tree.left = BinaryTree(2, tree)
-    tree.left.left = BinaryTree(4, tree.left)
-    tree.left.left.right = BinaryTree(9, tree.left.left)
-    tree.right = BinaryTree(3, tree)
-    tree.right.left = BinaryTree(6, tree.right)
-    tree.right.right = BinaryTree(7, tree.right)
+def insert_level_order(array, tree, parent, index, length):
+    if index < length and array[index] is not None:
+        tree = BinaryTree(array[index], parent)
+        tree.left = insert_level_order(array, tree.left, tree, 2 * index + 1, length)
+        tree.right = insert_level_order(array, tree.right, tree, 2 * index + 2, length)
     return tree
 
 
@@ -423,7 +460,9 @@ def iterative_in_order_traversal(tree, callback):
 
 
 if __name__ == '__main__':
-    iterative_in_order_traversal(init_tree(), lambda e: print(e, end=' '))
+    source = [1, 2, 3, 4, None, 6, 7, None, 9]
+    root_node = insert_level_order(source, None, None, 0, len(source))
+    iterative_in_order_traversal(root_node, lambda e: print(e, end=' '))
 ```
 
-Last Modified 2021-10-11
+Last Modified 2021-10-12
