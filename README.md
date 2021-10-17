@@ -12,6 +12,7 @@
 - [Docker Compose](docker-compose/)文档仅包含启动和停止的命令以及配置文件参考
 - [Python](python/)包含了个人常用模块的参考
 - [Git](vcs/)的基本使用已经完成
+- [How to talk](talk/)
 
 **补充**
 
