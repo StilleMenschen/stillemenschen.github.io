@@ -540,4 +540,63 @@ if __name__ == '__main__':
     flatten_binary_tree2(root_node)
 ```
 
-Last Modified 2021-10-12
+## 右兄弟树
+
+```python
+class BinaryTree:
+
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+
+def insert_level_order(array, tree, index, length):
+    if index < length and array[index] is not None:
+        tree = BinaryTree(array[index])
+        tree.left = insert_level_order(array, tree.left, 2 * index + 1, length)
+        tree.right = insert_level_order(array, tree.right, 2 * index + 2, length)
+    return tree
+
+
+def in_order_traverse(root, array):
+    if root is not None:
+        array = in_order_traverse(root.left, array)
+        array.append(root.value)
+        array = in_order_traverse(root.right, array)
+    return array
+
+
+def mutate(node, parent, is_left_child):
+    if node is None:
+        return False
+    left, right = node.left, node.right
+    mutate(left, node, True)
+    if parent is None:
+        node.right = None
+    elif is_left_child:
+        node.right = parent.right
+    else:
+        if parent.right is None:
+            node.right = None
+        else:
+            node.right = parent.right.left
+    mutate(right, node, False)
+
+
+# O(n) time | O(d) space
+def right_sibling_tree(root):
+    mutate(root, None, None)
+    return root
+
+
+if __name__ == '__main__':
+    source = [1, 2, 3, 4, 5, 6, 7, 8, 9, None, 10, 11, None, 12, 13,
+              None, None, None, None, None, None, None, None, 14]
+    root_node = insert_level_order(source, None, 0, len(source))
+    print(in_order_traverse(root_node, list()))
+    root_node = right_sibling_tree(root_node)
+    print(in_order_traverse(root_node, list()))
+```
+
+Last Modified 2021-10-18
