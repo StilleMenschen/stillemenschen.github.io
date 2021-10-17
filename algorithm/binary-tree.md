@@ -465,4 +465,79 @@ if __name__ == '__main__':
     iterative_in_order_traversal(root_node, lambda e: print(e, end=' '))
 ```
 
+## 展平二叉树
+
+```python
+class BinaryTree:
+
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+
+def insert_level_order(array, tree, index, length):
+    if index < length and array[index] is not None:
+        tree = BinaryTree(array[index])
+        tree.left = insert_level_order(array, tree.left, 2 * index + 1, length)
+        tree.right = insert_level_order(array, tree.right, 2 * index + 2, length)
+    return tree
+
+
+def get_nodes_in_order(tree, array):
+    if tree is not None:
+        get_nodes_in_order(tree.left, array)
+        array.append(tree)
+        get_nodes_in_order(tree.right, array)
+    return array
+
+
+def connect_nodes(left, right):
+    left.right = right
+    right.left = left
+
+
+def flatten_tree(node):
+    if node.left is None:
+        left_most = node
+    else:
+        left_subtree_left_most, left_subtree_right_most = flatten_tree(node.left)
+        connect_nodes(left_subtree_right_most, node)
+        left_most = left_subtree_left_most
+
+    if node.right is None:
+        right_most = node
+    else:
+        right_subtree_left_most, right_subtree_right_most = flatten_tree(node.right)
+        connect_nodes(node, right_subtree_left_most)
+        right_most = right_subtree_right_most
+
+    return left_most, right_most
+
+
+# O(n) time | O(n) space
+def flatten_binary_tree1(root):
+    in_order_nodes = get_nodes_in_order(root, list())
+    for i in range(len(in_order_nodes) - 1):
+        left_node = in_order_nodes[i]
+        right_node = in_order_nodes[i + 1]
+        left_node.right = right_node
+        right_node.left = left_node
+    return in_order_nodes[0]
+
+
+# O(n) time | O(d) space
+def flatten_binary_tree2(root):
+    left_most, _ = flatten_tree(root)
+    return left_most
+
+
+if __name__ == '__main__':
+    source = [1, 2, 3, 4, 5, 6, None, None, None, 7, 8]
+    root_node = insert_level_order(source, None, 0, len(source))
+    flatten_binary_tree1(root_node)
+    root_node = insert_level_order(source, None, 0, len(source))
+    flatten_binary_tree2(root_node)
+```
+
 Last Modified 2021-10-12
