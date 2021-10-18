@@ -58,10 +58,9 @@ logging:
                     converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
 
     <appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+        <!-- 级别大于INFO的如WARN、ERROR的ACCEPT，级别小于INFO的DENY -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>INFO</level>
-            <!-- <onMatch>ACCEPT</onMatch> -->
-            <!-- <onMismatch>DENY</onMismatch> -->
         </filter>
         <file>${LOG_HOME}/${app.name}-info.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -139,4 +138,4 @@ logging:
 </configuration>
 ```
 
-Last Modified 2021-10-09
+Last Modified 2021-10-18
