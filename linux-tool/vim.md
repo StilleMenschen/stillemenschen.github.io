@@ -9,6 +9,17 @@
 3. 可视化模式(visual)，左下角有`-- VISUAL --`、`-- VISUAL BLOCK --`字样
 4. 替换模式(replace)，左下角有`-- REPLACE --`字样
 
+### 模式切换
+
+1. 插入模式，按下字母`i`或`I`
+2. 可视化模式（字符选择），按下字母`v`
+3. 可视化模式（行选择），按下字母`V`
+4. 可视化模式（块选择），按下字母`ctrl+v`
+5. 替换模式，按下字母`R`
+6. 普通模式，在其它模式下，按下`Esc`
+
+> 注意字母大小写
+
 ### 注意事项
 
 1. 在 vim 中，大写字母和小写字母的命令是有区别的
@@ -80,6 +91,17 @@ O        在当前行上面新增行
 *        向下查找光标位置的单词
 #        向上查找光标位置的单词
 ~        大小写相互转换
+3~       将光标开始处的3个字母改变大小写
+g~~      改变当前光标所在行的大小写
+gUU      将当前光标所行的字母全部改为大写
+guu      将当前光标所行的字母全部改为小写
+3gUU     将当前光标所行往下3行的字母全部改为大写
+3guu     将当前光标所行往下3行的字母全部改为小写
+gUw      将光标处的单词转为大写
+guw      将光标处的单词转为小写
+gUG      将当前光标所在行到文件末尾的所有字母转为大写
+guG      将当前光标所在行到文件末尾的所有字母转为小写
+gUgg     将当前光标所在行到文件第一行的所有字母转为大写
 .        再次执行上一次命令
 fa       在当前行向后查找字母a,并跳转到第一个匹配项
 ta       在当前行向后查找字母a,并跳转到第一个匹配项的前一个字符
@@ -273,14 +295,14 @@ gT         切换到前一个tab页
 **括号中的是设置项的单词缩写**
 
 ```
-set number        行号(nu)
-set hlsearch      高亮搜索(hls)
-set incsearch     实时搜索
-set showcmd       展示命令
-set shiftwidth=4  自动缩进时的宽度(sw)
-set tabstop=4     tab的宽度(ts)
-set expandtab     tab换成空格
-syntax on         代码语法高亮
+:set number        行号(nu)
+:set hlsearch      高亮搜索(hls)
+:set incsearch     实时搜索
+:set showcmd       展示命令
+:set shiftwidth=4  自动缩进时的宽度(sw)
+:set tabstop=4     tab的宽度(ts)
+:set expandtab     tab换成空格
+:syntax on         代码语法高亮
 ```
 
 ## vim 按键
@@ -293,4 +315,4 @@ syntax on         代码语法高亮
 imap <C-X> <Esc>:q!<CR>
 ```
 
-Last Modified 2021-04-11
+Last Modified 2021-10-21
