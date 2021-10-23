@@ -4,3 +4,4 @@
   - [依赖跟踪](javascript/dependency-tracking.md)
   - [迷你观察者](javascript/mini-watchers.md)
   - [Promise](javascript/promise.md)
+  - [Objects](javascript/objects.md)
