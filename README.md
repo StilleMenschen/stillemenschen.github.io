@@ -12,11 +12,11 @@
 - [Docker Compose](docker-compose/)文档仅包含启动和停止的命令以及配置文件参考
 - [Python](python/)包含了个人常用模块的参考
 - [Git](vcs/)的基本使用已经完成
-- [How to talk](talk/)
+- [交谈中的要点](talk/)
 
 **补充**
 
-- 最近在研究[算法](algorithm/)相关的内容
+- 最近在研究[递归算法](algorithm/)相关的内容
 
 > 此文档基于 NodeJS 的 [docsify](https://docsify.js.org/#/zh-cn/) 框架生成
 

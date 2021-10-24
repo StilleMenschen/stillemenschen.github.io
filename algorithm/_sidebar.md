@@ -9,3 +9,4 @@
   - [Binary Tree](algorithm/binary-tree.md)
   - [Binary Search Tree](algorithm/binary-search-tree.md)
   - [Dynamic Programming](algorithm/dynamic-programming.md)
+  - [Recursion](algorithm/recursion.md)
