@@ -599,4 +599,115 @@ if __name__ == '__main__':
     print(in_order_traverse(root_node, list()))
 ```
 
-Last Modified 2021-10-18
+## 所有节点深度
+
+```python
+class BinaryTree:
+
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+
+class TreeInfo:
+    def __init__(self, num_nodes_in_tree, sum_of_depths, sum_of_all_depths):
+        self.num_nodes_in_tree = num_nodes_in_tree
+        self.sum_of_depths = sum_of_depths
+        self.sum_of_all_depths = sum_of_all_depths
+
+
+def insert_level_order(array, tree, index, length):
+    if index < length and array[index] is not None:
+        tree = BinaryTree(array[index])
+        tree.left = insert_level_order(array, tree.left, 2 * index + 1, length)
+        tree.right = insert_level_order(array, tree.right, 2 * index + 2, length)
+    return tree
+
+
+def get_node_depths(node, depth=0):
+    if node is None:
+        return 0
+    return depth + get_node_depths(node.left, depth + 1) + get_node_depths(node.right, depth + 1)
+
+
+def sum_all_node_depths(node, node_depth):
+    if node is None:
+        return 0
+    return node_depth[node] + sum_all_node_depths(node.left, node_depth) + sum_all_node_depths(node.right, node_depth)
+
+
+def add_node_depths(node, node_depths, node_counts):
+    node_depths[node] = 0
+    if node.left is not None:
+        add_node_depths(node.left, node_depths, node_counts)
+        node_depths[node] += node_depths[node.left] + node_counts[node.left]
+    if node.right is not None:
+        add_node_depths(node.right, node_depths, node_counts)
+        node_depths[node] += node_depths[node.right] + node_counts[node.right]
+
+
+def add_node_counts(node, node_counts):
+    node_counts[node] = 1
+    if node.left is not None:
+        add_node_counts(node.left, node_counts)
+        node_counts[node] += node_counts[node.left]
+    if node.right is not None:
+        add_node_counts(node.right, node_counts)
+        node_counts[node] += node_counts[node.right]
+
+
+def get_tree_info(tree):
+    if tree is None:
+        return TreeInfo(0, 0, 0)
+    left_tree_info = get_tree_info(tree.left)
+    right_tree_info = get_tree_info(tree.right)
+
+    sum_of_left_depth = left_tree_info.sum_of_depths + left_tree_info.num_nodes_in_tree
+    sum_of_right_depth = right_tree_info.sum_of_depths + right_tree_info.num_nodes_in_tree
+
+    num_nodes_in_tree = 1 + left_tree_info.num_nodes_in_tree + right_tree_info.num_nodes_in_tree
+    sum_of_depth = sum_of_left_depth + sum_of_right_depth
+    sum_of_all_depths = sum_of_depth + left_tree_info.sum_of_all_depths + right_tree_info.sum_of_all_depths
+
+    return TreeInfo(num_nodes_in_tree, sum_of_depth, sum_of_all_depths)
+
+
+# O(n * log(n)) time | O(h) space
+# h is tree height
+def all_kinds_of_node_depths1(root):
+    sum_of_all_depths = 0
+    stack = [root]
+    while len(stack) > 0:
+        node = stack.pop()
+        if node is None:
+            continue
+        sum_of_all_depths += get_node_depths(node)
+        stack.append(node.left)
+        stack.append(node.right)
+    return sum_of_all_depths
+
+
+# O(n) time | O(n) space
+def all_kinds_of_node_depths2(root):
+    node_counts = dict()
+    add_node_counts(root, node_counts)
+    node_depths = dict()
+    add_node_depths(root, node_depths, node_counts)
+    return sum_all_node_depths(root, node_depths)
+
+
+# O(n) time | O(n) space
+def all_kinds_of_node_depths3(root):
+    return get_tree_info(root).sum_of_all_depths
+
+
+if __name__ == '__main__':
+    source = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    root_node = insert_level_order(source, None, 0, len(source))
+    print(all_kinds_of_node_depths1(root_node))
+    print(all_kinds_of_node_depths2(root_node))
+    print(all_kinds_of_node_depths3(root_node))
+```
+
+Last Modified 2021-10-24
