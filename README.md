@@ -16,7 +16,7 @@
 
 **补充**
 
-- 最近在研究[递归算法](algorithm/)相关的内容
+- 最近在研究[算法](algorithm/)相关的内容
 
 > 此文档基于 NodeJS 的 [docsify](https://docsify.js.org/#/zh-cn/) 框架生成
 

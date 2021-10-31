@@ -926,4 +926,46 @@ if __name__ == '__main__':
     print(waterfall_streams(a, 3))
 ```
 
-Last Modified 2021-06-29
+## 锦标赛冠军
+
+```python
+HOW_TEAM_WON = 1
+
+
+def update_scores(team, scores, points):
+    if team not in scores:
+        scores[team] = 0
+    scores[team] += points
+
+
+# O(n) time | O(k) space
+# k is the number of teams
+def tournament_winner(competitions, results):
+    current_best_team = ''
+    scores = {current_best_team: 0}
+
+    for idx, competition in enumerate(competitions):
+        result = results[idx]
+        first_team, second_team = competition
+
+        winner_team = first_team if result == HOW_TEAM_WON else second_team
+
+        update_scores(winner_team, scores, 3)
+
+        if scores[winner_team] > scores[current_best_team]:
+            current_best_team = winner_team
+
+    return current_best_team
+
+    pass
+
+
+if __name__ == '__main__':
+    source_competitions = [["HTML", "C#"],
+                    ["C#", "Python"],
+                    ["Python", "HTML"]]
+    source_results = [0, 0, 1]
+    print(tournament_winner(source_competitions, source_results))
+```
+
+Last Modified 2021-10-31
