@@ -5,7 +5,9 @@
 ## 冒泡排序
 
 ```python
-# O(n^2) time | O(1) space
+# Best: O(n) time | O(1) space
+# Average: O(n^2) time | O(1) space
+# Worst: O(n^2) time | O(1) space
 def bubble_sort(array):
     is_sorted = False
     length = len(array)
