@@ -336,48 +336,42 @@ int main()
 
 ## 不重复子字符串
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
+```cpp
+#include <unordered_map>
+#include <vector>
+#include <iostream>
 
-int getStringLength(char* string)
-{
-    char *p = string;
-    int length = 0;
-    while ( *p++ ) length++;
-    return length;
-}
+using namespace std;
 
-/* O(n) time | O(min(n, a)) space */
-char* longestSubstringWithoutDuplication(char string[])
+// O(n) time | O(min(n, a)) space
+string longestSubstringWithoutDuplication(string str)
 {
-    int map[95];
-    int moveIdx = 0;
-    while ( moveIdx < 95 ) map[moveIdx++] = -1;
-    const int length = getStringLength(string);
-    int startIdx = -1, position, start = 0, stop = 0;
-    moveIdx = 0;
-    for ( ; moveIdx < length; moveIdx++ )
+
+    unordered_map<char, int> lastSeen;
+    vector<int> longest{0, 1};
+    int startIdx = 0;
+
+    for (int i = 0; i < str.length(); i++)
     {
-        position = string[moveIdx] - ' ';
-        if ( map[position] >= 0 && map[position] + 1 > startIdx )
-            startIdx = map[position] + 1;
-        if ( stop - start < moveIdx + 1 - startIdx)
+        char character = str[i];
+        if (lastSeen.find(character) != lastSeen.end())
         {
-            start = startIdx;
-            stop = moveIdx + 1;
+            startIdx = max(startIdx, lastSeen[character] + 1);
         }
-        map[position] = moveIdx;
+        if (longest[1] - longest[0] < i + 1 - startIdx)
+        {
+            longest = {startIdx, i + 1};
+        }
+        lastSeen[character] = i;
     }
-    char *p = &string[start];
-    string[stop] = '\0';
-    return p;
+
+    string result = str.substr(longest[0], longest[1] - longest[0]);
+    return result;
 }
 
 int main()
 {
-    char words[] = "cleMent3isacap";
-    printf("%s", longestSubstringWithoutDuplication(words));
+    cout << longestSubstringWithoutDuplication("clementisacap") << endl;
     return 0;
 }
 ```
@@ -786,4 +780,59 @@ int main(void)
 }
 ```
 
-Last Modified 2021-07-19
+## 生成文档
+
+```python
+def count_character_frequency(character, target):
+    frequency = 0
+    for char in target:
+        if char == character:
+            frequency += 1
+    return frequency
+
+
+# O(c * (n + m)) time | O(c) space
+# c is the number of unique characters in the document
+def generate_document1(characters, document):
+    if not len(document):
+        return True
+    already_counted = set()
+    for character in document:
+        if character in already_counted:
+            continue
+
+        document_frequency = count_character_frequency(character, document)
+        characters_frequency = count_character_frequency(character, characters)
+        if document_frequency > characters_frequency:
+            return False
+
+        already_counted.add(character)
+
+    return True
+
+
+# O(n + m) time | O(n) space
+# n is the number of characters
+# m is the number of document
+def generate_document2(characters, document):
+    if not len(document):
+        return True
+    counts = dict()
+    for character in characters:
+        if character not in counts:
+            counts[character] = 1
+        else:
+            counts[character] += 1
+    for character in document:
+        if character not in counts or counts[character] == 0:
+            return False
+        counts[character] -= 1
+    return True
+
+
+if __name__ == '__main__':
+    print(generate_document1('ahealolabbhb', 'hello'))
+    print(generate_document2('ahealolabbhb', 'hello'))
+```
+
+Last Modified 2021-11-04
