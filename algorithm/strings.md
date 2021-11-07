@@ -850,8 +850,11 @@ int firstNonRepeatingCharacter(string string)
         int foundDuplicate = false;
         for (int idx2 = 0; idx2 < string.size(); idx2++)
         {
-            if (string[idx] == string[idx2] && idx != idx2)
+            if ( string[idx] == string[idx2] && idx != idx2 )
+            {
                 foundDuplicate = true;
+                break;
+            }
         }
         if (!foundDuplicate)
             return idx;
