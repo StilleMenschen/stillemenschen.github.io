@@ -835,4 +835,35 @@ if __name__ == '__main__':
     print(generate_document2('ahealolabbhb', 'hello'))
 ```
 
-Last Modified 2021-11-04
+## 第一个不重复字符
+
+```cpp
+#include <iostream>
+
+using namespace std;
+
+// O(n^2) time | O(1) space - where n is the length of the input string
+int firstNonRepeatingCharacter(string string)
+{
+    for (int idx = 0; idx < string.size(); idx++)
+    {
+        int foundDuplicate = false;
+        for (int idx2 = 0; idx2 < string.size(); idx2++)
+        {
+            if (string[idx] == string[idx2] && idx != idx2)
+                foundDuplicate = true;
+        }
+        if (!foundDuplicate)
+            return idx;
+    }
+    return -1;
+}
+
+int main()
+{
+    cout << firstNonRepeatingCharacter("abcdacff") << endl;
+    return 0;
+}
+```
+
+Last Modified 2021-11-07
