@@ -11,3 +11,4 @@
   - [Dynamic Programming](algorithm/dynamic-programming.md)
   - [Recursion](algorithm/recursion.md)
   - [Searching](algorithm/searching.md)
+  - [Greedy Algorithm](algorithm/greedy-algorithm.md)
