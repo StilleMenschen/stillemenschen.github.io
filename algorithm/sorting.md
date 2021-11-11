@@ -336,4 +336,84 @@ if __name__ == '__main__':
     print(merge_sort2(a))
 ```
 
-Last Modified 2021-06-28
+## 基数排序
+
+```cpp
+#include <vector>
+#include <algorithm>
+#include <iostream>
+using namespace std;
+
+void countingSort(vector<int> &array, int digit);
+int myPow(int base, int exponent);
+
+// O(d * (n + b)) time | O(n + b) space - where n is the length of the input
+// array, d is the max number of digits, and b is the base of the numbering
+// system used
+vector<int> radixSort(vector<int> array)
+{
+    if (array.size() == 0)
+        return array;
+
+    int maxNumber = *max_element(array.begin(), array.end());
+
+    int digit = 0;
+    while (maxNumber / (myPow(10, digit)) > 0)
+    {
+        countingSort(array, digit);
+        digit++;
+    }
+    return array;
+}
+
+void countingSort(vector<int> &array, int digit)
+{
+    vector<int> sortedArray(array.size(), 0);
+    vector<int> countArray(10, 0);
+    int arraySize = array.size();
+
+    int digitColumn = myPow(10, digit);
+    for (auto num : array)
+    {
+        int countIndex = num / digitColumn % 10;
+        countArray[countIndex]++;
+    }
+
+    for (int idx = 1; idx < 10; idx++)
+    {
+        countArray[idx] += countArray[idx - 1];
+    }
+
+    for (int idx = arraySize - 1; idx >= 0; idx--)
+    {
+        int countIndex = array[idx] / digitColumn % 10;
+        countArray[countIndex]--;
+        int sortedIndex = countArray[countIndex];
+        sortedArray[sortedIndex] = array[idx];
+    }
+
+    for (int idx = 0; idx < arraySize; idx++)
+    {
+        array[idx] = sortedArray[idx];
+    }
+}
+
+int myPow(int base, int exponent)
+{
+    int result = 1;
+    for (int i = 1; i <= exponent; i++)
+        result *= base;
+    return result;
+}
+
+int main()
+{
+    vector<int> source = {8762, 654, 3008, 345, 87, 65, 234, 12, 2};
+    source = radixSort(source);
+    for(vector<int>::iterator it = source.begin(); it != source.end(); it++)
+        cout << *it << " ";
+    return 0;
+}
+```
+
+Last Modified 2021-11-11
