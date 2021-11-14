@@ -258,6 +258,72 @@ if __name__ == '__main__':
     print(node_depths2(parent))
 ```
 
+```cpp
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+class BinaryTree
+{
+public:
+    int value;
+    BinaryTree *left;
+    BinaryTree *right;
+
+    BinaryTree(int value)
+    {
+        this->value = value;
+        left = nullptr;
+        right = nullptr;
+    }
+};
+
+struct Level
+{
+    BinaryTree *root;
+    int depth;
+};
+
+BinaryTree* insertLevelOrder(vector<int> &array, BinaryTree *tree, int index, int length)
+{
+    if ( index < length )
+    {
+        tree = new BinaryTree(array[index]);
+        tree->left = insertLevelOrder(array, tree->left, 2 * index + 1, length);
+        tree->right = insertLevelOrder(array, tree->right, 2 * index + 2, length);
+    }
+    return tree;
+}
+
+int nodeDepths(BinaryTree *root)
+{
+    int sumOfDepths = 0;
+    vector<Level> stack = {{root, 0}};
+    while ( stack.size() > 0 )
+    {
+        BinaryTree *node = stack.back().root;
+        int depth = stack.back().depth;
+        stack.pop_back();
+        if ( node == nullptr)
+            continue;
+        sumOfDepths += depth;
+        stack.push_back(Level{node->left, depth + 1});
+        stack.push_back(Level{node->right, depth + 1});
+    }
+    return sumOfDepths;
+}
+
+
+int main()
+{
+    vector<int> source = {1,2,3,4,5,6,7,8,9};
+    BinaryTree *root = insertLevelOrder(source, nullptr, 0, source.size());
+    cout << nodeDepths(root);
+    return 0;
+}
+```
+
 ## 反转二叉数
 
 ```python
