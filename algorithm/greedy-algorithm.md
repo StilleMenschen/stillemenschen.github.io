@@ -50,4 +50,32 @@ public class Algorithm {
 }
 ```
 
-Last Modified 2021-11-11
+## 按身高排列
+
+```python
+# O(nlog(n)) time | O(1) space - where n is the number of students
+def class_photos(red_shirt_heights, blue_shirt_heights):
+    red_shirt_heights.sort(reverse=True)
+    blue_shirt_heights.sort(reverse=True)
+
+    shirt_color_in_first_row = "RED" if red_shirt_heights[0] < blue_shirt_heights[0] else "BLUE"
+    for idx in range(len(red_shirt_heights)):
+        red_shirt_height = red_shirt_heights[idx]
+        blue_shirt_height = blue_shirt_heights[idx]
+
+        if shirt_color_in_first_row == "RED":
+            if red_shirt_height >= blue_shirt_height:
+                return False
+        else:
+            if blue_shirt_height >= red_shirt_height:
+                return False
+    return True
+
+
+if __name__ == '__main__':
+    blue = [5, 8, 1, 3, 4]
+    red = [6, 9, 2, 4, 5]
+    print(class_photos(red, blue))
+```
+
+Last Modified 2021-11-14
