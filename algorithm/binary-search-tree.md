@@ -107,6 +107,159 @@ if __name__ == '__main__':
     print(in_order_traverse(root_node, list()))
 ```
 
+```cpp
+#include <vector>
+using namespace std;
+
+class BST
+{
+public:
+    int value;
+    BST *left;
+    BST *right;
+
+    BST(int val)
+    {
+        value = val;
+        left = nullptr;
+        right = nullptr;
+    }
+
+    BST &insert(int val)
+    {
+        if (val < value )
+        {
+            if ( left == nullptr )
+            {
+                BST *item = new BST(val);
+                left = item;
+            }
+            else
+            {
+                left->insert(val);
+            }
+        }
+        else
+        {
+            if ( right == nullptr )
+            {
+                BST *item = new BST(val);
+                right = item;
+            }
+            else
+            {
+                right->insert(val);
+            }
+        }
+        return *this;
+    }
+
+    bool contains(int val)
+    {
+        if (val < value )
+        {
+            if ( left == nullptr )
+            {
+                return false;
+            }
+            else
+            {
+                return left->contains(val);
+            }
+        }
+        else if (val > value )
+        {
+            if ( right == nullptr )
+            {
+                return false;
+            }
+            else
+            {
+                return right->contains(val);
+            }
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    BST &remove(int val, BST *parent = nullptr)
+    {
+        if ( val < value )
+        {
+            left->remove(val, this);
+        }
+        else if ( val > value )
+        {
+            right->remove(val, this);
+        }
+        else
+        {
+            if ( left != nullptr && right != nullptr )
+            {
+                value = right->getMinValue();
+                right->remove(value, this);
+            }
+            else if ( parent == nullptr )
+            {
+                if ( left != nullptr )
+                {
+                    value = left->value;
+                    right = left->right;
+                    left = left->left;
+                }
+                else if ( right != nullptr )
+                {
+                    value = right->value;
+                    left = right->left;
+                    right = right->right;
+                }
+                else {}
+            }
+            else if ( parent->left == this )
+            {
+                parent->left = left != nullptr ? left : right;
+            }
+            else if ( parent->right == this )
+            {
+                parent->right = left != nullptr ? left : right;
+            }
+        }
+        return *this;
+    }
+
+    int getMinValue()
+    {
+        if ( left == nullptr )
+        {
+            return value;
+        }
+        else
+        {
+            return left->getMinValue();
+        }
+    }
+};
+
+int main()
+{
+    BST *root = new BST(10);
+    root->insert(5);
+    root->insert(15);
+    root->insert(2);
+    root->insert(5);
+    root->insert(13);
+    root->insert(22);
+    root->insert(1);
+    root->insert(14);
+    root->insert(12);
+    root->remove(10);
+    root->contains(15);
+    return 0;
+}
+```
+
 ## 遍历二叉数
 
 ```python
