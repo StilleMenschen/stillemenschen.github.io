@@ -166,6 +166,59 @@ if __name__ == '__main__':
     print(three_number_sum(a, 0))
 ```
 
+```cpp
+#include <vector>
+#include <algorithm>
+#include <iostream>
+
+using namespace std;
+
+// O(n^2) time | O(n) space
+vector<vector<int>> threeNumberSum(vector<int> array, int targetSum)
+{
+    if ( array.size() < 3 ) return {};
+    sort(array.begin(), array.end());
+    int leftIdx, rightIdx, length = array.size();
+    int currentValue, leftValue, rightValue, sumOfValue;
+    vector<vector<int>> result;
+    for (int i=0; i<length; i++)
+    {
+        leftIdx = i + 1;
+        rightIdx = length - 1;
+        while ( leftIdx < rightIdx )
+        {
+            if (leftIdx == i) leftIdx++;
+            if (rightIdx == i) rightIdx--;
+            leftValue = array[leftIdx];
+            rightValue = array[rightIdx];
+            currentValue = array[i];
+            sumOfValue = leftValue + rightValue + currentValue;
+            if ( targetSum == sumOfValue )
+            {
+                result.push_back({currentValue, leftValue, rightValue});
+                leftIdx++;
+                rightIdx--;
+            }
+            if (targetSum > sumOfValue) leftIdx++;
+            if (targetSum < sumOfValue) rightIdx--;
+        }
+    }
+    return result;
+}
+
+
+int main()
+{
+    vector<vector<int>> result = threeNumberSum({12, 3, 1, 2, -6, 5, -8, 6}, 0);
+    const int length = result.size();
+    for (int i=0; i<length; i++)
+    {
+        cout << result[i][0] << " " << result[i][1] << " "  << result[i][2] << endl;
+    }
+    return 0;
+}
+```
+
 ## 最小差异
 
 在两个序列中分别找出序列 1 和序列 2 中相差最小的两个数
