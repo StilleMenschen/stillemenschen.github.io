@@ -78,4 +78,32 @@ if __name__ == '__main__':
     print(class_photos(red, blue))
 ```
 
-Last Modified 2021-11-14
+## 速度差异总和
+
+```python
+# O(n * log(n)) time | O(1) space
+def tandem_bicycle(red_shirt_speeds, blue_shirt_speeds, fastest):
+    sum_of_speeds = 0
+    if fastest:
+        red_shirt_speeds.sort()
+    else:
+        red_shirt_speeds.sort(reverse=True)
+    blue_shirt_speeds.sort(reverse=True)
+
+    min_length = min(len(red_shirt_speeds), len(blue_shirt_speeds))
+
+    for i in range(min_length):
+        red_shirt = red_shirt_speeds[i]
+        blue_shirt = blue_shirt_speeds[i]
+        sum_of_speeds += max(red_shirt, blue_shirt)
+
+    return sum_of_speeds
+
+
+if __name__ == '__main__':
+    blue = [3, 3, 4, 6, 1, 2]
+    red = [1, 2, 1, 9, 12, 3]
+    print(tandem_bicycle(red, blue, False))
+```
+
+Last Modified 2021-11-15
