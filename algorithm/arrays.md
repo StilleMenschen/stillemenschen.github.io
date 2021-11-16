@@ -331,6 +331,42 @@ if __name__ == '__main__':
     print(move_element_ti_end(a, 8))
 ```
 
+```cpp
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+vector<int> moveElementToEnd(vector<int> array, int toMove)
+{
+    int i = 0, j = array.size() - 1;
+    while ( i < j )
+    {
+        while ( i < j && array[j] == toMove )
+        {
+            j--;
+        }
+        if ( array[i] == toMove)
+        {
+            swap(array[i], array[j]);
+        }
+        i++;
+    }
+    return array;
+}
+
+
+int main()
+{
+    vector<int> r = moveElementToEnd({2, 1, 2, 2, 3, 2, 4, 2}, 2);
+    for (vector<int>::const_iterator it = r.begin(); it != r.end(); it++)
+    {
+        cout << *it << " ";
+    }
+    return 0;
+}
+```
+
 ## 单调数组
 
 判断一个整型序列，是否是升序排序或者降序排序，如果满足两个条件中的一个，就表示它是单调的
@@ -362,6 +398,49 @@ if __name__ == '__main__':
     a = [872, 743, 65, 30, 14, 10, 5, 3, 1, -3]
     # a.reverse()
     print(is_monotonic(a))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+bool breaksDirection( int direction, int previousInt, int currentInt )
+{
+    int difference = currentInt - previousInt;
+    if (direction > 0)
+        return difference < 0;
+    return difference > 0;
+}
+
+// O(n) time | O(1) space
+// where n is the length of the array
+bool isMonotonic(vector<int> array)
+{
+    const int arraySize = array.size();
+    if (arraySize <= 2)
+        return true;
+    int direction = array[1] - array[0];
+    for (int i = 2; i < arraySize; i++)
+    {
+        if (direction == 0)
+        {
+            direction = array[i] - array[i - 1];
+            continue;
+        }
+        if (breaksDirection(direction, array[i - 1], array[i]))
+            return false;
+    }
+    return true;
+}
+
+
+int main()
+{
+    cout << isMonotonic({-1, 0, 4, 19, 200});
+    return 0;
+}
 ```
 
 ## 螺旋线
