@@ -253,9 +253,59 @@ def smallest_difference(array1, array2):
 
 
 if __name__ == '__main__':
-    a = [-1, 5, 10, 20, 28, 3]
-    b = [26, 134, 135, 15, 17]
-    print(smallest_difference(a, b))
+    print(smallest_difference([-1, 5, 10, 20, 28, 3], [26, 134, 135, 15, 17]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+// O(n*log(n) + m*log(m)) time | O(1) space
+vector<int> smallestDifference(vector<int> arrayOne, vector<int> arrayTwo)
+{
+    sort(arrayOne.begin(), arrayOne.end());
+    sort(arrayTwo.begin(), arrayTwo.end());
+
+    vector<int> result;
+
+    int smaller = INT_MAX, current = INT_MAX;
+    int idx1 = 0, idx2 = 0;
+    while (idx1 < arrayOne.size() && idx2 < arrayTwo.size())
+    {
+        int firstNum = arrayOne[idx1];
+        int secondNum = arrayTwo[idx2];
+        if ( firstNum > secondNum )
+        {
+            current = firstNum - secondNum;
+            idx2++;
+        }
+        else if (secondNum > firstNum)
+        {
+            current = secondNum - firstNum;
+            idx1++;
+        }
+        else
+        {
+            return {firstNum, secondNum};
+        }
+        if (current < smaller)
+        {
+            result = {firstNum, secondNum};
+            smaller = current;
+        }
+    }
+    return result;
+}
+
+
+int main()
+{
+    vector<int> r = smallestDifference({-1, 5, 10, 20, 28, 3}, {26, 134, 135, 15, 17});
+    cout << r[0] << " " << r[1] << endl;
+    return 0;
+}
 ```
 
 ## 移动元素至末尾
@@ -741,7 +791,7 @@ if __name__ == '__main__':
     print(zigzag_traverse(a))
 ```
 
-## Apartment Hunting
+## 寻找合适公寓
 
 ```python
 # O(b^2 * r) time | O(b) space
@@ -1021,4 +1071,4 @@ if __name__ == '__main__':
     print(tournament_winner(source_competitions, source_results))
 ```
 
-Last Modified 2021-10-31
+Last Modified 2021-11-16
