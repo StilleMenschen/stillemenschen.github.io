@@ -503,6 +503,130 @@ if __name__ == '__main__':
     print(spiral_traverse2(a))
 ```
 
+```cpp
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+
+// O(n) time | O(n) space - where n is the total number of elements in the array
+vector<int> spiralTraverse1(vector<vector<int>> array)
+{
+
+    if (array.size() == 0)
+        return {};
+
+    vector<int> result = {};
+    int startRow = 0;
+    int endRow = array.size() - 1;
+    int startCol = 0;
+    int endCol = array[0].size() - 1;
+    while (startRow <= endRow && startCol <= endCol)
+    {
+        for (int col = startCol; col <= endCol; col++)
+        {
+            result.push_back(array[startRow][col]);
+        }
+
+        for (int row = startRow + 1; row <= endRow; row++)
+        {
+            result.push_back(array[row][endCol]);
+        }
+
+        for (int col = endCol - 1; col >= startCol; col--)
+        {
+            // Handle the edge case when there's a single row
+            // in the middle of the matrix. In this case, we don't
+            // want to double-count the values in this row, which
+            // we've already counted in the first for loop above.
+            if (startRow == endRow)
+                break;
+            result.push_back(array[endRow][col]);
+        }
+        for (int row = endRow - 1; row > startRow; row--)
+        {
+            // Handle the edge case when there's a single column
+            // in the middle of the matrix. In this case, we don't
+            // want to double-count the values in this column, which
+            // we've already counted in the second for loop above.
+            if (startCol == endCol)
+                break;
+            result.push_back(array[row][startCol]);
+        }
+
+        startRow++;
+        endRow--;
+        startCol++;
+        endCol--;
+    }
+    return result;
+}
+
+// O(n) time | O(n) space - where n is the total number of elements in the array
+void spiralFill(vector<vector<int>> &array, int startRow, int endRow,
+                int startCol, int endCol, vector<int> &result)
+{
+    if (startRow > endRow || startCol > endCol)
+    {
+        return;
+    }
+    for (int col = startCol; col <= endCol; col++)
+    {
+        result.push_back(array[startRow][col]);
+    }
+    for (int row = startRow + 1; row <= endRow; row++)
+    {
+        result.push_back(array[row][endCol]);
+    }
+    for (int col = endCol - 1; col >= startCol; col--)
+    {
+        // Handle the edge case when there's a single row
+        // in the middle of the matrix. In this case, we don't
+        // want to double-count the values in this row, which
+        // we've already counted in the first for loop above.
+        if (startRow == endRow)
+            break;
+        result.push_back(array[endRow][col]);
+    }
+    for (int row = endRow - 1; row >= startRow + 1; row--)
+    {
+        // Handle the edge case when there's a single column
+        // in the middle of the matrix. In this case, we don't
+        // want to double-count the values in this column, which
+        // we've already counted in the second for loop above.
+        if (startCol == endCol)
+            break;
+        result.push_back(array[row][startCol]);
+    }
+    spiralFill(array, startRow + 1, endRow - 1, startCol + 1, endCol - 1, result);
+}
+
+vector<int> spiralTraverse2(vector<vector<int>> array)
+{
+    if (array.size() == 0)
+        return {};
+    vector<int> result = {};
+    spiralFill(array, 0, array.size() - 1, 0, array[0].size() - 1, result);
+    return result;
+}
+
+int main()
+{
+    vector<int> result = spiralTraverse2(
+    {
+        { 1,  2,  3, 4},
+        {12, 13, 14, 5},
+        {11, 16, 15, 6},
+        {10,  9,  8, 7},
+    });
+    const int length = result.size();
+    for (int i=0; i<length; i++)
+        cout << result[i] << " ";
+    return 0;
+}
+```
+
 ## 最宽（长）波峰
 
 给出一个整数序列，将序列的索引作为 x 坐标，每个索引的数值作为 y 坐标，将所有的点连接起来形成一个波谱，找出一个波谱中波峰
