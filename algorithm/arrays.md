@@ -662,6 +662,41 @@ if __name__ == '__main__':
     print(longest_peak(a))
 ```
 
+```cpp
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+// O(n) time | O(1) space
+int longestPeak(vector<int> array)
+{
+    if (array.size() <= 1)
+        return 0;
+    const int arrayLength = array.size();
+    int current = 0;
+    int longest = 0;
+    for (int i = 1; i < arrayLength - 1; i++)
+    {
+        const bool isPeak = array[i - 1] < array[i] && array[i] > array[i + 1];
+        if (!isPeak) continue;
+        int leftIdx = i - 2;
+        while (leftIdx >= 0 && array[leftIdx] < array[leftIdx + 1]) leftIdx--;
+        int rightIdx = i + 2;
+        while (rightIdx < arrayLength && array[rightIdx - 1] > array[rightIdx]) rightIdx++;
+        current = rightIdx - leftIdx - 1;
+        if (current > longest) longest = current;
+    }
+    return longest;
+}
+
+int main()
+{
+    cout << longestPeak({1, 2, 3, 3, 4, 0, 10, 6, 5, -1, -3, 2, 3});
+    return 0;
+}
+```
+
 ## 数组消费者
 
 给定一个整数序列，求出另一个序列满足第 n 个元素是除了其本身之外的其它元素的乘积
@@ -731,6 +766,42 @@ if __name__ == '__main__':
     print(array_of_products2(a))
     a = [5, 1, 4, 2]
     print(array_of_products3(a))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+// O(n) time | O(n) space
+vector<int> arrayOfProducts(vector<int> array)
+{
+    const int size = array.size();
+    vector<int> products(size, 1);
+    int sumOfproduct = 1;
+    int i;
+    for (i = 0; i < size; i++)
+    {
+        products[i] = sumOfproduct;
+        sumOfproduct *= array[i];
+    }
+    sumOfproduct = 1;
+    for (i = size - 1; i >= 0; i--)
+    {
+        products[i] *= sumOfproduct;
+        sumOfproduct *= array[i];
+    }
+    return products;
+}
+
+int main()
+{
+    vector<int> r = arrayOfProducts({-1, -5, 5, 10});
+    for (vector<int>::const_iterator it = r.begin(); it != r.end(); it++)
+        cout << *it << " ";
+    return 0;
+}
 ```
 
 ## 四数求和
