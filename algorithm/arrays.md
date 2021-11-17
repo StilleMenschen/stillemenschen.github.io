@@ -1345,4 +1345,73 @@ if __name__ == '__main__':
     print(tournament_winner(source_competitions, source_results))
 ```
 
-Last Modified 2021-11-16
+## 第一个重复值
+
+给定一个整数数组，数组的数值范围在1到N之间，而N为数组的长度，找出数组中第一个出现重复的值
+
+```python
+# O(n) time | O(n) space
+def find_duplicate_value1(array):
+    seen = set()
+    for value in array:
+        if value in seen:
+            return value
+        seen.add(value)
+    return -1
+
+
+# O(n) time | O(1) space
+def find_duplicate_value2(array):
+    for value in array:
+        abs_value = abs(value)
+        if array[abs_value - 1] < 0:
+            return abs_value
+        array[abs_value - 1] *= -1
+    return -1
+
+
+if __name__ == '__main__':
+    source = [3, 1, 3, 1, 1, 4, 4]
+    print(find_duplicate_value1(source))
+    print(find_duplicate_value2(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+using namespace std;
+
+// O(n) time | O(n) space
+int firstDuplicateValue1(vector<int> array)
+{
+    unordered_map<int, bool> seen;
+    for(int value : array)
+    {
+        if (seen.find(value) != seen.end()) return value;
+        seen[value] = true;
+    }
+    return -1;
+}
+
+// O(n) time | O(1) space
+int firstDuplicateValue2(vector<int> array)
+{
+    for(int value : array)
+    {
+        int absValue = abs(value);
+        if (array[absValue - 1] < 0) return absValue;
+        array[absValue - 1] *= -1;
+    }
+    return -1;
+}
+
+int main()
+{
+    vector<int> source = {2, 1, 5, 3, 3, 2, 4};
+    cout << firstDuplicateValue1(source) << " " << firstDuplicateValue2(source);
+    return 0;
+}
+```
+
+Last Modified 2021-11-17
