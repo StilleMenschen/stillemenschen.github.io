@@ -125,6 +125,8 @@ public:
         right = nullptr;
     }
 
+    // Average: O(log(n)) time | O(1) space
+    // Worst: O(n) time | O(1) space
     BST &insert(int val)
     {
         if (val < value )
@@ -154,6 +156,8 @@ public:
         return *this;
     }
 
+    // Average: O(log(n)) time | O(1) space
+    // Worst: O(n) time | O(1) space
     bool contains(int val)
     {
         if (val < value )
@@ -184,6 +188,8 @@ public:
         }
     }
 
+    // Average: O(log(n)) time | O(1) space
+    // Worst: O(n) time | O(1) space
     BST &remove(int val, BST *parent = nullptr)
     {
         if ( val < value )
@@ -425,21 +431,17 @@ def find_closest_value_in_bst2(tree, target):
     return find_closest_value_in_bst_helper2(tree, target, float('inf'))
 
 
-def init_bst_tree():
-    bst_tree = Tree(10)
-    bst_tree.left = Tree(5)
-    bst_tree.right = Tree(15)
-    bst_tree.left.left = Tree(2)
-    bst_tree.left.right = Tree(5)
-    bst_tree.right.left = Tree(13)
-    bst_tree.right.right = Tree(22)
-    bst_tree.left.left.left = Tree(1)
-    bst_tree.right.left.right = Tree(14)
-    return bst_tree
+def insert_level_order(array, tree, index, length):
+    if index < length and array[index] is not None:
+        tree = Tree(array[index])
+        tree.left = insert_level_order(array, tree.left, 2 * index + 1, length)
+        tree.right = insert_level_order(array, tree.right, 2 * index + 2, length)
+    return tree
 
 
 if __name__ == '__main__':
-    bst = init_bst_tree()
+    source = [10, 5, 15, 2, 5, 13, 22, 1, None, None, None, None, 14]
+    bst = insert_level_order(source, None, 0, len(source))
     print(find_closest_value_in_bst1(bst, 12))
     print(find_closest_value_in_bst2(bst, 12))
 ```
@@ -867,26 +869,100 @@ def validate_binary_search_helper(tree, min_value, max_value):
 
 # O(n) time | O(d) space
 # d is tree depth
-def validate_binary_search_tree1(tree):
+def validate_binary_search_tree(tree):
     return validate_binary_search_helper(tree, float('-inf'), float('inf'))
-
-
-# O(n) time | O(d) space
-# d is tree depth
-def validate_binary_search_tree2(tree):
-    if tree is None:
-        return True
-    if tree.left is not None and tree.left.value > tree.value:
-        return False
-    if tree.right is not None and tree.right.value < tree.value:
-        return False
-    return validate_binary_search_tree2(tree.left) and validate_binary_search_tree2(tree.right)
 
 
 if __name__ == '__main__':
     bst = init_bst([10, 5, 5, 2, 1, 15, 13, 22, 14])
-    print(validate_binary_search_tree1(bst))
-    print(validate_binary_search_tree2(bst))
+    print(validate_binary_search_tree(bst))
 ```
 
-Last Modified 2021-09-21
+```cpp
+#include <iostream>
+#include <vector>
+#include <climits>
+
+using namespace std;
+
+class BST
+{
+public:
+    int value;
+    BST *left;
+    BST *right;
+
+    BST(int val)
+    {
+        value = val;
+        left = nullptr;
+        right = nullptr;
+    };
+
+    BST &insert(int val)
+    {
+        if (val < value )
+        {
+            if ( left == nullptr )
+            {
+                BST *item = new BST(val);
+                left = item;
+            }
+            else
+            {
+                left->insert(val);
+            }
+        }
+        else
+        {
+            if ( right == nullptr )
+            {
+                BST *item = new BST(val);
+                right = item;
+            }
+            else
+            {
+                right->insert(val);
+            }
+        }
+        return *this;
+    }
+};
+
+bool validateBstHelper(BST *tree, int minValue, int maxValue)
+{
+    if (tree->value < minValue || tree->value >= maxValue)
+    {
+        return false;
+    }
+    if (tree->left != nullptr &&
+            !validateBstHelper(tree->left, minValue, tree->value))
+    {
+        return false;
+    }
+    if (tree->right != nullptr &&
+            !validateBstHelper(tree->right, tree->value, maxValue))
+    {
+        return false;
+    }
+    return true;
+}
+
+// 0(n) time| 0(d) space
+bool validateBst(BST *tree)
+{
+    return validateBstHelper(tree, INT_MIN, INT_MAX);
+}
+
+int main()
+{
+    vector<int> a = {10, 5, 15, 2, 5, 13, 22, 1, 14};
+    BST *root = new BST(a[0]);
+    for (int i = 1; i < a.size(); i++)
+        root->insert(a[i]);
+    cout << validateBst(root);
+    return 0;
+}
+```
+
+Last Modified 2021-11-18
