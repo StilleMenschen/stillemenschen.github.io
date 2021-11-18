@@ -1414,4 +1414,80 @@ int main()
 }
 ```
 
-Last Modified 2021-11-17
+## 合并重叠区间
+
+```python
+# O(n * log(n)) time | O(n) space
+def merge_overlapping_intervals(intervals):
+    if not len(intervals):
+        return [[]]
+    intervals.sort(key=lambda a: a[0])
+    merged_intervals = intervals[:1]
+    for i in range(1, len(intervals)):
+        left, right = intervals[i]
+        _, current_right = merged_intervals[-1]
+        if current_right >= left:
+            current_right = max(current_right, right)
+            merged_intervals[-1][1] = current_right
+        else:
+            merged_intervals.append(intervals[i])
+
+    return merged_intervals
+
+
+if __name__ == '__main__':
+    source = [[89, 90], [-10, 20], [-50, 0], [70, 90], [90, 91], [90, 95]]
+    print(merge_overlapping_intervals(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+// O(n * log(n)) time | O(n) space - where n is the length of the input array
+vector<vector<int>> mergeOverlappingIntervals(vector<vector<int>> intervals)
+{
+    sort(intervals.begin(), intervals.end(),
+         [](vector<int> a, vector<int> b)
+    {
+        return a[0] < b[0];
+    });
+
+    vector<vector<int>> mergedIntervals = { intervals[0] };
+    int last_compare_index = 0;
+    const int intervalsSize = intervals.size();
+
+    for (int i=1; i < intervalsSize; i++)
+    {
+        int currentIntervalEnd = mergedIntervals[last_compare_index][1];
+        int nextIntervalStart = intervals[i][0];
+        int nextIntervalEnd = intervals[i][1];
+
+        if (currentIntervalEnd >= nextIntervalStart)
+        {
+            mergedIntervals[last_compare_index][1] = max(currentIntervalEnd, nextIntervalEnd);
+        }
+        else
+        {
+            mergedIntervals.push_back(intervals[i]);
+            last_compare_index++;
+        }
+    }
+    return mergedIntervals;
+}
+
+int main()
+{
+    vector<vector<int>> result = mergeOverlappingIntervals({{89, 90}, {-10, 20}, {-50, 0}, {70, 90}, {90, 91}, {90, 95}});
+    for( vector<int> element : result )
+    {
+        cout << element[0] << " " << element[1] << endl;
+    }
+    return 0;
+}
+```
+
+Last Modified 2021-11-18
