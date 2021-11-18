@@ -250,16 +250,10 @@ public:
 
 int main()
 {
-    BST *root = new BST(10);
-    root->insert(5);
-    root->insert(15);
-    root->insert(2);
-    root->insert(5);
-    root->insert(13);
-    root->insert(22);
-    root->insert(1);
-    root->insert(14);
-    root->insert(12);
+    vector<int> a = {10, 5, 15, 2, 5, 13, 22, 1, 14};
+    BST *root = new BST(a[0]);
+    for (int i = 1; i < a.size(); i++)
+        root->insert(a[i]);
     root->remove(10);
     root->contains(15);
     return 0;
@@ -948,7 +942,7 @@ bool validateBstHelper(BST *tree, int minValue, int maxValue)
     return true;
 }
 
-// 0(n) time| 0(d) space
+// O(n) time | O(d) space - where d is tree depth
 bool validateBst(BST *tree)
 {
     return validateBstHelper(tree, INT_MIN, INT_MAX);
