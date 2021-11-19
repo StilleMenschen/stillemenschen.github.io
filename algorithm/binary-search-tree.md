@@ -375,6 +375,155 @@ if __name__ == '__main__':
     print(post_order_traverse2(_tree, list()))
 ```
 
+```cpp
+#include <iostream>
+#include <vector>
+#include <stack>
+using namespace std;
+
+class BST {
+public:
+    int value;
+    BST *left;
+    BST *right;
+
+    BST(int value)
+    {
+        this->value = value;
+        left = nullptr;
+        right = nullptr;
+    }
+
+    void insert(int value)
+    {
+        if (value < this->value)
+        {
+            if (left == nullptr)
+            {
+                left = new BST(value);
+            }
+            else
+            {
+                left->insert(value);
+            }
+        }
+        else
+        {
+            if (right == nullptr)
+            {
+                right = new BST(value);
+            }
+            else
+            {
+                right->insert(value);
+            }
+        }
+    }
+};
+
+// O(n) time | O(n) space
+void inOrderTraverse(BST *tree, vector<int> &array)
+{
+    if ( tree == nullptr ) return;
+    stack<BST *> stk;
+    while ( tree != nullptr || ! stk.empty() )
+    {
+        while ( tree != nullptr )
+        {
+            stk.push(tree);
+            tree = tree->left;
+        }
+        if ( ! stk.empty() )
+        {
+            tree = stk.top();
+            stk.pop();
+            array.push_back(tree->value);
+            tree = tree->right;
+        }
+    }
+}
+
+// O(n) time | O(n) space
+void preOrderTraverse(BST *tree, vector<int> &array)
+{
+    if ( tree == nullptr ) return;
+    stack<BST *> stk;
+    while ( tree != nullptr || ! stk.empty() )
+    {
+        while ( tree != nullptr )
+        {
+            array.push_back(tree->value);
+            stk.push(tree);
+            tree = tree->left;
+        }
+        if ( ! stk.empty() )
+        {
+            tree = stk.top();
+            stk.pop();
+            tree = tree->right;
+        }
+    }
+}
+
+// O(n) time | O(n) space
+void postOrderTraverse(BST *tree, vector<int> &array)
+{
+    if ( tree == nullptr ) return;
+    BST *current = nullptr, *prevision = nullptr;
+    stack<BST *> stk;
+    stk.push(tree);
+    while ( ! stk.empty() )
+    {
+        current = stk.top();
+        if ( ( current->left == nullptr && current->right == nullptr )
+            || prevision != nullptr && ( prevision == current->left || prevision == current->right ) )
+        {
+            array.push_back(current->value);
+            prevision = stk.top();
+            stk.pop();
+        }
+        else
+        {
+            if ( current->right != nullptr )
+            {
+                stk.push(current->right);
+            }
+            if ( current->left != nullptr )
+            {
+                stk.push(current->left);
+            }
+        }
+    }
+}
+
+void printList(vector<int> &array)
+{
+    for (int e : array)
+    {
+        cout << e << " ";
+    }
+    cout << endl;
+}
+
+int main()
+{
+    vector<int> source = {10, 5, 15, 2, 5, 22, 1};
+    BST *root = new BST(source[0]);
+    for (int i = 1 ; i < source.size(); i++) root->insert(source[i]);
+    vector<int> result;
+    inOrderTraverse(root, result);
+    printList(result);
+    result.clear();
+    preOrderTraverse(root, result);
+    printList(result);
+    result.clear();
+    postOrderTraverse(root, result);
+    printList(result);
+    result.clear();
+    return 0;
+}
+```
+
 ## 查找最相近的值
 
 ```python
