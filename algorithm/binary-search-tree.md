@@ -673,6 +673,8 @@ class BST:
         self.left = None
         self.right = None
 
+    # Average: O(log(n)) time | O(1) space
+    # Worst: O(n) time | O(1) space
     def insert(self, value):
         current_node = self
         while True:
@@ -770,6 +772,75 @@ if __name__ == '__main__':
     print(in_order_traverse(b, list()))
     b = min_height_bst3(source)
     print(in_order_traverse(b, list()))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <stack>
+
+using namespace std;
+
+class BST
+{
+public:
+    int value;
+    BST *left;
+    BST *right;
+
+    BST(int value)
+    {
+        this->value = value;
+        left = nullptr;
+        right = nullptr;
+    }
+};
+
+void inOrderTraverse(BST *tree)
+{
+    if ( tree == nullptr ) return;
+    stack<BST *> stk;
+    while ( tree != nullptr || ! stk.empty() )
+    {
+        while ( tree != nullptr )
+        {
+            stk.push(tree);
+            tree = tree->left;
+        }
+        if ( ! stk.empty() )
+        {
+            tree = stk.top();
+            stk.pop();
+            cout << tree->value << " ";
+            tree = tree->right;
+        }
+    }
+    cout << endl;
+}
+
+// O(n) time | O(n) space
+BST *minHeightBstHelper(vector<int> array, int start, int end)
+{
+    if ( start > end ) return nullptr;
+    int middleIndex = (start + end) / 2;
+    BST *root = new BST(array[middleIndex]);
+    root->left = minHeightBstHelper(array, start, middleIndex - 1);
+    root->right = minHeightBstHelper(array, middleIndex + 1, end);
+    return root;
+}
+
+BST *minHeightBst(vector<int> array)
+{
+    return minHeightBstHelper(array, 0, array.size() - 1);
+}
+
+int main()
+{
+    vector<int> source = { 1, 2, 5, 7, 10, 13, 14, 15, 22, 28, 32, 36, 89, 92, 9000, 9001 };
+    BST *root = minHeightBst(source);
+    inOrderTraverse(root);
+    return 0;
+}
 ```
 
 ## 相同二叉搜索树
