@@ -387,9 +387,9 @@ public:
     BST *left;
     BST *right;
 
-    BST(int value)
+    BST(int val)
     {
-        this->value = value;
+        value = val;
         left = nullptr;
         right = nullptr;
     }
@@ -788,9 +788,9 @@ public:
     BST *left;
     BST *right;
 
-    BST(int value)
+    BST(int val)
     {
-        this->value = value;
+        value = val;
         left = nullptr;
         right = nullptr;
     }
@@ -1179,4 +1179,244 @@ int main()
 }
 ```
 
-Last Modified 2021-11-18
+## 第 K 个最大值
+
+```python
+class BST:
+
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+    def insert(self, value):
+        current_node = self
+        while True:
+            if value < current_node.value:
+                if current_node.left is None:
+                    current_node.left = BST(value)
+                    break
+                else:
+                    current_node = current_node.left
+            else:
+                if current_node.right is None:
+                    current_node.right = BST(value)
+                    break
+                else:
+                    current_node = current_node.right
+        return self
+
+
+def in_order_traverse(tree, array):
+    arr = list()
+    while tree is not None or len(arr) > 0:
+        while tree is not None:
+            arr.append(tree)
+            tree = tree.left
+        if len(arr) > 0:
+            tree = arr.pop()
+            array.append(tree.value)
+            tree = tree.right
+    return array
+
+
+# O(n) time | O(n) space
+def find_kth_largest_value_in_bst1(tree, k):
+    array = list()
+    in_order_traverse(tree, array)
+    return array[-1 * k]
+
+
+# O(h + k) time | O(h) space
+def find_kth_largest_value_in_bst2(tree, k):
+    arr = list()
+    count = 0
+    while tree is not None or len(arr) > 0:
+        while tree is not None:
+            arr.append(tree)
+            tree = tree.right
+        if len(arr) > 0:
+            tree = arr.pop()
+            count += 1
+            if count == k:
+                return tree.value
+            tree = tree.left
+    return -1
+
+
+class NodeInfo:
+    def __init__(self):
+        self.numberOfNodesVisited = 0
+        self.latestVisitedNodeValue = None
+
+
+def reverse_in_order_traverse(tree, k, info):
+    if tree is None or info.numberOfNodesVisited >= k:
+        return
+    reverse_in_order_traverse(tree.right, k, info)
+    if info.numberOfNodesVisited < k:
+        info.numberOfNodesVisited += 1
+        info.latestVisitedNodeValue = tree.value
+        reverse_in_order_traverse(tree.left, k, info)
+
+
+# O(h + k) time | O(h) space
+def find_kth_largest_value_in_bst3(tree, k):
+    info = NodeInfo()
+    reverse_in_order_traverse(tree, k, info)
+    return info.latestVisitedNodeValue
+
+
+if __name__ == '__main__':
+    _tree = BST(15)
+    for e in [5, 20, 2, 5, 17, 22, 1, 3]:
+        _tree = _tree.insert(e)
+    print(find_kth_largest_value_in_bst1(_tree, 3))
+    print(find_kth_largest_value_in_bst2(_tree, 3))
+    print(find_kth_largest_value_in_bst3(_tree, 3))
+```
+
+```cpp
+#include <iostream>
+#include <stack>
+#include <vector>
+using namespace std;
+
+class BST
+{
+public:
+    int value;
+    BST *left = nullptr;
+    BST *right = nullptr;
+
+    BST(int val)
+    {
+        value = val;
+        left = nullptr;
+        right = nullptr;
+    }
+
+    BST &insert(int val)
+    {
+        if (val < value )
+        {
+            if ( left == nullptr )
+            {
+                BST *item = new BST(val);
+                left = item;
+            }
+            else
+            {
+                left->insert(val);
+            }
+        }
+        else
+        {
+            if ( right == nullptr )
+            {
+                BST *item = new BST(val);
+                right = item;
+            }
+            else
+            {
+                right->insert(val);
+            }
+        }
+        return *this;
+    }
+};
+
+void inOrderTraverse(BST *node, vector<int> &sortedNodeValues);
+
+// O(n) time | O(n) space - where n is the number of nodes in the tree
+int findKthLargestValueInBst1(BST *tree, int k)
+{
+    vector<int> sortedNodeValues;
+    inOrderTraverse(tree, sortedNodeValues);
+    return sortedNodeValues[sortedNodeValues.size() - k];
+}
+
+void inOrderTraverse(BST *node, vector<int> &sortedNodeValues)
+{
+    if (node == nullptr)
+        return;
+
+    inOrderTraverse(node->left, sortedNodeValues);
+    sortedNodeValues.push_back(node->value);
+    inOrderTraverse(node->right, sortedNodeValues);
+}
+
+struct TreeInfo
+{
+    int numberOfNodesVisited;
+    int latestVisitedNodeValue;
+};
+
+void reverseInOrderTraverse(BST *node, int k, TreeInfo &treeInfo);
+
+// O(h + k) time | O(h) space - where h is the height of the tree
+// and k is the input parameter
+int findKthLargestValueInBst2(BST *tree, int k)
+{
+    auto treeInfo = TreeInfo{0, -1};
+    reverseInOrderTraverse(tree, k, treeInfo);
+    return treeInfo.latestVisitedNodeValue;
+}
+
+void reverseInOrderTraverse(BST *node, int k, TreeInfo &treeInfo)
+{
+    if (node == nullptr || treeInfo.numberOfNodesVisited >= k)
+        return;
+
+    reverseInOrderTraverse(node->right, k, treeInfo);
+    if (treeInfo.numberOfNodesVisited < k)
+    {
+        treeInfo.numberOfNodesVisited++;
+        treeInfo.latestVisitedNodeValue = node->value;
+        reverseInOrderTraverse(node->left, k, treeInfo);
+    }
+}
+
+// O(h + k) time | O(h) space - where h is the height of the tree
+// and k is the input parameter
+int findKthLargestValueInBst3(BST *tree, int k)
+{
+    if ( tree == nullptr ) return -1;
+    stack<BST *> stk;
+    int count = 0;
+    while ( tree != nullptr || ! stk.empty() )
+    {
+        while ( tree != nullptr )
+        {
+            stk.push(tree);
+            tree = tree->right;
+        }
+        if ( ! stk.empty() )
+        {
+            tree = stk.top();
+            stk.pop();
+            count++;
+            if ( count == k )
+                return tree->value;
+            tree = tree->left;
+        }
+    }
+    return -1;
+}
+
+int main()
+{
+    vector<int> source = { 15, 5, 20, 2, 5, 17, 22, 1, 3 };
+    BST *root = new BST(source[0]);
+    for (int i = 1; i < source.size(); i++)
+    {
+        root->insert(source[i]);
+    }
+    cout << findKthLargestValueInBst1(root, 3);
+    cout << findKthLargestValueInBst2(root, 3);
+    cout << findKthLargestValueInBst3(root, 3);
+    return 0;
+}
+```
+
+Last Modified 2021-11-21
