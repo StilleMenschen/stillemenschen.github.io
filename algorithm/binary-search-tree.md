@@ -1419,4 +1419,194 @@ int main()
 }
 ```
 
-Last Modified 2021-11-21
+## 重构二叉搜索树
+
+给定一个先序遍历的数组，参考数组重新创建二叉搜索树
+
+```python
+class BST:
+
+    def __init__(self, value, left=None, right=None):
+        self.value = value
+        self.left = left
+        self.right = right
+
+
+def pre_order_traverse(tree):
+    stack = list()
+    while tree is not None or len(stack) > 0:
+        while tree is not None:
+            print(tree.value, end=' ')
+            stack.append(tree)
+            tree = tree.left
+        if len(stack) > 0:
+            tree = stack.pop()
+            tree = tree.right
+    print()
+
+
+# O(n^2) time | O(n) space
+def reconstruct_bst1(pre_order_traverse_values):
+    if len(pre_order_traverse_values) == 0:
+        return None
+
+    current_value = pre_order_traverse_values[0]
+    right_subtree_root_idx = len(pre_order_traverse_values)
+    for idx in range(1, len(pre_order_traverse_values)):
+        value = pre_order_traverse_values[idx]
+        if value > current_value:
+            right_subtree_root_idx = idx
+            break
+
+    left_subtree = reconstruct_bst1(pre_order_traverse_values[1:right_subtree_root_idx])
+    right_subtree = reconstruct_bst1(pre_order_traverse_values[right_subtree_root_idx:])
+    return BST(current_value, left_subtree, right_subtree)
+
+
+class TreeInfo:
+    def __init__(self, root_idx):
+        self.root_idx = root_idx
+
+
+def reconstruct_bst_from_range(lower_bound, upper_bound, pre_order_traverse_values, current_subtree_info):
+    if current_subtree_info.root_idx == len(pre_order_traverse_values):
+        return None
+
+    root_value = pre_order_traverse_values[current_subtree_info.root_idx]
+    if root_value < lower_bound or root_value >= upper_bound:
+        return None
+
+    current_subtree_info.root_idx += 1
+    left_subtree = reconstruct_bst_from_range(lower_bound, root_value, pre_order_traverse_values, current_subtree_info)
+    right_subtree = reconstruct_bst_from_range(root_value, upper_bound, pre_order_traverse_values, current_subtree_info)
+    return BST(root_value, left_subtree, right_subtree)
+
+
+# O(n) time | O(n) space
+def reconstruct_bst2(pre_order_traverse_values):
+    tree_info = TreeInfo(0)
+    return reconstruct_bst_from_range(float('-inf'), float('inf'), pre_order_traverse_values, tree_info)
+
+
+if __name__ == '__main__':
+    source = [10, 4, 1, 2, 5, 17, 19, 18]
+    root = reconstruct_bst1(source)
+    pre_order_traverse(root)
+    root = reconstruct_bst2(source)
+    pre_order_traverse(root)
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <limits>
+using namespace std;
+
+class BST
+{
+public:
+    int value;
+    BST *left;
+    BST *right;
+
+    BST(int val)
+    {
+        value = val;
+        left = nullptr;
+        right = nullptr;
+    }
+};
+
+struct TreeInfo
+{
+    int rootIdx;
+};
+
+void preOrderTraverse(BST *tree)
+{
+    if ( tree == nullptr ) return;
+    stack<BST *> stk;
+    while ( tree != nullptr || ! stk.empty() )
+    {
+        while ( tree != nullptr )
+        {
+            cout << tree->value << " ";
+            stk.push(tree);
+            tree = tree->left;
+        }
+        if ( ! stk.empty() )
+        {
+            tree = stk.top();
+            stk.pop();
+            tree = tree->right;
+        }
+    }
+    cout << endl;
+}
+
+// O(n^2) time | O(n) space - where n is the length of the input array
+BST *reconstructBst1(vector<int> preOrderTraverseValues)
+{
+    if (preOrderTraverseValues.size() == 0) return nullptr;
+
+    int currentValue = preOrderTraverseValues[0];
+    int rightSubtreeRootIdx = preOrderTraverseValues.size();
+
+    const int size = preOrderTraverseValues.size();
+    for (int i = 1; i < size; i++)
+    {
+        int value = preOrderTraverseValues[i];
+        if (value >= currentValue)
+        {
+            rightSubtreeRootIdx = i;
+            break;
+        }
+    }
+
+    BST *leftSubtree = reconstructBst1(vector<int>(preOrderTraverseValues.begin() + 1, preOrderTraverseValues.begin() + rightSubtreeRootIdx));
+    BST *rightSubtree = reconstructBst1(vector<int>(preOrderTraverseValues.begin() + rightSubtreeRootIdx, preOrderTraverseValues.end()));
+    BST *bst = new BST(currentValue);
+    bst->left = leftSubtree;
+    bst->right = rightSubtree;
+    return bst;
+}
+
+
+BST *reconstructBstFromRange(int lowerBound, int upperBound, vector<int> &preOrderTraversalValues, TreeInfo &currentSubtreeInfo)
+{
+    if (currentSubtreeInfo.rootIdx == preOrderTraversalValues.size())
+        return nullptr;
+
+    int rootValue = preOrderTraversalValues[currentSubtreeInfo.rootIdx];
+    if (rootValue < lowerBound || rootValue >= upperBound)
+        return nullptr;
+
+    currentSubtreeInfo.rootIdx++;
+    BST *leftSubtree = reconstructBstFromRange(lowerBound, rootValue, preOrderTraversalValues, currentSubtreeInfo);
+    BST *rightSubtree = reconstructBstFromRange(rootValue, upperBound, preOrderTraversalValues, currentSubtreeInfo);
+    BST *bst = new BST(rootValue);
+    bst->left = leftSubtree;
+    bst->right = rightSubtree;
+    return bst;
+}
+
+// O(n) time | O(n) space - where n is the length of the input array
+BST *reconstructBst2(vector<int> preOrderTraversalValues)
+{
+    TreeInfo treeInfo = TreeInfo{0};
+    return reconstructBstFromRange(numeric_limits<int>::min(), numeric_limits<int>::max(), preOrderTraversalValues, treeInfo);
+}
+
+int main()
+{
+    vector<int> source = {10, 4, 1, 2, 5, 17, 19, 18};
+    BST *root = reconstructBst1(source);
+    preOrderTraverse(root);
+    root = reconstructBst2(source);
+    preOrderTraverse(root);
+    return 0;
+}
+```
+
+Last Modified 2021-11-25
