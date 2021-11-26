@@ -336,19 +336,24 @@ class BinaryTree:
 
 
 def insert_level_order(array, tree, index, length):
-    if index < length:
+    if index < length and array[index] is not None:
         tree = BinaryTree(array[index])
         tree.left = insert_level_order(array, tree.left, 2 * index + 1, length)
         tree.right = insert_level_order(array, tree.right, 2 * index + 2, length)
     return tree
 
 
-def in_order_traverse(tree, array):
-    if tree is not None:
-        in_order_traverse(tree.left, array)
-        array.append(tree.value)
-        in_order_traverse(tree.right, array)
-    return array
+def pre_order_traverse(tree):
+    stack = list()
+    while tree is not None or len(stack) > 0:
+        while tree is not None:
+            stack.append(tree)
+            tree = tree.left
+        if len(stack) > 0:
+            tree = stack.pop()
+            print(tree.value, end=' ')
+            tree = tree.right
+    print()
 
 
 def swap_left_and_right(tree):
@@ -360,11 +365,10 @@ def invert_binary_tree1(tree):
     queue = [tree]
     while len(queue):
         current = queue.pop(0)
-        if current is None:
-            continue
-        swap_left_and_right(current)
-        queue.append(current.left)
-        queue.append(current.right)
+        if current is not None:
+            swap_left_and_right(current)
+            queue.append(current.left)
+            queue.append(current.right)
 
 
 # O(n) time | O(d) space
@@ -377,14 +381,14 @@ def invert_binary_tree2(tree):
 
 
 if __name__ == '__main__':
-    source = list(range(1, 10))
+    source = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     root_node = insert_level_order(source, None, 0, len(source))
-    print(in_order_traverse(root_node, list()))
+    pre_order_traverse(root_node)
     invert_binary_tree1(root_node)
-    print(in_order_traverse(root_node, list()))
+    pre_order_traverse(root_node)
     root_node = insert_level_order(source, None, 0, len(source))
     invert_binary_tree2(root_node)
-    print(in_order_traverse(root_node, list()))
+    pre_order_traverse(root_node)
 ```
 
 ## 二叉树最大直径
