@@ -343,7 +343,7 @@ def insert_level_order(array, tree, index, length):
     return tree
 
 
-def pre_order_traverse(tree):
+def in_order_traverse(tree):
     stack = list()
     while tree is not None or len(stack) > 0:
         while tree is not None:
@@ -383,12 +383,112 @@ def invert_binary_tree2(tree):
 if __name__ == '__main__':
     source = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     root_node = insert_level_order(source, None, 0, len(source))
-    pre_order_traverse(root_node)
+    in_order_traverse(root_node)
     invert_binary_tree1(root_node)
-    pre_order_traverse(root_node)
+    in_order_traverse(root_node)
     root_node = insert_level_order(source, None, 0, len(source))
     invert_binary_tree2(root_node)
-    pre_order_traverse(root_node)
+    in_order_traverse(root_node)
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <deque>
+#include <stack>
+
+using namespace std;
+
+class BinaryTree
+{
+public:
+    int value;
+    BinaryTree *left;
+    BinaryTree *right;
+    BinaryTree(int val)
+    {
+        value = val;
+        left = nullptr;
+        right = nullptr;
+    };
+};
+
+BinaryTree *insertLevelOrder(vector<int> &array, BinaryTree *tree, int index, int length)
+{
+    if (index < length)
+    {
+        tree = new BinaryTree(array[index]);
+        tree->left = insertLevelOrder(array, tree->left, 2 * index + 1, length);
+        tree->right = insertLevelOrder(array, tree->right, 2 * index + 2, length);
+    }
+    return tree;
+}
+
+void inOrderTraverse(BinaryTree *tree)
+{
+    if ( tree == nullptr ) return;
+    stack<BinaryTree *> stk;
+    while ( tree != nullptr || ! stk.empty() )
+    {
+        while ( tree != nullptr )
+        {
+            stk.push(tree);
+            tree = tree->left;
+        }
+        if ( ! stk.empty() )
+        {
+            tree = stk.top();
+            stk.pop();
+            cout << tree->value << " ";
+            tree = tree->right;
+        }
+    }
+    cout << endl;
+}
+
+// O(n) time | O(n) space
+void invertBinaryTree1(BinaryTree *tree)
+{
+    deque<BinaryTree *> queue;
+    queue.push_back(tree);
+    while (queue.size() > 0)
+    {
+        BinaryTree *current = queue.front();
+        queue.pop_front();
+        if (current == nullptr)
+        {
+            continue;
+        }
+        swap( current->left, current->right);
+        queue.push_back( current->left );
+        queue.push_back( current->right );
+    }
+}
+
+// O(n) time | O(d) space
+// d is tree depth
+void invertBinaryTree2(BinaryTree *tree)
+{
+    if ( tree != nullptr )
+    {
+        swap( tree->left, tree->right);
+        invertBinaryTree2(tree->left);
+        invertBinaryTree2(tree->right);
+    }
+}
+
+int main()
+{
+    vector<int> source = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    BinaryTree *root_node = insertLevelOrder(source, nullptr, 0, source.size());
+    inOrderTraverse(root_node);
+    invertBinaryTree1(root_node);
+    inOrderTraverse(root_node);
+    root_node = insertLevelOrder(source, nullptr, 0, source.size());
+    invertBinaryTree2(root_node);
+    inOrderTraverse(root_node);
+    return 0;
+}
 ```
 
 ## 二叉树最大直径
