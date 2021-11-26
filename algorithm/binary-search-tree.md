@@ -1489,7 +1489,7 @@ def reconstruct_bst2(pre_order_traverse_values):
 
 
 if __name__ == '__main__':
-    source = [10, 4, 1, 2, 5, 17, 19, 18]
+    source = [10, 4, 2, 1, 5, 17, 19, 18]
     root = reconstruct_bst1(source)
     pre_order_traverse(root)
     root = reconstruct_bst2(source)
@@ -1600,7 +1600,7 @@ BST *reconstructBst2(vector<int> preOrderTraversalValues)
 
 int main()
 {
-    vector<int> source = {10, 4, 1, 2, 5, 17, 19, 18};
+    vector<int> source = {10, 4, 2, 1, 5, 17, 19, 18};
     BST *root = reconstructBst1(source);
     preOrderTraverse(root);
     root = reconstructBst2(source);
@@ -1609,4 +1609,4 @@ int main()
 }
 ```
 
-Last Modified 2021-11-25
+Last Modified 2021-11-26
