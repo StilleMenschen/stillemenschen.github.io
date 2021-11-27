@@ -209,7 +209,7 @@ public class BinaryTreeAlgorithm {
 
 ## 节点高度求和
 
-根节点的高度为0，第二层的节点高度为1，以此类推。
+根节点的高度为 0，第二层的节点高度为 1，以此类推。
 
 ```python
 class BinaryTree:
@@ -531,7 +531,10 @@ def get_tree_info(tree):
     return TreeInfo(current_diameter, current_height)
 
 
-# O(n) time | O(n) space
+# Average case: when the tree is balanced
+# O(n) time| O(h) space - where n is the number of nodes in
+# the Binary Tree and h is the height of the Binary Tree
+# Worst: O(n) time | O(n) space
 def binary_tree_diameter(tree):
     return get_tree_info(tree).diameter
 
@@ -541,6 +544,81 @@ if __name__ == '__main__':
               None, None, 9, None, None, None, None, None, None, 6]
     root_node = insert_level_order(source, None, 0, len(source))
     print(binary_tree_diameter(root_node))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+class BinaryTree
+{
+public:
+    int value;
+    BinaryTree *left;
+    BinaryTree *right;
+    BinaryTree(int val)
+    {
+        value = val;
+        left = nullptr;
+        right = nullptr;
+    }
+};
+
+struct TreeInfo
+{
+    int diameter;
+    int height;
+};
+
+BinaryTree* insertLevelOrder(vector<int> &array, BinaryTree *tree, int index, int length)
+{
+    if ( index < length && array[index] != -1)
+    {
+        tree = new BinaryTree(array[index]);
+        tree->left = insertLevelOrder(array, tree->left, 2 * index + 1, length);
+        tree->right = insertLevelOrder(array, tree->right, 2 * index + 2, length);
+    }
+    return tree;
+}
+
+TreeInfo getTreeInfo(BinaryTree *tree);
+
+// Average case: when the tree is balanced
+// O(n) time| O(h) space - where n is the number of nodes in
+// the Binary Tree and h is the height of the Binary Tree
+// Worst: O(n) time | O(n) space
+int binaryTreeDiameter(BinaryTree *tree)
+{
+    return getTreeInfo(tree).diameter;
+}
+
+TreeInfo getTreeInfo(BinaryTree *tree)
+{
+    if (tree == nullptr)
+    {
+        return TreeInfo{0, 0};
+    }
+    TreeInfo leftTreeInfo = getTreeInfo(tree->left);
+    TreeInfo rightTreeInfo = getTreeInfo(tree->right);
+    int longestPathThroughRoot = leftTreeInfo.height + rightTreeInfo.height;
+    int maxDiameterSoFar = max(leftTreeInfo.diameter, rightTreeInfo.diameter);
+    int currentDiameter = max(longestPathThroughRoot, maxDiameterSoFar);
+    int currentHeight = 1 + max(leftTreeInfo.height, rightTreeInfo.height);
+    return TreeInfo{ currentDiameter, currentHeight };
+}
+
+int main()
+{
+    vector<int> source =
+    {
+        1, 3, 2, 7, 4, -1, -1, 8, -1, -1, 5, -1, -1, -1, -1, 9, -1, -1, -1, -1, -1, -1, 6
+    };
+    BinaryTree *root_node = insertLevelOrder(source, nullptr, 0, source.size());
+    cout << binaryTreeDiameter(root_node);
+    return 0;
+}
 ```
 
 ## 最大路径之和
