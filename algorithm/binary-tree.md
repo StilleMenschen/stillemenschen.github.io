@@ -958,4 +958,84 @@ if __name__ == '__main__':
     print(all_kinds_of_node_depths3(root_node))
 ```
 
-Last Modified 2021-10-24
+## 寻找后继节点
+
+给定一个二叉树和一个树节点，在二叉树中找出给定树节点中序遍历的下一个节点，如寻找的树节点值为`5`中序遍历为`6 4 2 5 1 3`，则找到的后继节点为`1`
+
+```python
+class BinaryTree:
+
+    def __init__(self, value, left=None, right=None, parent=None):
+        self.value = value
+        self.left = left
+        self.right = right
+        self.parent = parent
+
+    def __str__(self):
+        if self.parent:
+            return f'Node = {self.value}, Parent = {self.parent.value}'
+        return f'Node = {self.value}, Parent = None'
+
+
+finder_node = None
+
+
+def insert_level_order(array, tree, parent, index, length, find_value):
+    if index < length and array[index] is not None:
+        tree = BinaryTree(array[index], parent=parent)
+        tree.left = insert_level_order(array, tree.left, tree, 2 * index + 1, length, find_value)
+        tree.right = insert_level_order(array, tree.right, tree, 2 * index + 2, length, find_value)
+        if tree.value == find_value:
+            global finder_node
+            finder_node = tree
+    return tree
+
+
+# O(n) time | O(n) space
+def find_successor1(tree, node):
+    is_match, prevision_node = False, None
+    stack = list()
+    while tree is not None or len(stack) > 0:
+        while tree is not None:
+            stack.append(tree)
+            tree = tree.left
+        if len(stack) > 0:
+            tree = stack.pop()
+            if is_match:
+                prevision_node = tree
+                break
+            if tree == node:
+                is_match = True
+            tree = tree.right
+    return prevision_node
+
+
+# 0(h) time | 0(1) space where h is the height of the tree
+def find_successor2(tree, node):
+    if node.right is not None:
+        return get_leftmost_child(node.right)
+    return get_rightmost_parent(node)
+
+
+def get_leftmost_child(node):
+    current_node = node
+    while current_node.left is not None:
+        current_node = current_node.left
+    return current_node
+
+
+def get_rightmost_parent(node):
+    current_node = node
+    while current_node.parent is not None and current_node.parent.right == current_node:
+        current_node = current_node.parent
+    return current_node.parent
+
+
+if __name__ == '__main__':
+    source = [1, 2, 3, 4, 5, None, None, 6]
+    root_node = insert_level_order(source, None, None, 0, len(source), 5)
+    print(find_successor1(root_node, finder_node))
+    print(find_successor2(root_node, finder_node))
+```
+
+Last Modified 2021-11-28
