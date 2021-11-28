@@ -1038,4 +1038,130 @@ if __name__ == '__main__':
     print(find_successor2(root_node, finder_node))
 ```
 
+## 高度平衡二叉树
+
+判断二叉树的左子树和右子树最大高度是否差值为`0`或`1`，如果满足则认为二叉树的高度平衡
+
+```python
+class BinaryTree:
+
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+
+def insert_level_order(array, tree, index, length):
+    if index < length and array[index] is not None:
+        tree = BinaryTree(array[index])
+        tree.left = insert_level_order(array, tree.left, 2 * index + 1, length)
+        tree.right = insert_level_order(array, tree.right, 2 * index + 2, length)
+    return tree
+
+
+class HeightInfo:
+
+    def __init__(self, is_balanced, height):
+        self.is_balanced = is_balanced
+        self.height = height
+
+
+def get_tree_height_info(tree):
+    if tree is None:
+        return HeightInfo(True, -1)
+
+    left_height_info = get_tree_height_info(tree.left)
+    right_height_info = get_tree_height_info(tree.right)
+
+    is_balanced = all([left_height_info.is_balanced, right_height_info.is_balanced,
+                       abs(left_height_info.height - right_height_info.height) <= 1])
+    height = max(left_height_info.height, right_height_info.height) + 1
+
+    return HeightInfo(is_balanced, height)
+
+
+# O(n) time| O(h) space - where n is the number of nodes in the binary tree
+def height_balanced_binary_tree(tree):
+    height_info = get_tree_height_info(tree)
+    return height_info.is_balanced
+
+
+if __name__ == '__main__':
+    source = [1, 2, 3, 4, 5, None, 6, None, None, 7, 8]
+    root_node = insert_level_order(source, None, 0, len(source))
+    print(height_balanced_binary_tree(root_node))
+    source = [1, 2, None, 4, 5, None, None, None, None, 7, 8]
+    root_node = insert_level_order(source, None, 0, len(source))
+    print(height_balanced_binary_tree(root_node))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <algorithm>
+using namespace std;
+
+class BinaryTree
+{
+public:
+    int value;
+    BinaryTree *left = nullptr;
+    BinaryTree *right = nullptr;
+    BinaryTree(int value)
+    {
+        this->value = value;
+    }
+};
+
+struct TreeInfo
+{
+    bool isBalanced;
+    int height;
+};
+
+BinaryTree* insertLevelOrder(vector<int> &array, BinaryTree *tree, int index, int length)
+{
+    if ( index < length && array[index] != -1)
+    {
+        tree = new BinaryTree(array[index]);
+        tree->left = insertLevelOrder(array, tree->left, 2 * index + 1, length);
+        tree->right = insertLevelOrder(array, tree->right, 2 * index + 2, length);
+    }
+    return tree;
+}
+
+TreeInfo getTreeInfo(BinaryTree *node);
+
+// O(n) time| O(h) space - where n is the number of nodes in the binary tree
+bool heightBalancedBinaryTree(BinaryTree *tree)
+{
+    TreeInfo treeInfo = getTreeInfo(tree);
+    return treeInfo.isBalanced;
+}
+
+TreeInfo getTreeInfo(BinaryTree *node)
+{
+    if (node == nullptr)
+        return TreeInfo{true, -1};
+    TreeInfo leftSubtreeInfo = getTreeInfo(node->left);
+    TreeInfo rightSubtreeInfo = getTreeInfo(node->right);
+    bool isBalanced = leftSubtreeInfo.isBalanced && rightSubtreeInfo.isBalanced &&
+                      abs( leftSubtreeInfo.height - rightSubtreeInfo.height) <= 1 ;
+    int height = max(leftSubtreeInfo.height, rightSubtreeInfo.height) + 1;
+    return TreeInfo {isBalanced, height};
+}
+
+int main()
+{
+    vector<int> source = {1, 2, 3, 4, 5, -1, 6, -1, -1, 7, 8};
+    BinaryTree *root_node = insertLevelOrder(source, nullptr, 0, source.size());
+    cout << heightBalancedBinaryTree(root_node) << endl;
+    source = {1, 2, -1, 4, 5, -1, -1, -1, -1, 7, 8};
+    root_node = insertLevelOrder(source, nullptr, 0, source.size());
+    cout << heightBalancedBinaryTree(root_node) << endl;
+    return 0;
+}
+```
+
 Last Modified 2021-11-28
