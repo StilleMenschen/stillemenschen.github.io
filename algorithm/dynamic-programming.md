@@ -76,7 +76,6 @@ int maxSubsetSumNoAdjacent2(vector<int> array)
     return first;
 }
 
-
 int main()
 {
     vector<int> source = {10, 5, 20, 25, 15, 5, 5, 15};
@@ -102,29 +101,47 @@ F(X, [dₒ..dᵢ]) = F(X, [dₒ..dᵢ-₁]) + F(X - dᵢ, [dₒ..dᵢ])
 Fᵢ(X) = Fᵢ-₁(X) + Fᵢ(X - dᵢ)
 ```
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
+```python
+def number_of_ways_to_make_change(n, denoms):
+    ways = [0 for _ in range(n + 1)]
+    ways[0] = 1
+    for denom in denoms:
+        for amount in range(1, n + 1):
+            if denom <= amount:
+                ways[amount] += ways[amount - denom]
+    return ways[n]
 
-/* O(n * d) time | O(n) space */
-int numberOfWaysToMakeChange(int n, int denoms[], int denomsLength)
+
+if __name__ == '__main__':
+    print(number_of_ways_to_make_change(10, [1, 5, 10, 25]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// O(n * d) time | O(n) space
+int numberOfWaysToMakeChange(int n, vector<int> denoms)
 {
-    if ( n <=0 ) return 0;
-    int ways[n + 1] = {0};
-    int i, amount;
+    vector<int> ways(n + 1, 0);
     ways[0] = 1;
-    for ( i=0; i<denomsLength; i++)
-        for ( amount=1; amount<=n; amount++)
-            if ( denoms[i] <= amount )
-                ways[amount] += ways[amount - denoms[i]];
+    for (int denom : denoms)
+    {
+        for (int amount = 1; amount < n + 1; amount++)
+        {
+            if (denom <= amount)
+            {
+                ways[amount] += ways[amount - denom];
+            }
+        }
+    }
     return ways[n];
 }
 
-int main(void)
+int main()
 {
-    int denoms[] = {3, 5, 10};
-    int length = sizeof(denoms) / sizeof(denoms[0]);
-    printf("%d", numberOfWaysToMakeChange(15, denoms, length));
+    cout << numberOfWaysToMakeChange(10, {1, 5, 10, 25}) << endl;
     return 0;
 }
 ```
@@ -1129,4 +1146,4 @@ if __name__ == '__main__':
     print(square_of_zeroes4(matrix1))
 ```
 
-Last Modified 2021-09-12
+Last Modified 2021-12-01
