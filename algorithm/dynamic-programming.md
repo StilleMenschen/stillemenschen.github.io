@@ -4,37 +4,84 @@
 
 编写一个函数，该函数接受一个正整数数组，并返回数组中不相邻元素的最大总和。如果输入数组为空，则函数应返回 0
 
-```c
-#include <stdio.h>
+```python
+def max_subset_sum_no_adjacent(array):
+    if not len(array):
+        return 0
+    elif len(array) == 1:
+        return array[0]
+    second = array[0]
+    first = max(array[0], array[1])
 
-int max(int a, int b)
-{
-    if ( a > b ) return a;
-    return b;
-}
+    for idx in range(2, len(array)):
+        current = max(first, array[idx] + second)
+        second = first
+        first = current
 
-/* O(n) time | O(1) space */
-int* maxSubsetSumNoAdjacent(int array[], int length)
+    return first
+
+
+if __name__ == '__main__':
+    source = [10, 5, 20, 25, 15, 5, 5, 15]
+    print(max_subset_sum_no_adjacent(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+// O(n) time| O(n) space
+int maxSubsetSumNoAdjacent1(vector<int> array)
 {
-    if ( length <= 3 ) return array;
-    int current = 2, first = 0, second = 1;
-    while ( current < length )
+    const int arraySize = array.size();
+    if (arraySize == 0)
     {
-        array[current] = max(array[second], array[current] + array[first]);
-        first = second;
-        second = current;
-        current++;
+        return 0;
     }
-    return array;
+    else if (arraySize == 1)
+    {
+        return array[0];
+    }
+    vector<int> maxSums = array;
+    maxSums[1] = max(array[0], array[1]);
+    for (int i = 2; i < arraySize; i++)
+    {
+        maxSums [i] = max(maxSums[i - 1], maxSums[i - 2] + array[i] );
+    }
+    return maxSums[array. size() - 1];
 }
 
-int main(void)
+// O(n) time| O(1) space
+int maxSubsetSumNoAdjacent2(vector<int> array)
 {
-    int numbers[] = {7, 10, 12, 7, 9, 14};
-    int length = sizeof(numbers) / sizeof(numbers[0]);
-    maxSubsetSumNoAdjacent(numbers, length);
-    int i = 0;
-    while ( i < length ) printf("%d ", numbers[i++]);
+    const int arraySize = array.size();
+    if (arraySize == 0)
+    {
+        return 0;
+    }
+    else if (arraySize == 1)
+    {
+        return array[0];
+    }
+    int second = array[0];
+    int first = max(array[0], array[1]);
+    for (int i = 2; i < arraySize; i++)
+    {
+        int current = max(first, second + array[i]);
+        second = first;
+        first = current;
+    }
+    return first;
+}
+
+
+int main()
+{
+    vector<int> source = {10, 5, 20, 25, 15, 5, 5, 15};
+    cout << maxSubsetSumNoAdjacent1(source) << endl;
+    cout << maxSubsetSumNoAdjacent2(source) << endl;
     return 0;
 }
 ```
