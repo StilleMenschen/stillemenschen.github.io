@@ -102,6 +102,7 @@ Fᵢ(X) = Fᵢ-₁(X) + Fᵢ(X - dᵢ)
 ```
 
 ```python
+# O(n * d) time | O(n) space
 def number_of_ways_to_make_change(n, denoms):
     ways = [0 for _ in range(n + 1)]
     ways[0] = 1
@@ -150,39 +151,62 @@ int main()
 
 给定一个金额，如 6，给定几种面额的硬币 如 1 2 4，硬币的数量没有限制，找出这几种硬币组合成金额的最小组合数，即 `F(6) = 2 + 4`，最少为 `2` 个数组合
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
-#define MAX_INTEGER 2147483646
+```python
+# O(n * d) time | O(n) space
+def min_number_of_coins_for_change(n, denoms):
+    num_of_coins = [float('inf') for _ in range(n + 1)]
+    num_of_coins[0] = 0
+    for denom in denoms:
+        for amount in range(len(num_of_coins)):
+            if denom <= amount:
+                num_of_coins[amount] = min(
+                    num_of_coins[amount],
+                    num_of_coins[amount - denom] + 1
+                )
+    return num_of_coins[n] if num_of_coins[n] != float('inf') else -1
 
-int min(int a, int b)
+
+if __name__ == '__main__':
+    print(min_number_of_coins_for_change(9, [3, 5]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+// O(n * d) time | O(n) space
+int minNumberOfCoinsForChange(int n, vector<int> denoms)
 {
-    if ( a < b ) return a;
-    return b;
+    vector<int> numOfCoins(n + 1, INT_MAX);
+    const int numOfCoinsSize = numOfCoins.size();
+    numOfCoins[0] = 0;
+    int toCompare = 0;
+    for (int denom : denoms)
+    {
+        for (int amount = 0; amount < numOfCoinsSize; amount++)
+        {
+            if (denom <= amount)
+            {
+                if (numOfCoins[amount - denom] == INT_MAX)
+                {
+                    toCompare = numOfCoins[amount - denom];
+                }
+                else
+                {
+                    toCompare = numOfCoins[amount - denom] + 1;
+                }
+                numOfCoins[amount] = min(numOfCoins[amount], toCompare);
+            }
+        }
+    }
+    return numOfCoins[n] != INT_MAX ? numOfCoins[n] : -1;
 }
 
-/* O(n * d) time | O(n) space */
-int minNumberOfCoinsForChange(int n, int denoms[], int denomsLength)
+int main()
 {
-    if ( n <=0 ) return 0;
-    int numOfCoins[n + 1] = {0};
-    int i, amount;
-    for ( i=1; i<=n; i++)
-        numOfCoins[i] = MAX_INTEGER;
-    for ( i=0; i<denomsLength; i++)
-        for ( amount=0; amount<=n; amount++)
-            if ( denoms[i] <= amount )
-                numOfCoins[amount] = min( numOfCoins[amount], 1 + numOfCoins[amount - denoms[i]] );
-    if ( numOfCoins[n] != MAX_INTEGER )
-        return numOfCoins[n];
-    return -1;
-}
-
-int main(void)
-{
-    int denoms[] = {2, 4, 9, 25, 11};
-    int length = sizeof(denoms) / sizeof(denoms[0]);
-    printf("%d", minNumberOfCoinsForChange(7, denoms, length));
+    cout << minNumberOfCoinsForChange(6, {1, 2, 5}) << endl;
     return 0;
 }
 ```
