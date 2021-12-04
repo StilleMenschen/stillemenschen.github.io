@@ -213,111 +213,136 @@ int main()
 
 ## 莱文斯坦距离
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
+```python
+# O(nm) time | O(nm) space
+def levenshtein_distance1(str1, str2):
+    edits = [[x for x in range(len(str1) + 1)] for y in range(len(str2) + 1)]
+    for i in range(1, len(str2) + 1):
+        edits[i][0] = edits[i - 1][0] + 1
+    for i in range(1, len(str2) + 1):
+        for j in range(1, len(str1) + 1):
+            if str2[i - 1] == str1[j - 1]:
+                edits[i][j] = edits[i - 1][j - 1]
+            else:
+                edits[i][j] = 1 + min(edits[i - 1][j - 1], edits[i - 1][j], edits[i][j - 1])
+    return edits[-1][-1]
 
-int getStringLength(char* string)
-{
-    char *p = string;
-    int length = 0;
-    while ( *p++ ) length++;
-    return length;
-}
 
-int min(int a, int b, int c)
-{
-    if ( b < a ) a = b;
-    if ( c < a ) a = c;
-    return a;
-}
+# O(nm) time| O(min(n, m)) space
+def levenshtein_distance2(str1, str2):
+    small = str1 if len(str1) < len(str2) else str2
+    big = str1 if len(str1) >= len(str2) else str2
+    even_edits = [x for x in range(len(small) + 1)]
+    odd_edits = [-1 for x in range(len(small) + 1)]
+    for i in range(1, len(big) + 1):
+        if i % 2 == 1:
+            current_edits = odd_edits
+            previous_edits = even_edits
+        else:
+            current_edits = even_edits
+            previous_edits = odd_edits
+        current_edits[0] = i
+        for j in range(1, len(small) + 1):
+            if big[i - 1] == small[j - 1]:
+                current_edits[j] = previous_edits[j - 1]
+            else:
+                current_edits[j] = 1 + min(previous_edits[j - 1], previous_edits[j], current_edits[j - 1])
+    return even_edits[-1] if len(big) % 2 == 0 else odd_edits[-1]
 
-/* O(n * m) time | O(n * m) space */
-int levenshteinDistance1(char str1[], char str2[])
+
+if __name__ == '__main__':
+    print(levenshtein_distance1('abc', 'yabd'))
+    print(levenshtein_distance2('abc', 'yabd'))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// O(n * m) time | O(n * m) space
+int levenshteinDistance1(string str1, string str2)
 {
-    int str1Length = getStringLength(str1) + 1;
-    int str2Length = getStringLength(str2) + 1;
-    int edits[str1Length][str2Length], row, col;
-    for ( col=0; col<str2Length; col++)
-        edits[0][col] = col;
-    for ( row=0; row<str1Length; row++)
-        edits[row][0] = row;
-    for ( row=1; row<str1Length; row++)
+    const int str1Length = str1.length();
+    const int str2Length = str2.length();
+    vector<vector<int>> edits( str2Length + 1,
+                               vector<int>(str1Length + 1, 0));
+    for (int i = 0; i < str2Length + 1; i++)
     {
-        for ( col=1; col<str2Length; col++)
+        for (int j = 0; j < str1Length + 1; j++)
         {
-            if ( str1[row - 1] == str2[col - 1] )
+            edits[i][j] = j;
+        }
+        edits[i][0] = i;
+    }
+
+    for (int i = 1; i < str2Length + 1; i++)
+    {
+        for (int j = 1; j < str1Length + 1; j++)
+        {
+            if (str2[i - 1] == str1[j - 1])
             {
-                edits[row][col] = edits[row - 1][col - 1];
+                edits[i][j] = edits[i - 1][j - 1];
             }
             else
             {
-                edits[row][col] = 1 + min(edits[row][col - 1], edits[row - 1][col], edits[row - 1][col - 1]);
+                edits[i][j] = 1 + min(edits[i - 1][j - 1], min(edits[i - 1][j], edits[i][j - 1]));
             }
         }
     }
-    return edits[str1Length - 1][str2Length - 1];
+    return edits[str2Length][str1Length];
 }
 
-/* O(n * m) time | O(min(n,m)) space */
-int levenshteinDistance2(char str1[], char str2[])
+// O(n * m) time | O(min(n, m)) space
+int levenshteinDistance2(string str1, string str2)
 {
-    int str1Length = getStringLength(str1) + 1;
-    int str2Length = getStringLength(str2) + 1;
-    int smallLength = str1Length, bigLength = str2Length;
-    char *small, *big;
-    int i, j;
-    int evenEdits[smallLength], oddEdits[smallLength];
-    int *currentEdits, *previousEdits;
-    for ( i=0; i<smallLength; i++)
+    string small = str1.length() < str2.length() ? str1 : str2;
+    string big = str1.length() >= str2.length() ? str1 : str2;
+    const int bigLength = big.length();
+    const int smallLength = small.length();
+    vector<int> evenEdits(smallLength + 1);
+    vector<int> oddEdits(smallLength + 1);
+    for (int j = 0; j < smallLength + 1; j++)
     {
-        evenEdits[i] = i;
-        oddEdits[i] = -1;
+        evenEdits[j] = j;
     }
-    if ( str1Length < str2Length )
+    vector<int> *currentEdits;
+    vector<int> *previousEdits;
+    for (int i = 1; i < bigLength + 1; i++)
     {
-        small = str1;
-        big = str2;
-    }
-    else
-    {
-        big = str1;
-        small = str2;
-        smallLength = str2Length;
-        bigLength = str1Length;
-    }
-    for ( i=1; i<bigLength; i++)
-    {
-        if ( i & 1 == 1 )
+        if( i % 2 == 1)
         {
-            currentEdits = oddEdits;
-            previousEdits = evenEdits;
+            currentEdits = &oddEdits ;
+            previousEdits = &evenEdits;
         }
         else
         {
-            currentEdits = evenEdits;
-            previousEdits = oddEdits;
+            currentEdits = &evenEdits;
+            previousEdits = &oddEdits;
         }
-        currentEdits[0] = i;
-        for ( j=0; j<smallLength; j++)
+        (*currentEdits)[0] = i;
+        for (int j = 1; j < smallLength + 1; j++)
         {
-            if ( big[i - 1] == small[j - 1] )
-                currentEdits[j] = previousEdits[j - 1];
+            if (big[i - 1] == small[j - 1])
+            {
+                (*currentEdits)[j] = previousEdits->at(j - 1);
+            }
             else
-                currentEdits[j] = 1 + min( previousEdits[j - 1], previousEdits[j], currentEdits[j -1] );
+            {
+                (*currentEdits)[j] =
+                    1 + min(previousEdits->at(j - 1),
+                            min( previousEdits->at(j), currentEdits->at(j - 1)));
+            }
         }
     }
-    if ( bigLength & 1 == 0)
-        return evenEdits[smallLength - 1];
-    return oddEdits[smallLength - 1];
+    return bigLength % 2 == 0 ? evenEdits[smallLength]
+           : oddEdits[smallLength];
 }
 
 int main()
 {
-    char str1[] = "abc5";
-    char str2[] = "yabcd";
-    printf("%d ", levenshteinDistance1(str1, str2));
-    printf("%d ", levenshteinDistance2(str1, str2));
+    cout << levenshteinDistance1("abc", "yabd") << endl;
+    cout << levenshteinDistance2("abc", "yabd") << endl;
     return 0;
 }
 ```
