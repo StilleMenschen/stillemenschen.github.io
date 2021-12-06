@@ -1195,4 +1195,154 @@ if __name__ == '__main__':
     print(square_of_zeroes4(matrix1))
 ```
 
-Last Modified 2021-12-01
+## 遍历图的路线数
+
+现有一个矩阵图，指定宽高，定义两个顶点分别放在矩阵的左上角和右下角，左上角为起点，右下角为终点，找出从起点到终点的所有路径数量
+
+```
+---------------------------------
+| start |       |       |       |
+---------------------------------
+|       |       |       |       |
+---------------------------------
+|       |       |       |  end  |
+---------------------------------
+```
+
+```python
+# O(2 ^ (n + m)) time | O(n + m) space
+# where n is the width of the graph and m is the height
+def number_of_ways_to_traverse_graph1(width, height):
+    if width == 1 or height == 1:
+        return 1
+
+    width_number = number_of_ways_to_traverse_graph1(width - 1, height)
+    height_number = number_of_ways_to_traverse_graph1(width, height - 1)
+    return width_number + height_number
+
+
+# O(n * m) time | O(n * m) space
+# where n is the width of the graph and m is the height
+def number_of_ways_to_traverse_graph2(width, height):
+    number_of_ways = [[0 for _ in range(width + 1)] for _ in range(height + 1)]
+
+    for width_idx in range(1, width + 1):
+        for height_idx in range(1, height + 1):
+            if width_idx == 1 or height_idx == 1:
+                number_of_ways[height_idx][width_idx] = 1
+            else:
+                ways_left = number_of_ways[height_idx][width_idx - 1]
+                ways_up = number_of_ways[height_idx - 1][width_idx]
+                number_of_ways[height_idx][width_idx] = ways_left + ways_up
+
+    return number_of_ways[height][width]
+
+
+# O(n + m) time | O(1) space
+# where n is the width of the graph and m is the height
+def number_of_ways_to_traverse_graph3(width, height):
+    x_distance_to_corner = width - 1
+    y_distance_to_corner = height - 1
+
+    # The number of permutations of right and down movements
+    # is the number of ways to reach the bottom right corner，
+    numerator = factorial(x_distance_to_corner + y_distance_to_corner)
+    denominator = factorial(x_distance_to_corner) * factorial(y_distance_to_corner)
+    return numerator // denominator
+
+
+def factorial(num):
+    result = 1
+    for n in range(2, num + 1):
+        result *= n
+    return result
+
+
+if __name__ == '__main__':
+    print(number_of_ways_to_traverse_graph1(4, 3))
+    print(number_of_ways_to_traverse_graph2(4, 3))
+    print(number_of_ways_to_traverse_graph3(4, 3))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+int factorial(int num);
+
+// O(2 ^ (n + m)) time | O(n + m) space
+// where n is the width of the graph and m is the height
+int numberOfWaysToTraverseGraph1(int width, int height)
+{
+    if (width == 1 || height == 1)
+        return 1;
+    return numberOfWaysToTraverseGraph1(width - 1, height) +
+           numberOfWaysToTraverseGraph1(width, height - 1);
+}
+
+// O(n * m) time | O(n * m) space
+int numberOfWaysToTraverseGraph2(int width, int height)
+{
+    vector<vector<int>> numberOfWays;
+    for (int i = 0; i < height + 1; i++)
+    {
+        numberOfWays.push_back(vector<int>{});
+        for (int j = 0; j < width + 1; j++)
+        {
+            numberOfWays[i].push_back(0);
+        }
+    }
+    for (int widthIdx = 1; widthIdx < width + 1; widthIdx++)
+    {
+        for (int heightIdx = 1; heightIdx < height + 1; heightIdx++)
+        {
+            if (widthIdx == 1 || heightIdx == 1)
+            {
+                numberOfWays[heightIdx][widthIdx] = 1;
+            }
+            else
+            {
+                int waysLeft = numberOfWays[heightIdx][widthIdx - 1];
+                int waysUp = numberOfWays[heightIdx - 1][widthIdx];
+                numberOfWays[heightIdx][widthIdx] = waysLeft + waysUp;
+            }
+        }
+    }
+    return numberOfWays[height][width];
+}
+
+// O(n + m) time | O(1) space
+int numberOfWaysToTraverseGraph3(int width, int height)
+{
+    int xDistanceToCorner = width - 1;
+    int yDistanceToCorner = height - 1;
+
+    // The number of permutations of right and down movements
+    // is the number of ways to reach the bottom right corner.
+    int numerator = factorial(xDistanceToCorner + yDistanceToCorner);
+    int denominator = factorial(xDistanceToCorner) * factorial(yDistanceToCorner);
+    return int(numerator / denominator);
+}
+
+int factorial(int num)
+{
+    int result = 1;
+    for (int n = 2; n < num + 1; n++)
+    {
+        result *= n;
+    }
+    return result;
+}
+
+int main()
+{
+    cout << numberOfWaysToTraverseGraph1(4, 3) << endl;
+    cout << numberOfWaysToTraverseGraph2(4, 3) << endl;
+    cout << numberOfWaysToTraverseGraph3(4, 3) << endl;
+    return 0;
+}
+```
+
+Last Modified 2021-12-06
