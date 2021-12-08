@@ -69,6 +69,8 @@ logging:
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>30MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- 根据日志大小调节删除策略，但仍然建议优先使用 maxHistory 来调节日志文件删除策略 -->
+            <!-- <totalSizeCap>2000MB</totalSizeCap> -->
         </rollingPolicy>
         <encoder>
             <charset>UTF-8</charset>
