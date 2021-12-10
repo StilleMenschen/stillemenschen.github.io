@@ -1490,4 +1490,51 @@ int main()
 }
 ```
 
-Last Modified 2021-11-18
+## 相邻子数组最大和
+
+```python
+# O(n) time| O(1) space - where n is the length of the input array
+def kadanes_algorithm(array):
+    max_ending_here = array[0]
+    max_so_far = array[0]
+    for i in range(1, len(array)):
+        num = array[i]
+        max_ending_here = max(num, max_ending_here + num)
+        max_so_far = max(max_so_far, max_ending_here)
+    return max_so_far
+
+
+if __name__ == '__main__':
+    source = [3, 5, -9, 1, 3, -2, 3, 4, 7, 2, -9, 6, 3, 1, -5, 4]
+    print(kadanes_algorithm(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// O(n) time | O(1) space
+int kadanesAlgorithm( vector<int> array)
+{
+    int maxEndingHere = array[0] ;
+    int maxSoFar = array[0];
+    const int arraySize = array.size();
+    for (int i = 1; i < arraySize; i++)
+    {
+        int num = array[i];
+        maxEndingHere = max(num, maxEndingHere + num);
+        maxSoFar = max(maxSoFar, maxEndingHere);
+    }
+    return maxSoFar;
+}
+
+int main()
+{
+    vector<int> source = {3, 5, -9, 1, 3, -2, 3, 4, 7, 2, -9, 6, 3, 1, -5, 4};
+    cout << kadanesAlgorithm(source);
+    return 0;
+}
+```
+
+Last Modified 2021-12-10
