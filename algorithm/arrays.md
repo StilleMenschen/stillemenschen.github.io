@@ -1493,7 +1493,7 @@ int main()
 ## 相邻子数组最大和
 
 ```python
-# O(n) time| O(1) space - where n is the length of the input array
+# O(n) time | O(1) space - where n is the length of the input array
 def kadanes_algorithm(array):
     max_ending_here = array[0]
     max_so_far = array[0]
@@ -1537,4 +1537,4 @@ int main()
 }
 ```
 
-Last Modified 2021-12-10
+Last Modified 2021-12-11
