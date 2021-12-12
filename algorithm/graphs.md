@@ -32,6 +32,64 @@ if __name__ == '__main__':
     print(root.depth_first_search([]))
 ```
 
+```cpp
+#include <iostream>
+#include <vector>
+#include <deque>
+using namespace std;
+
+class Node
+{
+public:
+    string name;
+    vector<Node *> children;
+    Node(string name)
+    {
+        this->name = name;
+    }
+
+    // O(v + e) time | O(v) space
+    vector<string> depthFirstSearch(vector<string> &array)
+    {
+        array.push_back(this->name);
+        const int childrenSize = this->children.size();
+        for (int i = 0; i < childrenSize; i++)
+        {
+            children[i]->depthFirstSearch(array);
+        }
+        return array;
+    }
+
+    Node *addChild(string name)
+    {
+        Node *child = new Node(name);
+        children.push_back(child);
+        return this;
+    }
+};
+
+int main()
+{
+    Node *root = new Node("A");
+    Node *B = new Node("B");
+    Node *F = new Node("F");
+    F->addChild("I")->addChild("J");
+    B->children = {new Node("E"), F};
+    Node *D = new Node("D");
+    Node *G = new Node("G");
+    G->addChild("K");
+    D->children = {G, new Node("H")};
+    root->children = {B, new Node("C"), D};
+    vector<string> result;
+    result = root->depthFirstSearch(result);
+    for (string element : result)
+    {
+        cout << element << " ";
+    }
+    return 0;
+}
+```
+
 ## 是否单向循环
 
 接收一个有正负整数数组，数组中的数值表示跳跃的步数，正数表示向前跳跃，负数表示向后跳跃，如果步数超过数组边界则折返再从开头或末尾开始；
@@ -99,4 +157,103 @@ int main()
 }
 ```
 
-Last Modified 2021-12-11
+## 广度优先遍历
+
+```python
+class Node:
+    def __init__(self, name):
+        self.children = []
+        self.name = name
+
+    def add_child(self, name):
+        self.children.append(Node(name))
+        return self
+
+    # O(v + e) time | O(v) space
+    # v is graphs vertex
+    # e is graphs edge
+    def breadth_first_search(self, array):
+        queue = [self]
+        while len(queue):
+            current = queue.pop(0)
+            array.append(current.name)
+            for child in current.children:
+                queue.append(child)
+        return array
+
+
+if __name__ == '__main__':
+    root = Node('A')
+    B = Node('B')
+    B.children = [Node('E'), Node('F').add_child('I').add_child('J')]
+    D = Node('D')
+    D.children = [Node('G').add_child('K'), Node('H')]
+    root.children = [B, Node('C'), D]
+    print(root.breadth_first_search([]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <deque>
+using namespace std;
+
+class Node
+{
+public:
+    string name;
+    vector<Node *> children;
+    Node(string name)
+    {
+        this->name = name;
+    }
+
+    // O(v + e) time | O(v) space
+    vector<string> breadthFirstSearch(vector<string> &array)
+    {
+        deque<Node *> queue{this};
+        while (!queue.empty())
+        {
+            Node current = *queue.front();
+            queue.pop_front();
+            array.push_back(current.name);
+            const int childrenSize = current.children.size();
+            for (int i = 0; i < childrenSize; i++)
+            {
+                queue.push_back(current.children[i]);
+            }
+        }
+        return array;
+    }
+
+    Node *addChild(string name)
+    {
+        Node *child = new Node(name);
+        children.push_back(child);
+        return this;
+    }
+};
+
+int main()
+{
+    Node *root = new Node("A");
+    Node *B = new Node("B");
+    Node *F = new Node("F");
+    F->addChild("I")->addChild("J");
+    B->children = {new Node("E"), F};
+    Node *D = new Node("D");
+    Node *G = new Node("G");
+    G->addChild("K");
+    D->children = {G, new Node("H")};
+    root->children = {B, new Node("C"), D};
+    vector<string> result;
+    result = root->breadthFirstSearch(result);
+    for (string element : result)
+    {
+        cout << element << " ";
+    }
+    return 0;
+}
+```
+
+Last Modified 2021-12-12
