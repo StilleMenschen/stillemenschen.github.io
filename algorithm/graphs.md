@@ -416,4 +416,165 @@ int main()
 }
 ```
 
-Last Modified 2021-12-15
+## 共同祖先
+
+有如下祖先树，找出节点 E 和 节点 I 的共同祖先 B
+
+```
+           A
+        /     \
+       B       C
+     /   \   /   \
+    D     E F     G
+  /  \
+ G    I
+```
+
+```python
+class AncestralTree:
+    def __init__(self, name):
+        self.name = name
+        self.ancestor = None
+
+
+# O(d) time | O(1) space - where d is the depth (height) of the ancestral tree
+def get_youngest_common_ancestor(top_ancestor, descendant_cne, descendant_two):
+    depth_one = get_descendant_depth(descendant_cne, top_ancestor)
+    depth_two = get_descendant_depth(descendant_two, top_ancestor)
+    if depth_one > depth_two:
+        return backtrack_ancestral_tree(descendant_cne, descendant_two, depth_one - depth_two)
+    else:
+        return backtrack_ancestral_tree(descendant_two, descendant_cne, depth_two - depth_one)
+
+
+def get_descendant_depth(descendant, top_ancestor):
+    depth = 0
+    while descendant != top_ancestor:
+        depth += 1
+        descendant = descendant.ancestor
+    return depth
+
+
+def backtrack_ancestral_tree(lower_descendant, higher_descendant, diff):
+    while diff > 0:
+        lower_descendant = lower_descendant.ancestor
+        diff -= 1
+    while lower_descendant != higher_descendant:
+        lower_descendant = lower_descendant.ancestor
+        higher_descendant = higher_descendant.ancestor
+    return lower_descendant
+
+
+if __name__ == '__main__':
+    A = AncestralTree('A')
+    B = AncestralTree('B')
+    B.ancestor = A
+    C = AncestralTree('C')
+    C.ancestor = A
+    D = AncestralTree('D')
+    D.ancestor = B
+    E = AncestralTree('E')
+    E.ancestor = B
+    F = AncestralTree('F')
+    F.ancestor = C
+    G = AncestralTree('G')
+    G.ancestor = C
+    H = AncestralTree('H')
+    H.ancestor = D
+    I = AncestralTree('I')
+    I.ancestor = D
+    common_ancestor = get_youngest_common_ancestor(A, E, I)
+    print(common_ancestor.name)
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class AncestralTree
+{
+public:
+    char name;
+    AncestralTree *ancestor;
+
+    AncestralTree(char name)
+    {
+        this->name = name;
+        this->ancestor = nullptr;
+    }
+};
+
+int getDescendantDepth(AncestralTree *descendant, AncestralTree *topAncestor)
+{
+    int depth = 0;
+    while (descendant != topAncestor)
+    {
+        depth++;
+        descendant = descendant->ancestor;
+    }
+    return depth;
+}
+
+AncestralTree *backtrackAncestralTree(AncestralTree *lowerDescendant,
+                                      AncestralTree *higherDescendant,
+                                      int diff)
+{
+    while (diff > 0)
+    {
+        lowerDescendant = lowerDescendant->ancestor;
+        diff--;
+    }
+    while (lowerDescendant != higherDescendant)
+    {
+        lowerDescendant = lowerDescendant->ancestor;
+        higherDescendant = higherDescendant->ancestor;
+    }
+    return lowerDescendant;
+}
+
+// O(d) time | O(1) space - where d is the depth (height) of the ancestral tree
+AncestralTree *getYoungestCommonAncestor(AncestralTree *topAncestor,
+                                         AncestralTree *descendantOne,
+                                         AncestralTree *descendantTwo)
+{
+    int depthOne = getDescendantDepth(descendantOne, topAncestor);
+    int depthTwo = getDescendantDepth(descendantTwo, topAncestor);
+    if (depthOne > depthTwo)
+    {
+        return backtrackAncestralTree(descendantOne, descendantTwo,
+                                      depthOne - depthTwo);
+    }
+    else
+    {
+        return backtrackAncestralTree(descendantTwo, descendantOne,
+                                      depthTwo - depthOne);
+    }
+}
+
+int main()
+{
+    AncestralTree *A = new AncestralTree('A');
+    AncestralTree *B = new AncestralTree('B');
+    B->ancestor = A;
+    AncestralTree *C = new AncestralTree('C');
+    C->ancestor = A;
+    AncestralTree *D = new AncestralTree('D');
+    D->ancestor = B;
+    AncestralTree *E = new AncestralTree('E');
+    E->ancestor = B;
+    AncestralTree *F = new AncestralTree('F');
+    F->ancestor = C;
+    AncestralTree *G = new AncestralTree('G');
+    G->ancestor = C;
+    AncestralTree *H = new AncestralTree('H');
+    H->ancestor = D;
+    AncestralTree *I = new AncestralTree('I');
+    I->ancestor = D;
+    AncestralTree *common_ancestor = getYoungestCommonAncestor(A, E, I);
+    cout << common_ancestor->name;
+    return 0;
+}
+```
+
+Last Modified 2021-12-16
