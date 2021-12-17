@@ -1,4 +1,4 @@
-# Oracle 驱动
+# Oracle 连接驱动
 
 访问地址 https://repo1.maven.org/maven2/com/oracle/database/jdbc/
 
@@ -18,4 +18,4 @@ mvn install:install-file -Dfile=ojdbc6.jar -DgroupId=com.oracle -DartifactId=ojd
 </dependency>
 ```
 
-Last Modified 2021-09-28
+Last Modified 2021-12-17
