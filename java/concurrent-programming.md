@@ -145,4 +145,57 @@ public class SynchronizedExample {
 > 同步代码属于不可中断的锁，适用于冲突不是很激烈的情况，代码可读性较好。
 > Lock 为可中断的锁，多样化同步，在竞争激烈时能维持常态
 
-Last Modified 2021-12-17
+## Volatile
+
+可见性，一个线程对主内存的修改可以被其它线程及时地观察到。
+
+volatile 通过 **内存屏障** 和 **禁止重排序** 优化来实现可见性
+
+- 对 `volatile` 变量写操作时，会在写操作后加入一条 `store` 屏障指令，将本地内存中的共享变量刷新到主内存
+- 对 `volatile` 变量读操作时，会在读操作前加入一条 `load` 屏障指令，从主内存中读取共享变量
+
+```java
+package com.example.concurrent;
+
+import java.util.Arrays;
+import java.util.Random;
+
+public class TestVolatile {
+    private volatile boolean isSorted = Boolean.FALSE;
+    private static final int MAX_COUNT = 10000;
+
+    private final int[] array = new int[MAX_COUNT];
+
+    public TestVolatile() {
+        final Random random = new Random();
+        for (int i = 0; i < MAX_COUNT; i++) {
+            array[i] = random.nextInt(MAX_COUNT);
+        }
+    }
+
+    public void sort() {
+        Arrays.sort(array);
+        isSorted = Boolean.TRUE;
+    }
+
+    public void increment() {
+        while (!isSorted) {
+            System.out.println("waiting for sort!!!");
+        }
+        int sums = 0;
+        for (int i = 0; i < array.length; i++) {
+            array[i] *= 10;
+            sums += array[i];
+        }
+        System.out.println(sums);
+    }
+
+    public static void main(String[] args) {
+        TestVolatile testVolatile = new TestVolatile();
+        new Thread(testVolatile::sort).start();
+        new Thread(testVolatile::increment).start();
+    }
+}
+```
+
+Last Modified 2021-12-18
