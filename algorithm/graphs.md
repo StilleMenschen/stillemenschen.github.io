@@ -577,4 +577,391 @@ int main()
 }
 ```
 
-Last Modified 2021-12-16
+## 移除孤岛
+
+给出一个整数表示的矩阵，其中 0 表示水域，1 表示土地；找出没有接触边界的孤岛并删除掉
+
+如下一个矩阵
+
+```
+[
+  [1, 0, 0, 0, 0, 0],
+  [0, 1, 0, 1, 1, 1],
+  [0, 0, 1, 0, 1, 0],
+  [1, 1, 0, 0, 1, 0],
+  [1, 0, 1, 1, 0, 0],
+  [1, 0, 0, 0, 0, 1]
+]
+```
+
+需要删除的孤岛为
+
+```
+[
+  [                ],
+  [   1,           ],
+  [      1,        ],
+  [                ],
+  [      1, 1,     ],
+  [                ]
+]
+```
+
+```python
+def get_unvisited_neighbors1(row, col, matrix, connected_to_border_islands):
+    unvisited_neighbors = []
+    if row > 0 and not connected_to_border_islands[row - 1][col]:
+        unvisited_neighbors.append((row - 1, col,))
+    if row < len(matrix) - 1 and not connected_to_border_islands[row + 1][col]:
+        unvisited_neighbors.append((row + 1, col,))
+    if col > 0 and not connected_to_border_islands[row][col - 1]:
+        unvisited_neighbors.append((row, col - 1,))
+    if col < len(matrix[row]) - 1 and not connected_to_border_islands[row][col + 1]:
+        unvisited_neighbors.append((row, col + 1,))
+    return unvisited_neighbors
+
+
+def mark_border_islands1(row, col, matrix, connected_to_border_islands):
+    nodes_to_traverse = [(row, col,)]
+    while len(nodes_to_traverse):
+        row, col = nodes_to_traverse.pop()
+        if connected_to_border_islands[row][col] or matrix[row][col] == 0:
+            continue
+        else:
+            connected_to_border_islands[row][col] = True
+        unvisited_neighbors = get_unvisited_neighbors1(row, col, matrix, connected_to_border_islands)
+        for neighbor in unvisited_neighbors:
+            nodes_to_traverse.append(neighbor)
+
+
+def get_unvisited_neighbors2(row, col, matrix):
+    unvisited_neighbors = []
+    if row > 0 and matrix[row - 1][col] != 2:
+        unvisited_neighbors.append((row - 1, col,))
+    if row < len(matrix) - 1 and matrix[row + 1][col] != 2:
+        unvisited_neighbors.append((row + 1, col,))
+    if col > 0 and matrix[row][col - 1] != 2:
+        unvisited_neighbors.append((row, col - 1,))
+    if col < len(matrix[row]) - 1 and matrix[row][col + 1] != 2:
+        unvisited_neighbors.append((row, col + 1,))
+    return unvisited_neighbors
+
+
+def mark_border_islands2(row, col, matrix):
+    nodes_to_traverse = [(row, col,)]
+    while len(nodes_to_traverse):
+        row, col = nodes_to_traverse.pop()
+        if matrix[row][col] == 0 or matrix[row][col] == 2:
+            continue
+        else:
+            matrix[row][col] = 2
+        unvisited_neighbors = get_unvisited_neighbors2(row, col, matrix)
+        for neighbor in unvisited_neighbors:
+            nodes_to_traverse.append(neighbor)
+
+
+# O(w * h) time | O(w * h) space
+def remove_islands1(matrix):
+    connected_to_border_islands = [[False for _ in row] for row in matrix]
+    matrix_size = len(matrix)
+    for row in range(matrix_size):
+        if row == 0 or row == matrix_size - 1:
+            traverse_nodes = list(range(len(matrix[row])))
+        else:
+            traverse_nodes = [0, len(matrix[row]) - 1]
+        for col in traverse_nodes:
+            if connected_to_border_islands[row][col]:
+                continue
+            mark_border_islands1(row, col, matrix, connected_to_border_islands)
+
+    for row in range(1, matrix_size - 1):
+        for col in range(1, len(matrix[row]) - 1):
+            if connected_to_border_islands[row][col]:
+                continue
+            matrix[row][col] = 0
+
+    return matrix
+
+
+# O(w * h) time | O(w * h) space
+def remove_islands2(matrix):
+    matrix_size = len(matrix)
+    for row in range(matrix_size):
+        if row == 0 or row == matrix_size - 1:
+            traverse_nodes = list(range(len(matrix[row])))
+        else:
+            traverse_nodes = [0, len(matrix[row]) - 1]
+        for col in traverse_nodes:
+            if matrix[row][col] == 2:
+                continue
+            mark_border_islands2(row, col, matrix)
+
+    for row in range(matrix_size):
+        for col in range(len(matrix[row])):
+            if matrix[row][col] == 0:
+                continue
+            if matrix[row][col] == 2:
+                matrix[row][col] = 1
+            else:
+                matrix[row][col] = 0
+
+    return matrix
+
+
+def print_matrix(matrix):
+    for i in range(len(matrix)):
+        for j in range(len(matrix[i])):
+            print(matrix[i][j], end='  ')
+        print()
+
+
+if __name__ == '__main__':
+    print_matrix(remove_islands1([
+        [1, 0, 0, 0, 0, 0],
+        [0, 1, 0, 1, 1, 1],
+        [0, 0, 1, 0, 1, 0],
+        [1, 1, 0, 0, 1, 0],
+        [1, 0, 1, 1, 0, 0],
+        [1, 0, 0, 0, 0, 1],
+    ]))
+    print_matrix(remove_islands2([
+        [1, 0, 0, 0, 0, 0],
+        [0, 1, 0, 1, 1, 1],
+        [0, 0, 1, 0, 1, 0],
+        [1, 1, 0, 0, 1, 0],
+        [1, 0, 1, 1, 0, 0],
+        [1, 0, 0, 0, 0, 1],
+    ]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void findOnesConnectedToBorder(vector<vector<int>> &matrix, int startRow,
+                               int startCol,
+                               vector<vector<bool>> &onesConnectedToBorder);
+
+vector<vector<int>> getNeighbors(vector<vector<int>> &matrix, int row, int col);
+
+// O(wh) time | O(wh) space - where w and h
+// are the width and height of the input matrix
+vector<vector<int>> removeIslands1(vector<vector<int>> matrix)
+{
+    vector<vector<bool>> onesConnectedToBorder;
+    const int matrixSize = matrix.size();
+    for (int i = 0; i < matrixSize; i++)
+    {
+        onesConnectedToBorder.push_back(vector<bool>(matrix[0].size(), false));
+    }
+
+    // Find all the 1s that are not islands
+    for (int row = 0; row < matrixSize; row++)
+    {
+        const int matrixRowSize = matrix[row].size();
+        for (int col = 0; col < matrixRowSize; col++)
+        {
+            bool rowIsBorder = row == 0 || row == matrixSize - 1;
+            bool colIsBorder = col == 0 || col == matrixRowSize - 1;
+            bool isBorder = rowIsBorder || colIsBorder;
+            if (!isBorder)
+            {
+                continue;
+            }
+            if (matrix[row][col] != 1)
+            {
+                continue;
+            }
+            findOnesConnectedToBorder(matrix, row, col, onesConnectedToBorder);
+        }
+    }
+
+    for (int row = 1; row < matrixSize - 1; row++)
+    {
+        const int matrixRowSize = matrix[row].size();
+        for (int col = 1; col < matrixRowSize - 1; col++)
+        {
+            if (onesConnectedToBorder[row][col])
+            {
+                continue;
+            }
+            matrix[row][col] = 0;
+        }
+    }
+
+    return matrix;
+}
+
+void findOnesConnectedToBorder(vector<vector<int>> &matrix,
+                               int startRow, int startCol,
+                               vector<vector<bool>> &onesConnectedToBorder)
+{
+
+    vector<vector<int>> stack = {{startRow, startCol}};
+    while (stack.size() > 0)
+    {
+        auto currentPosition = stack[stack.size() - 1];
+        stack.pop_back();
+        int currentRow = currentPosition[0];
+        int currentCol = currentPosition[1];
+        bool alreadyVisited = onesConnectedToBorder[currentRow][currentCol];
+        if (alreadyVisited)
+        {
+            continue;
+        }
+        onesConnectedToBorder[currentRow][currentCol] = true;
+        auto neighbors = getNeighbors(matrix, currentRow, currentCol);
+        for (auto neighbor : neighbors)
+        {
+            int row = neighbor[0];
+            int col = neighbor[1];
+            if (matrix[row][col] != 1)
+            {
+                continue;
+            }
+            stack.push_back(neighbor);
+        }
+    }
+}
+
+vector<vector<int>> getNeighbors(vector<vector<int>> &matrix,
+                                 int row, int col)
+{
+    vector<vector<int>> neighbors;
+    const int matrixSize = matrix.size();
+    const int matrixRowSize = matrix[row].size();
+    int numRows = matrixSize;
+    int numCols = matrixRowSize;
+    if (row - 1 >= 0)
+    {
+        neighbors.push_back(vector<int>{row - 1, col}); // UP
+    }
+    if (row + 1 < numRows)
+    {
+        neighbors.push_back(vector<int>{row + 1, col}); // DOWN
+    }
+    if (col - 1 >= 0)
+    {
+        neighbors.push_back(vector<int>{row, col - 1}); // LEFT
+    }
+    if (col + 1 < numCols)
+    {
+        neighbors.push_back(vector<int>{row, col + 1}); // RIGHT
+    }
+
+    return neighbors;
+}
+
+void changeOnesConnectedToBorderToTwos2(vector<vector<int>> &matrix,
+                                        int startRow, int startCol);
+
+vector<vector<int>> getNeighbors(vector<vector<int>> &matrix, int row, int col);
+
+// O(wh) time | O(wh) space - where w and h
+// are the width and height of the input matrix
+vector<vector<int>> removeIslands2(vector<vector<int>> matrix)
+{
+    const int matrixSize = matrix.size();
+    for (int row = 0; row < matrixSize; row++)
+    {
+        const int matrixRowSize = matrix[row].size();
+        for (int col = 0; col < matrixRowSize; col++)
+        {
+            bool rowIsBorder = row == 0 || row == matrixSize - 1;
+            bool colIsBorder = col == 0 || col == matrixRowSize - 1;
+            bool isBorder = rowIsBorder || colIsBorder;
+            if (!isBorder)
+            {
+                continue;
+            }
+            if (matrix[row][col] != 1)
+            {
+                continue;
+            }
+            changeOnesConnectedToBorderToTwos2(matrix, row, col);
+        }
+    }
+
+    for (int row = 0; row < matrixSize; row++)
+    {
+        const int matrixRowSize = matrix[row].size();
+        for (int col = 0; col < matrixRowSize; col++)
+        {
+            int color = matrix[row][col];
+            if (color == 1)
+            {
+                matrix[row][col] = 0;
+            }
+            else if (color == 2)
+            {
+                matrix[row][col] = 1;
+            }
+        }
+    }
+
+    return matrix;
+}
+
+void changeOnesConnectedToBorderToTwos2(vector<vector<int>> &matrix,
+                                        int startRow, int startCol)
+{
+    vector<vector<int>> stack = {{startRow, startCol}};
+    while (stack.size() > 0)
+    {
+        auto currentPosition = stack[stack.size() - 1];
+        stack.pop_back();
+        int currentRow = currentPosition[0];
+        int currentCol = currentPosition[1];
+        matrix[currentRow][currentCol] = 2;
+        auto neighbors = getNeighbors(matrix, currentRow, currentCol);
+        for (auto neighbor : neighbors)
+        {
+            int row = neighbor[0];
+            int col = neighbor[1];
+            if (matrix[row][col] != 1)
+            {
+                continue;
+            }
+            stack.push_back(neighbor);
+        }
+    }
+}
+
+void print_matrix(vector<vector<int>> &matrix)
+{
+    for (vector<int> row : matrix)
+    {
+        for (int col : row)
+        {
+            cout << col << "  ";
+        }
+        cout << endl;
+    }
+}
+
+int main()
+{
+    vector<vector<int>> source = {
+        {1, 0, 0, 0, 0, 0},
+        {0, 1, 0, 1, 1, 1},
+        {0, 0, 1, 0, 1, 0},
+        {1, 1, 0, 0, 1, 0},
+        {1, 0, 1, 1, 0, 0},
+        {1, 0, 0, 0, 0, 1}};
+    removeIslands1(source);
+    print_matrix(source);
+    source = {
+        {1, 0, 0, 0, 0, 0},
+        {0, 1, 0, 1, 1, 1},
+        {0, 0, 1, 0, 1, 0},
+        {1, 1, 0, 0, 1, 0},
+        {1, 0, 1, 1, 0, 0},
+        {1, 0, 0, 0, 0, 1}};
+    removeIslands2(source);
+    print_matrix(source);
+    return 0;
+}
+```
+
+Last Modified 2021-12-18
