@@ -964,4 +964,218 @@ int main()
 }
 ```
 
-Last Modified 2021-12-18
+## 循环的连接
+
+定义一个表示图的二维数组，一维表示图的顶点，二维表示当前的顶点可以访问其他顶点的索引
+
+如下表示的图中，存在一个循环的连接 `0 -> 1 -> 2 -> 0`
+
+```
+[
+    [1, 3],
+    [2, 3, 4],
+    [0],
+    [],
+    [2, 5],
+    []
+]
+```
+
+```python
+def is_node_cycle(node, edges, visited, currently_in_stack):
+    visited[node] = True
+    currently_in_stack[node] = True
+
+    for vertx in edges[node]:
+        if not visited[vertx]:
+            if is_node_cycle(vertx, edges, visited, currently_in_stack):
+                return True
+        elif currently_in_stack[vertx]:
+            return True
+
+    currently_in_stack[node] = False
+    return False
+
+
+WHITE, GREY, BLACK = 0, 1, 2
+
+
+def traverse_and_color_nodes(node, edges, colors):
+    colors[node] = GREY
+
+    for vertx in edges[node]:
+        color = colors[vertx]
+        if color == GREY:
+            return True
+        if color == BLACK:
+            continue
+        if traverse_and_color_nodes(vertx, edges, colors):
+            return True
+
+    colors[node] = BLACK
+    return False
+
+
+# O(v + e) time | O(v) space
+def cycle_in_graph1(edges):
+    visited = [False for _ in edges]
+    currently_in_stack = [False for _ in edges]
+    for node in range(len(edges)):
+        if visited[node]:
+            continue
+        if is_node_cycle(node, edges, visited, currently_in_stack):
+            return True
+
+    return False
+
+
+# O(v + e) time | O(v) space
+def cycle_in_graph2(edges):
+    colors = [WHITE for _ in edges]
+
+    for node in range(len(edges)):
+        if colors[node] != WHITE:
+            continue
+
+        if traverse_and_color_nodes(node, edges, colors):
+            return True
+
+    return False
+
+
+if __name__ == '__main__':
+    source = [
+        [1, 3],
+        [2, 3, 4],
+        [0],
+        [],
+        [2, 5],
+        []
+    ]
+    print(cycle_in_graph1(source))
+    print(cycle_in_graph2(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+const int WHITE = 0;
+const int GREY = 1;
+const int BLACK = 2;
+
+bool isNodeInCycle(int node, vector<vector<int>> &edges,
+                   vector<bool> &visited, vector<bool> &currentlyInStack);
+
+bool traverseAndColorNodes(int node, vector<vector<int>> &edges,
+                           vector<int> &colors);
+
+// O(v + e) time | O(v) space - where v is the number of
+// vertices and e is the number of edges in the graph
+bool cycleInGraph1(vector<vector<int>> edges)
+{
+    int numberOfNodes = edges.size();
+    vector<bool> visited(numberOfNodes, false);
+    vector<bool> currentlyInStack(numberOfNodes, false);
+
+    for (int node = 0; node < numberOfNodes; node++)
+    {
+        if (visited[node])
+            continue;
+
+        bool containsCycle = isNodeInCycle(node, edges, visited, currentlyInStack);
+        if (containsCycle)
+            return true;
+    }
+
+    return false;
+}
+
+
+bool isNodeInCycle(int node, vector<vector<int>> &edges, vector<bool> &visited,
+                   vector<bool> &currentlyInStack)
+{
+    visited[node] = true;
+    currentlyInStack[node] = true;
+
+    auto neighbors = edges[node];
+    for (auto neighbor : neighbors)
+    {
+        if (!visited[neighbor])
+        {
+            bool containsCycle = isNodeInCycle(neighbor, edges, visited, currentlyInStack);
+            if (containsCycle)
+                return true;
+        }
+        else if (currentlyInStack[neighbor])
+        {
+            return true;
+        }
+    }
+
+    currentlyInStack[node] = false;
+    return false;
+}
+
+// O(v + e) time | O(v) space - where v is the number of
+// vertices and e is the number of edges in the graph
+bool cycleInGraph2(vector<vector<int>> edges)
+{
+    int numberOfNodes = edges.size();
+    vector<int> colors(numberOfNodes, WHITE);
+
+    for (int node = 0; node < numberOfNodes; node++)
+    {
+        if (colors[node] != WHITE)
+            continue;
+        bool containsCycle = traverseAndColorNodes(node, edges, colors);
+        if (containsCycle)
+            return true;
+    }
+
+    return false;
+}
+
+
+
+bool traverseAndColorNodes(int node, vector<vector<int>> &edges,
+                           vector<int> &colors)
+{
+    colors[node] = GREY;
+
+    auto neighbors = edges[node];
+    for (auto neighbor : neighbors)
+    {
+        int neighborColor = colors[neighbor];
+        if (neighborColor == GREY)
+            return true;
+        if (neighborColor == BLACK)
+            continue;
+        bool containsCycle = traverseAndColorNodes(neighbor, edges, colors);
+        if (containsCycle)
+            return true;
+    }
+
+    colors[node] = BLACK;
+    return false;
+}
+
+int main()
+{
+    vector<vector<int>> source =
+    {
+        {1, 3},
+        {2, 3, 4},
+        {0},
+        {},
+        {2, 5},
+        {}
+    };
+    cout << cycleInGraph1(source);
+    cout << cycleInGraph2(source);
+    return 0;
+}
+```
+
+Last Modified 2021-12-19
