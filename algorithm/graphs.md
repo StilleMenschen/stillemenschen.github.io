@@ -259,31 +259,31 @@ int main()
 ## 河流大小
 
 ```python
-def get_unvisited_neighbors(i, j, matrix, visited):
+def get_unvisited_neighbors(row, col, matrix, visited):
     unvisited_neighbors = []
-    if i > 0 and not visited[i - 1][j]:
-        unvisited_neighbors.append((i - 1, j,))
-    if i < len(matrix) - 1 and not visited[i + 1][j]:
-        unvisited_neighbors.append((i + 1, j,))
-    if j > 0 and not visited[i][j - 1]:
-        unvisited_neighbors.append((i, j - 1,))
-    if j < len(matrix[i]) - 1 and not visited[i][j + 1]:
-        unvisited_neighbors.append((i, j + 1,))
+    if row > 0 and not visited[row - 1][col]:
+        unvisited_neighbors.append((row - 1, col,))
+    if row < len(matrix) - 1 and not visited[row + 1][col]:
+        unvisited_neighbors.append((row + 1, col,))
+    if col > 0 and not visited[row][col - 1]:
+        unvisited_neighbors.append((row, col - 1,))
+    if col < len(matrix[row]) - 1 and not visited[row][col + 1]:
+        unvisited_neighbors.append((row, col + 1,))
     return unvisited_neighbors
 
 
-def traverse_node(i, j, matrix, visited, sizes):
+def traverse_node(row, col, matrix, visited, sizes):
     number_of_river_size = 0
-    nodes_to_explore = [(i, j,)]
+    nodes_to_explore = [(row, col,)]
     while len(nodes_to_explore):
-        i, j = nodes_to_explore.pop()
-        if visited[i][j]:
+        row, col = nodes_to_explore.pop()
+        if visited[row][col]:
             continue
-        visited[i][j] = True
-        if matrix[i][j] == 0:
+        visited[row][col] = True
+        if matrix[row][col] == 0:
             continue
         number_of_river_size += 1
-        unvisited_neighbors = get_unvisited_neighbors(i, j, matrix, visited)
+        unvisited_neighbors = get_unvisited_neighbors(row, col, matrix, visited)
         for neighbor in unvisited_neighbors:
             nodes_to_explore.append(neighbor)
     if number_of_river_size > 0:
@@ -294,11 +294,11 @@ def traverse_node(i, j, matrix, visited, sizes):
 def river_sizes(matrix):
     sizes = []
     visited = [[False for _ in row] for row in matrix]
-    for i in range(len(matrix)):
-        for j in range(len(matrix[i])):
-            if visited[i][j]:
+    for row in range(len(matrix)):
+        for col in range(len(matrix[row])):
+            if visited[row][col]:
                 continue
-            traverse_node(i, j, matrix, visited, sizes)
+            traverse_node(row, col, matrix, visited, sizes)
     return sizes
 
 
@@ -318,53 +318,53 @@ if __name__ == '__main__':
 #include <vector>
 using namespace std;
 
-vector<vector<int>> getUnvisitedNeighbors(int i, int j,
+vector<vector<int>> getUnvisitedNeighbors(int row, int col,
                                           vector<vector<int>> &matrix, vector<vector<int>> &visited)
 {
     vector<vector<int>> unvisitedNeighbors{};
-    if (i > 0 && !visited[i - 1][j])
+    if (row > 0 && !visited[row - 1][col])
     {
-        unvisitedNeighbors.push_back({i - 1, j});
+        unvisitedNeighbors.push_back({row - 1, col});
     }
     const int matrixSize = matrix.size();
-    if (i < matrixSize - 1 && !visited[i + 1][j])
+    if (row < matrixSize - 1 && !visited[row + 1][col])
     {
-        unvisitedNeighbors.push_back({i + 1, j});
+        unvisitedNeighbors.push_back({row + 1, col});
     }
-    if (j > 0 && !visited[i][j - 1])
+    if (col > 0 && !visited[row][col - 1])
     {
-        unvisitedNeighbors.push_back({i, j - 1});
+        unvisitedNeighbors.push_back({row, col - 1});
     }
-    const int subMatrixSize = matrix[i].size();
-    if (j < subMatrixSize - 1 && !visited[i][j + 1])
+    const int subMatrixSize = matrix[row].size();
+    if (col < subMatrixSize - 1 && !visited[row][col + 1])
     {
-        unvisitedNeighbors.push_back({i, j + 1});
+        unvisitedNeighbors.push_back({row, col + 1});
     }
     return unvisitedNeighbors;
 }
 
-void traverseNode(int i, int j, vector<vector<int>> &matrix,
+void traverseNode(int row, int col, vector<vector<int>> &matrix,
                   vector<vector<int>> &visited, vector<int> &sizes)
 {
     int currentRiverSize = 0;
-    vector<vector<int>> nodesToExplore{{i, j}};
+    vector<vector<int>> nodesToExplore{{row, col}};
     while (nodesToExplore.size() != 0)
     {
         vector<int> currentNode = nodesToExplore.back();
         nodesToExplore.pop_back();
-        i = currentNode[0];
-        j = currentNode[1];
-        if (visited[i][j])
+        row = currentNode[0];
+        col = currentNode[1];
+        if (visited[row][col])
         {
             continue;
         }
-        visited[i][j] = true;
-        if (matrix[i][j] == 0)
+        visited[row][col] = true;
+        if (matrix[row][col] == 0)
         {
             continue;
         }
         currentRiverSize++;
-        vector<vector<int>> unvisitedNeighbors = getUnvisitedNeighbors(i, j, matrix, visited);
+        vector<vector<int>> unvisitedNeighbors = getUnvisitedNeighbors(row, col, matrix, visited);
         for (vector<int> neighbor : unvisitedNeighbors)
         {
             nodesToExplore.push_back(neighbor);
@@ -384,16 +384,16 @@ vector<int> riverSizes(vector<vector<int>> matrix)
                                 vector<int>(matrix[0].size(), false));
     const int matrixSize = matrix.size();
     int subMatrixSize = 0;
-    for (int i = 0; i < matrixSize; i++)
+    for (int row = 0; row < matrixSize; row++)
     {
-        subMatrixSize = matrix[i].size();
-        for (int j = 0; j < subMatrixSize; j++)
+        subMatrixSize = matrix[row].size();
+        for (int col = 0; col < subMatrixSize; col++)
         {
-            if (visited[i][j])
+            if (visited[row][col])
             {
                 continue;
             }
-            traverseNode(i, j, matrix, visited, sizes);
+            traverseNode(row, col, matrix, visited, sizes);
         }
     }
     return sizes;
