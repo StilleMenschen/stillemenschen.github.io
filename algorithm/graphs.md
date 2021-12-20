@@ -1178,4 +1178,234 @@ int main()
 }
 ```
 
-Last Modified 2021-12-19
+## 最小通过次数
+
+给定一个包含整数元素的矩阵，规定矩阵中正数周围的负数（上下左右）可以转为正数，求出转化所有负数为正数的最小次数，如果存在无法转化的负数，则转化次数为 `-1`。
+
+例，给出以下矩阵，矩阵中存在负数
+
+```
+[
+    [ 0, -2, -1],
+    [-5,  2,  0],
+    [-6, -2,  0]
+]
+```
+
+第一次通过后，通过位置`(1, 1)`的正数将一部分负数转为了正数
+
+```
+[
+    [ 0, 2, -1],
+    [ 5, 2,  0],
+    [-6, 2,  0]
+]
+```
+
+再次通过，通过位置`(0, 1)`和`(1, 0)`的正数将剩余的负数转为了正数
+
+```
+[
+    [ 0, 2, 1],
+    [ 5, 2, 0],
+    [ 6, 2, 0]
+]
+```
+
+此时矩阵内已经没有负数可以转化，最后得出的最小通过次数为 `2`
+
+```python
+def get_adjacent_positions(row, col, matrix):
+    adjacent_positions = []
+    if row > 0 > matrix[row - 1][col]:
+        matrix[row - 1][col] *= -1
+        adjacent_positions.append((row - 1, col,))
+    if row < len(matrix) - 1 and matrix[row + 1][col] < 0:
+        matrix[row + 1][col] *= -1
+        adjacent_positions.append((row + 1, col,))
+    if col > 0 > matrix[row][col - 1]:
+        matrix[row][col - 1] *= -1
+        adjacent_positions.append((row, col - 1,))
+    if col < len(matrix[row]) - 1 and matrix[row][col + 1] < 0:
+        matrix[row][col + 1] *= -1
+        adjacent_positions.append((row, col + 1,))
+    return adjacent_positions
+
+
+def get_all_positive_positions(matrix):
+    positive_positions = []
+    for row in range(len(matrix)):
+        for col in range(len(matrix[row])):
+            if matrix[row][col] > 0:
+                positive_positions.append((row, col,))
+
+    return positive_positions
+
+
+def contains_negative(matrix):
+    for row in range(len(matrix)):
+        for col in range(len(matrix[row])):
+            if matrix[row][col] < 0:
+                return True
+
+    return False
+
+
+# O(w * h) time | O(w * h) space
+def minimum_passes_of_matrix(matrix):
+    queue = get_all_positive_positions(matrix)
+    minimum_passes = 0
+
+    while len(queue):
+        number_of_process = len(queue)
+
+        while number_of_process > 0:
+            row, col = queue.pop(0)
+            adjacent_positions = get_adjacent_positions(row, col, matrix)
+            for position in adjacent_positions:
+                queue.append(position)
+            number_of_process -= 1
+
+        minimum_passes += 1
+
+    return minimum_passes - 1 if not contains_negative(matrix) else -1
+
+
+if __name__ == '__main__':
+    source = [
+        [0, -1, -3, 2, 0],
+        [1, -2, -5, -1, -3],
+        [3, 0, 0, -4, -1],
+    ]
+    print(minimum_passes_of_matrix(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int convertNegatives(vector<vector<int>> &matrix);
+vector<vector<int>> getAllPositivePositions(const vector<vector<int>> &matrix);
+vector<vector<int>> getAdjacentPositions(int row, int col,
+                 const vector<vector<int>> &matrix);
+bool containsNegative(const vector<vector<int>> &matrix);
+
+// O(w * h) time | O(w * h) space - where w is the
+// width of the matrix and h is the height
+int minimumPassesOfMatrix(vector<vector<int>> matrix)
+{
+    int passes = convertNegatives(matrix);
+    return !containsNegative(matrix) ? passes - 1 : -1;
+}
+
+int convertNegatives(vector<vector<int>> &matrix)
+{
+    vector<vector<int>> queue = getAllPositivePositions(matrix);
+
+    int passes = 0;
+
+    while (queue.size() > 0)
+    {
+        int currentSize = queue.size();
+
+        while (currentSize > 0)
+        {
+            // In C++, removing elements from the start of a vector is an O(n)-time
+            // operation. To make this an O(1)-time operation, we could use a more
+            // legitimate queue structure. For our time complexity analysis, we'll
+            // assume this runs in O(1) time.
+            auto currentPosition = queue.front();
+            queue.erase(queue.begin());
+            int currentRow = currentPosition[0];
+            int currentCol = currentPosition[1];
+
+            vector<vector<int>> adjacentPositions =
+                                 getAdjacentPositions(currentRow, currentCol, matrix);
+            for (const auto &position : adjacentPositions)
+            {
+                int row = position[0];
+                int col = position[1];
+
+                int value = matrix[row][col];
+                if (value < 0)
+                {
+                    matrix[row][col] *= -1;
+                    queue.push_back({row, col});
+                }
+            }
+
+            currentSize--;
+        }
+
+        passes++;
+    }
+
+    return passes;
+}
+
+vector<vector<int>> getAllPositivePositions(const vector<vector<int>> &matrix)
+{
+    vector<vector<int>> positivePositions;
+    const int matrixSize = matrix.size();
+    for (int row = 0; row < matrixSize; row++)
+    {
+        const int matrixRowSize = matrix[row].size();
+        for (int col = 0; col < matrixRowSize; col++)
+        {
+            int value = matrix[row][col];
+            if (value > 0)
+                positivePositions.push_back({row, col});
+        }
+    }
+
+    return positivePositions;
+}
+
+vector<vector<int>> getAdjacentPositions(int row, int col,
+                 const vector<vector<int>> &matrix)
+{
+    vector<vector<int>> adjacentPositions;
+
+    if (row > 0)
+        adjacentPositions.push_back({row - 1, col});
+    const int matrixSize = matrix.size();
+    if (row < matrixSize - 1)
+        adjacentPositions.push_back({row + 1, col});
+    if (col > 0)
+        adjacentPositions.push_back({row, col - 1});
+    const int matrixRowSize = matrix[row].size();
+    if (col < matrixRowSize - 1)
+        adjacentPositions.push_back({row, col + 1});
+
+    return adjacentPositions;
+}
+
+bool containsNegative(const vector<vector<int>> &matrix)
+{
+    for (const auto &row : matrix)
+    {
+        for (const auto &value : row)
+        {
+            if (value < 0)
+                return true;
+        }
+    }
+
+    return false;
+}
+
+int main()
+{
+    vector<vector<int>> source =
+    {
+        {0, -1, -3, 2, 0},
+        {1, -2, -5, -1, -3},
+        {3, 0, 0, -4, -1}
+    };
+    cout << minimumPassesOfMatrix(source);
+    return 0;
+}
+```
+
+Last Modified 2021-12-20
