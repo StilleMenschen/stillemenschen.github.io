@@ -52,4 +52,4 @@ table th:first-of-type {
    docker pull myregistry.local:5000/testing/test-image
    ```
 
-Last Modified 2021-04-22
+Last Modified 2021-12-24
