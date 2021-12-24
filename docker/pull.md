@@ -2,7 +2,7 @@
 
 ## 简介
 
-从镜像残酷中提取镜像或存储库
+从镜像仓库中提取镜像或存储库
 
 ```
 docker pull [OPTIONS] NAME[:TAG|@DIGEST]

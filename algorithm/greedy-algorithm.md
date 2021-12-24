@@ -235,4 +235,128 @@ int main()
 }
 ```
 
-Last Modified 2021-12-22
+## 验证有效起始城市
+
+现有几座城市是相互靠近且循环相连的，给定一辆每加仑油耗能行驶指定英里的汽车，汽车每到一个城市都有加油站可以加油，给出两个数组和一个整数，
+分别为：表示每座城市距离下一座城市的距离（数组）、每座城市可以提供多少加仑的汽油（数组），汽车每一加仑可以行驶的英里数。
+每座城市以数组的下标来表示，找出可以刚刚好走完所有城市的起始城市位置
+
+```python
+# O(n^2) time | O(1) space - where n is the number of cities
+def valid_starting_city1(distances, fuel, mpg):
+    number_of_cities = len(distances)
+
+    for start_city_idx in range(number_of_cities):
+        miles_remaining = 0
+
+        for current_city_idx in range(start_city_idx, start_city_idx + number_of_cities):
+            if miles_remaining < 0:
+                continue
+
+            current_city_idx = current_city_idx % number_of_cities
+
+            fuel_from_current_city = fuel[current_city_idx]
+            distance_to_next_city = distances[current_city_idx]
+            miles_remaining += fuel_from_current_city * mpg - distance_to_next_city
+
+        if miles_remaining >= 0:
+            return start_city_idx
+
+    # This line should never be reached if the inputs are correct.
+    return -1
+
+
+# O(n) time | O(1) space - where n is the number of cities
+def valid_starting_city2(distances, fuel, mpg):
+    number_of_cities = len(distances)
+    miles_remaining = 0
+
+    index_of_starting_city_candidate = 0
+    miles_remaining_at_starting_city_candidate = 0
+
+    for city_idx in range(1, number_of_cities):
+        distance_from_previous_city = distances[city_idx - 1]
+        fuel_from_previous_city = fuel[city_idx - 1]
+        miles_remaining += fuel_from_previous_city * mpg - distance_from_previous_city
+
+        if miles_remaining < miles_remaining_at_starting_city_candidate:
+            miles_remaining_at_starting_city_candidate = miles_remaining
+            index_of_starting_city_candidate = city_idx
+
+    return index_of_starting_city_candidate
+
+
+if __name__ == '__main__':
+    print(valid_starting_city1([5, 25, 15, 10, 15], [1, 2, 1, 0, 3], 10))
+    print(valid_starting_city2([5, 25, 15, 10, 15], [1, 2, 1, 0, 3], 10))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// O(n^2) time | O(1) space - where n is the number of cities
+int validStartingCity1(vector<int> distances, vector<int> fuel, int mpg)
+{
+    int numberOfCities = distances.size();
+
+    for (int startCityIdx = 0; startCityIdx < numberOfCities; startCityIdx++)
+    {
+        int milesRemaining = 0;
+
+        for (int currentCityIdx = startCityIdx;
+             currentCityIdx < startCityIdx + numberOfCities; currentCityIdx++)
+        {
+            if (milesRemaining < 0)
+                continue;
+
+            int currentCityIdxRotated = currentCityIdx % numberOfCities;
+
+            int fuelFromCurrentCity = fuel[currentCityIdxRotated];
+            int distanceToNextCity = distances[currentCityIdxRotated];
+            milesRemaining += fuelFromCurrentCity * mpg - distanceToNextCity;
+        }
+
+        if (milesRemaining >= 0)
+            return startCityIdx;
+    }
+
+    // This line should never be reached if the inputs are correct.
+    return -1;
+}
+
+// O(n) time | O(1) space - where n is the number of cities
+int validStartingCity2(vector<int> distances, vector<int> fuel, int mpg)
+{
+    int numberOfCities = distances.size();
+    int milesRemaining = 0;
+
+    int indexOfStartingCityCandidate = 0;
+    int milesRemainingAtStartingCityCandidate = 0;
+
+    for (int cityIdx = 1; cityIdx < numberOfCities; cityIdx++)
+    {
+        int distanceFromPreviousCity = distances[cityIdx - 1];
+        int fuelFromPreviousCity = fuel[cityIdx - 1];
+        milesRemaining += fuelFromPreviousCity * mpg - distanceFromPreviousCity;
+
+        if (milesRemaining < milesRemainingAtStartingCityCandidate)
+        {
+            milesRemainingAtStartingCityCandidate = milesRemaining;
+            indexOfStartingCityCandidate = cityIdx;
+        }
+    }
+
+    return indexOfStartingCityCandidate;
+}
+
+int main()
+{
+    cout << validStartingCity1({5, 25, 15, 10, 15}, {1, 2, 1, 0, 3}, 10);
+    cout << validStartingCity2({5, 25, 15, 10, 15}, {1, 2, 1, 0, 3}, 10);
+    return 0;
+}
+```
+
+Last Modified 2021-12-24
