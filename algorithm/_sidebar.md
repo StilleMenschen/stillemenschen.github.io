@@ -8,6 +8,7 @@
   - [Binary Tree](algorithm/binary-tree.md)
   - [Binary Search Tree](algorithm/binary-search-tree.md)
   - [Graphs](algorithm/graphs.md)
+  - [Heap](algorithm/heap.md)
   - [Sorting](algorithm/sorting.md)
   - [Dynamic Programming](algorithm/dynamic-programming.md)
   - [Recursion](algorithm/recursion.md)
