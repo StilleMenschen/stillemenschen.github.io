@@ -3,3 +3,4 @@
   - [Client-Server Model](system-design/client-server-model.md)
   - [Network Protocols](system-design/network-protocols.md)
   - [Storage](system-design/storage.md)
+  - [Latency And Throughput](system-design/latency-and-throughput.md)
