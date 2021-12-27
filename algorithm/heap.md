@@ -19,11 +19,10 @@ class MinHeap:
         child_one_idx = current_idx * 2 + 1
         while child_one_idx <= end_idx:
             child_two_idx = current_idx * 2 + 2 if current_idx * 2 + 2 <= end_idx else -1
+            idx_to_swap = child_one_idx
             # In Max Heap, change comparison operator '<' to '>'
             if child_two_idx != -1 and heap[child_two_idx] < heap[child_one_idx]:
                 idx_to_swap = child_two_idx
-            else:
-                idx_to_swap = child_one_idx
             # In Max Heap, change comparison operator '<' to '>'
             if heap[idx_to_swap] < heap[current_idx]:
                 self.swap(current_idx, idx_to_swap, heap)
@@ -194,4 +193,4 @@ int main()
 }
 ```
 
-Last Modified 2021-12-26
+Last Modified 2021-12-27
