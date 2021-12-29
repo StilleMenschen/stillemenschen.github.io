@@ -1,4 +1,4 @@
-# vscode
+# Visual Studio Code
 
 settings.json
 
@@ -9,13 +9,12 @@ settings.json
     "window.restoreWindows": "none",
     "editor.renderWhitespace": "all",
     "emmet.triggerExpansionOnTab": true,
-    "python.autoComplete.addBrackets": true,
     "python.formatting.provider": "yapf",
-    "python.formatting.yapfPath": "yapf.exe",
-    "python.linting.pylintPath": "pylint.exe",
+    "python.linting.pylintPath": "pylint",
     "python.pythonPath": "python.exe",
     "php.validate.executablePath": "php.exe",
     "php.executablePath": "php.exe",
+    "prettier.printWidth": 120,
     "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
     "typescript.format.insertSpaceBeforeFunctionParenthesis": true,
     "vetur.format.defaultFormatter.html": "js-beautify-html",
@@ -23,11 +22,14 @@ settings.json
         "js-beautify-html": {
             "wrap_attributes": "preserve-aligned",
             "indent_size": 4
+        },
+        "prettier": {
+            "singleQuote": true
         }
     },
     "eslint.options": {
         "env": {
-            "es2020": true
+            "es2019": true
         },
         "parserOptions": {
             "ecmaVersion": 2020,
@@ -65,12 +67,13 @@ settings.json
     "workbench.iconTheme": "material-icon-theme",
     "files.autoGuessEncoding": true,
     "python.languageServer": "Pylance",
-    "python.showStartPage": false,
     "editor.linkedEditing": true,
     "python.analysis.completeFunctionParens": true,
     "editor.codeActionsOnSave": {
-        "source.fixAll": true,
-        "source.fixAll.eslint": true
+        "source.fixAll": true
+    },
+    "workbench.editorAssociations": {
+        "*.ipynb": "jupyter.notebook.ipynb"
     },
     "editor.wordBasedSuggestionsMode": "allDocuments",
     "path-intellisense.mappings": {
@@ -79,9 +82,10 @@ settings.json
     "files.trimTrailingWhitespace": true,
     "git.autofetch": "all",
     "remote.SSH.remotePlatform": {
-        "192.168.0.1": "linux"
+        "sz.tystnad.tech": "linux",
+        "192.168.55.80": "linux",
+        "192.168.52.64": "linux"
     },
-    "workbench.colorTheme": "Remedy - Dark (Straight)",
     "terminal.integrated.profiles.windows": {
         "Git-Bash": {
             "path": "bash.exe",
@@ -92,11 +96,21 @@ settings.json
         },
     },
     "terminal.integrated.defaultProfile.windows": "Git-Bash",
-    "eslint.format.enable": true,
-    "security.workspace.trust.startupPrompt": "never",
-    "security.workspace.trust.emptyWindow": false,
-    "security.workspace.trust.enabled": false
+    "security.workspace.trust.enabled": false,
+    "editor.fontFamily": "Consolas, 'Microsoft Yahei', 'Courier New', monospace",
+    "workbench.colorTheme": "One Dark Pro Darker",
+    "gitlens.hovers.avatars": false,
+    "gitlens.views.commits.avatars": false,
+    "gitlens.views.repositories.avatars": false,
+    "gitlens.views.fileHistory.avatars": false,
+    "gitlens.views.branches.avatars": false,
+    "gitlens.views.remotes.avatars": false,
+    "gitlens.views.tags.avatars": false,
+    "gitlens.views.contributors.avatars": false,
+    "gitlens.views.searchAndCompare.avatars": false,
+    "gitlens.blame.avatars": false,
+    "bracket-pair-colorizer-2.depreciation-notice": false
 }
 ```
 
-Last Modified 2021-07-26
+Last Modified 2021-12-29

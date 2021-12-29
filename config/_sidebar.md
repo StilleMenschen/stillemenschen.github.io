@@ -5,5 +5,6 @@
   - [npmrc](config/npmrc.md)
   - [pip](config/pip.md)
   - [php](config/php.md)
-  - [vscode](config/vscode.md)
-  - [linux proxy](config/linux-proxy.md)
+  - [Visual Studio Code](config/visual-studio-code.md)
+  - [Sublime Text](config/sublime-text.md)
+  - [Linux Proxy](config/linux-proxy.md)
