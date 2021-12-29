@@ -106,7 +106,7 @@ curl -sL http://localhost:9090/api/v1/query?query=up | python -m json.tool
 curl -IL http://localhost:3000
 ```
 
-在 Grafana 中配置好 Data Source 和 Dashboard 就可以以之间看了
+在 Grafana 中配置好 Data Source 和 Dashboard 即可开始监控
 
 ## 参考文档
 
@@ -117,4 +117,4 @@ curl -IL http://localhost:3000
 - Grafana 仪表盘 https://grafana.com/grafana/dashboards
 - Node Exporter GitHub https://github.com/prometheus/node_exporter
 
-Last Modified 2021-05-15
+Last Modified 2021-12-29
