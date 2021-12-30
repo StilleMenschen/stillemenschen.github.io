@@ -11,7 +11,8 @@ Preferences.sublime-settings
     "show_line_endings": true,
     "draw_white_space": ["all"],
     "color_scheme": "Monokai.sublime-color-scheme",
+    "save_on_focus_lost": true,
 }
 ```
 
-Last Modified 2021-12-29
+Last Modified 2021-12-30
