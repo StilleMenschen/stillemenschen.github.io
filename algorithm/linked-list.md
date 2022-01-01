@@ -2,229 +2,342 @@
 
 ## 基本实现
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
+```python
+class Node:
+    def __init__(self, value):
+        self.value = value
+        self.prev = None
+        self.next = None
 
-typedef struct Node
-{
-    struct Node *prev;
-    struct Node *next;
-    int value = -1;
-} Node;
 
-Node *head = NULL;
-Node *tail = NULL;
-int listSize = 0;
+class DoublyLinkedList:
+    def __init__(self):
+        self.head = None
+        self.tail = None
 
-void setHead(Node* node);
-void removeNodeBindings(Node* node);
-void remove(Node* node);
-void insertBefore(Node* node, Node* nodeToInsert);
-void insertAfter(Node* node, Node* nodeToInsert);
+    # O(1) time | O(1) space
+    def set_head(self, node):
+        if self.head is None:
+            self.head = node
+            self.tail = node
+            return
+        self.insert_before(self.head, node)
 
-/* O(1) time | O(1) space */
-void setHead(Node* node)
+    # O(1) time | O(1) space
+    def set_tail(self, node):
+        if self.tail is None:
+            self.set_head(node)
+            return
+        self.insert_after(self.tail, node)
+
+    # O(1) time | O(1) space
+    def insert_before(self, node, node_to_insert):
+        if node_to_insert == self.head and node_to_insert == self.tail:
+            return
+        self.remove(node_to_insert)
+        node_to_insert.prev = node.prev
+        node_to_insert.next = node
+        if node.prev is None:
+            self.head = node_to_insert
+        else:
+            node.prev.next = node_to_insert
+        node.prev = node_to_insert
+
+    # O(1) time | O(1) space
+    def insert_after(self, node, node_to_insert):
+        if node_to_insert == self.head and node_to_insert == self.tail:
+            return
+        self.remove(node_to_insert)
+        node_to_insert.prev = node
+        node_to_insert.next = node.next
+        if node.next is None:
+            self.tail = node_to_insert
+        else:
+            node.next.prev = node_to_insert
+        node.next = node_to_insert
+
+    # O(p) time | O(1) space
+    def insert_at_position(self, position, node_to_insert):
+        if position == 1:
+            self.set_head(node_to_insert)
+            return
+        node = self.head
+        current_position = 1
+        while node is not None and current_position != position:
+            node = node.next
+            current_position += 1
+        if node is not None:
+            self.insert_before(node, node_to_insert)
+        else:
+            self.set_tail(node_to_insert)
+
+    # O(n) time | O(1) space
+    def remove_nodes_with_value(self, value):
+        node = self.head
+        while node is not None:
+            node_to_remove = node
+            node = node.next
+            if node_to_remove.value == value:
+                self.remove(node_to_remove)
+
+    # O(1) time | O(1) space
+    def remove(self, node):
+        if node == self.head:
+            self.head = self.head.next
+        if node == self.tail:
+            self.tail = self.tail.prev
+        self.remove_node_bindings(node)
+
+    # O(n) time | O(1) space
+    def contains_node_with_value(self, value):
+        node = self.head
+        while node is not None and node.value != value:
+            node = node.next
+        return node is not None
+
+    @staticmethod
+    def remove_node_bindings(node):
+        if node.prev is not None:
+            node.prev.next = node.next
+        if node.next is not None:
+            node.next.prev = node.prev
+        node.prev = None
+        node.next = None
+
+    def get_node_with_value(self, value):
+        node = self.head
+        while node is not None:
+            if node.value == value:
+                return node
+            node = node.next
+        return None
+
+
+def print_linked_list(head):
+    node = head
+    while node is not None:
+        print(node.value, end=' ')
+        node = node.next
+    print()
+
+
+if __name__ == '__main__':
+    linked_list = DoublyLinkedList()
+    linked_list.set_head(Node(5))
+    linked_list.set_head(Node(4))
+    linked_list.set_head(Node(3))
+    linked_list.set_head(Node(2))
+    linked_list.set_head(Node(1))
+    linked_list.set_head(Node(4))
+    linked_list.set_tail(Node(6))
+    linked_list.insert_before(linked_list.tail, Node(3))
+    linked_list.insert_after(linked_list.tail, Node(3))
+    print_linked_list(linked_list.head)
+    linked_list.remove_nodes_with_value(3)
+    print_linked_list(linked_list.head)
+    linked_list.remove(linked_list.get_node_with_value(2))
+    print(linked_list.contains_node_with_value(5))
+    print_linked_list(linked_list.head)
+```
+
+```cpp
+#include <iostream>
+using namespace std;
+
+class Node
 {
-    if ( head == NULL )
+public:
+    int value;
+    Node *prev;
+    Node *next;
+
+    Node(int val)
     {
-        head = node;
-        tail = node;
-        listSize++;
-        return;
-    }
-    insertBefore(head, node);
-}
-/* O(1) time | O(1) space */
-void setTail(Node* node)
+        value = val;
+        prev = nullptr;
+        next = nullptr;
+    };
+};
+
+class DoublyLinkedList
 {
-    if ( tail == NULL )
+public:
+    Node *head;
+    Node *tail;
+
+    DoublyLinkedList()
     {
-        setHead(node);
-        return;
+        head = nullptr;
+        tail = nullptr;
     }
-    insertAfter(tail, node);
-}
-/* O(1) time | O(1) space */
-void insertBefore(Node* node, Node* nodeToInsert)
-{
-    if ( nodeToInsert == head && nodeToInsert == tail )
+
+    // O(1) time | O(1) space
+    void setHead(Node *node)
     {
-        return;
-    }
-    remove(nodeToInsert);
-    nodeToInsert->prev = node->prev;
-    nodeToInsert->next = node;
-    if ( node->prev == NULL )
-    {
-        head = nodeToInsert;
-    }
-    else
-    {
-        node->prev->next = nodeToInsert;
-    }
-    node->prev = nodeToInsert;
-    listSize++;
-}
-/* O(1) time | O(1) space */
-void insertAfter(Node* node, Node* nodeToInsert)
-{
-    if ( nodeToInsert == head && nodeToInsert == tail )
-    {
-        return;
-    }
-    remove(nodeToInsert);
-    nodeToInsert->prev = node;
-    nodeToInsert->next = node->next;
-    if ( node->next == NULL )
-    {
-        tail = nodeToInsert;
-    }
-    else
-    {
-        node->next->prev = nodeToInsert;
-    }
-    node->next = nodeToInsert;
-    listSize++;
-}
-/*
-   O(p) time | O(1) space
-   p is position
-*/
-void insertAtPosition(int position, Node* nodeToInsert)
-{
-    if ( position == 0)
-    {
-        setHead(nodeToInsert);
-        return;
-    }
-    Node *node = head;
-    int currentPosition = 0;
-    while ( node != NULL && currentPosition != position )
-    {
-        node = node->next;
-        currentPosition++;
-    }
-    if ( node != NULL )
-    {
-        insertBefore(node, nodeToInsert);
-    }
-    else
-    {
-        setTail(nodeToInsert);
-    }
-}
-/* O(n) time | O(1) space */
-void removeNodesWithValue(int value)
-{
-    Node *node = head;
-    Node *nodeToRemove = NULL;
-    while ( node != NULL )
-    {
-        nodeToRemove = node;
-        node = node->next;
-        if ( nodeToRemove->value == value )
+        if (head == nullptr)
         {
-            remove(nodeToRemove);
-            listSize--;
+            head = node;
+            tail = node;
+            return;
+        }
+        insertBefore(head, node);
+    }
+
+    // O(1) time | O(1) space
+    void setTail(Node *node)
+    {
+        if (tail == nullptr)
+        {
+            setHead(node);
+            return;
+        }
+        insertAfter(tail, node);
+    }
+
+    // O(1) time | O(1) space
+    void insertBefore(Node *node, Node *nodeToInsert)
+    {
+        if (nodeToInsert == head && nodeToInsert == tail)
+            return;
+        remove(nodeToInsert);
+        nodeToInsert->prev = node->prev;
+        nodeToInsert->next = node;
+        if (node->prev == nullptr)
+        {
+            head = nodeToInsert;
+        }
+        else
+        {
+            node->prev->next = nodeToInsert;
+        }
+        node->prev = nodeToInsert;
+    }
+
+    // O(1) time | O(1) space
+    void insertAfter(Node *node, Node *nodeToInsert)
+    {
+        if (nodeToInsert == head && nodeToInsert == tail)
+            return;
+        remove(nodeToInsert);
+        nodeToInsert->prev = node;
+        nodeToInsert->next = node->next;
+        if (node->next == nullptr)
+        {
+            tail = nodeToInsert;
+        }
+        else
+        {
+            node->next->prev = nodeToInsert;
+        }
+        node->next = nodeToInsert;
+    }
+
+    // O(p) time | O(1) space
+    void insertAtPosition(int position, Node *nodeToInsert)
+    {
+        if (position == 1)
+        {
+            setHead(nodeToInsert);
+            return;
+        }
+        Node *node = head;
+        int currentPosition = 1;
+        while (node != nullptr && currentPosition++ != position)
+            node = node->next;
+        if (node != nullptr)
+        {
+            insertBefore(node, nodeToInsert);
+        }
+        else
+        {
+            setTail(nodeToInsert);
         }
     }
-}
-/* O(1) time | O(1) space */
-void remove(Node* node)
-{
-    if ( node == head )
+
+    // O(n) time | O(1) space
+    void removeNodesWithValue(int value)
     {
-        head = head->next;
+        Node *node = head;
+        while (node != nullptr)
+        {
+            Node *nodeToRemove = node;
+            node = node->next;
+            if (nodeToRemove->value == value)
+                remove(nodeToRemove);
+        }
     }
-    if ( node == tail )
+
+    // O(1) time | O(1) space
+    void remove(Node *node)
     {
-        tail = tail->prev;
+        if (node == head)
+            head = head->next;
+        if (node == tail)
+            tail = tail->prev;
+        removeNodeBindings(node);
     }
-    removeNodeBindings(node);
-}
-/* O(n) time | O(1) space */
-int containsNodeWithValue(int value)
+
+    // O(n) time | O(1) space
+    bool containsNodeWithValue(int value)
+    {
+        Node *node = head;
+        while (node != nullptr && node->value != value)
+            node = node->next;
+        return node != nullptr;
+    }
+
+    void removeNodeBindings(Node *node)
+    {
+        if (node->prev != nullptr)
+            node->prev->next = node->next;
+        if (node->next != nullptr)
+            node->next->prev = node->prev;
+        node->prev = nullptr;
+        node->next = nullptr;
+    }
+
+    Node *getNodeWithValue(int value)
+    {
+        Node *node = head;
+        while (node != nullptr)
+        {
+            if (node->value == value)
+            {
+                return node;
+            }
+            node = node->next;
+        }
+        return nullptr;
+    }
+};
+
+void printLinkedList(Node *head)
 {
     Node *node = head;
-    while( node != NULL && node->value != value )
+    while (node != nullptr)
     {
+        cout << node->value << " ";
         node = node->next;
     }
-    return node != NULL;
-}
-void removeNodeBindings(Node* node)
-{
-    if ( node->prev != NULL )
-    {
-        node->prev->next = node->next;
-    }
-    node->prev = NULL;
-    if ( node->next != NULL )
-    {
-        node->next->prev = node->prev;
-    }
-    node->next = NULL;
-}
-
-void initLinkedList()
-{
-    Node *a = NULL;
-    int i = 0;
-    for (; i<10; i++)
-    {
-        a = (Node*)malloc(sizeof(Node));
-        a->prev = NULL;
-        a->next = NULL;
-        a->value = i;
-        insertAtPosition(i, a);
-    }
-}
-
-void printLinkedLists(Node* node)
-{
-    while ( node != NULL )
-    {
-        printf("%d ", node->value);
-        node = node->next;
-    }
-    printf("\n");
-}
-
-void clearList()
-{
-    const int end = listSize / 2;
-    int i = 0;
-    Node *node = head;
-    for(; i < end; i++)
-    {
-        node = NULL;
-        head = head->next;
-        node = tail;
-        tail = tail->prev;
-    }
-    listSize = 0;
+    cout << endl;
 }
 
 int main()
 {
-    initLinkedList();
-    printLinkedLists(head);
-    if ( containsNodeWithValue(3) == 1 )
-    {
-        printf("containsNodeWithValue(3) is true \n");
-    }
-    if ( containsNodeWithValue(13) == 0 )
-    {
-        printf("containsNodeWithValue(13) is false \n");
-    }
-    printf("removeNodesWithValue(3)\n");
-    removeNodesWithValue(3);
-    printf("removeNodesWithValue(9)\n");
-    removeNodesWithValue(9);
-    printLinkedLists(head);
-    printf("list size is %d \n", listSize);
-    clearList();
+    DoublyLinkedList linkedList;
+    linkedList.setHead(new Node(5));
+    linkedList.setHead(new Node(4));
+    linkedList.setHead(new Node(3));
+    linkedList.setHead(new Node(2));
+    linkedList.setHead(new Node(1));
+    linkedList.setHead(new Node(4));
+    linkedList.setTail(new Node(6));
+    linkedList.insertBefore(linkedList.tail, new Node(3));
+    linkedList.insertAfter(linkedList.tail, new Node(3));
+    linkedList.removeNodesWithValue(3);
+    linkedList.remove(linkedList.getNodeWithValue(2));
+    linkedList.containsNodeWithValue(5);
+    printLinkedList(linkedList.head);
     return 0;
 }
 ```
@@ -1067,4 +1180,4 @@ int main()
 }
 ```
 
-Last Modified 2021-07-05
+Last Modified 2022-01-01
