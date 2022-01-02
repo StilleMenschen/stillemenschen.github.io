@@ -342,44 +342,92 @@ int main()
 }
 ```
 
-## 从末尾删除节点
+## 删除末尾向前第 N 个节点
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
+```python
+class LinkedList:
+    def __init__(self, value):
+        self.value = value
+        self.next = None
 
-typedef struct Node
+
+# O(n) time | O(1) space
+def remove_kth_node_from_end(head, k):
+    counter = 1
+    first = head
+    second = head
+    while counter <= k:
+        second = second.next
+        counter += 1
+    if second is None:
+        head.value = head.next.value
+        head.next = head.next.next
+        return
+    while second.next is not None:
+        second = second.next
+        first = first.next
+    first.next = first.next.next
+
+
+def initialize_linked_list(array):
+    head = LinkedList(array[0])
+    p = head
+    for idx in range(1, len(array)):
+        p.next = LinkedList(array[idx])
+        p = p.next
+    return head
+
+
+def print_linked_list(head):
+    node = head
+    while node is not None:
+        print(node.value, end=' ')
+        node = node.next
+    print()
+
+
+if __name__ == '__main__':
+    source = initialize_linked_list([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+    remove_kth_node_from_end(source, 4)
+    print_linked_list(source)
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class LinkedList
 {
-    struct Node *prev;
-    struct Node *next;
-    int value = -1;
-} Node;
+public:
+    int value;
+    LinkedList *next;
 
-typedef struct LinkedList
-{
-    Node* head;
-    Node* tail;
-    int size;
-} LinkedList;
+    LinkedList(int val)
+    {
+        value = val;
+        next = nullptr;
+    }
+};
 
-/* O(n) time | O(1) space */
-void removeNthNodeFromEnd(Node* head, int n)
+// O(n) time | O(1) space
+void removeKthNodeFromEnd(LinkedList *head, int k)
 {
-    int counter = 0;
-    Node *first = head;
-    Node *second = head;
-    while ( counter < n )
+    int counter = 1;
+    LinkedList *first = head;
+    LinkedList *second = head;
+    while (counter <= k)
     {
         second = second->next;
         counter++;
     }
-    if ( second == NULL )
+    if (second == nullptr)
     {
         head->value = head->next->value;
         head->next = head->next->next;
         return;
     }
-    while ( second->next != NULL )
+    while (second->next != nullptr)
     {
         second = second->next;
         first = first->next;
@@ -387,44 +435,34 @@ void removeNthNodeFromEnd(Node* head, int n)
     first->next = first->next->next;
 }
 
-void initLinkedList(LinkedList** list)
+LinkedList *initializeLinkedList(const vector<int> array)
 {
-    Node *head, *tail, *node;
-    head = (Node*)malloc(sizeof(Node));
-    head->value = 0;
-    tail = head;
-    int i = 1;
-    for (; i<10; i++)
+    LinkedList *head = new LinkedList(array[0]);
+    LinkedList *tail = head;
+    for (size_t i = 1; i < array.size(); i++)
     {
-        node = (Node*)malloc(sizeof(Node));
-        node->value = i;
-        tail->next = node;
-        node->prev = tail;
-        tail = node;
+        tail->next = new LinkedList(array[i]);
+        tail = tail->next;
     }
-    tail->next = NULL;
-    (*list)->head = head;
-    (*list)->tail = tail;
-    (*list)->size = 10;
+    return head;
 }
 
-void printLinkedLists(Node* node)
+void printLinkedList(LinkedList *head)
 {
-    while ( node != NULL )
+    LinkedList *node = head;
+    while (node != nullptr)
     {
-        printf("%d ", node->value);
+        cout << node->value << " ";
         node = node->next;
     }
-    printf("\n");
+    cout << endl;
 }
 
 int main()
 {
-    LinkedList* list = (LinkedList*)malloc(sizeof(LinkedList));
-    initLinkedList(&list);
-    printLinkedLists(list->head);
-    removeNthNodeFromEnd(list->head, 4);
-    printLinkedLists(list->head);
+    LinkedList *source = initializeLinkedList({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+    removeKthNodeFromEnd(source, 4);
+    printLinkedList(source);
     return 0;
 }
 ```
@@ -1180,4 +1218,4 @@ int main()
 }
 ```
 
-Last Modified 2022-01-01
+Last Modified 2022-01-02
