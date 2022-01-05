@@ -20,7 +20,7 @@ services:
       ZBX_HOSTNAME: "zabbix-agent-node1"
       ZBX_SERVER_HOST: "192.168.1.1"
       ZBX_SERVER_PORT: "10051"
-    # 直接将agent的10050端口绑定到宿主机
+    # 直接将agent的10051端口绑定到宿主机
     network_mode: "host"
 ```
 
@@ -29,4 +29,4 @@ services:
 - 官方 Docker 安装参考 https://www.zabbix.com/documentation/current/manual/installation/containers
 - Agent 镜像 https://hub.docker.com/r/zabbix/zabbix-agent
 
-Last Modified 2021-05-03
+Last Modified 2022-01-05
