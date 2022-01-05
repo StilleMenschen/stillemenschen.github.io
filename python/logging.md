@@ -14,30 +14,31 @@ logging.warning('And this, too')
 ## 高级方式
 
 ```python
-from logging import DEBUG
-from logging import getLogger
-from logging import StreamHandler
-from logging import FileHandler
-from logging import Formatter
+import logging
+from logging.handlers import TimedRotatingFileHandler
 
 # Multiple calls to getLogger() with the same name will return a reference to the same logger object.
-logger = getLogger(__name__)
-logger.setLevel(DEBUG)
-log_format = Formatter(fmt='%(asctime)s %(levelname)s %(name)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-console_handler = StreamHandler()
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
+log_format = logging.Formatter(fmt='%(asctime)s %(levelname)s %(name)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+console_handler = logging.StreamHandler()
 console_handler.setFormatter(log_format)
 
-file_handler = FileHandler(filename='example.log')
+file_handler = logging.FileHandler(filename='example.log')
 file_handler.setFormatter(log_format)
 
-logger.addHandler(console_handler)
-logger.addHandler(file_handler)
+rotating_file_handler = TimedRotatingFileHandler(filename='rotating-example.log', when='midnight')
+rotating_file_handler.setFormatter(log_format)
 
-logger.debug('debug message')
-logger.info('info message')
-logger.warning('warning message')
-logger.error('error message')
-logger.critical('critical message')
+log.addHandler(console_handler)
+log.addHandler(file_handler)
+log.addHandler(rotating_file_handler)
+
+log.debug('debug message')
+log.info('info message')
+log.warning('warning message')
+log.error('error message')
+log.critical('critical message')
 ```
 
 ## 参考文档
@@ -45,4 +46,4 @@ logger.critical('critical message')
 - 日志 HOW TO https://docs.python.org/zh-cn/2.7/howto/logging.html
 - 日志 HOW TO https://docs.python.org/zh-cn/3.7/howto/logging.html
 
-Last Modified 2021-05-22
+Last Modified 2022-01-05
