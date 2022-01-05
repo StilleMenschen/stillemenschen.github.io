@@ -16,8 +16,8 @@ import java.util.concurrent.atomic.LongAdder;
 
 public class UtilTests {
     private static final int MAX_THREAD = 10000;
-    private LongAdder adder = new LongAdder();
-    private AtomicLong atomicLong = new AtomicLong(0);
+    private final LongAdder adder = new LongAdder();
+    private final AtomicLong atomicLong = new AtomicLong(0);
 
     @Test
     public void testLongAdder() {
@@ -198,4 +198,76 @@ public class TestVolatile {
 }
 ```
 
-Last Modified 2021-12-18
+## Publish
+
+- 发布对象：使一个对象能够被当前范围之外的代码所使用
+- 对象溢出：一种错误的发布，当一个对象还没有构造完成时，就使它被其它线程所见
+
+```java
+package com.example.concurrent;
+
+import java.util.Objects;
+
+/**
+ * 双重同步锁单例模式
+ */
+public class SingletonExample1 {
+
+    // 私有构造函数
+    private SingletonExample1() {
+        System.out.println("SingletonExample1");
+    }
+
+    // 单例对象
+    // 加入 volatile 防止指令重排序
+    private static volatile SingletonExample1 instance;
+
+    // 静态工厂方法
+    public static SingletonExample1 getInstance() {
+        if (Objects.isNull(instance)) { // 双重检测
+            synchronized (SingletonExample1.class) { // 同步锁
+                if (Objects.isNull(instance)) {
+                    instance = new SingletonExample1();
+                }
+            }
+        }
+        return instance;
+    }
+}
+```
+
+```java
+package com.example.concurrent;
+
+/**
+ * 枚举单例模式
+ */
+public class SingletonExample2 {
+
+    // 私有构造函数
+    private SingletonExample2() {
+        System.out.println("SingletonExample1");
+    }
+
+    public static SingletonExample2 getInstance() {
+        return Singleton.INSTANCE.getInstance();
+    }
+
+    private enum Singleton {
+        INSTANCE;
+
+        private SingletonExample2 singleton;
+
+        // JVM 保证此方法绝对只调用一次
+        Singleton() {
+            singleton = new SingletonExample2();
+        }
+
+        public SingletonExample2 getInstance() {
+            return singleton;
+        }
+    }
+}
+```
+
+Last Modified 2022-01-05
