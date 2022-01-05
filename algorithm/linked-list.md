@@ -1218,4 +1218,144 @@ int main()
 }
 ```
 
-Last Modified 2022-01-02
+## 链表求和
+
+给出两个链表，链表里的元素反向表示一个正整数，求出两个链表表示的正整数的和并返回一个反向表示的链表（个位数从左开始）
+
+```python
+class LinkedList:
+    def __init__(self, value):
+        self.value = value
+        self.next = None
+
+
+# O(max(n, m)) time | O(max(n, m)) space
+def sum_of_linked_list(linked_list_one, linked_list_two):
+    new_linked_list_pointer = LinkedList(0)
+    next_node = new_linked_list_pointer
+    carry = 0
+
+    node_one = linked_list_one
+    node_two = linked_list_two
+
+    while node_one is not None or node_two is not None or carry != 0:
+        sum_of_values = carry
+
+        if node_one is not None:
+            sum_of_values += node_one.value
+            node_one = node_one.next
+        if node_two is not None:
+            sum_of_values += node_two.value
+            node_two = node_two.next
+
+        new_value = sum_of_values % 10
+        carry = sum_of_values // 10
+        next_node.next = LinkedList(new_value)
+        next_node = next_node.next
+
+    return new_linked_list_pointer.next
+
+
+def initialize_linked_list(array):
+    head = LinkedList(array[0])
+    node = head
+    for idx in range(1, len(array)):
+        node.next = LinkedList(array[idx])
+        node = node.next
+    return head
+
+
+def print_linked_list(head):
+    node = head
+    while node is not None:
+        print(node.value, end=' ')
+        node = node.next
+    print()
+
+
+if __name__ == '__main__':
+    list_one = initialize_linked_list([1, 1, 1, 1])
+    list_two = initialize_linked_list([9, 8, 8, 8])
+    # 1111 + 8889 = 10000, result is: 0 -> 0 -> 0 -> 0 -> 1
+    print_linked_list(sum_of_linked_list(list_one, list_two))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class LinkedList
+{
+public:
+    int value;
+    LinkedList *next = nullptr;
+
+    LinkedList(int value) { this->value = value; }
+};
+
+// O(max(n, m)) time | O(max(n, m)) space - where n is the length of the
+// first Linked List and m is the length of the second Linked List
+LinkedList *sumOfLinkedLists(LinkedList *linkedListOne,
+                             LinkedList *linkedListTwo)
+{
+    // This variable will store a dummy node whose .next
+    // attribute will point to the head of our new LL.
+    auto newLinkedListHeadPointer = new LinkedList(0);
+    auto currentNode = newLinkedListHeadPointer;
+    int carry = 0;
+
+    auto nodeOne = linkedListOne;
+    auto nodeTwo = linkedListTwo;
+    while (nodeOne != nullptr || nodeTwo != nullptr || carry != 0)
+    {
+        int valueOne = nodeOne != nullptr ? nodeOne->value : 0;
+        int valueTwo = nodeTwo != nullptr ? nodeTwo->value : 0;
+        int sumOfValues = valueOne + valueTwo + carry;
+
+        int newValue = sumOfValues % 10;
+        auto newNode = new LinkedList(newValue);
+        currentNode->next = newNode;
+        currentNode = newNode;
+
+        carry = sumOfValues / 10;
+        nodeOne = nodeOne != nullptr ? nodeOne->next : nullptr;
+        nodeTwo = nodeTwo != nullptr ? nodeTwo->next : nullptr;
+    }
+
+    return newLinkedListHeadPointer->next;
+}
+
+LinkedList *initializeLinkedList(const vector<int> array)
+{
+    LinkedList *head = new LinkedList(array[0]);
+    LinkedList *node = head;
+    for (size_t i = 1; i < array.size(); i++)
+    {
+        node->next = new LinkedList(array[i]);
+        node = node->next;
+    }
+    return head;
+}
+
+void printLinkedList(LinkedList *head)
+{
+    LinkedList *node = head;
+    while (node != nullptr)
+    {
+        cout << node->value << " ";
+        node = node->next;
+    }
+    cout << endl;
+}
+
+int main()
+{
+    LinkedList *listOne = initializeLinkedList({1, 1, 1, 1});
+    LinkedList *listTwo = initializeLinkedList({9, 8, 8, 8});
+    printLinkedList(sumOfLinkedLists(listOne, listTwo));
+    return 0;
+}
+```
+
+Last Modified 2022-01-05
