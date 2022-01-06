@@ -115,9 +115,101 @@ def swap(array, i, j):
 
 
 if __name__ == '__main__':
-    source = [1, 2, 3]
-    print(get_permutations1(source))
-    print(get_permutations2(source))
+    print(get_permutations1([1, 2, 3]))
+    print(get_permutations2([1, 2, 3]))
 ```
 
-Last Modified 2021-10-30
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void permutationsHelper1(vector<int> array, vector<int> currentPermutation,
+                         vector<vector<int>> *permutations);
+void permutationsHelper2(size_t i, vector<int> &array,
+                         vector<vector<int>> &permutations);
+
+// Upper Bound: O(n^2*n!) time | O(n*n!) space
+// Roughly: O(n*n!) time | O(n*n!) space
+vector<vector<int>> getPermutations1(vector<int> array)
+{
+    vector<vector<int>> permutations;
+    permutationsHelper1(array, {}, &permutations);
+    return permutations;
+}
+
+void permutationsHelper1(vector<int> array, vector<int> currentPermutation,
+                         vector<vector<int>> *permutations)
+{
+    if (array.size() == 0 && currentPermutation.size() > 0)
+    {
+        permutations->push_back(currentPermutation);
+    }
+    else
+    {
+        for (size_t i = 0; i < array.size(); i++)
+        {
+            vector<int> newArray;
+            newArray.insert(newArray.end(), array.begin(), array.begin() + i);
+            newArray.insert(newArray.end(), array.begin() + i + 1, array.end());
+            vector<int> newPermutation = currentPermutation;
+            newPermutation.push_back(array[i]);
+            permutationsHelper1(newArray, newPermutation, permutations);
+        }
+    }
+}
+
+// O(n*n!) time | O(n*n!) space
+vector<vector<int>> getPermutations2(vector<int> array)
+{
+    vector<vector<int>> permutations;
+    permutationsHelper2(0, array, permutations);
+    return permutations;
+}
+
+void permutationsHelper2(size_t i, vector<int> &array,
+                         vector<vector<int>> &permutations)
+{
+    if (i == array.size() - 1)
+    {
+        permutations.push_back(array);
+    }
+    else
+    {
+        for (size_t j = i; j < array.size(); j++)
+        {
+            swap(array[i], array[j]);
+            permutationsHelper2(i + 1, array, permutations);
+            swap(array[i], array[j]);
+        }
+    }
+}
+
+void iterationArray(const vector<vector<int>> &array)
+{
+    for (size_t i = 0; i < array.size(); i++)
+    {
+        const vector<int> elements = array[i];
+        cout << "[ ";
+        for (int element : elements)
+        {
+            cout << element << ", ";
+        }
+        cout << "], ";
+    }
+    cout << endl;
+}
+
+int main()
+{
+    vector<int> source = {1, 2, 3};
+    vector<vector<int>> result;
+    result = getPermutations1(source);
+    iterationArray(result);
+    result = getPermutations2(source);
+    iterationArray(result);
+    return 0;
+}
+```
+
+Last Modified 2022-01-06
