@@ -212,4 +212,116 @@ int main()
 }
 ```
 
-Last Modified 2022-01-06
+## 所有子元素集合
+
+给出一个包含整数的数组，表示一个集合，找出使用该集合的元素可以构成的所有集合，
+如 `[1, 2]` 的所有集合为 `[[], [1], [2], [1, 2]]`
+
+```python
+# O(n*2^n) time | O(n*2^n) space
+def powerset1(array, idx=None):
+    if idx is None:
+        idx = len(array) - 1
+    if idx < 0:
+        return [[]]
+    ele = array[idx]
+    subsets = powerset1(array, idx - 1)
+    for i in range(len(subsets)):
+        current_subset = subsets[i]
+        subsets.append(current_subset + [ele])
+    return subsets
+
+
+# O(n*2^n) time | O(n*2^n) space
+def powerset2(array):
+    subsets = [[]]
+    for ele in array:
+        for i in range(len(subsets)):
+            current_subset = subsets[i]
+            subsets.append(current_subset + [ele])
+    return subsets
+
+
+if __name__ == '__main__':
+    source = [1, 2, 3]
+    print(powerset1(source))
+    print(powerset2(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<vector<int>> powersetHelper1(vector<int> &array, int idx);
+
+// O(n*2^n) time | O(n*2^n) space
+vector<vector<int>> powerset1(vector<int> array)
+{
+    return powersetHelper1(array, array.size() - 1);
+}
+
+vector<vector<int>> powersetHelper1(vector<int> &array, int idx)
+{
+    if (idx < 0)
+    {
+        return vector<vector<int>>{{}};
+    }
+    int ele = array[idx];
+    vector<vector<int>> subsets = powersetHelper1(array, idx - 1);
+    int length = subsets.size();
+    for (int i = 0; i < length; i++)
+    {
+        vector<int> currentSubset = subsets[i];
+        vector<int> newSubset = currentSubset;
+        newSubset.push_back(ele);
+        subsets.push_back(newSubset);
+    }
+    return subsets;
+}
+
+// O(n*2^n) time | O(n*2^n) space
+vector<vector<int>> powerset2(vector<int> array)
+{
+    vector<vector<int>> subsets = {{}};
+    for (int ele : array)
+    {
+        int length = subsets.size();
+        for (int i = 0; i < length; i++)
+        {
+            vector<int> currentSubset = subsets[i];
+            currentSubset.push_back(ele);
+            subsets.push_back(currentSubset);
+        }
+    }
+    return subsets;
+}
+
+void iterationArray(const vector<vector<int>> &array)
+{
+    for (size_t i = 0; i < array.size(); i++)
+    {
+        const vector<int> elements = array[i];
+        cout << "[ ";
+        for (int element : elements)
+        {
+            cout << element << ", ";
+        }
+        cout << "], ";
+    }
+    cout << endl;
+}
+
+int main()
+{
+    vector<int> source = {1, 2, 3};
+    vector<vector<int>> result;
+    result = powerset1(source);
+    iterationArray(result);
+    result = powerset2(source);
+    iterationArray(result);
+    return 0;
+}
+```
+
+Last Modified 2022-01-07
