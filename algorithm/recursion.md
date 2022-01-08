@@ -324,4 +324,107 @@ int main()
 }
 ```
 
-Last Modified 2022-01-07
+## 拨号盘拼词
+
+```python
+# O(4^n * n) time | O(4^n * n) space - where
+# n is the length of the phone number
+def phone_number_mnemonics(phone_number):
+    current_mnemonic = ["0"] * len(phone_number)
+    mnemonics_found = []
+
+    phone_number_mnemonics_helper(0, phone_number, current_mnemonic, mnemonics_found)
+    return mnemonics_found
+
+
+def phone_number_mnemonics_helper(idx, phone_number, current_mnemonic, mnemonics_found):
+    if idx == len(phone_number):
+        mnemonic = "".join(current_mnemonic)
+        mnemonics_found.append(mnemonic)
+    else:
+        digit = phone_number[idx]
+        letters = DIGIT_LETTERS[digit]
+        for letter in letters:
+            current_mnemonic[idx] = letter
+            phone_number_mnemonics_helper(idx + 1, phone_number, current_mnemonic, mnemonics_found)
+
+
+DIGIT_LETTERS = {
+    "0": ["0"],
+    "1": ["1"],
+    "2": ["a", "b", "c"],
+    "3": ["d", "e", "f"],
+    "4": ["g", "h", "i"],
+    "5": ["j", "k", "l"],
+    "6": ["m", "n", "o"],
+    "7": ["p", "q", "r", "s"],
+    "8": ["t", "u", "v"],
+    "9": ["w", "x", "y", "z"],
+}
+
+
+if __name__ == '__main__':
+    print(phone_number_mnemonics('1097'))
+    print(phone_number_mnemonics('10'))
+```
+
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+#include <numeric>
+#include <unordered_map>
+using namespace std;
+
+void phoneNumberMnemonicsHelper(size_t idx, string phoneNumber,
+                                vector<char> &currentMnemonic,
+                                vector<string> &mnemonicsFound);
+unordered_map<int, vector<char>> DIGIT_LETTERS{
+    {0, {'0'}}, {1, {'1'}}, {2, {'a', 'b', 'c'}}, {3, {'d', 'e', 'f'}}, {4, {'g', 'h', 'i'}},
+    {5, {'j', 'k', 'l'}}, {6, {'m', 'n', 'o'}}, {7, {'p', 'q', 'r', 's'}}, {8, {'t', 'u', 'v'}},
+    {9, {'w', 'x', 'y', 'z'}}};
+
+// O(4^n * n) time | O(4^n * n) space - where
+// n is the length of the phone number
+vector<string> phoneNumberMnemonics(string phoneNumber)
+{
+    vector<char> currentMnemonic(phoneNumber.size(), '0');
+    vector<string> mnemonicsFound;
+    phoneNumberMnemonicsHelper(0, phoneNumber, currentMnemonic, mnemonicsFound);
+    return mnemonicsFound;
+}
+
+void phoneNumberMnemonicsHelper(size_t idx, string phoneNumber,
+                                vector<char> &currentMnemonic,
+                                vector<string> &mnemonicsFound)
+{
+    if (idx == phoneNumber.size())
+    {
+        string mnemonic =
+            accumulate(currentMnemonic.begin(), currentMnemonic.end(), string{});
+        mnemonicsFound.push_back(mnemonic);
+    }
+    else
+    {
+        int digit = phoneNumber[idx] - '0';
+        vector<char> letters = DIGIT_LETTERS[digit];
+        for (auto letter : letters)
+        {
+            currentMnemonic[idx] = letter;
+            phoneNumberMnemonicsHelper(idx + 1, phoneNumber, currentMnemonic,
+                                       mnemonicsFound);
+        }
+    }
+}
+
+int main()
+{
+    string source = "1097";
+    vector<string> result = phoneNumberMnemonics(source);
+    for (string element : result)
+        cout << element << " ";
+    return 0;
+}
+```
+
+Last Modified 2022-01-09
