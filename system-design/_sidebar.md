@@ -4,3 +4,4 @@
   - [Network Protocols](system-design/network-protocols.md)
   - [Storage](system-design/storage.md)
   - [Latency And Throughput](system-design/latency-and-throughput.md)
+  - [Availability](system-design/availability.md)

@@ -17,6 +17,7 @@
 **补充**
 
 - 最近在研究[算法](algorithm/)相关的内容
+- 也在了解一些与[系统设计](system-design/)相关的概念
 
 > 此文档基于 NodeJS 的 [docsify](https://docsify.js.org/#/zh-cn/) 框架生成
 
