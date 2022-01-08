@@ -22,6 +22,7 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 log_format = logging.Formatter(fmt='%(asctime)s %(levelname)s %(name)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.WARNING)
 console_handler.setFormatter(log_format)
 
 file_handler = logging.FileHandler(filename='example.log')
@@ -46,4 +47,4 @@ log.critical('critical message')
 - 日志 HOW TO https://docs.python.org/zh-cn/2.7/howto/logging.html
 - 日志 HOW TO https://docs.python.org/zh-cn/3.7/howto/logging.html
 
-Last Modified 2022-01-05
+Last Modified 2022-01-08
