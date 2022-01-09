@@ -427,4 +427,195 @@ int main()
 }
 ```
 
+## 楼梯穿行
+
+给定两个参数 height 和 max steps，表示楼梯的高度和最大可以走多少步上楼，求出在最大步数限制下有多少种方式可以完成上楼
+
+```python
+# O(k^n) time | O(n) space
+# where n is the height of the staircase and k is the number of allowed steps
+def staircase_traversal1(height, max_steps):
+    return number_of_ways_to_top1(height, max_steps)
+
+
+def number_of_ways_to_top1(height, max_steps):
+    if height <= 1:
+        return 1
+
+    number_of_ways = 0
+    for step in range(1, min(max_steps, height) + 1):
+        number_of_ways += number_of_ways_to_top1(height - step, max_steps)
+
+    return number_of_ways
+
+
+# O(n * k) time | O(n) space
+# where n is the height of the staircase and k is the number of allowed steps
+def staircase_traversal2(height, max_steps):
+    return number_of_ways_to_top2(height, max_steps, {0: 1, 1: 1})
+
+
+def number_of_ways_to_top2(height, max_steps, memoize):
+    if height in memoize:
+        return memoize[height]
+
+    number_of_ways = 0
+    for step in range(1, min(max_steps, height) + 1):
+        number_of_ways += number_of_ways_to_top2(height - step, max_steps, memoize)
+
+    memoize[height] = number_of_ways
+
+    return number_of_ways
+
+
+# O(n * k) time | O(n) space
+# where n is the height of the staircase and k is the number of allowed steps
+def staircase_traversal3(height, max_steps):
+    ways_to_top = [0 for _ in range(height + 1)]
+    ways_to_top[0] = 1
+    ways_to_top[1] = 1
+
+    for current_height in range(2, height + 1):
+        step = 1
+        while step <= max_steps and step <= current_height:
+            ways_to_top[current_height] = ways_to_top[current_height] + ways_to_top[current_height - step]
+            step += 1
+
+    return ways_to_top[height]
+
+
+# O(n) time | O(n) space - where n is the height of the staircase
+def staircase_traversal4(height, max_steps):
+    current_number_of_ways = 0
+    ways_to_top = [1]
+
+    for current_height in range(1, height + 1):
+        start_of_window = current_height - max_steps - 1
+        end_of_window = current_height - 1
+        if start_of_window >= 0:
+            current_number_of_ways -= ways_to_top[start_of_window]
+
+        current_number_of_ways += ways_to_top[end_of_window]
+        ways_to_top.append(current_number_of_ways)
+
+    return ways_to_top[height]
+
+
+if __name__ == '__main__':
+    print(staircase_traversal1(15, 5))
+    print(staircase_traversal2(15, 5))
+    print(staircase_traversal3(15, 5))
+    print(staircase_traversal4(15, 5))
+```
+
+```cpp
+#include <iostream>
+#include <algorithm>
+#include <unordered_map>
+#include <vector>
+using namespace std;
+
+int numberOfWaysToTop1(int height, int maxSteps);
+
+// O(k^n) time | O(n) space
+// where n is the height of the staircase and k is the number of allowed steps
+int staircaseTraversal1(int height, int maxSteps)
+{
+  return numberOfWaysToTop1(height, maxSteps);
+}
+
+int numberOfWaysToTop1(int height, int maxSteps)
+{
+  if (height <= 1)
+    return 1;
+
+  int numberOfWays = 0;
+  for (int step = 1; step < min(maxSteps, height) + 1; step++)
+  {
+    numberOfWays += numberOfWaysToTop1(height - step, maxSteps);
+  }
+
+  return numberOfWays;
+}
+
+int numberOfWaysToTop2(int height, int maxSteps,
+                       unordered_map<int, int> &memoize);
+
+// O(n * k) time | O(n) space
+// where n is the height of the staircase and k is the number of allowed steps
+int staircaseTraversal2(int height, int maxSteps)
+{
+  unordered_map<int, int> memoize = {{0, 1}, {1, 1}};
+  return numberOfWaysToTop2(height, maxSteps, memoize);
+}
+
+int numberOfWaysToTop2(int height, int maxSteps,
+                       unordered_map<int, int> &memoize)
+{
+  if (memoize.find(height) != memoize.end())
+    return memoize[height];
+
+  int numberOfWays = 0;
+  for (int step = 1; step < min(maxSteps, height) + 1; step++)
+  {
+    numberOfWays += numberOfWaysToTop2(height - step, maxSteps, memoize);
+  }
+
+  memoize[height] = numberOfWays;
+
+  return numberOfWays;
+}
+
+// O(n * k) time | O(n) space
+// where n is the height of the staircase and k is the number of allowed steps
+int staircaseTraversal3(int height, int maxSteps)
+{
+  vector<int> waysToTop(height + 1, 0);
+  waysToTop[0] = 1;
+  waysToTop[1] = 1;
+
+  for (int currentHeight = 2; currentHeight < height + 1; currentHeight++)
+  {
+    int step = 1;
+    while (step <= maxSteps && step <= currentHeight)
+    {
+      waysToTop[currentHeight] =
+          waysToTop[currentHeight] + waysToTop[currentHeight - step];
+      step++;
+    }
+  }
+
+  return waysToTop[height];
+}
+
+// O(n) time | O(n) space - where n is the height of the staircase
+int staircaseTraversal4(int height, int maxSteps)
+{
+  int currentNumberOfWays = 0;
+  vector<int> waysToTop = {1};
+
+  for (int currentHeight = 1; currentHeight < height + 1; currentHeight++)
+  {
+    int startOfWindow = currentHeight - maxSteps - 1;
+    int endOfWindow = currentHeight - 1;
+    if (startOfWindow >= 0)
+      currentNumberOfWays -= waysToTop[startOfWindow];
+
+    currentNumberOfWays += waysToTop[endOfWindow];
+    waysToTop.push_back(currentNumberOfWays);
+  }
+
+  return waysToTop[height];
+}
+
+int main()
+{
+  cout << staircaseTraversal1(15, 5) << endl;
+  cout << staircaseTraversal2(15, 5) << endl;
+  cout << staircaseTraversal3(15, 5) << endl;
+  cout << staircaseTraversal4(15, 5) << endl;
+  return 0;
+}
+```
+
 Last Modified 2022-01-09
