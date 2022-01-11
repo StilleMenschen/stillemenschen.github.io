@@ -342,7 +342,7 @@ print(min(source, key=lambda x: x['age']))
 
 ## pow(x, y[, z])
 
-返回`x`的`y`次幂；如果`z`存在，则对`z`取余（比直接`pow(x, y) % z`计算更高效）。两个参数形式的`pow(x, y)`等价于幂运算符
+返回`x`的`y`次幂；如果`z`存使用`pow(x, y) % z`计算更高效）。两个参数形式的`pow(x, y)`等价于幂运算符
 ：`x**y`
 
 ## print(\*objects, sep=' ', end='\n', file=sys.stdout, flush=False)

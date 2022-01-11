@@ -2,7 +2,7 @@
 
 ## 安装 Ansible
 
-由于使用的是 CentOS 7 所以只简单说一下这个系统下的安装，首先是包管理器的方式，直接
+由于使用的是 CentOS 7 所以只简单说一下这个系统下的安装，首先是包管理器的方式，执行
 
 ```bash
 sudo yum install ansible
