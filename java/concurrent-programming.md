@@ -270,4 +270,94 @@ public class SingletonExample2 {
 }
 ```
 
-Last Modified 2022-01-05
+## 安全共享对象
+
+安全共享对象策略
+
+- 线程限制: 一个被线程限制的对象, 由线程独占, 并且只能被占有它的线程修改
+- 共享只读: 一个共享只读的对象, 在没有额外同步的情况下, 可以被多个线程并发访问, 但是任何线程都不能修改它
+- 线程安全对象: 一个线程安全的对象或者容器, 在内部通过同步机制来保证线程安全, 所以其他线程无需额外的同步就可以通过公共接口随意访问它
+- 被守护对象: 被守护对象只能通过获取特定的锁来访问
+
+```java
+package com.demo.example;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.concurrent.*;
+
+public class ThreadSafeExample {
+    private static final Logger log = LoggerFactory.getLogger(ThreadSafeExample.class);
+
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
+
+    /* 同步容器, 通过加入 synchronized 关键字来保证操作同步 */
+    private static final StringBuffer STRING_BUFFER = new StringBuffer();
+    private static final List<Integer> VECTOR = new Vector<>();
+    private static final Set<Integer> SET = Collections.synchronizedSet(new HashSet<>());
+
+    /* 并发容器 */
+    // 对应 HashMap, 如果仅需要同步容器可考虑 HashTable, 在并发场景下优化了读取操作, 但不允许数据有空值出现
+    private static final Map<Integer, Character> MAP = new ConcurrentHashMap<>();
+    // 对应 TreeMap, 在相同数据量和相同线程数量的情况下, 并发性能相比 ConcurrentHashMap 较好一些
+    private static final Map<Integer, Character> SKIP_MAP = new ConcurrentSkipListMap<>();
+    // CopyOnWriteArrayList 读写分离, 保证数据最终一致性, 但数据量过多时可能会引发 GC 问题, 适用于数据量小且读取多修改少的场景
+    private static final List<Integer> COPY_WRITE_LIST = new CopyOnWriteArrayList<>();
+    // 对应 TreeSet, 保证单个数据修改的原子性, 但对批量操作无法保证, 如 addAll, removeAll 等, 需要再手动加锁保证准确性
+    // HashSet 可使用 CopyOnWriteArraySet 代替
+    private static final Set<Integer> SKIP_SET = new ConcurrentSkipListSet<>();
+
+    private static final int CLIENT_TOTAL = 5000;
+    private static final int THREAD_TOTAL = 200;
+
+    /*
+    即使是同步容器, 如果在不同线程中同时修改数据和读取数据, 仍可能会引发线程安全问题
+    单个线程的情况下使用同步容器, 如果使用 Iterator 或 Foreach 操作遍历数据的同时修改数据(删除或更新),
+    会引发 java.util.ConcurrentModificationException 异常导致线程安全问题
+    */
+
+    public static void main(String[] args) {
+        final ExecutorService pool = Executors.newFixedThreadPool(THREAD_TOTAL);
+        final CountDownLatch latch = new CountDownLatch(CLIENT_TOTAL);
+        for (int i = 0; i < CLIENT_TOTAL; i++) {
+            final int c = i;
+            pool.execute(() -> {
+                try {
+                    addOrUpdate(c);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+        try {
+            latch.await();
+            pool.shutdown();
+            log.info("STRING_BUFFER: {}", STRING_BUFFER.length());
+            log.info("VECTOR: {}", VECTOR.size());
+            log.info("MAP: {}", MAP.size());
+            log.info("SKIP_MAP: {}", SKIP_MAP.size());
+            log.info("SET: {}", SET.size());
+            log.info("COPY_WRITE_LIST: {}", COPY_WRITE_LIST.size());
+            log.info("SKIP_SET: {}", SKIP_SET.size());
+        } catch (InterruptedException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+    private static void addOrUpdate(int i) {
+        log.info("{}, {}", i, DATE_FORMAT.parse("20220111").hashCode());
+        STRING_BUFFER.append('1');
+        VECTOR.add(i);
+        COPY_WRITE_LIST.add(i);
+        MAP.put(i, 'a');
+        SKIP_MAP.put(i, 'a');
+        SET.add(i);
+        SKIP_SET.add(i);
+    }
+}
+```
+
+Last Modified 2022-01-12
