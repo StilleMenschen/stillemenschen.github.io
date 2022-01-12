@@ -12,7 +12,9 @@ alias ll='ls -AFlh --color=auto --time-style=long-iso'
 alias grep='grep --color=auto'
 alias less='less -gM'
 alias lsn='less -N'
+alias dff='df -hT -t xfs -t ext4 --total'
+alias vir='vim -R'
 export HISTCONTROL=ignoreboth
 ```
 
-Last Modified 2021-04-12
+Last Modified 2022-01-12
