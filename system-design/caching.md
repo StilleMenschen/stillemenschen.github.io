@@ -21,8 +21,8 @@ FIFO（先进先出，first in first out）和 LFU（最不常用，least-freque
 
 ## 内容交付网络
 
-CDN （Content Delivery Network）是一种第三方服务，其作用类似于服务器的缓存。有时，如果服务器仅位于另一个区域，
-则特定区域的用户的 Web 应用程序可能会很慢。CDN 在世界各地都有服务器，这意味着 CDN 服务器的延迟几乎总是比服务器的延迟低得多。
+CDN （Content Delivery Network）是一种第三方服务，其作用类似于服务器的缓存。如果服务器仅位于另一个区域，
+则不在此区域的用户的 Web 应用程序访问速度可能会较慢。CDN 在世界各地都有服务器，这意味着 CDN 服务器的延迟几乎总是比服务器的延迟低得多。
 CDN 的服务器通常称为 PoPs（Points of Presence）。两个最受欢迎的 CDN 是 Cloudflare 和 Google Cloud CDN。
 
 Last Modified 2022-01-13
