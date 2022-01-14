@@ -2,9 +2,70 @@
 
 ## 最小最大栈
 
+```python
+class MinMaxStack:
+    def __init__(self):
+        self.min_max_stack = []
+        self.stack = []
+
+    # O(1) time | O(1) space
+    def peek(self):
+        if len(self.stack):
+            return self.stack[-1]
+        else:
+            return None
+
+    # O(1) time | O(1) space
+    def pop(self):
+        if len(self.stack):
+            self.min_max_stack.pop()
+            return self.stack.pop()
+        else:
+            return None
+
+    # O(1) time | O(1) space
+    def push(self, number):
+        self.stack.append(number)
+        if len(self.min_max_stack):
+            mi = min(self.min_max_stack[-1][0], number)
+            ma = max(self.min_max_stack[-1][1], number)
+        else:
+            mi = ma = number
+        self.min_max_stack.append([mi, ma])
+
+    # O(1) time | O(1) space
+    def get_min(self):
+        if len(self.min_max_stack):
+            return self.min_max_stack[-1][0]
+        else:
+            return None
+
+    # O(1) time | O(1) space
+    def get_max(self):
+        if len(self.min_max_stack):
+            return self.min_max_stack[-1][1]
+        else:
+            return None
+
+def print_stack(s):
+    print(f'min {s.get_min()}, max {s.get_max()}, peek {s.peek()}')
+
+if __name__ == '__main__':
+    s = MinMaxStack()
+    s.push(5)
+    print_stack(s)
+    s.push(7)
+    print_stack(s)
+    s.push(2)
+    print_stack(s)
+    s.pop()
+    print_stack(s)
+    s.pop()
+    print_stack(s)
+```
+
 ```cpp
 #include <iostream>
-
 using namespace std;
 
 typedef struct Node
@@ -22,31 +83,31 @@ typedef struct MinMaxStack
 class Stack
 {
 private:
-    pNode stack = NULL;
-    pMinMaxStack minMaxStack = NULL;
+    pNode stack = nullptr;
+    pMinMaxStack minMaxStack = nullptr;
+
 public:
     /* O(1) time | O(1) space */
     int peek()
     {
-        if ( this->stack != NULL ) return this->stack->value;
+        if (this->stack != nullptr)
+            return this->stack->value;
         return -1;
     }
     /* O(1) time | O(1) space */
     int pop()
     {
         const pNode first = this->stack;
-        if ( this->stack->next != NULL )
+        if (this->stack->next != nullptr)
             this->stack = this->stack->next;
         else
-            this->stack = NULL;
-        if ( this->minMaxStack != NULL )
+            this->stack = nullptr;
+        if (this->minMaxStack != nullptr)
         {
-            if ( this->minMaxStack->next != NULL )
-                this->minMaxStack = this->minMaxStack->next;
-            else
-                this->minMaxStack = NULL;
+            this->minMaxStack = this->minMaxStack->next;
         }
-        if ( first != NULL ) return first->value;
+        if (first != nullptr)
+            return first->value;
         return -1;
     }
     /* O(1) time | O(1) space */
@@ -55,8 +116,8 @@ public:
         pMinMaxStack newMinMax = new MinMaxStack;
         newMinMax->min = number;
         newMinMax->max = number;
-        newMinMax->next = NULL;
-        if ( this->minMaxStack != NULL )
+        newMinMax->next = nullptr;
+        if (this->minMaxStack != nullptr)
         {
             pMinMaxStack last = this->minMaxStack;
             newMinMax->min = last->min < number ? last->min : number;
@@ -66,42 +127,92 @@ public:
         this->minMaxStack = newMinMax;
         pNode top = new Node;
         top->value = number;
-        if ( this->stack != NULL )
+        if (this->stack != nullptr)
             top->next = this->stack;
         else
-            top->next = NULL;
+            top->next = nullptr;
         this->stack = top;
     }
     /* O(1) time | O(1) space */
     int getMin()
     {
-        if ( this->minMaxStack != NULL ) return this->minMaxStack->min;
+        if (this->minMaxStack != nullptr)
+            return this->minMaxStack->min;
         return -1;
     }
     /* O(1) time | O(1) space */
     int getMax()
     {
-        if ( this->minMaxStack != NULL ) return this->minMaxStack->max;
+        if (this->minMaxStack != nullptr)
+            return this->minMaxStack->max;
         return -1;
     }
 };
+
+void printStack(Stack stk)
+{
+    cout << "min " << stk.getMin() << ", max " << stk.getMax() << ", peek " << stk.peek() << endl;
+}
 
 int main()
 {
     Stack stk;
     stk.push(2);
+    printStack(stk);
     stk.push(7);
     stk.push(5);
     cout << "push 2, 7, 5 to stack" << endl;
-    cout << "peek stack " << stk.peek() << endl;
-    cout << "min in stack is " << stk.getMin() << " ,max in stack is " << stk.getMax() << endl;
+    printStack(stk);
     stk.pop();
     stk.pop();
+    printStack(stk);
     stk.pop();
     cout << "pop stack 3 times" << endl;
-    cout << "peek stack " << stk.peek() << endl;
+    printStack(stk);
     return 0;
 }
+```
+
+```cpp
+#include <vector>
+#include <unordered_map>
+using namespace std;
+
+class MinMaxStack {
+public:
+  vector<unordered_map<string, int>> minMaxStack = {};
+  vector<int> stack = {};
+
+  // O(1) time | O(1) space
+  int peek() { return stack[stack.size() - 1]; }
+
+  // O(1) time | O(1) space
+  int pop() {
+    minMaxStack.pop_back();
+    int result = stack[stack.size() - 1];
+    stack.pop_back();
+    return result;
+  }
+
+  // O(1) time | O(1) space
+  void push(int number) {
+    unordered_map<string, int> newMinMax = {{"min", number}, {"max", number}};
+    if (minMaxStack.size()) {
+      unordered_map<string, int> lastMinMax =
+          minMaxStack[minMaxStack.size() - 1];
+      newMinMax["min"] = min(lastMinMax["min"], number);
+      newMinMax["max"] = max(lastMinMax["max"], number);
+    }
+    minMaxStack.push_back(newMinMax);
+    stack.push_back(number);
+  }
+
+  // O(1) time | O(1) space
+  int getMin() { return minMaxStack[minMaxStack.size() - 1]["min"]; }
+
+  // O(1) time | O(1) space
+  int getMax() { return minMaxStack[minMaxStack.size() - 1]["max"]; }
+};
 ```
 
 ## 平衡括号
