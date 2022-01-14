@@ -49,6 +49,58 @@ if __name__ == '__main__':
     print(get_nth_fib4(42))
 ```
 
+```cpp
+#include <iostream>
+using namespace std;
+
+// O(2^n) time | O(n) space
+int getNthFib1(int n)
+{
+  if (n == 2)
+    return 1;
+  if (n <= 1)
+    return 0;
+  return getNthFib1(n - 1) + getNthFib1(n - 2);
+}
+
+int fibHelper(int n, int first, int second)
+{
+  if (n <= 1)
+    return first;
+  return fibHelper(n - 1, second, first + second);
+}
+
+// O(n) time | O(1) space
+int getNthFib2(int n)
+{
+  return fibHelper(n, 0, 1);
+}
+
+// O(n) time | O(1) space
+int getNthFib3(int n)
+{
+  int first = 0;
+  int second = 1;
+  int counter = 3;
+  while (counter <= n)
+  {
+    int nextFib = first + second;
+    first = second;
+    second = nextFib;
+    counter++;
+  }
+  return n > 1 ? second : first;
+}
+
+int main()
+{
+  cout << getNthFib3(42) << endl;
+  cout << getNthFib2(42) << endl;
+  cout << getNthFib1(42) << endl;
+  return 0;
+}
+```
+
 ## 多维数组求和
 
 ```python
