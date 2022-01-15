@@ -439,7 +439,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.*;
 
 public class CyclicBarrierExample {
-    private static final Logger log = LoggerFactory.getLogger(CountDownLatchExample.class);
+    private static final Logger log = LoggerFactory.getLogger(CyclicBarrierExample.class);
     private static final int THREAD_TOTAL = 16;
 
     private static final CyclicBarrier BARRIER =
