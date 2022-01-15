@@ -320,18 +320,13 @@ public class ThreadSafeExample {
     */
 
     public static void main(String[] args) {
-        final ExecutorService pool = Executors.newFixedThreadPool(CLIENT_TOTAL);
+        final ExecutorService pool = Executors.newFixedThreadPool(THREAD_TOTAL);
         final CountDownLatch latch = new CountDownLatch(CLIENT_TOTAL);
-        final Semaphore semaphore = new Semaphore(THREAD_TOTAL);
         for (int i = 0; i < CLIENT_TOTAL; i++) {
             final int c = i;
             pool.execute(() -> {
                 try {
-                    semaphore.acquire();
                     addOrUpdate(c);
-                    semaphore.release();
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
                 } finally {
                     latch.countDown();
                 }
@@ -365,4 +360,119 @@ public class ThreadSafeExample {
 }
 ```
 
-Last Modified 2022-01-12
+## 信号量
+
+```java
+package com.demo.example;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+
+public class SemaphoreExample {
+    private static final Logger log = LoggerFactory.getLogger(SemaphoreExample.class);
+    private static final int THREAD_TOTAL = 32;
+
+    private static void test1(char flag) {
+        final ExecutorService pool = Executors.newFixedThreadPool(THREAD_TOTAL);
+        final Semaphore semaphore = new Semaphore(4);
+        for (int i = 0; i < THREAD_TOTAL; i++) {
+            final int c = i;
+            pool.execute(() -> {
+                try {
+                    semaphore.acquire();
+                    // semaphore.acquire(2);
+                    addOrUpdate(c, flag);
+                    semaphore.release();
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+            });
+        }
+        pool.shutdown();
+    }
+
+    private static void test2(char flag) {
+        final ExecutorService pool = Executors.newFixedThreadPool(THREAD_TOTAL);
+        final Semaphore semaphore = new Semaphore(4);
+        for (int i = 0; i < THREAD_TOTAL; i++) {
+            final int c = i;
+            pool.execute(() -> {
+                try {
+                    if (semaphore.tryAcquire(2, TimeUnit.SECONDS)) {
+                        // if (semaphore.tryAcquire(2, 2, TimeUnit.SECONDS)) {
+                        addOrUpdate(c, flag);
+                        semaphore.release();
+                    }
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+            });
+        }
+        pool.shutdown();
+    }
+
+    public static void main(String[] args) {
+        test1('A');
+        test2('B');
+    }
+
+    private static void addOrUpdate(int i, char flag) throws InterruptedException {
+        log.info("{} - {}", flag, i);
+        Thread.sleep(1000);
+    }
+}
+```
+
+## 循环屏障
+
+```java
+package com.demo.example;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.*;
+
+public class CyclicBarrierExample {
+    private static final Logger log = LoggerFactory.getLogger(CountDownLatchExample.class);
+    private static final int THREAD_TOTAL = 16;
+
+    private static final CyclicBarrier BARRIER =
+            new CyclicBarrier(8, () -> log.info("callback is running..."));
+
+    public static void main(String[] args) throws InterruptedException {
+        final ExecutorService pool = Executors.newFixedThreadPool(THREAD_TOTAL);
+        for (int i = 0; i < THREAD_TOTAL; i++) {
+            final int threadNumber = i;
+            Thread.sleep(1000);
+            pool.execute(() -> {
+                try {
+                    race(threadNumber);
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+            });
+        }
+        pool.shutdown();
+    }
+
+    private static void race(int threadNumber) throws InterruptedException {
+        Thread.sleep(1000);
+        log.info("{} is ready", threadNumber);
+        try {
+            BARRIER.await();
+            // BARRIER.await(2000, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        log.info("{} continue", threadNumber);
+    }
+}
+```
+
+Last Modified 2022-01-15
