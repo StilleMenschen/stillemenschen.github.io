@@ -320,13 +320,18 @@ public class ThreadSafeExample {
     */
 
     public static void main(String[] args) {
-        final ExecutorService pool = Executors.newFixedThreadPool(THREAD_TOTAL);
+        final ExecutorService pool = Executors.newFixedThreadPool(CLIENT_TOTAL);
         final CountDownLatch latch = new CountDownLatch(CLIENT_TOTAL);
+        final Semaphore semaphore = new Semaphore(THREAD_TOTAL);
         for (int i = 0; i < CLIENT_TOTAL; i++) {
             final int c = i;
             pool.execute(() -> {
                 try {
+                    semaphore.acquire();
                     addOrUpdate(c);
+                    semaphore.release();
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
                 } finally {
                     latch.countDown();
                 }
