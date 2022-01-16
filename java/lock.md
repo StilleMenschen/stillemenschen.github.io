@@ -69,6 +69,8 @@ package com.example.concurrent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -76,10 +78,11 @@ public class ReentrantLockExample {
     private static final Logger log = LoggerFactory.getLogger(ReentrantLockExample.class);
 
     public static void main(String[] args) {
+        final ExecutorService pool = Executors.newFixedThreadPool(2);
         final ReentrantLock reentrantLock = new ReentrantLock();
         final Condition condition = reentrantLock.newCondition();
 
-        new Thread(() -> {
+        pool.execute(() -> {
             try {
                 reentrantLock.lock(); // 加锁, 进入同步等待队列
                 log.info("wait signal"); // 1 等待信号
@@ -89,9 +92,9 @@ public class ReentrantLockExample {
             }
             log.info("get signal"); // 4 获得信号, 拿到锁, 进入同步等待队列
             reentrantLock.unlock(); // 释放锁
-        }).start();
+        });
 
-        new Thread(() -> {
+        pool.execute(() -> {
             try {
                 reentrantLock.lock(); // 加锁, 进入同步等待队列
                 log.info("get lock"); // 2 等待获取锁
@@ -102,7 +105,8 @@ public class ReentrantLockExample {
             condition.signalAll(); // 唤醒条件同步等待队列
             log.info("sending signal..."); // 3 发送信号
             reentrantLock.unlock(); // 释放锁
-        }).start();
+        });
+        pool.shutdown();
     }
 }
 ```

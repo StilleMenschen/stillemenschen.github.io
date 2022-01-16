@@ -159,10 +159,12 @@ package com.example.concurrent;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class TestVolatile {
     private volatile boolean isSorted = Boolean.FALSE;
-    private static final int MAX_COUNT = 10000;
+    private static final int MAX_COUNT = 1000;
 
     private final int[] array = new int[MAX_COUNT];
 
@@ -191,9 +193,11 @@ public class TestVolatile {
     }
 
     public static void main(String[] args) {
-        TestVolatile testVolatile = new TestVolatile();
-        new Thread(testVolatile::sort).start();
-        new Thread(testVolatile::increment).start();
+        final ExecutorService pool = Executors.newFixedThreadPool(2);
+        final TestVolatile testVolatile = new TestVolatile();
+        pool.execute(testVolatile::sort);
+        pool.execute(testVolatile::increment);
+        pool.shutdown();
     }
 }
 ```
