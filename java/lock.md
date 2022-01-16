@@ -162,7 +162,6 @@ public class ReentrantReadWriteLockExample {
 
 ## StampedLock
 
-
 ```java
 package com.example.concurrent;
 
@@ -211,6 +210,76 @@ public class StampedLockExample {
             count++;
         } finally {
             LOCK.unlock(stamped);
+        }
+    }
+}
+```
+
+JDK 中 StampedLock 类的例子
+
+```java
+package com.example.concurrent;
+
+import java.util.concurrent.locks.StampedLock;
+
+public class Point {
+    private double x, y;
+    private final StampedLock sl = new StampedLock();
+
+    /**
+     * 悲观（排它）写锁示例
+     */
+    void move(double deltaX, double deltaY) { // an exclusively locked method
+        final long stamp = sl.writeLock();
+        try {
+            x += deltaX;
+            y += deltaY;
+        } finally {
+            sl.unlockWrite(stamp);
+        }
+    }
+
+    /**
+     * 乐观读锁示例
+     */
+    double distanceFromOrigin() { // A read-only method
+        long stamp = sl.tryOptimisticRead(); // 获得一个乐观读锁的<票据>
+        double currentX = x, currentY = y; // 将数据先读入本地变量
+        if (!sl.validate(stamp)) { // 检测发出乐观读锁后同时是否有其它写锁发生
+            stamp = sl.readLock(); // 如果没有, 再次获得一个悲观读锁, 并缓存<票据>
+            try {
+                // 将实际数据再次读入局部变量
+                currentX = x;
+                currentY = y;
+            } finally {
+                sl.unlockRead(stamp); // 使用<票据>释放对应的锁
+            }
+        }
+        return Math.sqrt(currentX * currentX + currentY * currentY);
+    }
+
+    /**
+     * 悲观读锁示例
+     */
+    void moveIfAtOrigin(double newX, double newY) { // upgrade
+        // Could instead start with optimistic, not read mode
+        long stamp = sl.readLock();
+        try {
+            while (x == 0.0 && y == 0.0) { // 循环, 检查当前状态是否符合
+                long ws = sl.tryConvertToWriteLock(stamp); // 将读锁转为写锁
+                if (ws != 0L) { // 确认转为写锁是否成功
+                    stamp = ws; // 成功, 则替换锁<票据>
+                    // 状态改变
+                    x = newX;
+                    y = newY;
+                    break;
+                } else { // 如果不能成功转换为写锁
+                    sl.unlockRead(stamp); // 显式释放读锁
+                    stamp = sl.writeLock(); // 显式获取写锁, 然后再通过循环重试
+                }
+            }
+        } finally {
+            sl.unlock(stamp); // 释放读锁或写锁
         }
     }
 }
