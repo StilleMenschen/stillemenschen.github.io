@@ -107,6 +107,8 @@ public class ReentrantLockExample {
 }
 ```
 
+> 是否使用对象锁，需要考虑并发量大小和冲突是否激烈，以及能否预估并发的增长量
+
 ## ReentrantReadWriteLock
 
 ```java
@@ -179,7 +181,7 @@ public class StampedLockExample {
     private static final int CLIENT_TOTAL = 500;
     private static final int THREAD_TOTAL = 20;
 
-    // 在读锁较少, 写锁较多的情况下, 并发性能更好
+    // 在读锁较多, 写锁较少的情况下, 并发性能更好
     private static final StampedLock LOCK = new StampedLock();
     private static int count = 0;
 

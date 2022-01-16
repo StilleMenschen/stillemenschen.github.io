@@ -475,4 +475,61 @@ public class CyclicBarrierExample {
 }
 ```
 
-Last Modified 2022-01-15
+## FutureTask
+
+```java
+package com.example.concurrent;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.*;
+
+public class FutureTaskExample {
+
+    private static final Logger log = LoggerFactory.getLogger(FutureTaskExample.class);
+
+    private static class SyncTask implements Callable<String> {
+
+        @Override
+        public String call() throws Exception {
+            log.info("sync task is running");
+            Thread.sleep(3000);
+            return "OK";
+        }
+    }
+
+
+    private static void testCallable() throws Exception {
+        final ExecutorService pool = Executors.newFixedThreadPool(1);
+        final Future<String> future = pool.submit(new SyncTask());
+        log.info("testCallable - main task is running");
+        Thread.sleep(1000);
+        final String result = future.get();
+        log.info("testCallable - get result {}", result);
+        pool.shutdown();
+    }
+
+    private static void testFutureTask() throws Exception {
+        final ExecutorService pool = Executors.newFixedThreadPool(1);
+        final FutureTask<String> task = new FutureTask<>(new SyncTask());
+        pool.execute(task);
+        log.info("testFutureTask - main task is running");
+        Thread.sleep(1000);
+        final String result = task.get();
+        log.info("testFutureTask - get result {}", result);
+        pool.shutdown();
+    }
+
+    public static void main(String[] args) {
+        try {
+            testCallable();
+            testFutureTask();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
+}
+```
+
+Last Modified 2022-01-16
