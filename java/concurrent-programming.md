@@ -532,4 +532,74 @@ public class FutureTaskExample {
 }
 ```
 
+## ForkJoinTask
+
+```java
+package com.example.concurrent;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
+import java.util.concurrent.RecursiveTask;
+
+public class ForkJoinTaskExample extends RecursiveTask<Integer> {
+
+    private static final Logger log = LoggerFactory.getLogger(ForkJoinTaskExample.class);
+
+    private static final int THRESHOLD = 5;
+    private final int start;
+    private final int end;
+
+    public ForkJoinTaskExample(int start, int end) {
+        this.start = start;
+        this.end = end;
+    }
+
+    @Override
+    protected Integer compute() {
+        int sum = 0;
+        // 如果任务量符合预期, 则直接计算
+        final boolean canCompute = (end - start) <= THRESHOLD;
+        if (canCompute) {
+            for (int i = start; i <= end; i++) {
+                sum += i;
+            }
+        } else {
+            // 如果任务量超过预期, 则折中拆分成两个任务执行
+            final int middle = (start + end) / 2;
+            final ForkJoinTaskExample leftTask = new ForkJoinTaskExample(start, middle);
+            final ForkJoinTaskExample rightTask = new ForkJoinTaskExample(middle + 1, end);
+            // 执行任务
+            leftTask.fork();
+            rightTask.fork();
+            // 获得返回的计算结果
+            final int leftSum = leftTask.join();
+            final int rightSum = rightTask.join();
+            // 合并计算结果
+            sum = leftSum + rightSum;
+        }
+        return sum;
+    }
+
+    public static void main(String[] args) {
+        final ForkJoinPool pool = new ForkJoinPool();
+
+        final ForkJoinTaskExample task = new ForkJoinTaskExample(1, 100);
+
+        final Future<Integer> result = pool.submit(task);
+
+        try {
+            log.info("result is {}", result.get());
+        } catch (ExecutionException | InterruptedException e) {
+            log.error(e.getMessage(), e);
+        } finally {
+            pool.shutdown();
+        }
+    }
+}
+```
+
 Last Modified 2022-01-16
