@@ -489,11 +489,11 @@ public class FutureTaskExample {
 
     private static final Logger log = LoggerFactory.getLogger(FutureTaskExample.class);
 
-    private static class SyncTask implements Callable<String> {
+    private static class AsyncTask implements Callable<String> {
 
         @Override
         public String call() throws Exception {
-            log.info("sync task is running");
+            log.info("async task is running");
             Thread.sleep(3000);
             return "OK";
         }
@@ -502,7 +502,7 @@ public class FutureTaskExample {
 
     private static void testCallable() throws Exception {
         final ExecutorService pool = Executors.newFixedThreadPool(1);
-        final Future<String> future = pool.submit(new SyncTask());
+        final Future<String> future = pool.submit(new AsyncTask());
         log.info("testCallable - main task is running");
         Thread.sleep(1000);
         final String result = future.get();
@@ -512,7 +512,7 @@ public class FutureTaskExample {
 
     private static void testFutureTask() throws Exception {
         final ExecutorService pool = Executors.newFixedThreadPool(1);
-        final FutureTask<String> task = new FutureTask<>(new SyncTask());
+        final FutureTask<String> task = new FutureTask<>(new AsyncTask());
         pool.execute(task);
         log.info("testFutureTask - main task is running");
         Thread.sleep(1000);
