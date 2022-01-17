@@ -6,3 +6,4 @@
   - [Latency And Throughput](system-design/latency-and-throughput.md)
   - [Availability](system-design/availability.md)
   - [Caching](system-design/caching.md)
+  - [Proxies](system-design/proxies.md)
