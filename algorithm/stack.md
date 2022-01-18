@@ -636,4 +636,85 @@ int main()
 }
 ```
 
-Last Modified 2022-01-17
+## 栈排序
+
+排序栈中的所有元素，只能调用出栈、入栈和查看栈顶元素三个方法，且必须使用递归实现
+
+```python
+def insert_in_sorted_order(stack, value):
+    if not len(stack) or stack[-1] <= value:
+        stack.append(value)
+    else:
+        top = stack.pop()
+        insert_in_sorted_order(stack, value)
+        stack.append(top)
+
+
+# O(n^2) time | O(n) space
+def sort_stack(stack):
+    if not len(stack):
+        return stack
+
+    top = stack.pop()
+
+    sort_stack(stack)
+    insert_in_sorted_order(stack, top)
+
+    return stack
+
+
+if __name__ == '__main__':
+    source = [-3, -5, 1, 4, 6, 8, 2]
+    print(sort_stack(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void insertInSortedOrder(vector<int> &stack, int value)
+{
+    if (stack.empty() || stack.back() <= value)
+    {
+        stack.push_back(value);
+    }
+    else
+    {
+        int top = stack.back();
+        stack.pop_back();
+        insertInSortedOrder(stack, value);
+        stack.push_back(top);
+    }
+}
+
+// O(n^2) time | O(n) space
+vector<int> sortStack(vector<int> &stack)
+{
+    if (stack.empty())
+    {
+        return stack;
+    }
+
+    int top = stack.back();
+    stack.pop_back();
+
+    sortStack(stack);
+    insertInSortedOrder(stack, top);
+
+    return stack;
+}
+
+int main()
+{
+    vector<int> stack = {-3, -5, 1, 4, 6, 8, 2};
+    stack = sortStack(stack);
+    for (const int element : stack)
+    {
+        cout << element << " ";
+    }
+    return 0;
+}
+```
+
+Last Modified 2022-01-18
