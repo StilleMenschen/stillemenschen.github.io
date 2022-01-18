@@ -217,6 +217,80 @@ public:
 
 ## 平衡括号
 
+```python
+# O(n) time | O(n) space
+def balanced_brackets(string):
+    opening_brackets = '([{'
+    closing_brackets = ')]}'
+    matching_brackets = {')': '(', ']': '[', '}': '{'}
+    stack = []
+    for char in string:
+        if char in opening_brackets:
+            stack.append(char)
+        elif char in closing_brackets:
+            if len(stack) == 0:
+                return False
+            if stack[-1] == matching_brackets[char]:
+                stack.pop()
+            else:
+                return False
+    return len(stack) == 0
+
+
+if __name__ == '__main__':
+    source = '([])(){}(())()()'
+    print(balanced_brackets(source))
+```
+
+```cpp
+#include <iostream>
+#include <string>
+#include <unordered_map>
+#include <stack>
+
+using namespace std;
+
+// O(n) time | O(n) space
+bool balancedBrackets(string str)
+{
+    string openingBrackets = "([{";
+    string closingBrackets = ")]}";
+    unordered_map<char, char> matchingBrackets{
+        {')', '('}, {']', '['}, {'}', '{'}};
+    stack<char> stack;
+    for (char character : str)
+    {
+        if (openingBrackets.find(character) != string::npos)
+        {
+            stack.push(character);
+        }
+        else if (closingBrackets.find(character) != string::npos)
+        {
+            if (stack.size() == 0)
+            {
+                return false;
+            }
+            if (stack.top() == matchingBrackets[character])
+            {
+                stack.pop();
+            }
+            else
+            {
+                return false;
+            }
+        }
+    }
+    return stack.size() == 0;
+}
+
+int main()
+{
+    string source = "([])(){}(())()()";
+    cout << balancedBrackets(source);
+    return 0;
+}
+```
+
 ```c
 #include <stdio.h>
 #include <stdlib.h>
