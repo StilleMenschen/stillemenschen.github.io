@@ -472,4 +472,168 @@ int main()
 }
 ```
 
-Last Modified 2021-07-09
+## 日落景观
+
+给出两个输入参数，第一个参数为一个数组，表示建筑物的高度，第二个参数表示建筑朝向，固定值为`EAST`和`WEST`，
+`EAST`表示向右看可以看见日落，而`WEST`表示向左看可以看见日落，找出可以看见日落的建筑物数组下标
+
+```python
+# O(n) time | O(n) space - where n is the length of the input array
+def sunset_views1(buildings, direction):
+    length = len(buildings)
+    if not length:
+        return []
+    idx = 0
+    step = 1
+    if direction == 'EAST':
+        idx = length - 1
+        step = -1
+    stack = []
+    last_max_height = float('-inf')
+    while 0 <= idx < length:
+        height = buildings[idx]
+        if last_max_height < height:
+            last_max_height = height
+            if direction == 'EAST':
+                stack.insert(0, idx)
+            else:
+                stack.append(idx)
+        idx += step
+    return stack
+
+
+# O(n) time | O(n) space - where n is the length of the input array
+def sunset_views2(buildings, direction):
+    candidate_buildings = []
+
+    start_idx = 0 if direction == "EAST" else len(buildings) - 1
+    step = 1 if direction == "EAST" else -1
+
+    idx = start_idx
+    while 0 <= idx < len(buildings):
+        building_height = buildings[idx]
+
+        while len(candidate_buildings) > 0 and buildings[candidate_buildings[-1]] <= building_height:
+            candidate_buildings.pop()
+
+        candidate_buildings.append(idx)
+
+        idx += step
+
+    if direction == "WEST":
+        return candidate_buildings[::-1]
+
+    return candidate_buildings
+
+
+if __name__ == '__main__':
+    source = [3, 5, 4, 4, 3, 1, 3, 2]
+    print(sunset_views1(source, 'EAST'))
+    print(sunset_views2(source, 'WEST'))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+// O(n) time | O(n) space - where n is the length of the input array
+vector<int> sunsetViews1(vector<int> buildings, string direction)
+{
+    vector<int> buildingsWithSunsetViews;
+
+    int startIdx = buildings.size() - 1;
+    int step = -1;
+
+    if (direction == "WEST")
+    {
+        startIdx = 0;
+        step = 1;
+    }
+
+    size_t idx = startIdx;
+    int runningMaxHeight = 0;
+    // int runningMaxHeight = INT_MIN;
+
+    while (idx >= 0 && idx < buildings.size())
+    {
+        int buildingHeight = buildings[idx];
+
+        if (buildingHeight > runningMaxHeight)
+        {
+            buildingsWithSunsetViews.push_back(idx);
+            // runningMaxHeight = buildingHeight;
+        }
+
+        runningMaxHeight = max(runningMaxHeight, buildingHeight);
+
+        idx += step;
+    }
+
+    if (direction == "EAST")
+    {
+        reverse(buildingsWithSunsetViews.begin(), buildingsWithSunsetViews.end());
+    }
+
+    return buildingsWithSunsetViews;
+}
+
+// O(n) time | O(n) space - where n is the length of the input array
+vector<int> sunsetViews2(vector<int> buildings, string direction)
+{
+    vector<int> candidateBuildings;
+
+    int startIdx = buildings.size() - 1;
+    int step = -1;
+
+    if (direction == "EAST")
+    {
+        startIdx = 0;
+        step = 1;
+    }
+
+    size_t idx = startIdx;
+    while (idx >= 0 && idx < buildings.size())
+    {
+        int buildingHeight = buildings[idx];
+
+        while (candidateBuildings.size() > 0 &&
+               buildings[candidateBuildings[candidateBuildings.size() - 1]] <=
+                   buildingHeight)
+        {
+            candidateBuildings.pop_back();
+        }
+
+        candidateBuildings.push_back(idx);
+
+        idx += step;
+    }
+
+    if (direction == "WEST")
+    {
+        reverse(candidateBuildings.begin(), candidateBuildings.end());
+    }
+
+    return candidateBuildings;
+}
+
+void iterArray(vector<int> array)
+{
+    for (const int element : array)
+    {
+        cout << element << " ";
+    }
+    cout << endl;
+}
+
+int main()
+{
+    vector<int> source = {3, 5, 4, 4, 3, 1, 3, 2};
+    iterArray(sunsetViews1(source, "EAST"));
+    iterArray(sunsetViews1(source, "WEST"));
+    return 0;
+}
+```
+
+Last Modified 2022-01-17
