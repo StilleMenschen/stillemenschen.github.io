@@ -7,3 +7,4 @@
   - [Availability](system-design/availability.md)
   - [Caching](system-design/caching.md)
   - [Proxies](system-design/proxies.md)
+  - [Load Balancers](system-design/load-balancers.md)
