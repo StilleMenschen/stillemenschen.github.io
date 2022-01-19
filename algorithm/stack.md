@@ -717,4 +717,129 @@ int main()
 }
 ```
 
-Last Modified 2022-01-18
+## 下一个大于的元素
+
+给出一个数组，找出数组中每个元素向后查找大于此元素的元素，并记录到新的数组中。
+查找允许循环，既查找到最后一个元素时可以从头开始查找
+
+```python
+# O(n) time | O(n) space - where n is the length of the array
+def next_greater_element1(array):
+    result = [-1] * len(array)
+    stack = []
+
+    for idx in range(2 * len(array)):
+        circular_idx = idx % len(array)
+
+        while len(stack) > 0 and array[stack[-1]] < array[circular_idx]:
+            top = stack.pop()
+            result[top] = array[circular_idx]
+
+        stack.append(circular_idx)
+
+    return result
+
+
+# O(n) time | O(n) space - where n is the length of the array
+def next_greater_element2(array):
+    result = [-1] * len(array)
+    stack = []
+
+    for idx in range(2 * len(array) - 1, -1, -1):
+        circular_idx = idx % len(array)
+
+        while len(stack) > 0:
+            if stack[len(stack) - 1] <= array[circular_idx]:
+                stack.pop()
+            else:
+                result[circular_idx] = stack[len(stack) - 1]
+                break
+
+        stack.append(array[circular_idx])
+
+    return result
+
+
+if __name__ == '__main__':
+    source = [2, 5, -3, -4, 6, 7, 2]
+    print(next_greater_element1(source))
+    print(next_greater_element2(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// O(n) time | O(n) space - where n is the length of the array
+vector<int> nextGreaterElement1(vector<int> array)
+{
+    vector<int> result(array.size(), -1);
+    vector<int> stack;
+
+    for (size_t idx = 0; idx < 2 * array.size(); idx++)
+    {
+        int circularIdx = idx % array.size();
+
+        while (stack.size() > 0 &&
+               array[stack.back()] < array[circularIdx])
+        {
+            int top = stack.back();
+            stack.pop_back();
+            result[top] = array[circularIdx];
+        }
+
+        stack.push_back(circularIdx);
+    }
+
+    return result;
+}
+
+// O(n) time | O(n) space - where n is the length of the array
+vector<int> nextGreaterElement2(vector<int> array)
+{
+    vector<int> result(array.size(), -1);
+    vector<int> stack;
+
+    for (int idx = 2 * array.size() - 1; idx > -1; idx--)
+    {
+        int circularIdx = idx % array.size();
+
+        while (stack.size() > 0)
+        {
+            if (stack[stack.size() - 1] <= array[circularIdx])
+            {
+                stack.pop_back();
+            }
+            else
+            {
+                result[circularIdx] = stack[stack.size() - 1];
+                break;
+            }
+        }
+
+        stack.push_back(array[circularIdx]);
+    }
+
+    return result;
+}
+
+void iterArray(vector<int> array)
+{
+    for (const int element : array)
+    {
+        cout << element << " ";
+    }
+    cout << endl;
+}
+
+int main()
+{
+    vector<int> source = {-3, -5, 1, 4, 6, 8, 2};
+    iterArray(nextGreaterElement1(source));
+    iterArray(nextGreaterElement2(source));
+    return 0;
+}
+```
+
+Last Modified 2022-01-19
