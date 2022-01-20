@@ -145,71 +145,134 @@ int main()
 
 ## 最长回文字符串
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
+```python
+# O(n^3) time | O(n) space
+def longest_palindromic_substring1(string):
+    longest = ""
+    for i in range(len(string)):
+        for j in range(i, len(string)):
+            substring = string[i: j + 1]
+            if len(substring) > len(longest) and is_palindrome(substring):
+                longest = substring
+    return longest
 
-int getStringLength(const char *string)
-{
-    const char *p = string;
-    int length = 0;
-    while ( *p++ != '\0' ) length++;
-    return length;
-}
 
-char* subString(const char string[], int startIdx, int endIdx)
-{
-    char *result = (char*)malloc( (endIdx - startIdx) * sizeof(char) );
-    char *p = result;
-    while ( startIdx < endIdx )
-        *p++ = string[startIdx++];
-    *p = '\0';
-    return result;
-}
+def is_palindrome(string):
+    left_idx = 0
+    right_idx = len(string) - 1
+    while left_idx < right_idx:
+        if string[left_idx] != string[right_idx]:
+            return False
+        left_idx += 1
+        right_idx -= 1
+    return True
 
-int* getLongestPalindromeFrom(const char string[], int leftIdx, int rightIdx, const int length)
+
+# O(n^2) time | O(n) space
+def longest_palindromic_substring2(string):
+    current_longest = [0, 1]
+    for i in range(1, len(string)):
+        odd = get_longest_palindrome_from(string, i - 1, i + 1)
+        even = get_longest_palindrome_from(string, i - 1, i)
+        current_longest = max(odd, even, current_longest, key=lambda x: x[1] - x[0])
+    return string[current_longest[0]: current_longest[1]]
+
+
+def get_longest_palindrome_from(string, left_idx, right_idx):
+    while left_idx >= 0 and right_idx < len(string):
+        if string[left_idx] != string[right_idx]:
+            break
+        left_idx -= 1
+        right_idx += 1
+    return [left_idx + 1, right_idx]
+
+
+if __name__ == '__main__':
+    source = 'abacdefghhhgfedaa'
+    print(longest_palindromic_substring1(source))
+    print(longest_palindromic_substring2(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+bool isPalindrome(string str);
+vector<size_t> getLongestPalindromeFrom(string str, size_t leftIdx, size_t rightIdx);
+
+// O(n^3) time | O(n) space
+string longestPalindromicSubstring1(string str)
 {
-    int *longest = (int*)malloc(2 * sizeof(int) );
-    while ( leftIdx >= 0 && rightIdx < length )
+    string longest = "";
+    for (size_t i = 0; i < str.length(); i++)
     {
-        if ( string[leftIdx] != string[rightIdx] )
-            break;
-        leftIdx--;
-        rightIdx++;
+        for (size_t j = i; j < str.length(); j++)
+        {
+            string substring = str.substr(i, j + 1 - i);
+            if (substring.length() > longest.length() && isPalindrome(substring))
+            {
+                longest = substring;
+            }
+        }
     }
-    longest[0] = leftIdx + 1;
-    longest[1] = rightIdx;
     return longest;
 }
 
-/* O(n^2) time | O(1) space */
-char* longestPalindromicString(const char string[])
+bool isPalindrome(string str)
 {
-    const int lastIdx = getStringLength(string) - 1;
-    int maxLeftIdx = 1, maxRightIdx = 1, currentIdx = 1;
-    while ( currentIdx < lastIdx )
+    int leftIdx = 0;
+    int rightIdx = str.length() - 1;
+    while (leftIdx < rightIdx)
     {
-        int *odd = getLongestPalindromeFrom(string, currentIdx - 1, currentIdx + 1, lastIdx + 1);
-        int *even = getLongestPalindromeFrom(string, currentIdx - 1, currentIdx, lastIdx + 1);
-        if ( odd[1] - odd[0] > maxRightIdx - maxLeftIdx )
+        if (str[leftIdx] != str[rightIdx])
         {
-            maxLeftIdx = odd[0];
-            maxRightIdx = odd[1];
+            return false;
         }
-        if ( even[1] - even[0] > maxRightIdx - maxLeftIdx )
-        {
-            maxLeftIdx = even[0];
-            maxRightIdx = even[1];
-        }
-        currentIdx++;
+        leftIdx++;
+        rightIdx--;
     }
-    return subString(string, maxLeftIdx, maxRightIdx);
+    return true;
+}
+
+// O(n^2) time | O(n) space
+string longestPalindromicSubstring2(string str)
+{
+    vector<size_t> currentLongest{0, 1};
+    for (size_t i = 1; i < str.length(); i++)
+    {
+        vector<size_t> odd = getLongestPalindromeFrom(str, i - 1, i + 1);
+        vector<size_t> even = getLongestPalindromeFrom(str, i - 1, i);
+        vector<size_t> longest = odd[1] - odd[0] > even[1] - even[0] ? odd : even;
+        currentLongest =
+            currentLongest[1] - currentLongest[0] > longest[1] - longest[0]
+                ? currentLongest
+                : longest;
+    }
+    return str.substr(currentLongest[0], currentLongest[1] - currentLongest[0]);
+}
+
+vector<size_t> getLongestPalindromeFrom(string str, size_t leftIdx, size_t rightIdx)
+{
+    while (leftIdx >= 0 && rightIdx < str.length())
+    {
+        if (str[leftIdx] != str[rightIdx])
+        {
+            break;
+        }
+        leftIdx--;
+        rightIdx++;
+    }
+    return vector<size_t>{leftIdx + 1, rightIdx};
 }
 
 int main()
 {
-    const char str[] = "abacdefghhhgfedaa";
-    printf("%s", longestPalindromicString(str));
+    string source = "abacdefghhhgfedaa";
+    cout << longestPalindromicSubstring1(source) << endl;
+    cout << longestPalindromicSubstring2(source) << endl;
     return 0;
 }
 ```
