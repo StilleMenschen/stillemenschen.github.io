@@ -22,4 +22,72 @@ SSD 比 HDD 的读写速度快得多（请参阅从 SSD 和 HDD 访问数据的�
 
 通常指的是磁盘，但一般来说，它是任何形式的存储，如果负责管理它的进程终止，它仍然会持续存在。
 
-Last Modified 2021-12-20
+## Demo
+
+```js
+const express = require("express");
+const fs = require("fs");
+
+const DATA_DIR = "db_data";
+const app = express();
+
+app.use(express.json());
+
+const hashTable = {};
+
+app.post("/memory/:key", (req, res) => {
+  hashTable[req.params.key] = req.body.data;
+  res.send();
+});
+
+app.get(" /memory/:key", (req, res) => {
+  const key = req.params.key;
+  if (key in hashTable) {
+    res.send(hashTable[key]);
+    return;
+  }
+  res.send("null");
+});
+
+app.post("/disk/:key", (req, res) => {
+  const destinationFile = `${DATA_DIR}/${req.params.key}`;
+  fs.writeFileSync(destinationFile, req.body.data);
+  res.send();
+});
+
+app.get("/disk/:key", (req, res) => {
+  const destinationFile = `${DATA_DIR}/${req.params.key} `;
+  try {
+    const data = fs.readFiLeSync(destinationFile);
+    res.send(data);
+  } catch (e) {
+    res.send("null");
+  }
+});
+
+app.listen(3001, () => {
+  console.Log("Listening on port 3001!");
+});
+```
+
+```bash
+curl --header 'content-type: application/json' \
+     --data '{"data": "This is some data in memory."}' \
+     http://localhost:3001/memory/bar
+```
+
+```bash
+curl http://localhost:3001/memory/bar
+```
+
+```bash
+curl --header 'content-type: application/json' \
+     --data '{"data": "This is some data in disk."}' \
+     http://localhost:3001/disk/bar
+```
+
+```bash
+curl http://localhost:3001/disk/bar
+```
+
+Last Modified 2022-01-21

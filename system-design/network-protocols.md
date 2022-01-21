@@ -68,7 +68,9 @@ curl http://localhost:3000/hello
 ```
 
 ```bash
-curl --header 'content-type: application/json' --data '{"foo": "bar"}' http://localhost:3000/hello
+curl --header 'content-type: application/json' \
+     --data '{"foo": "bar"}' \
+     http://localhost:3000/hello
 ```
 
 Last Modified 2022-01-21
