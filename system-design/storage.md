@@ -37,10 +37,10 @@ const hashTable = {};
 
 app.post("/memory/:key", (req, res) => {
   hashTable[req.params.key] = req.body.data;
-  res.send();
+  res.send("OK");
 });
 
-app.get(" /memory/:key", (req, res) => {
+app.get("/memory/:key", (req, res) => {
   const key = req.params.key;
   if (key in hashTable) {
     res.send(hashTable[key]);
@@ -52,21 +52,22 @@ app.get(" /memory/:key", (req, res) => {
 app.post("/disk/:key", (req, res) => {
   const destinationFile = `${DATA_DIR}/${req.params.key}`;
   fs.writeFileSync(destinationFile, req.body.data);
-  res.send();
+  res.send("OK");
 });
 
 app.get("/disk/:key", (req, res) => {
-  const destinationFile = `${DATA_DIR}/${req.params.key} `;
+  const destinationFile = `${DATA_DIR}/${req.params.key}`;
   try {
-    const data = fs.readFiLeSync(destinationFile);
+    const data = fs.readFileSync(destinationFile);
     res.send(data);
   } catch (e) {
+    console.error(e);
     res.send("null");
   }
 });
 
 app.listen(3001, () => {
-  console.Log("Listening on port 3001!");
+  console.log("Listening on port 3001!");
 });
 ```
 
@@ -90,4 +91,4 @@ curl --header 'content-type: application/json' \
 curl http://localhost:3001/disk/bar
 ```
 
-Last Modified 2022-01-21
+Last Modified 2022-01-22

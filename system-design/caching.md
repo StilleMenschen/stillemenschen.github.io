@@ -25,4 +25,56 @@ CDN （Content Delivery Network）是一种第三方服务，其作用类似于�
 则不在此区域的用户的 Web 应用程序访问速度可能会较慢。CDN 在世界各地都有服务器，这意味着 CDN 服务器的延迟几乎总是比服务器的延迟低得多。
 CDN 的服务器通常称为 PoPs（Points of Presence）。两个最受欢迎的 CDN 是 Cloudflare 和 Google Cloud CDN。
 
-Last Modified 2022-01-13
+## Demo
+
+```js
+const database = {
+  ["index.html"]: "<html>Hello World !</html>",
+};
+
+module.exports.get = (key, callback) => {
+  setTimeout(() => {
+    callback(database[key]);
+  }, 2000);
+};
+```
+
+```js
+const database = require("./database");
+const express = require("express");
+
+const app = express();
+const cache = {};
+
+app.get("/nocache/index.html", (req, res) => {
+  database.get("index.html", (page) => {
+    res.send(page);
+  });
+});
+
+app.get("/withcache/index.html", (req, res) => {
+  if ("index.html" in cache) {
+    res.send(cache["index.html"]);
+    return;
+  }
+
+  database.get("index.html", (page) => {
+    cache["index.html"] = page;
+    res.send(page);
+  });
+});
+
+app.listen(3002, () => {
+  console.log("Listening on port 3002!");
+});
+```
+
+```bash
+curl http://localhost:3002/nocache/index.html
+```
+
+```bash
+curl http://localhost:3002/withcache/index.html
+```
+
+Last Modified 2022-01-22

@@ -47,8 +47,6 @@ const app = express();
 
 app.use(express.json());
 
-app.listen(3000, () => console.log("Listening on port 3000."));
-
 app.get("/hello", (req, res) => {
   console.log("Headers:", req.headers);
   console.log("Method:", req.method);
@@ -56,11 +54,13 @@ app.get("/hello", (req, res) => {
 });
 
 app.post("/hello", (req, res) => {
-  console.log("Headers:", req, headers);
+  console.log("Headers:", req.headers);
   console.log("Method:", req.method);
   console.log("Body:", req.body);
   res.send("Received POST request!\n");
 });
+
+app.listen(3000, () => console.log("Listening on port 3000."));
 ```
 
 ```bash
@@ -73,4 +73,4 @@ curl --header 'content-type: application/json' \
      http://localhost:3000/hello
 ```
 
-Last Modified 2022-01-21
+Last Modified 2022-01-22
