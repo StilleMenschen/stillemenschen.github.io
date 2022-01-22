@@ -16,4 +16,53 @@
 
 发音为“engine X”而不是“N jinx”，Nginx 是一种非常流行的 Web 服务器，通常用作反向代理和负载均衡器。了解更多：https://www.nginx.com/
 
-Last Modified 2022-01-19
+## Demo
+
+```nginx
+events {}
+
+http {
+    upstream node-backend {
+        server 127.0.0.1:3004 weight=2;
+        server 127.0.0.1:3005;
+    }
+
+    server {
+        listen 8082;
+
+        location / {
+           proxy_set_header systemexpert-tutorial ture;
+           proxy_pass http://node-backend;
+        }
+    }
+}
+```
+
+```js
+const express = require("express");
+
+const app = express();
+
+const port = process.env.PORT;
+
+app.get("/hello", (req, res) => {
+  console.log("Headers:", req.headers);
+  res.send(`Hello from port ${port}.\n`);
+});
+
+app.listen(port, () => console.log(`Listening on port ${port}.`));
+```
+
+```bash
+PORT=3004 node server.js
+```
+
+```bash
+PORT=3005 node server.js
+```
+
+```bash
+for i in {1..30}; do curl http://localhost:8082/hello; done
+```
+
+Last Modified 2022-01-22
