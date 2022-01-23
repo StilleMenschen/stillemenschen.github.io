@@ -1076,36 +1076,99 @@ int main()
 
 ## 第一个不重复字符
 
+```python
+# O(n^2) time | O(1) space - where n is the length of the input string
+def first_non_repeating_character1(string):
+    for idx in range(len(string)):
+        found_duplicate = False
+        for idx2 in range(len(string)):
+            if string[idx] == string[idx2] and idx != idx2:
+                found_duplicate = True
+
+        if not found_duplicate:
+            return idx
+
+    return -1
+
+
+# O(n) time | O(1) space - where n is the length of the input string
+# The constant space is because the input string only has lowercase
+# English-alphabet letters; thus, our hash table will never have more
+# than 26 character frequencies.
+def first_non_repeating_character2(string):
+    character_frequencies = {}
+
+    for character in string:
+        character_frequencies[character] = character_frequencies.get(character, 0) + 1
+
+    for idx in range(len(string)):
+        character = string[idx]
+        if character_frequencies[character] == 1:
+            return idx
+
+    return -1
+
+
+if __name__ == '__main__':
+    print(first_non_repeating_character1('faadabcbbebdf'))
+    print(first_non_repeating_character2('faadabcbbebdf'))
+```
+
 ```cpp
 #include <iostream>
-
+#include <unordered_map>
 using namespace std;
 
 // O(n^2) time | O(1) space - where n is the length of the input string
-int firstNonRepeatingCharacter(string string)
+int firstNonRepeatingCharacter1(string string)
 {
-    for (int idx = 0; idx < string.size(); idx++)
+    for (size_t idx = 0; idx < string.size(); idx++)
     {
         int foundDuplicate = false;
-        for (int idx2 = 0; idx2 < string.size(); idx2++)
+        for (size_t idx2 = 0; idx2 < string.size(); idx2++)
         {
-            if ( string[idx] == string[idx2] && idx != idx2 )
-            {
+            if (string[idx] == string[idx2] && idx != idx2)
                 foundDuplicate = true;
-                break;
-            }
         }
+
         if (!foundDuplicate)
             return idx;
     }
+
+    return -1;
+}
+
+// O(n) time | O(1) space - where n is the length of the input string
+// The constant space is because the input string only has lowercase
+// English-alphabet letters; thus, our hash table will never have more
+// than 26 character frequencies.
+int firstNonRepeatingCharacter2(string string)
+{
+    unordered_map<char, int> characterFrequencies;
+
+    for (auto character : string)
+    {
+        if (characterFrequencies.find(character) == characterFrequencies.end())
+            characterFrequencies[character] = 0;
+        characterFrequencies[character]++;
+    }
+
+    for (size_t idx = 0; idx < string.size(); idx++)
+    {
+        char character = string[idx];
+        if (characterFrequencies[character] == 1)
+            return idx;
+    }
+
     return -1;
 }
 
 int main()
 {
-    cout << firstNonRepeatingCharacter("abcdacff") << endl;
+    cout << firstNonRepeatingCharacter1("faadabcbbebdf") << endl;
+    cout << firstNonRepeatingCharacter2("faadabcbbebdf") << endl;
     return 0;
 }
 ```
 
-Last Modified 2022-01-20
+Last Modified 2022-01-23
