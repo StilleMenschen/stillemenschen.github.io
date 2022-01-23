@@ -74,6 +74,97 @@ int main()
 
 ## 凯撒密码加密器
 
+```python
+# O(n) time | O(n) space
+def caesar_cipher_encryptor1(string, key):
+    new_letters = []
+    new_key = key % 26
+    for letter in string:
+        new_letters.append(get_new_letter1(letter, new_key))
+    return "".join(new_letters)
+
+
+def get_new_letter1(letter, key):
+    new_letter_code = ord(letter) + key
+    return chr(new_letter_code) if new_letter_code <= 122 else chr(96 + new_letter_code % 122)
+
+
+# O(n) time | O(n) space
+def caesar_cipher_encryptor2(string, key):
+    new_letters = []
+    new_key = key % 26
+    alphabet = list("abcdefghijklmnopqrstuvwxyz")
+    for letter in string:
+        new_letters.append(get_new_letter2(letter, new_key, alphabet))
+    return "".join(new_letters)
+
+
+def get_new_letter2(letter, key, alphabet):
+    new_letter_code = alphabet.index(letter) + key
+    return alphabet[new_letter_code % 26]
+
+
+if __name__ == '__main__':
+    print(caesar_cipher_encryptor1('zxd', 2))
+    print(caesar_cipher_encryptor2('zxd', 2))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <numeric>
+#include <string>
+using namespace std;
+
+char getNewLetter1(char letter, int key);
+char getNewLetter2(char letter, int key, string alphabet);
+
+// O(n) time | O(n) space
+string caesarCypherEncryptor1(string str, int key)
+{
+    vector<char> newLetters;
+    int newKey = key % 26;
+    for (size_t i = 0; i < str.length(); i++)
+    {
+        newLetters.push_back(getNewLetter1(str[i], newKey));
+    }
+    return string(newLetters.begin(), newLetters.end());
+}
+
+char getNewLetter1(char letter, int key)
+{
+    int newLetterCode = letter + key;
+    return newLetterCode <= 122 ? newLetterCode : 96 + newLetterCode % 122;
+}
+
+// O(n) time | O(n) space
+string caesarCypherEncryptor2(string str, int key)
+{
+    vector<char> newLetters;
+    int newKey = key % 26;
+    string alphabet = "abcdefghijklmnopqrstuvwxyz";
+    for (size_t i = 0; i < str.length(); i++)
+    {
+        newLetters.push_back(getNewLetter2(str[i], newKey, alphabet));
+    }
+    return string(newLetters.begin(), newLetters.end());
+}
+
+char getNewLetter2(char letter, int key, string alphabet)
+{
+    int newLetterCode = alphabet.find(letter) + key;
+    return alphabet[newLetterCode % 26];
+}
+
+int main()
+{
+    string source = "xyz";
+    cout << caesarCypherEncryptor1(source, 2) << endl;
+    cout << caesarCypherEncryptor2(source, 2) << endl;
+    return 0;
+}
+```
+
 ```c
 #include <stdio.h>
 
@@ -81,24 +172,26 @@ int getStringLength(const char *string)
 {
     const char *p = string;
     int length = 0;
-    while ( *p++ != '\0' ) length++;
+    while (*p++ != '\0')
+        length++;
     return length;
 }
 
 /* O(n) time | O(1) space */
-void caesarCipherEncryptor(char string[], int key)
+char *caesarCipherEncryptor(char string[], int key)
 {
     const int length = getStringLength(string);
-    const int firstLetters = 'a', lastLetters = 'z';
+    const int firstLetters = 'a' - 1, lastLetters = 'z';
     int i = 0;
     key = key % 26; // make sure range of 26 English letters
     for (; i < length; i++)
     {
         int c = string[i] + key;
-        if ( c > lastLetters )
-            c = ( firstLetters + c ) % lastLetters;
+        if (c > lastLetters)
+            c = (firstLetters + c) % lastLetters;
         string[i] = c;
     }
+    return string;
 }
 
 int main()
