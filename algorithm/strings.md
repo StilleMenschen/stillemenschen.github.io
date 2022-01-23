@@ -204,70 +204,78 @@ int main()
 
 ## 行程编码
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
+```python
+# O(n) time | O(n) space - where n is the length of the input string
+def run_length_encoding(string):
+    # The input string is guaranteed to be non-empty,
+    # so our first run will be of at least length 1.
+    encoded_string_characters = []
+    current_run_length = 1
 
-typedef struct Node
-{
-    struct Node *next;
-    char value[2];
-} Node, *pNode;
+    for i in range(1, len(string)):
+        current_character = string[i]
+        previous_character = string[i - 1]
 
-int getStringLength(const char *string)
-{
-    const char *p = string;
-    int length = 0;
-    while ( *p++ != '\0' ) length++;
-    return length;
-}
+        if current_character != previous_character or current_run_length == 9:
+            encoded_string_characters.append(str(current_run_length))
+            encoded_string_characters.append(previous_character)
+            current_run_length = 0
 
-char* concatLists(Node* head, int listsSize)
+        current_run_length += 1
+
+    # Handle the last run.
+    encoded_string_characters.append(str(current_run_length))
+    encoded_string_characters.append(string[len(string) - 1])
+
+    return "".join(encoded_string_characters)
+
+
+if __name__ == '__main__':
+    print(run_length_encoding('AAAAAAAAAAAAABBCCCCDD'))
+```
+
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+// O(n) time | O(n) space - where n is the length of the input string
+string runLengthEncoding(string str)
 {
-    char *str = (char*)malloc(listsSize * 2 * sizeof(char));
-    char *p;
-    int i = 0, j;
-    while ( head != NULL )
+    // The input string is guaranteed to be non-empty,
+    // so our first run will be of at least length 1.
+    vector<char> encodedStringCharacters;
+    int currentRunLength = 1;
+
+    for (size_t i = 1; i < str.size(); i++)
     {
-        for ( j = 0; j < 2; i++, j++) str[i] = head->value[j];
-        head = head->next;
-    }
-    str[i] = '\0';
-    return str;
-}
+        char currentCharacter = str[i];
+        char previousCharacter = str[i - 1];
 
-/* O(n) time | O(n) space */
-char* runLengthEncoding(char string[])
-{
-    int length = getStringLength(string);
-    pNode head, tail;
-    head = (Node*)malloc(sizeof(Node));
-    tail = head;
-    int i = 1, size = 1, listsSize = 0;
-    for (; i < length; i++)
-    {
-        if ( string[i] != string[i - 1] || size == 9)
+        if (currentCharacter != previousCharacter || currentRunLength == 9)
         {
-            tail->value[0] = (char)(size + 48);
-            tail->value[1] = string[i - 1];
-            pNode node = (Node*)malloc(sizeof(Node));
-            node->next = NULL;
-            tail->next = node;
-            tail = node;
-            size = 0;
-            listsSize++;
+            encodedStringCharacters.push_back(to_string(currentRunLength)[0]);
+            encodedStringCharacters.push_back(previousCharacter);
+            currentRunLength = 0;
         }
-        size++;
+
+        currentRunLength++;
     }
-    tail->value[0] = (char)(size + 48);
-    tail->value[1] = string[length - 1];
-    return concatLists(head, listsSize + 1);
+
+    // Handle the last run.
+    encodedStringCharacters.push_back(to_string(currentRunLength)[0]);
+    encodedStringCharacters.push_back(str[str.size() - 1]);
+
+    string encodedString(encodedStringCharacters.begin(),
+                         encodedStringCharacters.end());
+    return encodedString;
 }
 
 int main()
 {
-    char str[] = "AAAAAAAAAAAAAABBBBCCCCDDDD";
-    printf("%s", runLengthEncoding(str));
+    string source = "AAAAAAAAAAAAABBCCCCDD";
+    cout << runLengthEncoding(source);
     return 0;
 }
 ```
