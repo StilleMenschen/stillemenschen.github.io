@@ -996,6 +996,84 @@ if __name__ == '__main__':
     print(generate_document2('ahealolabbhb', 'hello'))
 ```
 
+```cpp
+#include <iostream>
+#include <unordered_set>
+#include <unordered_map>
+using namespace std;
+
+int countCharacterFrequency(char character, string target);
+
+// O(c * (n + m)) time | O(c) space - where n is the number of characters, m is
+// the length of the document, and c is the number of unique characters in the
+// document
+bool generateDocument1(string characters, string document)
+{
+    unordered_set<char> alreadyCounted;
+
+    for (auto character : document)
+    {
+        if (alreadyCounted.find(character) != alreadyCounted.end())
+            continue;
+
+        auto documentFrequency = countCharacterFrequency(character, document);
+        auto charactersFrequency = countCharacterFrequency(character, characters);
+        if (documentFrequency > charactersFrequency)
+            return false;
+
+        alreadyCounted.insert(character);
+    }
+
+    return true;
+}
+
+int countCharacterFrequency(char character, string target)
+{
+    int frequency = 0;
+    for (auto c : target)
+    {
+        if (c == character)
+            frequency++;
+    }
+
+    return frequency;
+}
+
+// O(n + m) time | O(c) space - where n is the number of characters, m is
+// the length of the document, and c is the number of unique characters in the
+// characters string
+bool generateDocument2(string characters, string document)
+{
+    unordered_map<char, int> characterCounts;
+
+    for (auto character : characters)
+    {
+        if (characterCounts.find(character) == characterCounts.end())
+            characterCounts[character] = 0;
+
+        characterCounts[character]++;
+    }
+
+    for (auto character : document)
+    {
+        if (characterCounts.find(character) == characterCounts.end() ||
+            characterCounts[character] == 0)
+            return false;
+
+        characterCounts[character]--;
+    }
+
+    return true;
+}
+
+int main()
+{
+    cout << generateDocument1("aheaollabbhb", "hello") << endl;
+    cout << generateDocument2("aheaollabbhb", "hello") << endl;
+    return 0;
+}
+```
+
 ## 第一个不重复字符
 
 ```cpp
