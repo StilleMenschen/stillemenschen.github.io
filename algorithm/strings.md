@@ -1171,4 +1171,141 @@ int main()
 }
 ```
 
+## 有效 IP 地址
+
+```python
+# O(1) time | O(1) space
+# input string must be less than or equal to 12
+def valid_ip_addresses(string):
+    ip_addresses_found = []
+
+    length = len(string)
+    for i in range(1, min(length, 4)):
+        current_ip_address_parts = ["", "", "", ""]
+
+        current_ip_address_parts[0] = string[:i]
+        if not is_valid_part(current_ip_address_parts[0]):
+            continue
+
+        for j in range(i + 1, min(length, i + 4)):
+            current_ip_address_parts[1] = string[i:j]
+            if not is_valid_part(current_ip_address_parts[1]):
+                continue
+
+            for k in range(j + 1, min(length, j + 4)):
+                current_ip_address_parts[2] = string[j:k]
+                current_ip_address_parts[3] = string[k:]
+
+                if is_valid_part(current_ip_address_parts[2]) and is_valid_part(current_ip_address_parts[3]):
+                    ip_addresses_found.append(".".join(current_ip_address_parts))
+
+    return ip_addresses_found
+
+
+def is_valid_part(string):
+    string_as_int = int(string)
+    if string_as_int > 255:
+        return False
+
+    return len(string) == len(str(string_as_int))  # check for leading 0
+
+
+if __name__ == '__main__':
+    print(valid_ip_addresses('1921680'))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+
+using namespace std;
+
+bool isValidPart(string str);
+string join(vector<string> strings);
+
+// O(1) time | O(1) space
+// input string must be less than or equal to 12
+vector<string> validIPAddresses(string str)
+{
+    vector<string> ipAddressesFound;
+
+    for (int i = 1; i < min((int)str.length(), 4); i++)
+    {
+        vector<string> currentIPAddressParts = {"", "", "", ""};
+
+        currentIPAddressParts[0] = str.substr(0, i);
+        if (!isValidPart(currentIPAddressParts[0]))
+        {
+            continue;
+        }
+
+        for (int j = i + 1; j < i + min((int)str.length() - i, 4); j++)
+        {
+            currentIPAddressParts[1] = str.substr(i, j - i);
+            if (!isValidPart(currentIPAddressParts[1]))
+            {
+                continue;
+            }
+
+            for (int k = j + 1; k < j + min((int)str.length() - j, 4); k++)
+            {
+                currentIPAddressParts[2] = str.substr(j, k - j);
+                currentIPAddressParts[3] = str.substr(k);
+
+                if (isValidPart(currentIPAddressParts[2]) &&
+                    isValidPart(currentIPAddressParts[3]))
+                {
+                    ipAddressesFound.push_back(join(currentIPAddressParts));
+                }
+            }
+        }
+    }
+
+    return ipAddressesFound;
+}
+
+bool isValidPart(string str)
+{
+    int stringAsInt = stoi(str);
+
+    if (stringAsInt > 255)
+    {
+        return false;
+    }
+
+    return str.length() == to_string(stringAsInt).length(); // check for leading 0
+}
+
+string join(vector<string> strings)
+{
+    string s;
+    for (size_t l = 0; l < strings.size(); l++)
+    {
+        s += strings[l];
+        if (l < strings.size() - 1)
+        {
+            s += ".";
+        }
+    }
+    return s;
+}
+
+void iterArray(vector<string> array)
+{
+    for (const string element : array)
+    {
+        cout << element << endl;
+    }
+    cout << endl;
+}
+
+int main()
+{
+    iterArray(validIPAddresses("1921680"));
+    return 0;
+}
+```
+
 Last Modified 2022-01-23
