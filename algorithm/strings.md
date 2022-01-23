@@ -2,6 +2,42 @@
 
 ## 回文字符串
 
+```python
+# O(n) time | O(1) space
+def is_palindrome(string):
+    left_idx = 0
+    right_idx = len(string) - 1
+    while left_idx < right_idx:
+        if string[left_idx] != string[right_idx]:
+            return False
+        left_idx += 1
+        right_idx -= 1
+    return True
+
+
+if __name__ == '__main__':
+    print(is_palindrome("abcba"))
+```
+
+```cpp
+#include <string>
+using namespace std;
+
+// O(n) time | O(1) space
+bool isPalindrome(string str) {
+  int leftIdx = 0;
+  int rightIdx = str.length() - 1;
+  while (leftIdx < rightIdx) {
+    if (str[leftIdx] != str[rightIdx]) {
+      return false;
+    }
+    leftIdx++;
+    rightIdx--;
+  }
+  return true;
+}
+```
+
 ```c
 #include <stdio.h>
 #define TRUE 1
