@@ -1308,4 +1308,252 @@ int main()
 }
 ```
 
+## 反转单词位置
+
+```python
+# O(n) time | O(n) space - where n is the length of the string
+def reverse_words_in_string1(string):
+    words = []
+    start_of_word = 0
+    for idx in range(len(string)):
+        character = string[idx]
+
+        if character == " ":
+            words.append(string[start_of_word:idx])
+            start_of_word = idx
+        elif string[start_of_word] == " ":
+            words.append(" ")
+            start_of_word = idx
+
+    words.append(string[start_of_word:])
+
+    reverse_list(words)
+    return "".join(words)
+
+
+def reverse_list(array):
+    start, end = 0, len(array) - 1
+    while start < end:
+        array[start], array[end] = array[end], array[start]
+        start += 1
+        end -= 1
+
+
+# O(n) time | O(n) space - where n is the length of the string
+def reverse_words_in_string2(string):
+    characters = [char for char in string]
+    reverse_list_range(characters, 0, len(characters) - 1)
+
+    start_of_word = 0
+    while start_of_word < len(characters):
+        end_of_word = start_of_word
+        while end_of_word < len(characters) and characters[end_of_word] != " ":
+            end_of_word += 1
+
+        reverse_list_range(characters, start_of_word, end_of_word - 1)
+        start_of_word = end_of_word + 1
+
+    return "".join(characters)
+
+
+def reverse_list_range(array, start, end):
+    while start < end:
+        array[start], array[end] = array[end], array[start]
+        start += 1
+        end -= 1
+
+
+# O(n) time | O(n) space
+def reverse_words_in_string3(string):
+    length = len(string)
+    if not length:
+        return string
+    characters = [' ' for _ in range(length)]
+    idx = 0
+    while idx < length:
+        if string[idx] == ' ':
+            idx += 1
+            continue
+        word_start_idx = idx
+        while idx < length and string[idx] != ' ':
+            idx += 1
+        word_idx = length - idx
+        for i in range(word_start_idx, idx):
+            characters[word_idx] = string[i]
+            word_idx += 1
+        idx += 1
+
+    return ''.join(characters)
+
+
+# O(n) time | O(n) space
+def reverse_words_in_string4(string):
+    length = len(string)
+    if not length:
+        return string
+    characters = []
+    i = 0
+    while i < length:
+        character = string[i]
+        if character == ' ':
+            space_idx = i
+            while i < length and string[i] == ' ':
+                i += 1
+            characters.insert(0, string[space_idx:i])
+            continue
+        word_idx = i
+        while i < length and string[i] != ' ':
+            i += 1
+        characters.insert(0, string[word_idx:i])
+
+    return ''.join(characters)
+
+
+if __name__ == '__main__':
+    print(reverse_words_in_string1('  System Expert is require!'))
+    print(reverse_words_in_string2('System   Expert is require!  '))
+    print(reverse_words_in_string3('  System Expert is require!'))
+    print(reverse_words_in_string4('System   Expert is require!  '))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void reverseList(vector<string> &list);
+
+// O(n) time | O(n) space - where n is the length of the string
+string reverseWordsInString1(string str)
+{
+    vector<string> words;
+    int startOfWord = 0;
+    for (size_t idx = 0; idx < str.size(); idx++)
+    {
+        char character = str[idx];
+
+        if (character == ' ')
+        {
+            words.push_back(str.substr(startOfWord, idx - startOfWord));
+            startOfWord = idx;
+        }
+        else if (str[startOfWord] == ' ')
+        {
+            words.push_back(" ");
+            startOfWord = idx;
+        }
+    }
+
+    words.push_back(str.substr(startOfWord));
+
+    reverseList(words);
+    string output;
+    for (auto word : words)
+    {
+        output += word;
+    }
+    return output;
+}
+
+void reverseList(vector<string> &list)
+{
+    size_t start = 0;
+    size_t end = list.size() - 1;
+    while (start < end)
+    {
+        string temp = list[start];
+        list[start] = list[end];
+        list[end] = temp;
+        start++;
+        end--;
+    }
+}
+
+void reverseListRange(vector<char> &list, int start, int end);
+
+// O(n) time | O(n) space - where n is the length of the string
+string reverseWordsInString2(string str)
+{
+    vector<char> characters;
+    for (auto character : str)
+    {
+        characters.push_back(character);
+    }
+    reverseListRange(characters, 0, characters.size() - 1);
+
+    size_t startOfWord = 0;
+    while (startOfWord < characters.size())
+    {
+        size_t endOfWord = startOfWord;
+        while (endOfWord < characters.size() && characters[endOfWord] != ' ')
+        {
+            endOfWord++;
+        }
+
+        reverseListRange(characters, startOfWord, endOfWord - 1);
+        startOfWord = endOfWord + 1;
+    }
+
+    string output;
+    for (auto character : characters)
+    {
+        output += character;
+    }
+    return output;
+}
+
+void reverseListRange(vector<char> &list, int start, int end)
+{
+    while (start < end)
+    {
+        char temp = list[start];
+        list[start] = list[end];
+        list[end] = temp;
+        start++;
+        end--;
+    }
+}
+
+// O(n) time | O(n) space
+string reverseWordsInString3(string str)
+{
+    size_t length = str.length();
+    if (length <= 0)
+    {
+        return str;
+    }
+    vector<char> characters(length, ' ');
+    size_t idx = 0;
+    while (idx < length)
+    {
+        if (str[idx] == ' ')
+        {
+            idx++;
+            continue;
+        }
+        size_t wordStartIdx = idx;
+        while (idx < length && str[idx] != ' ')
+        {
+            idx++;
+        }
+        size_t wordIdx = length - idx;
+        for (size_t i = wordStartIdx; i < idx; i++)
+        {
+            characters[wordIdx] = str[i];
+            wordIdx++;
+        }
+        idx++;
+    }
+    return string(characters.begin(), characters.end());
+}
+
+int main()
+{
+    cout << reverseWordsInString1("  System Expert is require!") << endl;
+    cout << reverseWordsInString2("System   Expert is require!  ") << endl;
+    cout << reverseWordsInString3("  System   Expert is yap!  ") << endl;
+    return 0;
+}
+```
+
 Last Modified 2022-01-23
