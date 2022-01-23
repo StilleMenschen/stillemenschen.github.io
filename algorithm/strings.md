@@ -279,120 +279,81 @@ int main()
 
 ## 分组字谜
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
+给定一个字符串数组，根据字符串的组成字符相似性归为一组字符串并返回，如 "abc" 和 "cab" 属于字符组成相似的字符串
 
-typedef struct Node
-{
-    const char *value;
-    int code;
-} Node, *pNode;
+```python
+# O(w * n * log(n)) time | O(wn) space
+# where w is the number of words and n is the length of the longest word
+def group_anagrams(words):
+    anagrams = {}
+    for word in words:
+        sorted_word = "".join(sorted(word))
+        if sorted_word in anagrams:
+            anagrams[sorted_word].append(word)
+        else:
+            anagrams[sorted_word] = [word]
+    return list(anagrams.values())
 
-typedef struct Stack
-{
-    struct Stack *next;
-    int array[2];
-} Stack, *pStack;
 
-pStack pushStack(pStack stack, int leftIdx, int rightIdx)
-{
-    pStack node = (Stack*)malloc(sizeof(Stack));
-    node->array[0] = leftIdx;
-    node->array[1] = rightIdx;
-    if ( stack != NULL )
-        node->next = stack;
-    else
-        node->next = NULL;
-    return node;
-}
+if __name__ == '__main__':
+    print(group_anagrams(["yo", "act", "flop", "tac", "foo", "cat", "oy", "olfp"]))
+```
 
-int compareCode(Node array[], int i, int j)
-{
-    return array[i].code - array[j].code;
-}
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <unordered_map>
+using namespace std;
 
-pNode quickSort(Node array[], int length)
+// O(w * n * log(n)) time | O(wn) space
+// where w is the number of words and n is the length of the longest word
+vector<vector<string>> groupAnagrams(vector<string> words)
 {
-    pStack stack = (Stack*)malloc(sizeof(Stack));
-    stack->array[0] = 0;
-    stack->array[1] = length - 1;
-    stack->next = NULL;
-    int startIdx, endIdx;
-    while ( stack != NULL )
+    unordered_map<string, vector<string>> anagrams;
+
+    for (auto word : words)
     {
-        startIdx = stack->array[0];
-        endIdx = stack->array[1];
-        stack = stack->next;
-        if ( startIdx >= endIdx )
-            continue;
-        int pivotIdx = startIdx;
-        int leftIdx = startIdx + 1;
-        int rightIdx = endIdx;
-        while ( rightIdx >= leftIdx )
+        string sortedWord = word;
+        sort(sortedWord.begin(), sortedWord.end());
+
+        if (anagrams.find(sortedWord) != anagrams.end())
         {
-            if ( compareCode(array, leftIdx, pivotIdx) > 0 && compareCode(array, pivotIdx, rightIdx) > 0 )
-            {
-                const Node node = array[leftIdx];
-                array[leftIdx] = array[rightIdx];
-                array[rightIdx] = node;
-            }
-            if ( compareCode(array, leftIdx, pivotIdx) <= 0 )
-                leftIdx++;
-            if ( compareCode(array, rightIdx, pivotIdx) >= 0 )
-                rightIdx--;
-        }
-        const Node node = array[pivotIdx];
-        array[pivotIdx] = array[rightIdx];
-        array[rightIdx] = node;
-        if ( rightIdx - 1 - startIdx < endIdx - (rightIdx + 1) )
-        {
-            stack = pushStack(stack, startIdx, rightIdx - 1);
-            stack = pushStack(stack, rightIdx + 1, endIdx);
+            anagrams[sortedWord].push_back(word);
         }
         else
         {
-            stack = pushStack(stack, rightIdx + 1, endIdx);
-            stack = pushStack(stack, startIdx, rightIdx - 1);
+            anagrams[sortedWord] = vector<string>{word};
         }
     }
-    return array;
+
+    vector<vector<string>> output = {};
+    for (auto it : anagrams)
+    {
+        output.push_back(it.second);
+    }
+    return output;
 }
 
-int wordCode(const char *word)
+void iterArray(vector<vector<string>> array)
 {
-    int code = 0;
-    while ( *word )
-        code += (int)*word++;
-    return code;
-}
-
-/* O(w * n * log(n)) time | O(w * n) space */
-Node* groupAnagrams(Node words[], int wordsLength)
-{
-    int i = 0;
-    for ( ; i < wordsLength; i++)
-        words[i].code = wordCode( words[i].value );
-    return quickSort(words, wordsLength);
+    for (const vector<string> elements : array)
+    {
+        cout << "[ ";
+        for (const string element : elements)
+        {
+            cout << element << " ";
+        }
+        cout << "] ";
+    }
+    cout << endl;
 }
 
 int main()
 {
-    Node words[] =
-    {
-        { "yo", -1 },
-        { "act", -1 },
-        { "blop", -1 },
-        { "tac", -1 },
-        { "cat", -1 },
-        { "oy", -1 },
-        { "olbp", -1 }
-    };
-    int wordsLength = sizeof(words) / sizeof(words[0]);
-    int i = 0;
-    pNode sortedWords = groupAnagrams(words, wordsLength);
-    for ( ; i < wordsLength ; i++)
-        printf("%s ", sortedWords[i].value );
+    vector<string> source = {"yo", "act", "flop", "tac", "foo", "cat", "oy", "olfp"};
+    iterArray(groupAnagrams(source));
     return 0;
 }
 ```
