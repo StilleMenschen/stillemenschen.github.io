@@ -383,7 +383,7 @@ vector<int> threeNumberSort3(vector<int> array, vector<int> order)
     return array;
 }
 
-void iter_list(vector<int> array)
+void iterArray(vector<int> array)
 {
     for (const int e : array)
     {
@@ -398,11 +398,11 @@ int main()
     vector<int> order = {-2, -3, 0};
     vector<int> result;
     result = threeNumberSort1(source, order);
-    iter_list(result);
+    iterArray(result);
     result = threeNumberSort2(source, order);
-    iter_list(result);
+    iterArray(result);
     result = threeNumberSort3(source, order);
-    iter_list(result);
+    iterArray(result);
     return 0;
 }
 ```
@@ -495,11 +495,11 @@ if __name__ == '__main__':
     print(heap_sort(a))
 ```
 
-> 堆排序是不稳定的排序算法，堆的结构是节点 i 的孩子为 2 _ i 和 2 _ i + 1 节点，大顶堆要求父节点大于等于其 2 个子节点，小
-> 顶堆要求父节点小于等于其 2 个子节点。在一个长为 n 的序列，堆排序的过程是从第 n / 2 开始和其子节点共 3 个值选择最大(大
-> 顶堆)或者最小(小顶堆),这 3 个元素之间的选择当然不会破坏稳定性。但当为 n / 2 - 1, n / 2 - 2, … 1 这些个父节点选择元素时
-> ，就会破坏稳定性。有可能第 n / 2 个父节点交换把后面一个元素交换过去了，而第 n / 2 - 1 个父节点把后面一个相同的元素没有
-> 交换，那么这 2 个相同的元素之间的稳定性就被破坏了。
+> 堆排序是不稳定的排序算法，堆的结构是节点 i 的孩子为 2 * i 和 2 * i + 1 节点，大顶堆要求父节点大于等于其 2 个子节点，
+> 小顶堆要求父节点小于等于其 2 个子节点。在一个长为 n 的序列，堆排序的过程是从第 n / 2 开始和其子节点共 3 个值选择最大(大顶堆)或者最小(小顶堆),
+> 这 3 个元素之间的选择当然不会破坏稳定性。但当为 n / 2 - 1, n / 2 - 2, … 1 这些个父节点选择元素时，
+> 就会破坏稳定性。有可能第 n / 2 个父节点交换把后面一个元素交换过去了，而第 n / 2 - 1 个父节点把后面一个相同的元素没有交换，
+> 那么这 2 个相同的元素之间的稳定性就被破坏了。
 
 ## 归并排序
 
@@ -585,6 +585,8 @@ if __name__ == '__main__':
 ```
 
 ## 基数排序
+
+> 基数排序不支持负数，仅支持正数排序
 
 ```python
 # O(d * (n + b)) time | O(n + b) space - where n is the length of the input array,
@@ -710,4 +712,4 @@ int main()
 }
 ```
 
-Last Modified 2022-01-14
+Last Modified 2022-01-24
