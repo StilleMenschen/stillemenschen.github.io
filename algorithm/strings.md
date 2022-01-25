@@ -1556,4 +1556,182 @@ int main()
 }
 ```
 
-Last Modified 2022-01-23
+## 组成单词最少字符
+
+给定多个单词，找出组成每一个单词的最少字符数，注意单词可能存在两个以上相同的字符，
+如 `["AC", "AAAC"]` 所需的字符最少为 `['A', 'A', 'A', 'C']`
+
+```python
+# O(n * l) time | O(c) space - where n is the number of words,
+# l is the length of the longest word, and c is the number of
+# unique characters across all words
+# See notes under video explanation for details about the space complexity.
+def minimum_characters_for_words1(words):
+    maximum_character_frequencies = {}
+
+    for word in words:
+        character_frequencies = count_character_frequencies(word)
+        update_maximum_frequencies(character_frequencies, maximum_character_frequencies)
+
+    return make_array_from_character_frequencies(maximum_character_frequencies)
+
+
+def count_character_frequencies(string):
+    character_frequencies = {}
+
+    for character in string:
+        if character not in character_frequencies:
+            character_frequencies[character] = 0
+
+        character_frequencies[character] += 1
+
+    return character_frequencies
+
+
+def update_maximum_frequencies(frequencies, maximum_frequencies):
+    for character in frequencies:
+        frequency = frequencies[character]
+
+        if character in maximum_frequencies:
+            maximum_frequencies[character] = max(frequency, maximum_frequencies[character])
+        else:
+            maximum_frequencies[character] = frequency
+
+
+def make_array_from_character_frequencies(character_frequencies):
+    characters = []
+
+    for character in character_frequencies:
+        frequency = character_frequencies[character]
+
+        for _ in range(frequency):
+            characters.append(character)
+
+    return characters
+
+
+# O(n * l) time | O(c) space
+def minimum_characters_for_words2(words):
+    characters = {}
+    for word in words:
+        current_characters = {}
+        for character in word:
+            if character not in current_characters:
+                current_characters[character] = 1
+            else:
+                current_characters[character] += 1
+
+            if character not in characters:
+                characters[character] = 1
+            elif current_characters[character] > characters[character]:
+                characters[character] = current_characters[character]
+
+    characters_for_words = []
+    for key, value in characters.items():
+        for _ in range(value):
+            characters_for_words.append(key)
+    return characters_for_words
+
+
+if __name__ == '__main__':
+    print(minimum_characters_for_words1(["this", "that", "did", "deed", "them!", "a"]))
+    print(minimum_characters_for_words2(["this", "that", "did", "deed", "them!", "a"]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
+using namespace std;
+
+unordered_map<char, int> countCharacterFrequencies(const string &string);
+void updateMaximumFrequencies(const unordered_map<char, int> &frequencies,
+                              unordered_map<char, int> &maximumFrequencies);
+vector<char> makeArrayFromCharacterFrequencies(
+    const unordered_map<char, int> &characterFrequencies);
+
+// O(n * l) time | O(c) space - where n is the number of words,
+// l is the length of the longest word, and c is the number of
+// unique characters across all words
+// See notes under video explanation for details about the space complexity.
+vector<char> minimumCharactersForWords(vector<string> words)
+{
+    unordered_map<char, int> maximumCharacterFrequencies;
+
+    for (auto const &word : words)
+    {
+        auto characterFrequencies = countCharacterFrequencies(word);
+        updateMaximumFrequencies(characterFrequencies, maximumCharacterFrequencies);
+    }
+
+    return makeArrayFromCharacterFrequencies(maximumCharacterFrequencies);
+}
+
+unordered_map<char, int> countCharacterFrequencies(const string &string)
+{
+    unordered_map<char, int> characterFrequencies;
+
+    for (auto character : string)
+    {
+        if (characterFrequencies.find(character) == characterFrequencies.end())
+        {
+            characterFrequencies[character] = 0;
+        }
+
+        characterFrequencies[character] += 1;
+    }
+
+    return characterFrequencies;
+}
+
+void updateMaximumFrequencies(const unordered_map<char, int> &frequencies,
+                              unordered_map<char, int> &maximumFrequencies)
+{
+    for (auto iter = frequencies.cbegin(); iter != frequencies.cend(); ++iter)
+    {
+        const char character = iter->first;
+        const int frequency = iter->second;
+        if (maximumFrequencies.find(character) != maximumFrequencies.end())
+        {
+            maximumFrequencies[character] =
+                max(frequency, maximumFrequencies[character]);
+        }
+        else
+        {
+            maximumFrequencies[character] = frequency;
+        }
+    }
+}
+
+vector<char> makeArrayFromCharacterFrequencies(
+    const unordered_map<char, int> &characterFrequencies)
+{
+    vector<char> characters;
+
+    for (auto iter = characterFrequencies.cbegin(); iter != characterFrequencies.cend(); ++iter)
+    {
+        const char character = iter->first;
+        const int frequency = iter->second;
+        for (int idx = 0; idx < frequency; idx++)
+        {
+            characters.push_back(character);
+        }
+    }
+
+    return characters;
+}
+
+int main()
+{
+    vector<string> source = {"this", "that", "did", "deed", "them!", "a"};
+    vector<char> result = minimumCharactersForWords(source);
+    for (const char element : result)
+    {
+        cout << element << " ";
+    }
+    return 0;
+}
+```
+
+Last Modified 2022-01-25
