@@ -9,3 +9,4 @@
   - [Proxies](system-design/proxies.md)
   - [Load Balancers](system-design/load-balancers.md)
   - [Hashing](system-design/hashing.md)
+  - [Relational Database](system-design/relational-database.md)
