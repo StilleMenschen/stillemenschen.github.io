@@ -1,25 +1,26 @@
 # Linux Tool
 
-- vim _终端下的文本编辑器_
-- ls _查看指定目录的文件_
-- grep _查找文件中的字符串_
-- sed _基于行处理的文本处理和编辑_
-- awk _可编程的文本分析_
-- find _查找目录或文件_
-- diff _逐行比较文件内容_
-- less _文件浏览且支持上下翻页_
-- curl _TCP 传输_
-- lsof _列出当前打开的文件_
-- netstat _显示网络连接，路由表，接口统计等信息_
-- tar _打包_
-- df _磁盘文件查看_
-- chmod _目录或文件的权限变更_
-- ps _查看当前进程_
-- top _查看实时进程_
-- useradd _新增用户_
-- usermod _修改用户_
-- userdel _删除用户_
-- groupadd _新增用户组_
-- groupmod _修改用户组_
-- groupdel _删除用户组_
-- shell _可执行脚本_
+- vim 终端下的文本编辑器
+- ls 查看指定目录的文件
+- grep 查找文件中的字符串
+- sed 基于行处理的文本处理和编辑
+- awk 可编程的文本分析
+- find 查找目录或文件
+- diff 逐行比较文件内容
+- less 文件浏览且支持上下翻页
+- curl TCP 传输
+- lsof 列出当前打开的文件
+- netstat 显示网络连接，路由表，接口统计等信息
+- tar 打包
+- df 磁盘文件查看
+- chmod 目录或文件的权限变更
+- ps 查看当前进程
+- top 查看实时进程
+- useradd 新增用户
+- usermod 修改用户
+- userdel 删除用户
+- groupadd 新增用户组
+- groupmod 修改用户组
+- groupdel 删除用户组
+- shell 可执行脚本
+- 更多的命令
