@@ -14,3 +14,4 @@
   - [Recursion](algorithm/recursion.md)
   - [Searching](algorithm/searching.md)
   - [Greedy Algorithm](algorithm/greedy-algorithm.md)
+  - [Trie](algorithm/trie.md)
