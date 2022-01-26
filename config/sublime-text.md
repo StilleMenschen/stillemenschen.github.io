@@ -12,7 +12,9 @@ Preferences.sublime-settings
     "draw_white_space": ["all"],
     "color_scheme": "Monokai.sublime-color-scheme",
     "save_on_focus_lost": true,
+    "tab_size": 4,
+    "translate_tabs_to_spaces": true,
 }
 ```
 
-Last Modified 2021-12-30
+Last Modified 2022-01-26
