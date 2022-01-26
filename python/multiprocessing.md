@@ -28,9 +28,8 @@ def quicksort(array):
     """快速排序"""
     length = len(array)
     stack = [(0, length)]
-    while stack:
-        first, last = stack[-1]
-        del stack[-1]
+    while len(stack):
+        first, last = stack.pop()
         if last - first < 5:
             for i in range(first + 1, last):
                 j = i - 1
@@ -48,7 +47,7 @@ def quicksort(array):
         if compare(array, j, i) < 0:
             swap(array, j, i)
         pivot, left, right = j, first, last
-        while True:
+        while left <= right:
             right -= 1
             while right > first and compare(array, right, pivot) >= 0:
                 right -= 1
@@ -56,7 +55,7 @@ def quicksort(array):
             while left < last and compare(array, left, pivot) <= 0:
                 left += 1
             if left > right:
-                break
+                continue
             swap(array, left, right)
         swap(array, pivot, right)
         n1 = right - first
@@ -67,16 +66,16 @@ def quicksort(array):
             stack.append((left, last))
 
 
-def task(i):
-    print(f'[task {getpid()}] process {i}')
-    source_list = [e + randint(1, 90) for e in range(10)]
+def task(task_id):
+    print(f'[Task {getpid()}] process {task_id}')
+    source_list = [e + randint(-50, 50) for e in range(10)]
     print('before', source_list)
     quicksort(source_list)
     print('after', source_list)
 
 
 def make_process():
-    for i in range(cpu_count() * 2):
+    for i in range(cpu_count()):
         p = Process(target=task, args=(i + 1,))
         p.start()
         # 挂起等待子进程结束
@@ -86,7 +85,7 @@ def make_process():
 print('__name__ :  ' + __name__)
 
 if __name__ == '__main__':
-    print(f'[main {getpid()}] process...')
+    print(f'[Main {getpid()}] process...')
     make_process()
 ```
 
