@@ -10,3 +10,4 @@
   - [Load Balancers](system-design/load-balancers.md)
   - [Hashing](system-design/hashing.md)
   - [Relational Database](system-design/relational-database.md)
+  - [Key-Value Store](system-design/key-value-store.md)
