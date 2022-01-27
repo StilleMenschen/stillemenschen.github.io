@@ -27,9 +27,9 @@ def swap(arr, i, j):
 def quicksort(array):
     """快速排序"""
     length = len(array)
-    stack = [(0, length)]
-    while len(stack):
-        first, last = stack.pop()
+    queue = [(0, length)]
+    while len(queue):
+        first, last = queue.pop(0)
         if last - first < 5:
             for i in range(first + 1, last):
                 j = i - 1
@@ -61,9 +61,9 @@ def quicksort(array):
         n1 = right - first
         n2 = last - left
         if n1 > 1:
-            stack.append((first, right))
+            queue.append((first, right))
         if n2 > 1:
-            stack.append((left, last))
+            queue.append((left, last))
 
 
 def task(task_id):
@@ -168,4 +168,4 @@ if __name__ == '__main__':
 - 基于进程的并行 https://docs.python.org/zh-cn/3.7/library/multiprocessing.html
 - 启动并行任务 https://docs.python.org/zh-cn/3.7/library/concurrent.futures.html
 
-Last Modified 2021-06-12
+Last Modified 2022-01-27
