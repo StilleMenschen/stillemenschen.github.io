@@ -140,8 +140,12 @@ int main()
 ## 选择排序
 
 ```python
-# O(n^2) time | O(1) space
+# Best: O(n^2) time | O(1) space
+# Average: O(n^2) time | O(1) space
+# Worst: O(n^2) time | O(1) space
 def selection_sort(array):
+    if not len(array):
+        return array
     current_idx = 0
     length = len(array)
     while current_idx < length - 1:
@@ -149,7 +153,8 @@ def selection_sort(array):
         for i in range(current_idx + 1, length):
             if array[smallest_idx] > array[i]:
                 smallest_idx = i
-        swap(current_idx, smallest_idx, array)
+        if smallest_idx != current_idx:
+            swap(current_idx, smallest_idx, array)
         current_idx += 1
     return array
 
@@ -159,7 +164,7 @@ def swap(i, j, array):
 
 
 if __name__ == '__main__':
-    a = [8, 5, 2, 9, 5, 6, 3]
+    a = [8, 1, 2, -6, 9, 5, 6, 3, -2]
     print(selection_sort(a))
 ```
 
@@ -175,20 +180,24 @@ vector<int> selectionSort(vector<int> array)
 {
     if (array.empty())
     {
-        return {};
+        return array;
     }
     size_t startIdx = 0;
-    while (startIdx < array.size() - 1)
+    const size_t length = array.size();
+    while (startIdx < length - 1)
     {
-        int smallestIdx = startIdx;
-        for (size_t i = startIdx + 1; i < array.size(); i++)
+        size_t smallestIdx = startIdx;
+        for (size_t i = startIdx + 1; i < length; i++)
         {
             if (array[smallestIdx] > array[i])
             {
                 smallestIdx = i;
             }
         }
-        swap(array[startIdx], array[smallestIdx]);
+        if (smallestIdx != startIdx)
+        {
+            swap(array[startIdx], array[smallestIdx]);
+        }
         startIdx++;
     }
     return array;
@@ -196,11 +205,11 @@ vector<int> selectionSort(vector<int> array)
 
 int main()
 {
-    vector<int> source = {8, 5, 2, 9, 5, 6, 3};
+    vector<int> source = {8, -10, 5, 2, 9, -5, 6, 3};
     source = selectionSort(source);
-    for (const int e : source)
+    for (const int element : source)
     {
-        cout << e << " ";
+        cout << element << " ";
     }
     return 0;
 }
