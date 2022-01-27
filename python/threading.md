@@ -26,43 +26,43 @@ def swap(arr, i, j):
 def quicksort(array):
     """快速排序"""
     length = len(array)
-    queue = [(0, length)]
+    queue = [(0, length,)]
     while len(queue):
-        first, last = queue.pop(0)
-        if last - first < 5:
-            for i in range(first + 1, last):
+        start_idx, end_idx = queue.pop(0)
+        if end_idx - start_idx < 5:
+            for i in range(start_idx + 1, end_idx):
                 j = i - 1
-                while j >= first:
+                while j >= start_idx:
                     if compare(array, j, j + 1) <= 0:
                         break
                     swap(array, j, j + 1)
                     j -= 1
             continue
-        j, i, k = first, (first + last) // 2, last - 1
+        j, i, k = start_idx, (start_idx + end_idx) // 2, end_idx - 1
         if compare(array, k, i) < 0:
             swap(array, k, i)
         if compare(array, k, j) < 0:
             swap(array, k, j)
         if compare(array, j, i) < 0:
             swap(array, j, i)
-        pivot, left, right = j, first, last
+        pivot, left, right = j, start_idx, end_idx
         while left <= right:
             right -= 1
-            while right > first and compare(array, right, pivot) >= 0:
+            while right > start_idx and compare(array, right, pivot) >= 0:
                 right -= 1
             left += 1
-            while left < last and compare(array, left, pivot) <= 0:
+            while left < end_idx and compare(array, left, pivot) <= 0:
                 left += 1
             if left > right:
                 continue
             swap(array, left, right)
         swap(array, pivot, right)
-        n1 = right - first
-        n2 = last - left
+        n1 = right - start_idx
+        n2 = end_idx - left
         if n1 > 1:
-            queue.append((first, right))
+            queue.append((start_idx, right,))
         if n2 > 1:
-            queue.append((left, last))
+            queue.append((left, end_idx,))
 
 
 def task(task_id):
