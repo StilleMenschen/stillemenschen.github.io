@@ -78,7 +78,9 @@ int main()
 ## 插入排序
 
 ```python
-# O(n^2) time | O(1) space
+# Best: O(n) time | O(1) space
+# Average: O(n^2) time | O(1) space
+# Worst: O(n^2) time | O(1) space
 def insertion_sort(array):
     for i in range(1, len(array)):
         j = i
@@ -93,7 +95,7 @@ def swap(i, j, array):
 
 
 if __name__ == '__main__':
-    a = [8, 5, 2, 9, 5, 6, 3]
+    a = [8, -4, 5, 2, 9, 5, 6, 3]
     print(insertion_sort(a))
 ```
 
