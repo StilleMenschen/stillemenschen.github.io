@@ -806,33 +806,103 @@ int main()
 
 ## 四数求和
 
-在一个序列中找出符合相加的和等于某个指定的数的四个数，这四个数不能重复，需要找出所有可能的组合
+在一个序列中找出符合相加的和等于某个指定的数的四个数，这四个数不能重复，如四个数位置不一样但值一样，
+像 `[4, 2, 3, 5]` 和 `[5, 3, 4, 2]` 其实是完全一样的，需要找出所有可能的组合
 
 ```python
-# O(n^2) time | O(n^2) space
+# Average: O(n^2) time | O(n^2) space
+# Worst: O(n^3) time | O(n^2) space
 def four_number_sum(array, target_sum):
-    length = len(array)
-    all_pair_sums = dict()
-    quadruplets = list()
-    for i in range(1, length - 1):
-        for j in range(i + 1, length):
+    all_pair_sums = {}  # 两数和记录字典, 将和作为 key 可以实现快速搜索
+    quadruplets = []  # 结果集
+    # 因为需要找出两个数的组合, 所有第一个和最后一个元素可以不在第一个循环中访问
+    for i in range(1, len(array) - 1):
+        # 第二个循环, 从当前位置向后
+        for j in range(i + 1, len(array)):
+            # 求出第一个两数和
             current_sum = array[i] + array[j]
+            # 求出第二个两数和, 也就是总和减去第一个两数和
             difference = target_sum - current_sum
+            # 如果第二个两数和已经有记录, 则取出并记录到结果数组中
             if difference in all_pair_sums:
                 for pair in all_pair_sums[difference]:
+                    # 在 Python 中可以使用加号连接两个数组为一个数组
                     quadruplets.append(pair + [array[i], array[j]])
+        # 将已经遍历过的两数和加入到记录中, 这里在后面才添加两数和的记录是为了防止记录重复的结果集
         for k in range(0, i):
             current_sum = array[i] + array[k]
             if current_sum not in all_pair_sums:
                 all_pair_sums[current_sum] = [[array[k], array[i]]]
             else:
+                # 如果两数和记录中已经存在, 则追加
                 all_pair_sums[current_sum].append([array[k], array[i]])
     return quadruplets
 
 
 if __name__ == '__main__':
-    a = [7, 6, 4, -1, 1, 2]
-    print(four_number_sum(a, 16))
+    print(four_number_sum([7, 6, 4, -1, 1, 2], 16))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
+using namespace std;
+
+// Average: O(n^2) time | O(n^2) space
+// Worst: O(n^3) time | O(n^2) space
+vector<vector<int>> fourNumberSum(vector<int> array, int targetSum)
+{
+    unordered_map<int, vector<vector<int>>> allPairSums;
+    vector<vector<int>> quadruplets{};
+    for (int i = 1; i < array.size() - 1; i++)
+    {
+        for (int j = i + 1; j < array.size(); j++)
+        {
+            int currentSum = array[i] + array[j];
+            int difference = targetSum - currentSum;
+            if (allPairSums.find(difference) != allPairSums.end())
+            {
+                for (vector<int> pair : allPairSums[difference])
+                {
+                    pair.push_back(array[i]);
+                    pair.push_back(array[j]);
+                    quadruplets.push_back(pair);
+                }
+            }
+        }
+        for (int k = 0; k < i; k++)
+        {
+            int currentSum = array[i] + array[k];
+            if (allPairSums.find(currentSum) == allPairSums.end())
+            {
+                allPairSums[currentSum] = vector<vector<int>>{{array[k], array[i]}};
+            }
+            else
+            {
+                allPairSums[currentSum].push_back(vector<int>{array[k], array[i]});
+            }
+        }
+    }
+    return quadruplets;
+}
+
+void iterArrays(vector<vector<int>> array)
+{
+    for (const vector<int> element : array)
+    {
+        cout << "[" << element[0] << ", " << element[1] << ", " << element[2] << ", " << element[3] << "] ";
+    }
+    cout << endl;
+}
+
+int main()
+{
+    vector<int> source = {7, 6, 4, -1, 1, 2};
+    iterArrays(fourNumberSum(source, 16));
+    return 0;
+}
 ```
 
 ## 子序列排序
@@ -1537,4 +1607,4 @@ int main()
 }
 ```
 
-Last Modified 2021-12-11
+Last Modified 2022-01-27
