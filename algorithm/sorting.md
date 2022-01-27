@@ -410,7 +410,9 @@ int main()
 ## 快速排序
 
 ```python
-# O(n * log(n)) time | O(log(n)) space
+# Best: O(nlog(n)) time | O(log(n)) space
+# Average: O(nlog(n)) time | O(log(n)) space
+# Worst: O(n^2) time | O(log(n)) space
 def quick_sort(array):
     quick_sort_helper(array, 0, len(array) - 1)
     return array
@@ -430,8 +432,8 @@ def quick_sort_helper(array, start_idx, end_idx):
         if array[right_idx] >= array[pivot_idx]:
             right_idx -= 1
     swap(pivot_idx, right_idx, array)
-    left_sub_array_is_smaller = right_idx - 1 - start_idx < end_idx - (right_idx + 1)
-    if left_sub_array_is_smaller:
+    left_subarray_is_smaller = right_idx - 1 - start_idx < end_idx - (right_idx + 1)
+    if left_subarray_is_smaller:
         quick_sort_helper(array, start_idx, right_idx - 1)
         quick_sort_helper(array, right_idx + 1, end_idx)
     else:
@@ -444,8 +446,76 @@ def swap(i, j, array):
 
 
 if __name__ == '__main__':
-    a = [8, 5, 2, 9, 5, 6, 3]
-    print(quick_sort(a))
+    source = [8, 5, -3, 2, 9, 6, 3]
+    print(quick_sort(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void quickSortHelper(vector<int> &array, int startIdx, int endIdx);
+
+// Best: O(nlog(n)) time | O(log(n)) space
+// Average: O(nlog(n)) time | O(log(n)) space
+// Worst: O(n^2) time | O(log(n)) space
+vector<int> quickSort(vector<int> array)
+{
+    quickSortHelper(array, 0, array.size() - 1);
+    return array;
+}
+
+void quickSortHelper(vector<int> &array, int startIdx, int endIdx)
+{
+    if (startIdx >= endIdx)
+    {
+        return;
+    }
+    int pivotIdx = startIdx;
+    int leftIdx = startIdx + 1;
+    int rightIdx = endIdx;
+    while (rightIdx >= leftIdx)
+    {
+        if (array.at(leftIdx) > array.at(pivotIdx) &&
+            array.at(rightIdx) < array.at(pivotIdx))
+        {
+            swap(array[leftIdx], array[rightIdx]);
+        }
+        if (array.at(leftIdx) <= array.at(pivotIdx))
+        {
+            leftIdx += 1;
+        }
+        if (array.at(rightIdx) >= array.at(pivotIdx))
+        {
+            rightIdx -= 1;
+        }
+    }
+    swap(array[pivotIdx], array[rightIdx]);
+    bool leftSubarrayIsSmaller =
+        rightIdx - 1 - startIdx < endIdx - (rightIdx + 1);
+    if (leftSubarrayIsSmaller)
+    {
+        quickSortHelper(array, startIdx, rightIdx - 1);
+        quickSortHelper(array, rightIdx + 1, endIdx);
+    }
+    else
+    {
+        quickSortHelper(array, rightIdx + 1, endIdx);
+        quickSortHelper(array, startIdx, rightIdx - 1);
+    }
+}
+
+int main()
+{
+    vector<int> source = {8, 5, -3, 2, 9, 6, 3};
+    source = quickSort(source);
+    for (const int element : source)
+    {
+        cout << element << " ";
+    }
+    return 0;
+}
 ```
 
 > 快速排序是不稳定的，快速算法是找出一个中枢元素来分开排序，当中枢元素发生交换时元素的相对位置发生变化了
@@ -712,4 +782,4 @@ int main()
 }
 ```
 
-Last Modified 2022-01-24
+Last Modified 2022-01-27
