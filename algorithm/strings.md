@@ -497,6 +497,31 @@ int main()
 
 ## 不重复子字符串
 
+```python
+# O(n) time | O(min(n, a)) space
+# where a is the length of the unique substring
+def longest_substring_without_duplication(string):
+    last_seen = {}  # 记录字符的最后一次出现位置
+    start_idx = 0  # 记录起始位置
+    longest = (0, 1,)  # 第一个字符认为是不重复的子字符串
+    for idx, character in enumerate(string):
+        if character in last_seen:
+            # 如果字符存在重复则重新记录不重复字符串的开始位置
+            start_idx = max(start_idx, last_seen[character] + 1)
+        # 判断新发现的字符串长度是否大于当前已经记录的最长字符串长度
+        if longest[1] - longest[0] < idx + 1 - start_idx:
+            longest = (start_idx, idx + 1,)
+        # 更新每个字符最后一次发现的位置
+        last_seen[character] = idx
+
+    # 由于 Python 的切片会忽略第二个切片位置, 所以前面记录位置时都需要加上 1
+    return string[longest[0]:longest[1]]
+
+
+if __name__ == '__main__':
+    print(longest_substring_without_duplication('clementisacap'))
+```
+
 ```cpp
 #include <unordered_map>
 #include <vector>
@@ -1734,4 +1759,4 @@ int main()
 }
 ```
 
-Last Modified 2022-01-25
+Last Modified 2022-01-27
