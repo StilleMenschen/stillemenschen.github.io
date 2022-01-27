@@ -21,8 +21,56 @@ TSDB（Time Series Database）是一种特殊类型的数据库，针对存储�
 
 一种图查询语言，最初是为 Neo4j 图数据库开发的，但此后已被标准化以与其他图数据库一起使用，以使其成为“图的 SQL”。Cypher 查询通常比 SQL 查询简单得多。在流行的图形数据库 Neo4j 中查找数据的 Cypher 查询示例：
 
-```
+```cypher
 MATCH (some_node:SomeLabel)-[:SOME_RELATIONSHIP]->(some_other_node:SomeLabel {some_property:'value'})
+```
+
+```cypher
+// Populate data.
+CREATE (facebook: Company {name: 'Facebook'})
+
+CREATE (clement: Candidate {name: 'Clement'})
+CREATE (antoine: Candidate {name: 'Antoine'})
+CREATE (simon: Candidate {name: 'Simon'})
+CREATE (alex: Interviewer {name: 'Alex'})
+CREATE (meghan: Interviewer {name: 'Meghan'})
+CREATE (marli: Interviewer {name: 'Marli'})
+CREATE (sandeep: Interviewer {name: 'Sandeep'})
+CREATE (molly:Interviewer {name: 'Molly' })
+CREATE (akshay: Interviewer {name: 'Akshay'})
+CREATE (aditya: Interviewer {name: 'Aditya'})
+CREATE (brandon: Interviewer {name: 'Brandon'})
+CREATE (pedro: Interviewer {name: 'Pedro'})
+CREATE (ryan: Interviewer {name: 'Ryan'})
+CREATE (xi: Interviewer {name: 'Xi'})
+CREATE (simran: Interviewer {name: 'Simran'})
+CREATE (amanda: Interviewer {name: 'Amanda'})
+
+CREATE (alex)-[:INTERVIEWED {score: 'passed'}]->(clement)
+CREATE (meghan)-[:INTERVIEWED {score: 'passed'}]->(clement)
+CREATE (simran)-[:INTERVIEWED {score: 'passed'}]->(clement)
+CREATE (molly)-[:INTERVIEWED {score: 'failed'}]->(clement)
+CREATE (marli)-[:INTERVIEWED {score: 'failed'}]->(antoine)
+CREATE (akshay)-[:INTERVIEWED {score: 'passed'}]->(antoine)
+CREATE (aditya)-[:INTERVIEWED {score: 'passed'}]-> (antoine)
+CREATE (meghan)-[:INTERVIEWED {score: 'passed'}]->(antoine)
+CREATE (marli)-[:INTERVIEWED {score: 'failed'}]->(simon)
+CREATE (meghan)-[:INTERVIEWED {score: 'failed'}]->(simon)
+CREATE (brandon)-[:INTERVIEWED {score: 'passed'}]->(simon)
+CREATE (xi)-[:INTERVIEWED {score: 'failed'}]->(simon)
+
+CREATE (ryan)-[:APPLIED {status: 'rejected'}]->(facebook)
+CREATE (simran)-[:APPLIED {status: 'accepted'}]->(facebook)
+CREATE (xi)-[:APPLIED {status: 'rejected'}]->(facebook)
+CREATE (molly)-[:APPLIED {status: 'rejected'}]-> (facebook)
+CREATE (alex)-[:APPLIED {status: 'rejected'}]-> (facebook);
+
+
+// Find the interviewers who interviewed and failed CLement
+// and who also applied to and got rejected by Facebook.
+MATCH (interviewer: Interviewer)-[:INTERVIEWED {score: 'failed'}]->(:Candidate {name:'Clement'})
+WHERE (interviewer)-[:APPLIED {status: 'rejected '}]->(:Company {name: 'Facebook'})
+RETURN interviewer.name;
 ```
 
 ## 空间数据库
