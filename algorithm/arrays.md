@@ -912,36 +912,134 @@ int main()
 
 ```python
 # O(n) time | O(1) space
-def sub_array_sort(array):
+def subarray_sort1(array):
+    # 由于数组必定是从小到大排序的, 所以可以先找出需要排序的最小值和最大值
     min_out_of_order = float("inf")
     max_out_of_order = float("-inf")
     for i in range(len(array)):
         num = array[i]
+        # 判断是否存在顺序有误并记录最小值和最大值
         if is_out_of_order(i, num, array):
             min_out_of_order = min(min_out_of_order, num)
             max_out_of_order = max(max_out_of_order, num)
+    # 如果没有找到顺序有误的情况, 即最大值或最小值没有发生变化, 则返回默认要求的数据
     if min_out_of_order == float("inf"):
         return [-1, -1]
+    # 从第一个位置开始找
     sub_array_left_idx = 0
+    # 根据需要排序的最小值, 从头开始定位这个值实际的位置
     while min_out_of_order >= array[sub_array_left_idx]:
         sub_array_left_idx += 1
+    # 从最后一个位置开始找
     sub_array_right_idx = len(array) - 1
+    # 根据需要排序的最大值, 从末尾开始定位这个值实际的位置
     while max_out_of_order <= array[sub_array_right_idx]:
         sub_array_right_idx -= 1
     return sub_array_left_idx, sub_array_right_idx
 
 
 def is_out_of_order(i, num, array):
+    # 如果是第一个位置, 只判断后面的数是否存在顺序有误
     if i == 0:
         return num > array[i + 1]
+    # 如果是末尾的位置, 只判断前面的数是否存在顺序有误
     if i == len(array) - 1:
         return num < array[i - 1]
+    # 如果是中间的位置, 需要判断前后两边是否存在顺序有误
     return num > array[i + 1] or num < array[i - 1]
 
 
+# O(n) time | O(1) space
+def subarray_sort2(array):
+    max_unsorted_value = float('-inf')
+    min_unsorted_value = float('inf')
+    # 循环的结束位置不是最后一个, 而是倒数第二个, 防止数组越界
+    for idx in range(len(array) - 1):
+        # 这里只是换了一种方式判断顺序有误的情况
+        if array[idx] > array[idx + 1]:
+            max_unsorted_value = max(max_unsorted_value, array[idx])
+            min_unsorted_value = min(min_unsorted_value, array[idx + 1])
+
+    if min_unsorted_value == float('inf'):
+        return [-1, -1]
+
+    start_idx = 0
+    end_idx = len(array) - 1
+
+    while start_idx < len(array) and array[start_idx] <= min_unsorted_value:
+        start_idx += 1
+
+    while end_idx >= 0 and array[end_idx] >= max_unsorted_value:
+        end_idx -= 1
+
+    return [start_idx, end_idx]
+
+
 if __name__ == '__main__':
-    a = [1, 2, 4, 7, 10, 11, 7, 12, 6, 7, 16, 18, 19]
-    print(sub_array_sort(a))
+    print(subarray_sort1([1, 2, 4, 7, 10, 11, 7, 12, 6, 7, 16, 18, 19]))
+    print(subarray_sort2([1, 2, 4, 7, 10, 11, 7, 12, 6, 7, 16, 18, 19]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+bool isOutOfOrder(size_t i, int num, vector<int> array);
+
+// O(n) time | O(1) space
+vector<int> subarraySort(vector<int> array)
+{
+    int minOutOfOrder = INT_MAX;
+    int maxOutOfOrder = INT_MIN;
+    for (size_t i = 0; i < array.size(); i++)
+    {
+        int num = array[i];
+        if (isOutOfOrder(i, num, array))
+        {
+            minOutOfOrder = min(minOutOfOrder, num);
+            maxOutOfOrder = max(maxOutOfOrder, num);
+        }
+    }
+    if (minOutOfOrder == INT_MAX)
+    {
+        return vector<int>{-1, -1};
+    }
+    int subarrayLeftIdx = 0;
+    while (minOutOfOrder >= array[subarrayLeftIdx])
+    {
+        subarrayLeftIdx++;
+    }
+    int subarrayRightIdx = array.size() - 1;
+    while (maxOutOfOrder <= array[subarrayRightIdx])
+    {
+        subarrayRightIdx--;
+    }
+    return vector<int>{subarrayLeftIdx, subarrayRightIdx};
+}
+
+bool isOutOfOrder(size_t i, int num, vector<int> array)
+{
+    if (i == 0)
+    {
+        return num > array[i + 1];
+    }
+    if (i == array.size() - 1)
+    {
+        return num < array[i - 1];
+    }
+    return num > array[i + 1] || num < array[i - 1];
+}
+
+int main()
+{
+    vector<int> source = {1, 2, 4, 7, 10, 11, 7, 12, 6, 7, 16, 18, 19};
+    source = subarraySort(source);
+    cout << source[0] << ", " << source[1];
+    return 0;
+}
 ```
 
 ## 最大连续范围
@@ -1607,4 +1705,4 @@ int main()
 }
 ```
 
-Last Modified 2022-01-27
+Last Modified 2022-01-28
