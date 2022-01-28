@@ -19,11 +19,11 @@ events {}
 
 http {
     upstream node-backend {
-        server 127.0.0.1:3003;
+        server 127.0.0.1:3000;
     }
 
     server {
-        listen 8081;
+        listen 5000;
 
         location / {
            proxy_set_header systemexpert-tutorial ture;
@@ -43,11 +43,13 @@ app.get("/hello", (req, res) => {
   res.send("Hello.\n");
 });
 
-app.listen(3003, () => console.log("Listening on port 3003!"));
+app.listen(3000, () => {
+    console.log("Listening on port 3000!");
+});
 ```
 
 ```bash
-curl http://localhost:8081/hello
+curl http://localhost:5000/hello
 ```
 
-Last Modified 2022-01-22
+Last Modified 2022-01-28

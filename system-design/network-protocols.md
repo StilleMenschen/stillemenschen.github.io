@@ -60,17 +60,17 @@ app.post("/hello", (req, res) => {
   res.send("Received POST request!\n");
 });
 
-app.listen(3000, () => console.log("Listening on port 3000."));
+app.listen(3000, () => {
+  console.log("Listening on port 3000.")
+});
 ```
 
 ```bash
 curl http://localhost:3000/hello
-```
 
-```bash
 curl --header 'content-type: application/json' \
      --data '{"foo": "bar"}' \
      http://localhost:3000/hello
 ```
 
-Last Modified 2022-01-22
+Last Modified 2022-01-28

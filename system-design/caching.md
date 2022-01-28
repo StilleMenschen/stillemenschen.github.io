@@ -64,17 +64,15 @@ app.get("/withcache/index.html", (req, res) => {
   });
 });
 
-app.listen(3002, () => {
-  console.log("Listening on port 3002!");
+app.listen(3000, () => {
+  console.log("Listening on port 3000!");
 });
 ```
 
 ```bash
-curl http://localhost:3002/nocache/index.html
+curl http://localhost:3000/nocache/index.html
+
+curl http://localhost:3000/withcache/index.html
 ```
 
-```bash
-curl http://localhost:3002/withcache/index.html
-```
-
-Last Modified 2022-01-22
+Last Modified 2022-01-28

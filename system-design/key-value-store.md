@@ -58,9 +58,9 @@ app.get("/withcache/index.html", (req, res) => {
   });
 });
 
-app.listen(3006, () => {
-  console.log("Listening on port 3006!");
+app.listen(3000, () => {
+  console.log("Listening on port 3000!");
 });
 ```
 
-Last Modified 2022-01-26
+Last Modified 2022-01-28

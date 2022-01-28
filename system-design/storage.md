@@ -66,29 +66,23 @@ app.get("/disk/:key", (req, res) => {
   }
 });
 
-app.listen(3001, () => {
-  console.log("Listening on port 3001!");
+app.listen(3000, () => {
+  console.log("Listening on port 3000!");
 });
 ```
 
 ```bash
 curl --header 'content-type: application/json' \
      --data '{"data": "This is some data in memory."}' \
-     http://localhost:3001/memory/bar
-```
+     http://localhost:3000/memory/bar
 
-```bash
-curl http://localhost:3001/memory/bar
-```
+curl http://localhost:3000/memory/bar
 
-```bash
 curl --header 'content-type: application/json' \
      --data '{"data": "This is some data in disk."}' \
-     http://localhost:3001/disk/bar
+     http://localhost:3000/disk/bar
+
+curl http://localhost:3000/disk/bar
 ```
 
-```bash
-curl http://localhost:3001/disk/bar
-```
-
-Last Modified 2022-01-22
+Last Modified 2022-01-28

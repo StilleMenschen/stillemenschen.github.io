@@ -23,12 +23,12 @@ events {}
 
 http {
     upstream node-backend {
-        server 127.0.0.1:3004 weight=2;
-        server 127.0.0.1:3005;
+        server 127.0.0.1:3001 weight=2;
+        server 127.0.0.1:3002;
     }
 
     server {
-        listen 8082;
+        listen 5000;
 
         location / {
            proxy_set_header systemexpert-tutorial ture;
@@ -43,26 +43,26 @@ const express = require("express");
 
 const app = express();
 
-const port = process.env.PORT;
+const PORT = process.env.PORT;
 
 app.get("/hello", (req, res) => {
   console.log("Headers:", req.headers);
-  res.send(`Hello from port ${port}.\n`);
+  res.send(`Hello from port ${PORT}.\n`);
 });
 
-app.listen(port, () => console.log(`Listening on port ${port}.`));
+app.listen(PORT, () => {
+    console.log(`Listening on port ${PORT}.`);
+});
 ```
 
 ```bash
-PORT=3004 node server.js
+PORT=3001 node server.js
+
+PORT=3002 node server.js
 ```
 
 ```bash
-PORT=3005 node server.js
+for i in {1..30}; do curl http://localhost:5000/hello; done
 ```
 
-```bash
-for i in {1..30}; do curl http://localhost:8082/hello; done
-```
-
-Last Modified 2022-01-22
+Last Modified 2022-01-28
