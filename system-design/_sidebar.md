@@ -12,3 +12,4 @@
   - [Relational Database](system-design/relational-database.md)
   - [Key-Value Store](system-design/key-value-store.md)
   - [Specialized Storage Paradigms](system-design/specialized-storage-paradigms.md)
+  - [Replication And Sharding](system-design/replication-and-sharding.md)
