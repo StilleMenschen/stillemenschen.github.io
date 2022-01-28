@@ -976,8 +976,9 @@ def subarray_sort2(array):
 
 
 if __name__ == '__main__':
-    print(subarray_sort1([1, 2, 4, 7, 10, 11, 7, 12, 6, 7, 16, 18, 19]))
-    print(subarray_sort2([1, 2, 4, 7, 10, 11, 7, 12, 6, 7, 16, 18, 19]))
+    source = [1, 2, 4, 7, 10, 11, 7, 12, 6, 7, 16, 18, 19]
+    print(subarray_sort1(source))
+    print(subarray_sort2(source))
 ```
 
 ```cpp
@@ -1685,7 +1686,7 @@ using namespace std;
 // O(n) time | O(1) space
 int kadanesAlgorithm( vector<int> array)
 {
-    int maxEndingHere = array[0] ;
+    int maxEndingHere = array[0];
     int maxSoFar = array[0];
     const int arraySize = array.size();
     for (int i = 1; i < arraySize; i++)
