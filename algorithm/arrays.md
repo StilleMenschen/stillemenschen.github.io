@@ -1050,26 +1050,39 @@ int main()
 ```python
 # O(n) time | O(n) space
 def largest_range(array):
-    best_range = list()
-    longest_length = 0
-    nums = dict()
-    for num in array:
-        nums[num] = True
-    for num in array:
-        if not nums[num]:
+    best_range = []  # 记录区间
+    longest_length = 0  # 记录区间的最大长度
+    numbers = {}
+    # 首先将所有数记录到字典中
+    for value in array:
+        # 设置为否, 标记为未访问
+        numbers[value] = False
+
+    for value in array:
+        # 如果已经访问过则不再访问
+        if numbers[value]:
             continue
-        nums[num] = False
+        # 标记为已访问
+        numbers[value] = True
+        # 当前值的长度初始为 1
         current_length = 1
-        left = num - 1
-        right = num + 1
-        while left in nums:
-            nums[left] = False
+        left = value - 1
+        right = value + 1
+        # 向左查找, 不断累加长度
+        while left in numbers:
+            # 标记为已访问
+            numbers[left] = True
             current_length += 1
+            # 如果符合递减值则继续扩大范围
             left -= 1
-        while right in nums:
-            nums[right] = False
+        # 向右查找, 不断累加长度
+        while right in numbers:
+            # 标记为已访问
+            numbers[right] = True
             current_length += 1
+            # 如果符合递增值则继续扩大范围
             right += 1
+        # 如果当前长度大于记录的长度则记录新的长度和区间
         if current_length > longest_length:
             longest_length = current_length
             best_range = [left + 1, right - 1]
@@ -1077,8 +1090,63 @@ def largest_range(array):
 
 
 if __name__ == '__main__':
-    a = [1, 11, 3, 0, 15, 5, 2, 4, 10, 7, 12, 6]
-    print(largest_range(a))
+    print(largest_range([8, 4, 2, 10, 3, 6, 7, 9, 1]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+using namespace std;
+
+// O(n) time | O(n) space
+vector<int> largestRange(vector<int> array)
+{
+    vector<int> bestRange = {};
+    int longestLength = 0;
+    unordered_map<int, bool> nums = {};
+    for (int num : array)
+    {
+        nums[num] = true;
+    }
+    for (int num : array)
+    {
+        if (!nums[num])
+        {
+            continue;
+        }
+        nums[num] = false;
+        int currentLength = 1;
+        int left = num - 1;
+        int right = num + 1;
+        while (nums.find(left) != nums.end())
+        {
+            nums[left] = false;
+            currentLength++;
+            left--;
+        }
+        while (nums.find(right) != nums.end())
+        {
+            nums[right] = false;
+            currentLength++;
+            right++;
+        }
+        if (currentLength > longestLength)
+        {
+            longestLength = currentLength;
+            bestRange = {left + 1, right - 1};
+        }
+    }
+    return bestRange;
+}
+
+int main()
+{
+    vector<int> source = {8, 4, 2, 10, 3, 6, 7, 9, 1};
+    source = largestRange(source);
+    cout << source[0] << ", " << source[1];
+    return 0;
+}
 ```
 
 ## 最少奖励
