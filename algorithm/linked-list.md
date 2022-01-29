@@ -587,86 +587,102 @@ int main()
 }
 ```
 
-## 反转链表
+## 反转单链表
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
-#define N 9
+```python
+class LinkedList:
+    def __init__(self, value):
+        self.value = value
+        self.next = None
 
-typedef struct Node
+
+# O(n) time | O(1) space - where n is the number of nodes in the Linked List
+def reverse_linked_list(head):
+    # 创建两个指针用于记录链表元素
+    previous_node, current_node = None, head
+    # 循环链表元素, 如果当前节点为空了, 表示已经到了链表末尾
+    while current_node is not None:
+        # 先缓存当前节点的下一个节点
+        next_node = current_node.next
+        # 将当前元素的节点指向它的前一个节点
+        current_node.next = previous_node
+        # 前一个节点指向当前节点
+        previous_node = current_node
+        # 当前节点指向下一个节点
+        current_node = next_node
+    return previous_node
+
+
+def constructor_linked_list(length):
+    head_element = LinkedList(0)
+    point = head_element
+    for i in range(1, length):
+        point.next = LinkedList(i)
+        point = point.next
+    return head_element
+
+
+if __name__ == '__main__':
+    source = constructor_linked_list(10)
+    source = reverse_linked_list(source)
+    while source is not None:
+        print(source.value, end=' ')
+        source = source.next
+```
+
+```cpp
+#include <iostream>
+using namespace std;
+
+class LinkedList
 {
-    struct Node *prev;
-    struct Node *next;
-    int value = -1;
-} Node;
+public:
+    int value;
+    LinkedList *next;
 
-typedef struct LinkedList
-{
-    Node* head;
-    Node* tail;
-    int size;
-} LinkedList;
-
-void initLinkedList(LinkedList** list, const int n)
-{
-    Node *head, *tail, *node;
-    head = (Node*)malloc(sizeof(Node));
-    head->value = 0;
-    tail = head;
-    int i = 1;
-    for (; i <= n; i++)
+    LinkedList(int value)
     {
-        node = (Node*)malloc(sizeof(Node));
-        node->value = i;
-        tail->next = node;
-        node->prev = tail;
-        tail = node;
+        this->value = value;
+        this->next = nullptr;
     }
-    tail->next = NULL;
-    (*list)->head = head;
-    (*list)->tail = tail;
-    (*list)->size = i;
+};
+
+// O(n) time | O(1) space - where n is the number of nodes in the Linked List
+LinkedList *reverseLinkedList(LinkedList *head)
+{
+    LinkedList *previousNode = nullptr;
+    LinkedList *currentNode = head;
+    while (currentNode != nullptr)
+    {
+        LinkedList *nextNode = currentNode->next;
+        currentNode->next = previousNode;
+        previousNode = currentNode;
+        currentNode = nextNode;
+    }
+    return previousNode;
 }
 
-void printLinkedLists(Node* node)
+LinkedList *constructorLinkedList(int length)
 {
-    while ( node != NULL )
+    LinkedList *head = new LinkedList(0);
+    LinkedList *point = head;
+    for (int i = 1; i < length; i++)
     {
-        printf("%d ", node->value);
-        node = node->next;
+        point->next = new LinkedList(i);
+        point = point->next;
     }
-    printf("\n");
-}
-
-/* O(n) time | O(1) space */
-Node* reverseLinkedList(Node* head)
-{
-    if ( head == NULL )
-    {
-        return head;
-    }
-    Node *p1, *p2, *p3;
-    p1 = head;
-    p2 = p1->next;
-    head->next = NULL;
-    while ( p2 != NULL )
-    {
-        p3 = p2->next;
-        p2->next = p1;
-        p1 = p2;
-        p2 = p3;
-    }
-    return p1;
+    return head;
 }
 
 int main()
 {
-    LinkedList* list = (LinkedList*)malloc(sizeof(LinkedList));
-    initLinkedList(&list, N);
-    printLinkedLists(list->head);
-    Node *node = reverseLinkedList(list->head);
-    printLinkedLists(node);
+    LinkedList *head = constructorLinkedList(10);
+    head = reverseLinkedList(head);
+    while (head != nullptr)
+    {
+        cout << head->value << " ";
+        head = head->next;
+    }
     return 0;
 }
 ```
@@ -1388,4 +1404,4 @@ int main()
 }
 ```
 
-Last Modified 2022-01-05
+Last Modified 2022-01-29
