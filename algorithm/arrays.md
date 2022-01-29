@@ -1151,96 +1151,107 @@ int main()
 
 ## 最少奖励
 
-老师有一系列学生的分数，老师必须根据学生的分数购买奖励给他们。奖励金额必须遵循 2 个标准：1. 每个学生必须至少获得一项奖励
-；2. 两个相邻学生中排名较高的学生必须比另一个获得更多的奖励。
+老师有一系列学生的分数，老师必须根据学生的分数购买奖励给他们。奖励金额必须遵循 2 个标准：
+
+1. 每个学生必须至少获得一项奖励
+2. 两个相邻学生中排名较高的学生必须比另一个获得更多的奖励
 
 ```python
 # O(n^2) time | O(n) space
 def min_rewards1(scores):
+    # 先初始化奖励为 1, 因为至少要给一个奖励
     rewards = [1 for _ in scores]
+    # 从第二个位置开始循环判断, 防止数组越界
     for i in range(1, len(scores)):
-        j = i - 1
+        j = i - 1  # 和前一个比较的
         if scores[i] > scores[j]:
+            # 如果当前的分数比前一个大, 则需要增加奖励, 因为相邻的分数之间必须高分的奖励数比低分的奖励数大
             rewards[i] = rewards[j] + 1
         else:
+            # 如果当前分数比前一个小, 则需要从后向前累加奖励
             while j >= 0 and scores[j] > scores[j + 1]:
+                # 因为前面的判断里面可能已经对奖励进行过累加了
+                # 所以这里加了判断取当前奖励和累加奖励中的最大值
                 rewards[j] = max(rewards[j], rewards[j + 1] + 1)
                 j -= 1
+    # 将所有奖励数求和
     return sum(rewards)
-
-
-# O(n^2) time | O(n) space
-def min_rewards4(scores):
-    length = len(scores)
-    rewards = [1 for _ in scores]
-    position = 0
-    while position < length:
-        plus_rewards(position, rewards, scores)
-        position += 1
-    return sum(rewards)
-
-
-def plus_rewards(i, rewards, array):
-    if i == 0 or i == len(array) - 1:
-        return False
-    n = i - 1
-    if array[n] > array[i]:
-        rewards[n] = rewards[n] + 1
-        plus_rewards(n, rewards, array)
-    n = i + 1
-    if array[n] > array[i]:
-        rewards[n] = rewards[n] + 1
-        plus_rewards(n, rewards, array)
 
 
 # O(n) time | O(n) space
 def min_rewards2(scores):
+    # 先初始化奖励为 1, 因为至少要给一个奖励
     rewards = [1 for _ in scores]
+    # 1. 先找出分数最小的索引, 即当前分数比左边和右边的分数都小的位置
     local_min_idx_list = get_local_min_idx(scores)
+    # 2. 通过最小分数位置, 同时向左和向右累加奖励
+    # 这里需要注意的是最小分数位置是从左向右计算出来的
+    # 所以累加奖励的时候需要注意不能覆盖掉已经累加过的奖励
     for local_min_idx in local_min_idx_list:
         expand_from_local_min_idx(local_min_idx, scores, rewards)
+    # 将所有奖励数求和
     return sum(rewards)
 
 
 def get_local_min_idx(array):
     length = len(array)
+    # 如果只有一个
     if length == 1:
         return [0]
     local_min_idx = []
-    for i in range(length):
-        if i == 0 and array[i] < array[i + 1]:
-            local_min_idx.append(i)
-        if i == length - 1 and array[i] < array[i - 1]:
-            local_min_idx.append(i)
-        if i == 0 or i == length - 1:
-            continue
-        if array[i] < array[i + 1] and array[i] + array[i - 1]:
+    # 开头位置只需要判断右边的分数
+    if array[0] < array[1]:
+        local_min_idx.append(0)
+    # 末尾位置只需要判断左边的分数
+    if array[length - 1] < array[length - 2]:
+        local_min_idx.append(length - 1)
+    # 由于开头位置和末尾位置已经处理过了, 所以这里的循环排除掉, 直接从第二个位置开始到倒数第二个位置
+    for i in range(1, length - 1):
+        # 同时判断左边和右边的分数是否都大于当前分数
+        if array[i] < array[i + 1] and array[i] < array[i - 1]:
             local_min_idx.append(i)
     return local_min_idx
 
 
 def expand_from_local_min_idx(local_min_idx, scores, rewards):
+    # 左边位置
     left_idx = local_min_idx - 1
+    # 如果当前分数总是小于前一个的分数, 则累加奖励
     while left_idx >= 0 and scores[left_idx] > scores[left_idx + 1]:
+        # 因为向左查找可能会在向右查找已经执行过之后才执行
+        # 所以这里需要判断取当前奖励和累加奖励中的最大值
         rewards[left_idx] = max(rewards[left_idx], rewards[left_idx + 1] + 1)
         left_idx -= 1
+    # 右边位置
     right_idx = local_min_idx + 1
     length = len(scores)
+    # 如果当前分数总是小于后一个的分数, 则累加奖励
     while right_idx < length and scores[right_idx] > scores[right_idx - 1]:
+        # 因为向右查找必定是首次执行的, 所以这里不需要进行最大值的判断
         rewards[right_idx] = rewards[right_idx - 1] + 1
         right_idx += 1
 
 
 # O(n) time | O(n) space
 def min_rewards3(scores):
-    rewards = [1 for _ in range(len(scores))]
+    # 先初始化奖励为 1, 因为至少要给一个奖励
+    rewards = [1 for _ in scores]
+    # 1. 从左向右处理, 只处理当前分数比前一个分数大的情况
+    # 因为需要判断前一个分数, 所以从第二个位置开始, 防止数组越界
     for i in range(1, len(scores)):
+        # 判断前一个分数和当前分数
         if scores[i] > scores[i - 1]:
+            # 累加奖励
             rewards[i] = rewards[i - 1] + 1
+    # 2. 从右向左处理, 只处理当前分数比后一个分数大的情况
+    # 因为需要判断后一个分数, 所以要从倒数第二个位置开始, 防止数组越界
     # for i in reversed(range(len(scores) - 1)):
     for i in range(len(scores) - 2, -1, -1):
+        # 判断后一个分数和当前分数
         if scores[i] > scores[i + 1]:
+            # 由于前一个步骤中从左向右的处理可能累加过奖励, 这里需要判断最大值, 取最优的奖励
             rewards[i] = max(rewards[i], rewards[i + 1] + 1)
+    # 将所有奖励数求和
     return sum(rewards)
 
 
@@ -1249,7 +1260,124 @@ if __name__ == '__main__':
     print(min_rewards1(a))
     print(min_rewards2(a))
     print(min_rewards3(a))
-    print(min_rewards4(a))
+```
+
+```cpp
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <numeric>
+using namespace std;
+
+// O(n^2) time | O(n) space - where n is the length of the input array
+int minRewards1(vector<int> scores)
+{
+    const size_t length = scores.size();
+    vector<int> rewards = vector<int>(length, 1);
+    for (size_t i = 1; i < length; i++)
+    {
+        size_t j = i - 1;
+        if (scores[i] > scores[j])
+        {
+            rewards[i] = rewards[j] + 1;
+        }
+        else
+        {
+            while (j >= 0 && scores[j] > scores[j + 1])
+            {
+                rewards[j] = max(rewards[j], rewards[j + 1] + 1);
+                j--;
+            }
+        }
+    }
+    return accumulate(rewards.begin(), rewards.end(), 0);
+}
+
+vector<int> getLocalMinIdxs(vector<int> array);
+void expandFromLocalMinIdx(int localMinIdx, vector<int> scores,
+                           vector<int> *rewards);
+
+// O(n) time | O(n) space - where n is the length of the input array
+int minRewards2(vector<int> scores)
+{
+    vector<int> rewards = vector<int>(scores.size(), 1);
+    vector<int> localMinIdxs = getLocalMinIdxs(scores);
+    for (int localMinIdx : localMinIdxs)
+    {
+        expandFromLocalMinIdx(localMinIdx, scores, &rewards);
+    }
+    return accumulate(rewards.begin(), rewards.end(), 0);
+}
+
+vector<int> getLocalMinIdxs(vector<int> array)
+{
+    if (array.size() == 1)
+        return vector<int>{0};
+    vector<int> localMinIdxs = {};
+    const int length = array.size();
+    for (int i = 0; i < length; i++)
+    {
+        if (i == 0 && array[i] < array[i + 1])
+            localMinIdxs.push_back(i);
+
+        if (i == length - 1 && array[i] < array[i - 1])
+            localMinIdxs.push_back(i);
+
+        if (i == 0 || i == length - 1)
+            continue;
+        if (array[i] < array[i + 1] && array[i] < array[i - 1])
+            localMinIdxs.push_back(i);
+    }
+    return localMinIdxs;
+}
+
+void expandFromLocalMinIdx(int localMinIdx, vector<int> scores,
+                           vector<int> *rewards)
+{
+    int leftIdx = localMinIdx - 1;
+    while (leftIdx >= 0 && scores[leftIdx] > scores[leftIdx + 1])
+    {
+        rewards->at(leftIdx) =
+            max(rewards->at(leftIdx), rewards->at(leftIdx + 1) + 1);
+        leftIdx--;
+    }
+    int rightIdx = localMinIdx + 1;
+    const int length = scores.size();
+    while (rightIdx < length && scores[rightIdx] > scores[rightIdx - 1])
+    {
+        rewards->at(rightIdx) = rewards->at(rightIdx - 1) + 1;
+        rightIdx++;
+    }
+}
+
+// O(n) time | O(n) space - where n is the length of the input array
+int minRewards3(vector<int> scores)
+{
+    vector<int> rewards = vector<int>(scores.size(), 1);
+    const int length = scores.size();
+    for (int i = 1; i < length; i++)
+    {
+        if (scores[i] > scores[i - 1])
+            rewards[i] = rewards[i - 1] + 1;
+    }
+    for (int i = length - 2; i >= 0; i--)
+    {
+        if (scores[i] > scores[i + 1])
+        {
+            rewards[i] = max(rewards[i], rewards[i + 1] + 1);
+        }
+    }
+    return accumulate(rewards.begin(), rewards.end(), 0);
+}
+
+int main()
+{
+    vector<int> source = {8, 4, 2, 1, 3, 6, 7, 9, 5};
+    cout << minRewards1(source) << endl;
+    cout << minRewards2(source) << endl;
+    cout << minRewards3(source) << endl;
+    return 0;
+}
 ```
 
 ## Z 型遍历
@@ -1584,7 +1712,7 @@ if __name__ == '__main__':
 
 ## 第一个重复值
 
-给定一个整数数组，数组的数值范围在1到N之间，而N为数组的长度，找出数组中第一个出现重复的值
+给定一个整数数组，数组的数值范围在 1 到 N 之间，而 N 为数组的长度，找出数组中第一个出现重复的值
 
 ```python
 # O(n) time | O(n) space
@@ -1774,4 +1902,4 @@ int main()
 }
 ```
 
-Last Modified 2022-01-28
+Last Modified 2022-01-29
