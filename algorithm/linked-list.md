@@ -469,76 +469,90 @@ int main()
 
 ## 找出循环节点
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
-#define N 9
+```python
+class LinkedList:
+    def __init__(self, value):
+        self.value = value
+        self.next = None
 
-typedef struct Node
-{
-    struct Node *prev;
-    struct Node *next;
-    int value = -1;
-} Node;
 
-typedef struct LinkedList
-{
-    Node* head;
-    Node* tail;
-    int size;
-} LinkedList;
+# O(n) time | O(1) space
+def find_loop(head):
+    # 定义第一个指针从第二个位置开始
+    first = head.next
+    # 定义第二个指针从第三个位置开始
+    second = head.next.next
+    # 由于第二个指针比第一个指针多走一步
+    # 在循环的链表中必定会相遇
+    while first != second:
+        first = first.next  # 第一个指针只走一步
+        second = second.next.next  # 第二个指针走两步
+    first = head  # 重新将第一个指针还原到第一个位置
+    # 同时移动两个指针, 但两个指针都只走一步
+    while first != second:
+        first = first.next
+        second = second.next
+    return first
 
-void initLinkedList(LinkedList** list, const int n)
+
+"""
+假设循环节点距离头节点的距离为 D, 从循环节点开始到第一次循环时两个指针相遇的位置距离为 P
+那么第一个指针走过的位置为 X = D + P, 但第二个指针走过的位置为 2X = 2D + 2P
+链表中所有元素的总和为 T, 而从两个节点相遇的位置到循环的节点距离为 R, 那么可以得出 T = D + P + R 和 R = T - D - P
+因为第二个指针一定是经过了两次出现循环的节点才遇到第一个指针, 所以也必定经过了一次指针相遇的位置, 而从循环节点到相遇的位置为 P
+所以可以推导出 T = 2D + 2P - P, 化简后为 T = 2D + P, 把这个式子代入求出 R 的式子就可以得到 R = 2D + P - D - P, 化简后为 R = D
+因为 R = D, 所以第二次移动指针的时候, 两个指针都只走一步, 当两个指针相遇后就是距离 D 的循环节点的位置了
+"""
+
+
+def constructor_linked_list(length, loop_value):
+    head_element = LinkedList(0)
+    point = head_element
+    loop_element = None
+    for i in range(1, length):
+        point.next = LinkedList(i)
+        point = point.next
+        if i == loop_value:
+            loop_element = point
+    point.next = loop_element
+    return head_element
+
+
+if __name__ == '__main__':
+    source = constructor_linked_list(10, 4)
+    print(find_loop(source).value)
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class LinkedList
 {
-    Node *head, *tail, *node;
-    head = (Node*)malloc(sizeof(Node));
-    head->value = 0;
-    tail = head;
-    int i = 1;
-    for (; i <= n; i++)
+public:
+    int value;
+    LinkedList *next;
+
+    LinkedList(int val)
     {
-        node = (Node*)malloc(sizeof(Node));
-        node->value = i;
-        tail->next = node;
-        node->prev = tail;
-        tail = node;
-    }
-    node = head;
-    while ( node->value != 4 )
-    {
-        node = node->next;
-    }
-    tail->next = node;
-    (*list)->head = head;
-    (*list)->tail = tail;
-    (*list)->size = 10;
-}
+        value = val;
+        next = nullptr;
+    };
+};
 
-void printLinkedLists(Node* node, const int n)
+// O(n) time | O(1) space
+LinkedList *findLoop(LinkedList *head)
 {
-    while ( node != NULL )
-    {
-        printf("%d ", node->value);
-        if ( node->value == n) {
-            break;
-        }
-        node = node->next;
-    }
-    printf("\n");
-}
-
-/* O(n) time | O(1) space */
-Node* findLoop(Node* head)
-{
-    Node *first = head->next;
-    Node *second = head->next->next;
-    while ( first != second )
+    LinkedList *first = head->next;
+    LinkedList *second = head->next->next;
+    while (first != second)
     {
         first = first->next;
         second = second->next->next;
     }
     first = head;
-    while ( first != second )
+    while (first != second)
     {
         first = first->next;
         second = second->next;
@@ -546,13 +560,29 @@ Node* findLoop(Node* head)
     return first;
 }
 
+LinkedList *constructorLinkedList(int length, int loopValue)
+{
+    LinkedList *head = new LinkedList(0);
+    LinkedList *point = head;
+    LinkedList *loopElement = nullptr;
+    for (int i = 1; i < length; i++)
+    {
+        point->next = new LinkedList(i);
+        point = point->next;
+        if (i == loopValue)
+        {
+            loopElement = point;
+        }
+    }
+    point->next = loopElement;
+    return head;
+}
+
 int main()
 {
-    LinkedList* list = (LinkedList*)malloc(sizeof(LinkedList));
-    initLinkedList(&list, N);
-    printLinkedLists(list->head, N);
-    Node *node = findLoop(list->head);
-    printf("loop value is %d\n", node->value);
+    LinkedList *head = constructorLinkedList(10, 4);
+    LinkedList *temp = findLoop(head);
+    cout << temp->value;
     return 0;
 }
 ```
