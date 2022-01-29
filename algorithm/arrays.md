@@ -1383,33 +1383,39 @@ int main()
 ## Z 型遍历
 
 ```python
-# O(n) time | O(n) space
-def zigzag_traverse(array):
+# O(n) time | O(n) space - where n is the total number of elements in the two-dimensional array
+def zigzag_traverse1(array):
+    # 记录宽高
     height = len(array) - 1
     width = len(array[0]) - 1
-    result = list()
-    row, col = 0, 0
-    going_down = True
+    result = []
+    row, col = 0, 0  # 从左上角开始
+    going_down = True  # 用来判断方向
+    # 没有超出边界则继续遍历
     while not is_out_of_bounds(row, col, height, width):
         result.append(array[row][col])
-        if going_down:
+        if going_down:  # 方向为左下
+            # 是否到达边界
             if col == 0 or row == height:
-                going_down = False
-                if row == height:
-                    col += 1
-                else:
-                    row += 1
+                going_down = False  # 调整方向
+                if row == height:  # 达到了下边界
+                    col += 1  # 向右移动
+                else:  # 达到了左边界
+                    row += 1  # 向下移动
             else:
+                # 没有达到边界, 继续朝左下方向
                 row += 1
                 col -= 1
-        else:
+        else:  # 方向为右上
+            # 是否到达边界
             if row == 0 or col == width:
-                going_down = True
-                if col == width:
-                    row += 1
-                else:
-                    col += 1
+                going_down = True  # 调整方向
+                if col == width:  # 达到了右边界
+                    row += 1  # 向下移动
+                else:  # 达到了上边界
+                    col += 1  # 向右移动
             else:
+                # 没有达到边界, 继续朝右上方向
                 row -= 1
                 col += 1
     return result
@@ -1419,15 +1425,146 @@ def is_out_of_bounds(row, col, height, width):
     return row < 0 or row > height or col < 0 or col > width
 
 
+BOTTOM_LEFT = 1
+TOP_RIGHT = 2
+
+
+# O(n) time | O(n) space - where n is the total number of elements in the two-dimensional array
+def zigzag_traverse2(array):
+    traverse_list = []
+    direction = BOTTOM_LEFT  # 用来判断方向
+    row, col = 0, 0
+    height = len(array)
+    width = len(array[row])
+    # 由于遍历的数量固定是矩阵的元素数量, 所以可以直接循环对应的次数
+    for _ in range(height * width):
+        traverse_list.append(array[row][col])
+        if direction == TOP_RIGHT:
+            if row == 0 or col == width - 1:
+                if col < width - 1:  # 判断是否可以继续向右
+                    col += 1
+                else:
+                    row += 1
+                direction = BOTTOM_LEFT  # 切换方向为左下
+            else:
+                row -= 1
+                col += 1
+            continue  # 跳到下一个循环
+        if direction == BOTTOM_LEFT:
+            if col == 0 or row == height - 1:
+                if row < height - 1:  # 判断是否可以继续向下
+                    row += 1
+                else:
+                    col += 1
+                direction = TOP_RIGHT  # 切换方向为右上
+            else:
+                row += 1
+                col -= 1
+
+    return traverse_list
+
+
 if __name__ == '__main__':
-    a = [
-        [ 1,  3,  4, 10, 11],
-        [ 2,  5,  9, 12, 19],
-        [ 6,  8, 13, 18, 20],
-        [ 7, 14, 17, 21, 24],
-        [15, 16, 22, 23, 25],
+    sources = [
+        [[1, 3, 4, 10],
+         [2, 5, 9, 11],
+         [6, 8, 12, 15],
+         [7, 13, 14, 16]],
+        [[1, 2, 3, 4, 5]],
+        [[1], [2], [3], [4], [5]]
     ]
-    print(zigzag_traverse(a))
+    for source in sources:
+        print(zigzag_traverse1(source))
+        print(zigzag_traverse2(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+bool isOutOfBounds(int row, int col, int height, int width);
+
+// O(n) time | O(n) space - where n is the total number of elements in the two-dimensional array
+vector<int> zigzagTraverse(vector<vector<int>> array)
+{
+    int height = array.size() - 1;
+    int width = array[0].size() - 1;
+    vector<int> result = {};
+    int row = 0;
+    int col = 0;
+    bool goingDown = true;
+    while (!isOutOfBounds(row, col, height, width))
+    {
+        result.push_back(array[row][col]);
+        if (goingDown)
+        {
+            if (col == 0 || row == height)
+            {
+                goingDown = false;
+                if (row == height)
+                {
+                    col++;
+                }
+                else
+                {
+                    row++;
+                }
+            }
+            else
+            {
+                row++;
+                col--;
+            }
+        }
+        else
+        {
+            if (row == 0 || col == width)
+            {
+                goingDown = true;
+                if (col == width)
+                {
+                    row++;
+                }
+                else
+                {
+                    col++;
+                }
+            }
+            else
+            {
+                row--;
+                col++;
+            }
+        }
+    }
+    return result;
+}
+
+bool isOutOfBounds(int row, int col, int height, int width)
+{
+    return row < 0 || row > height || col < 0 || col > width;
+}
+
+void iterArray(vector<int> array)
+{
+    for (const int e : array)
+    {
+        cout << e << " ";
+    }
+    cout << endl;
+}
+
+int main()
+{
+    iterArray(zigzagTraverse({{1, 3, 4, 10},
+                              {2, 5, 9, 11},
+                              {6, 8, 12, 15},
+                              {7, 13, 14, 16}}));
+    iterArray(zigzagTraverse({{1, 2, 3, 4, 5}}));
+    iterArray(zigzagTraverse({{1}, {2}, {3}, {4}, {5}}));
+    return 0;
+}
 ```
 
 ## 寻找合适公寓
