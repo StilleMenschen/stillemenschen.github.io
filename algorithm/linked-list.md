@@ -1034,98 +1034,146 @@ int main(void)
 }
 ```
 
-## 提取末尾元素到头节点
+## 移动链表
 
-根据给定数量提取末尾倒数第 N 个节点到头节点
+根据指定的整数 K 移动链表，即末尾的节点变成头节点，末尾节点的前一个节点变成末尾，K 可能是正数也可能是负数，
+负数表示向后移动，即头节点变成末尾，头节点的下一个节点变成头节点
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
-#define N 9
+```python
+class LinkedList:
+    def __init__(self, value):
+        self.value = value
+        self.next = None
 
-typedef struct Node
+
+# O(n) time | O(1) space - where n is the number of nodes in the Linked List
+def shift_linked_list(head, k):
+    list_length = 1
+    list_tail = head
+    # 首先测量链表的长度
+    while list_tail.next is not None:
+        list_tail = list_tail.next
+        list_length += 1
+
+    # 通过 K 的绝对值计算偏移量, 用来计算需要转为链表末尾的实际位置
+    # K 的值有可能超过了链表的长度, 所以这里做取模的计算
+    offset = abs(k) % list_length
+    if offset == 0:
+        # 计算偏移量为 0 表示不需要进行操作, 直接返回原始的链表
+        return head
+
+    # 由于 K 的值为正负整数, 所以这里有两种情况
+    # 当 K 的值为正数, 新的链表末尾位置为链表长度减去偏移量
+    # 当 K 的值为负数, 新的链表末尾位置为偏移量
+    new_tail_position = list_length - offset if k > 0 else offset
+    new_tail = head  # 初始化新的尾节点
+    # 注意是从 1 开始计算的, 与数组有所区别
+    for i in range(1, new_tail_position):
+        new_tail = new_tail.next
+
+    # 新增链表头是新的链表末尾下一个元素
+    new_head = new_tail.next
+    # 因为已经记录了新的链表头, 这里去掉链表末尾的下一个元素关联
+    new_tail.next = None
+    # 原来的链表末尾指向原来的链表头
+    list_tail.next = head
+    # 返回新的链表头
+    return new_head
+
+
+def constructor_linked_list(length):
+    head_element = LinkedList(0)
+    point = head_element
+    for i in range(1, length):
+        point.next = LinkedList(i)
+        point = point.next
+    return head_element
+
+
+def iter_linked_list(ll):
+    while ll is not None:
+        print(ll.value, end=' ')
+        ll = ll.next
+    print()
+
+
+if __name__ == '__main__':
+    iter_linked_list(shift_linked_list(constructor_linked_list(10), 6))
+    iter_linked_list(shift_linked_list(constructor_linked_list(10), -12))
+```
+
+```cpp
+#include <iostream>
+using namespace std;
+
+class LinkedList
 {
-    struct Node *prev;
-    struct Node *next;
-    int value = -1;
-} Node;
+public:
+    int value;
+    LinkedList *next;
 
-typedef struct LinkedList
-{
-    Node* head;
-    Node* tail;
-    int size;
-} LinkedList;
-
-void initLinkedList(LinkedList** list, const int n)
-{
-    Node *head, *tail, *node;
-    head = (Node*)malloc(sizeof(Node));
-    head->value = 0;
-    tail = head;
-    int i = 1;
-    for (; i <= n; i++)
+    LinkedList(int value)
     {
-        node = (Node*)malloc(sizeof(Node));
-        node->value = i;
-        tail->next = node;
-        node->prev = tail;
-        tail = node;
+        this->value = value;
+        next = nullptr;
     }
-    tail->next = NULL;
-    (*list)->head = head;
-    (*list)->tail = tail;
-    (*list)->size = i;
-}
+};
 
-void printLinkedLists(Node* node)
+// O(n) time | O(1) space - where n is the number of nodes in the Linked List
+LinkedList *shiftLinkedList(LinkedList *head, int k)
 {
-    while ( node != NULL )
-    {
-        printf("%d ", node->value);
-        node = node->next;
-    }
-    printf("\n");
-}
-
-int abs(const int num)
-{
-    return ((num >> 31) ^ num) - (num >> 31);
-}
-
-/* O(n) time | O(1) space */
-Node* shiftLinkedList(Node* head, const int k)
-{
-    int listLength = 0;
-    Node *listTail = head;
-    while ( listTail->next != NULL )
+    int listLength = 1;
+    LinkedList *listTail = head;
+    while (listTail->next != nullptr)
     {
         listTail = listTail->next;
         listLength++;
     }
-    const int offset = abs(k) % listLength;
-    if ( offset == 0 ) return head;
 
-    const int newTailPosition = k > 0 ? listLength - offset : offset;
-    Node *newTail = head;
-    int i = 0;
-    while ( i++ < newTailPosition )
+    int offset = abs(k) % listLength;
+    if (offset == 0)
+        return head;
+    int newTailPosition = k > 0 ? listLength - offset : offset;
+    LinkedList *newTail = head;
+    for (int i = 1; i < newTailPosition; i++)
     {
         newTail = newTail->next;
     }
-    Node *newHead = newTail->next;
-    newTail->next = NULL;
+
+    LinkedList *newHead = newTail->next;
+    newTail->next = nullptr;
     listTail->next = head;
     return newHead;
 }
 
+LinkedList *constructorLinkedList(int length)
+{
+    LinkedList *head = new LinkedList(0);
+    LinkedList *point = head;
+    for (int i = 1; i < length; i++)
+    {
+        point->next = new LinkedList(i);
+        point = point->next;
+    }
+    return head;
+}
+
+void iterLinkedList(LinkedList *head)
+{
+    while (head != nullptr)
+    {
+        cout << head->value << " ";
+        head = head->next;
+    }
+    cout << endl;
+}
+
 int main()
 {
-    LinkedList* list = (LinkedList*)malloc(sizeof(LinkedList));
-    initLinkedList(&list, N);
-    printLinkedLists(list->head);
-    Node *node = shiftLinkedList(list->head, 2);
-    printLinkedLists(node);
+    LinkedList *head = constructorLinkedList(10);
+    iterLinkedList(shiftLinkedList(head, 6));
+    head = constructorLinkedList(10);
+    iterLinkedList(shiftLinkedList(head, -12));
     return 0;
 }
 ```
