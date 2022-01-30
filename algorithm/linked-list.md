@@ -689,95 +689,236 @@ int main()
 
 ## 合并链表
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
-#define GET_ARRAY_LEN(array, len) { len = sizeof(array)/sizeof(array[0]); }
+```python
+class LinkedList:
+    def __init__(self, value):
+        self.value = value
+        self.next = None
 
-typedef struct Node
-{
-    struct Node *prev;
-    struct Node *next;
-    int value = -1;
-} Node;
 
-typedef struct LinkedList
-{
-    Node* head;
-    Node* tail;
-    int size;
-} LinkedList;
+# O(n + m) time | O(1) space - where n is the number of nodes in the first
+# Linked List and m is the number of nodes in the second Linked List
+def merge_linked_lists1(head_one, head_two):
+    p1 = head_one
+    p1_prev = None  # 跟踪指针, 用来缓存前一个元素
+    p2 = head_two
+    # 如果链表中仍然有元素未遍历完则循环
+    while p1 is not None and p2 is not None:
+        # 如果第一个指针的值小于第二个指针
+        if p1.value < p2.value:
+            p1_prev = p1  # 缓存第一个指针
+            p1 = p1.next  # 移动第一个指针到下一个元素
+        else:
+            if p1_prev is not None:
+                # 由于前面 prev 缓存了第一个指针的前一个元素
+                # 为了保证链表不会断开, 需要先将下一个元素指向第二个指针
+                p1_prev.next = p2
+            p1_prev = p2  # 缓存第二个指针
+            p2 = p2.next  # 移动第二个指针到下一个元素
+            p1_prev.next = p1  # 将缓存的前一个指针指向第一个指针
+    # 如果第一个指针为空, 则将第二个指针剩余的元素连接到第一个链表中
+    if p1 is None:
+        p1_prev.next = p2
+    # 由于要求返回的链表必须开始是最小的数, 所以判断两个链表值大小后返回
+    return head_one if head_one.value < head_two.value else head_two
 
-void initLinkedList(LinkedList** list, const int array[], const int n)
+
+# O(n + m) time | O(n + m) space - where n is the number of nodes in the first
+# Linked List and m is the number of nodes in the second Linked List
+def merge_linked_lists2(head_one, head_two):
+    recursive_merge(head_one, head_two, None)
+    return head_one if head_one.value < head_two.value else head_two
+
+
+def recursive_merge(p1, p2, p1_prev):
+    if p1 is None:
+        p1_prev.next = p2
+        return False
+    if p2 is None:
+        return False
+
+    if p1.value < p2.value:
+        recursive_merge(p1.next, p2, p1)
+    else:
+        if p1_prev is not None:
+            p1_prev.next = p2
+        new_p2 = p2.next
+        p2.next = p1
+        recursive_merge(p1, new_p2, p2)
+
+
+def merge_linked_lists3(head_one, head_two):
+    # 创建两个指针, 第一个指针保证指向最小值的链表
+    first_node = head_one
+    second_node = head_two
+    if head_one.value > head_two.value:
+        first_node = head_two
+        second_node = head_one
+    while first_node is not None and second_node is not None:
+        # 由于是以第一个指针为主的方式, 所以第二个指针没有元素了就可以结束了
+        if second_node is None:
+            break
+        # 第一个指针的链表没有元素了, 则将第二个指针剩余的元素连接到第一个指针并结束
+        if first_node.next is None:
+            first_node.next = second_node
+            break
+        next_value = first_node.next.value
+        # 比较第一第二个和第一个指针的下一个元素
+        if first_node.value <= second_node.value < next_value:
+            # 先缓存第二个指针的下一个元素
+            next_node = second_node.next
+            # 将第二个指针的下一个指向第一个指针的下一个
+            second_node.next = first_node.next
+            # 将第一个指针的下一个指向第二个指针
+            first_node.next = second_node
+            # 切换第二个指针为前面缓存的, 原本是第二个指针的下一个
+            second_node = next_node
+        # 移动第一个指针到下一个
+        first_node = first_node.next
+    # 由于要求返回的链表必须开始是最小的数, 所以判断两个链表值大小后返回
+    # 这里的 <= 与上面的大小值逻辑判断必须一致
+    return head_one if head_one.value <= head_two.value else head_two
+
+
+def constructor_linked_list(array):
+    head_element = LinkedList(array[0])
+    point = head_element
+    for i in range(1, len(array)):
+        point.next = LinkedList(array[i])
+        point = point.next
+    return head_element
+
+
+def get_linked_list(array1, array2):
+    return constructor_linked_list(array1), constructor_linked_list(array2)
+
+
+def iter_linked_list(ll):
+    while ll is not None:
+        print(ll.value, end=' ')
+        ll = ll.next
+    print()
+
+
+if __name__ == '__main__':
+    a = [1, 2, 4, 4, 10]
+    b = [1, 3, 4, 5, 9, 10]
+    iter_linked_list(merge_linked_lists1(*get_linked_list(a, b)))
+    iter_linked_list(merge_linked_lists2(*get_linked_list(a, b)))
+    iter_linked_list(merge_linked_lists3(*get_linked_list(a, b)))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+class LinkedList
 {
-    Node *head, *tail, *node;
-    head = (Node*)malloc(sizeof(Node));
-    head->value = array[0];
-    tail = head;
-    int i = 0;
-    while ( ++i < n )
+public:
+    int value;
+    LinkedList *next;
+
+    LinkedList(int value)
     {
-        node = (Node*)malloc(sizeof(Node));
-        node->value = array[i];
-        tail->next = node;
-        tail = node;
+        this->value = value;
+        this->next = nullptr;
     }
-    tail->next = NULL;
-    (*list)->head = head;
-    (*list)->tail = tail;
-    (*list)->size = i;
-}
+};
 
-void printLinkedLists(Node* node)
+// O(n + m) time | O(1) space - where n is the number of nodes in the first
+// Linked List and m is the number of nodes in the second Linked List
+LinkedList *mergeLinkedLists1(LinkedList *headOne, LinkedList *headTwo)
 {
-    while ( node != NULL )
+    LinkedList *p1 = headOne;
+    LinkedList *p1Prev = nullptr;
+    LinkedList *p2 = headTwo;
+    while (p1 != nullptr && p2 != nullptr)
     {
-        printf("%d ", node->value);
-        node = node->next;
-    }
-    printf("\n");
-}
-
-/* O(n+m) time | O(1) space */
-Node* mergeLinkedList(Node* head1, Node* head2)
-{
-    Node *p1, *p2, *prev;
-    p1 = head1;
-    p2 = head2;
-    while ( p1 != NULL && p2 != NULL )
-    {
-        if ( p1->value <= p2->value )
+        if (p1->value < p2->value)
         {
-            prev = p1;
+            p1Prev = p1;
             p1 = p1->next;
         }
         else
         {
-            if ( prev != NULL ) prev->next = p2;
-            prev = p2;
+            if (p1Prev != nullptr)
+                p1Prev->next = p2;
+            p1Prev = p2;
             p2 = p2->next;
-            prev->next = p1;
+            p1Prev->next = p1;
         }
     }
-    if ( p1 == NULL ) prev->next = p2;
-    return head1->value <= head2->value ? head1 : head2;
+    if (p1 == nullptr)
+        p1Prev->next = p2;
+    return headOne->value < headTwo->value ? headOne : headTwo;
+}
+
+void recursiveMerge(LinkedList *p1, LinkedList *p2, LinkedList *p1Prev);
+
+// O(n + m) time | O(n + m) space - where n is the number of nodes in the first
+// Linked List and m is the number of nodes in the second Linked List
+LinkedList *mergeLinkedLists2(LinkedList *headOne, LinkedList *headTwo)
+{
+    recursiveMerge(headOne, headTwo, nullptr);
+    return headOne->value < headTwo->value ? headOne : headTwo;
+}
+
+void recursiveMerge(LinkedList *p1, LinkedList *p2, LinkedList *p1Prev)
+{
+    if (p1 == nullptr)
+    {
+        p1Prev->next = p2;
+        return;
+    }
+    if (p2 == nullptr)
+        return;
+
+    if (p1->value < p2->value)
+    {
+        recursiveMerge(p1->next, p2, p1);
+    }
+    else
+    {
+        if (p1Prev != nullptr)
+            p1Prev->next = p2;
+        LinkedList *newP2 = p2->next;
+        p2->next = p1;
+        recursiveMerge(p1, newP2, p2);
+    }
+}
+
+LinkedList *constructorLinkedList(const vector<int> array)
+{
+    LinkedList *head = new LinkedList(array[0]);
+    LinkedList *point = head;
+    for (size_t i = 1; i < array.size(); i++)
+    {
+        point->next = new LinkedList(array[i]);
+        point = point->next;
+    }
+    return head;
+}
+
+void iterLinkedList(LinkedList *head)
+{
+    while (head != nullptr)
+    {
+        cout << head->value << " ";
+        head = head->next;
+    }
+    cout << endl;
 }
 
 int main()
 {
-    const int arr1[] = {2, 6, 7, 8};
-    const int arr2[] = {1, 3, 4, 5, 9, 10};
-    unsigned int len1, len2;
-    GET_ARRAY_LEN(arr1, len1);
-    GET_ARRAY_LEN(arr2, len2);
-    LinkedList* list1 = (LinkedList*)malloc(sizeof(LinkedList));
-    LinkedList* list2 = (LinkedList*)malloc(sizeof(LinkedList));
-    initLinkedList(&list1, arr1, len1);
-    initLinkedList(&list2, arr2, len2);
-    printLinkedLists(list1->head);
-    printLinkedLists(list2->head);
-    Node *node = mergeLinkedList(list1->head, list2->head);
-    printLinkedLists(node);
+    LinkedList *a = constructorLinkedList({1, 3, 4, 5, 9, 10});
+    LinkedList *b = constructorLinkedList({1, 2, 4, 4, 10});
+    iterLinkedList(mergeLinkedLists1(a, b));
+    a = constructorLinkedList({1, 3, 4, 5, 9, 10});
+    b = constructorLinkedList({1, 2, 4, 4, 10});
+    iterLinkedList(mergeLinkedLists2(a, b));
     return 0;
 }
 ```
@@ -1404,4 +1545,4 @@ int main()
 }
 ```
 
-Last Modified 2022-01-29
+Last Modified 2022-01-30
