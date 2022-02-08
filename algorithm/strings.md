@@ -564,108 +564,172 @@ int main()
 
 ## 标记子字符串
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
+```python
+# Average case: O(n + m) | O(n) space - where n is the length
+# of the main string and m is the length of the substring
+def under_scorify_substring(string, substring):
+    locations = collapse(get_locations(string, substring))
+    return under_scorify(string, locations)
 
-typedef struct Node
-{
-    struct Node *next;
-    int position[2];
-} Node, *pNode;
 
-int getStringLength(char* string)
-{
-    char *p = string;
-    int length = 0;
-    while ( *p++ ) length++;
-    return length;
+def get_locations(string, substring):
+    locations = []
+    start_idx = 0  # 搜索开始位置为字符串第一个字符位置
+    while start_idx < len(string):
+        # 逐个搜索子字符串并记录开始和结束位置
+        next_idx = string.find(substring, start_idx)
+        if next_idx != -1:  # 在 Python 中如果找不到子字符串则会返回 -1
+            locations.append([next_idx, next_idx + len(substring)])
+            start_idx = next_idx + 1  # 调整搜索开始位置
+        else:
+            # 找不到则结束搜索
+            break
+    return locations
+
+
+def collapse(locations):
+    """合并重叠的位置区间"""
+    if not len(locations):
+        return locations
+    new_locations = [locations[0]]
+    previous = new_locations[0]  # 指向最后一个记录的区间
+    for i in range(1, len(locations)):
+        current = locations[i]  # 获取下一个区间
+        if current[0] <= previous[1]:
+            # 如果最后一个区间的结束位置和下一个区间的开始位置有重叠
+            # 则更新最后一个区间的结束位置为下一个区间的结束位置
+            previous[1] = current[1]
+        else:
+            # 没有重叠则将区间加入到记录中
+            new_locations.append(current)
+            # 这里将指针重新指向最后一个记录的区间
+            # 类似 previous = new_locations[len(new_locations) - 1]
+            previous = current
+    return new_locations
+
+
+def under_scorify(string, locations):
+    """标记字符串中的子字符串"""
+    locations_idx = 0  # 读取记录区间的索引
+    string_idx = 0  # 原字符串的索引
+    in_between_underscores = False  # 标记是否处于区间范围内
+    final_chars = []  # 记录标记后的字符
+    i = 0  # 记录区间的开始结束位置
+    while string_idx < len(string) and locations_idx < len(locations):
+        # 判断是否到达了记录区间的位置
+        if string_idx == locations[locations_idx][i]:
+            # 增加一个标记
+            final_chars.append("_")
+            # 切换范围标记
+            in_between_underscores = not in_between_underscores
+            # 如果已经离开了区间范围, 表示可以切换到下一个区间进行标记
+            if not in_between_underscores:
+                locations_idx += 1
+            # 循环切换区间的开始和结束位置
+            i = 0 if i == 1 else 1
+        # 添加原始的字符串
+        final_chars.append(string[string_idx])
+        string_idx += 1
+    # 如果子字符串刚刚好在原字符串的末尾, 则在末尾再追加一个标记
+    if locations_idx < len(locations):
+        final_chars.append("_")
+    # 如果记录区间已经标记完成, 则将剩下的原始字符串添加到新的带标记的字符串中
+    elif string_idx < len(string):
+        final_chars.append(string[string_idx:])
+    return "".join(final_chars)  # 拼接字符串并返回
+
+
+if __name__ == '__main__':
+    print(under_scorify_substring('broken s broken de broken', 'broken'))
+    print(under_scorify_substring('alphathis is a alphaalpha to see if alphalphalpha it works', 'alpha'))
+```
+
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+#include <numeric>
+using namespace std;
+
+vector<vector<int>> getLocations(string str, string subStr);
+vector<vector<int>> collapse(vector<vector<int>> locations);
+string underscorify(string str, vector<vector<int>> locations);
+
+// Average case: O(n + m) | O(n) space - where n is the length
+// of the main string and m is the length of the substring
+string underscorifySubstring(string str, string subStr) {
+  vector<vector<int>> locations = collapse(getLocations(str, subStr));
+  return underscorify(str, locations);
 }
 
-int findSubstring(char string[], int startIdx, int length1, char substring[], int length2)
-{
-    int j = 0, position = 0;
-    length1 = length1 - length2 + 1;
-    while ( startIdx < length1 )
-    {
-        if ( string[startIdx] == substring[j] )
-        {
-            position = startIdx;
-            while ( j < length2 && string[++position] == substring[++j] ) {} ;
-            if ( j == length2 ) return startIdx;
-            j = 0;
-        }
-        startIdx++;
+vector<vector<int>> getLocations(string str, string subStr) {
+  vector<vector<int>> locations{};
+  int startIdx = 0;
+  const int strLength = str.length();
+  const int subStrLength = subStr.length();
+  while (startIdx < strLength) {
+    int nextIdx = str.find(subStr, startIdx);
+    if (nextIdx != string::npos) {
+      locations.push_back(vector<int>{nextIdx, int(nextIdx + subStrLength)});
+      startIdx = nextIdx + 1;
+    } else {
+      break;
     }
-    return -1;
+  }
+  return locations;
 }
 
-char* underscorify(char string[], int stringLength, int realLength, pNode head)
-{
-    char *p = (char*)malloc((realLength + 1) * sizeof(char));
-    char *q = p;
-    int startIdx = 0;
-    while ( head != NULL )
-    {
-        while ( startIdx < head->position[0] )
-            *q++ = string[startIdx++];
-        *q++ = '_';
-        while ( startIdx < head->position[1] )
-            *q++ = string[startIdx++];
-        *q++ = '_';
-        head = head->next;
+vector<vector<int>> collapse(vector<vector<int>> locations) {
+  if (locations.empty()) {
+    return locations;
+  }
+  vector<vector<int>> newLocations{locations[0]};
+  vector<int> *previous = &newLocations[0];
+  for (size_t i = 1; i < locations.size(); i++) {
+    vector<int> *current = &locations[i];
+    if (current->at(0) <= previous->at(1)) {
+      previous->at(1) = current->at(1);
+    } else {
+      newLocations.push_back(*current);
+      previous = &newLocations[newLocations.size() - 1];
     }
-    while ( startIdx < stringLength )
-        *q++ = string[startIdx++];
-    *q = '\0';
-    return p;
+  }
+  return newLocations;
 }
 
-/* O(n + m) time | O(n) space */
-char* underscorifySubstring(char string[], char substring[])
-{
-    int stringLength = getStringLength(string);
-    int substringLength = getStringLength(substring);
-    if ( stringLength <= 0 || substringLength <= 0 || stringLength < substringLength) return string;
-    int startIdx = 0, total = 0, locate;
-    pNode head = NULL, tail = NULL;
-    while ( startIdx < stringLength )
-    {
-        locate = findSubstring(string, startIdx, stringLength, substring, substringLength);
-        if ( locate < 0 ) break;
-        if ( head == NULL )
-        {
-            head = (Node*)malloc(sizeof(Node));
-            tail = head;
-            tail->position[0] = locate;
-            tail->position[1] = locate + substringLength;
-        }
-        else
-        {
-            if ( locate <= tail->position[1] )
-            {
-                tail->position[1] = locate + substringLength;
-            }
-            else
-            {
-                tail->next = (Node*)malloc(sizeof(Node));
-                tail = tail->next;
-                tail->position[0] = locate;
-                tail->position[1] = locate + substringLength;
-            }
-        }
-        startIdx = locate + 1;
-        total++;
+string underscorify(string str, vector<vector<int>> locations) {
+  size_t locationsIdx = 0;
+  int stringIdx = 0;
+  bool inBetweenUnderscores = false;
+  vector<string> finalChars{};
+  int i = 0;
+  const int strLength = str.length();
+  while (stringIdx < strLength && locationsIdx < locations.size()) {
+    if (stringIdx == locations[locationsIdx][i % 2]) {
+      finalChars.push_back("_");
+      inBetweenUnderscores = !inBetweenUnderscores;
+      if (!inBetweenUnderscores) {
+        locationsIdx++;
+      }
+      i++;
     }
-    tail->next = NULL;
-    return underscorify(string, stringLength, total * 2 + stringLength, head);
+    string s(1, str[stringIdx]);
+    finalChars.push_back(s);
+    stringIdx++;
+  }
+  if (locationsIdx < locations.size()) {
+    finalChars.push_back("_");
+  } else if (stringIdx < strLength) {
+    finalChars.push_back(str.substr(stringIdx));
+  }
+  return accumulate(finalChars.begin(), finalChars.end(), string());
 }
+
 
 int main()
 {
-    char string[] = "alpha a that a alphaalpha pre to seen if alphalphalpha it works";
-    char substring[] = "alpha";
-    printf("%s", underscorifySubstring(string, substring));
+    cout << underscorifySubstring("broken s broken de broken", "broken") << endl;
+    cout << underscorifySubstring("alpha a that a alphaalpha pre to seen if alphalphalpha it works", "alpha");
     return 0;
 }
 ```
@@ -1759,4 +1823,4 @@ int main()
 }
 ```
 
-Last Modified 2022-01-27
+Last Modified 2022-02-08
