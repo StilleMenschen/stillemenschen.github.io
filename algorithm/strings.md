@@ -1869,6 +1869,7 @@ def does_match(string, substring, pattern):
         if string[i] == substring[j]:
             # 如果子字符串的指针已经走到结束位置, 说明存在匹配的子字符串, 返回匹配成功
             if j == substring_length - 1:
+                # return i - substring_length + 1
                 return True
             # 移动两个指针
             i += 1
@@ -1879,6 +1880,7 @@ def does_match(string, substring, pattern):
         # 上面两个条件都不满足, 则继续移动第一个指针
         else:
             i += 1
+    # return -1
     return False
 
 
