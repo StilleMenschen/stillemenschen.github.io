@@ -1823,4 +1823,157 @@ int main()
 }
 ```
 
-Last Modified 2022-02-08
+## KMP 查找子字符串
+
+Knuth-Morris-Pratt 字符串查找算法，可在一个字符串 S 内查找一个词 W 的出现位置。
+一个词在不匹配时本身就包含足够的信息来确定下一个匹配可能的开始位置，此算法利用这一特性以避免重新检查先前匹配的字符。
+
+```python
+# O(m) time | O(m) space
+def get_pattern(substring):
+    # 初始化模式数组, 全部标记为 -1, 表示没有索引关联
+    pattern = [-1 for _ in substring]
+    substring_length = len(substring)
+    # 创建两个指针, 第一个指针为 i, 从第二个位置开始
+    # 因为不需要重复比较第一个位置已经是相同的字符
+    # 第二个指针 j 则从开头开始
+    i, j = 1, 0
+    while i < substring_length:
+        # 如果两个位置的字符相同
+        if substring[i] == substring[j]:
+            # 记录相同的字符到数组中
+            pattern[i] = j
+            # 移动两个指针
+            i += 1
+            j += 1
+        # 如果两个位置的字符不相同, 移动第二个指针回到上一次匹配位置的下一个位置
+        elif j > 0:
+            j = pattern[j - 1] + 1
+        # 上面两个条件都不满足, 则继续移动第一个指针
+        else:
+            i += 1
+    return pattern
+
+
+# O(n) time | O(1) space
+def does_match(string, substring, pattern):
+    substring_length = len(substring)
+    string_length = len(string)
+    # 第一个指针 i 指向原始字符串开头
+    # 第二个指针 j 指向待查找字符串开头
+    i, j = 0, 0
+    # 循环原始字符串, 判断原始字符串剩余未匹配的字符数量与
+    # 待查找的字符串字符数量不足以比较时则直接结束查找
+    while i + substring_length - j <= string_length:
+        # 如果原始字符串与待查找字符串的字符相同
+        if string[i] == substring[j]:
+            # 如果子字符串的指针已经走到结束位置, 说明存在匹配的子字符串, 返回匹配成功
+            if j == substring_length - 1:
+                return True
+            # 移动两个指针
+            i += 1
+            j += 1
+        # 如果字符不相同, 移动第二个指针回到上一次匹配位置的下一个位置
+        elif j > 0:
+            j = pattern[j - 1] + 1
+        # 上面两个条件都不满足, 则继续移动第一个指针
+        else:
+            i += 1
+    return False
+
+
+# O(n + m) time | O(m) space
+def knuth_morris_pratt_algorithm(string, substring):
+    # 如果长度不符合比较要求则直接返回
+    if not len(string) or not len(substring) or len(string) < len(substring):
+        return False
+    # 创建一个匹配模式
+    pattern = get_pattern(substring)
+    # 根据匹配模式来搜索子字符串
+    # 由于创建了一个模式数组, 加快了匹配的速度, 避免重复地从头开始匹配的步骤
+    # 让时间复杂的从 O(n^2) 或 O(n * m) 降低到 O(n + m)
+    return does_match(string, substring, pattern)
+
+
+if __name__ == '__main__':
+    print(knuth_morris_pratt_algorithm('alg normal algorithm is', 'algo'))
+    print(knuth_morris_pratt_algorithm('abxabcabcaby', 'abcaby'))
+```
+
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+vector<int> buildPattern(string substr);
+bool doesMatch(string str, string substr, vector<int> pattern);
+
+// O(n + m) time | O(m) space
+bool knuthMorrisPrattAlgorithm(string str, string substr)
+{
+  vector<int> pattern = buildPattern(substr);
+  return doesMatch(str, substr, pattern);
+}
+
+vector<int> buildPattern(string substr)
+{
+  vector<int> pattern(substr.size(), -1);
+  int j = 0;
+  int i = 1;
+  const int substringLength = substr.size();
+  while (i < substringLength)
+  {
+    if (substr[i] == substr[j])
+    {
+      pattern[i] = j;
+      i++;
+      j++;
+    }
+    else if (j > 0)
+    {
+      j = pattern[j - 1] + 1;
+    }
+    else
+    {
+      i++;
+    }
+  }
+  return pattern;
+}
+
+bool doesMatch(string str, string substr, vector<int> pattern)
+{
+  int i = 0;
+  int j = 0;
+  const int substringLength = substr.size();
+  const int stringLength = str.size();
+  while (i + substringLength - j <= stringLength)
+  {
+    if (str[i] == substr[j])
+    {
+      if (j == substringLength - 1)
+        return true;
+      i++;
+      j++;
+    }
+    else if (j > 0)
+    {
+      j = pattern[j - 1] + 1;
+    }
+    else
+    {
+      i++;
+    }
+  }
+  return false;
+}
+
+int main()
+{
+  cout << knuthMorrisPrattAlgorithm("abcdefaefbcdefefabcdef", "fbcdefef") << endl;
+  return 0;
+}
+```
+
+Last Modified 2022-02-09
