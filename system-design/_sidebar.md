@@ -14,3 +14,4 @@
   - [Specialized Storage Paradigms](system-design/specialized-storage-paradigms.md)
   - [Replication And Sharding](system-design/replication-and-sharding.md)
   - [Leader Election](system-design/leader-election.md)
+  - [Peer-to-Peer Networks](system-design/peer-to-peer-networks.md)
