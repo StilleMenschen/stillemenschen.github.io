@@ -657,74 +657,92 @@ string underscorify(string str, vector<vector<int>> locations);
 
 // Average case: O(n + m) | O(n) space - where n is the length
 // of the main string and m is the length of the substring
-string underscorifySubstring(string str, string subStr) {
-  vector<vector<int>> locations = collapse(getLocations(str, subStr));
-  return underscorify(str, locations);
+string underscorifySubstring(string str, string subStr)
+{
+    vector<vector<int>> locations = collapse(getLocations(str, subStr));
+    return underscorify(str, locations);
 }
 
-vector<vector<int>> getLocations(string str, string subStr) {
-  vector<vector<int>> locations{};
-  int startIdx = 0;
-  const int strLength = str.length();
-  const int subStrLength = subStr.length();
-  while (startIdx < strLength) {
-    int nextIdx = str.find(subStr, startIdx);
-    if (nextIdx != string::npos) {
-      locations.push_back(vector<int>{nextIdx, int(nextIdx + subStrLength)});
-      startIdx = nextIdx + 1;
-    } else {
-      break;
+vector<vector<int>> getLocations(string str, string subStr)
+{
+    vector<vector<int>> locations{};
+    int startIdx = 0;
+    const int strLength = str.length();
+    const int subStrLength = subStr.length();
+    while (startIdx < strLength)
+    {
+        int nextIdx = str.find(subStr, startIdx);
+        if (nextIdx != string::npos)
+        {
+            locations.push_back(vector<int>{nextIdx, int(nextIdx + subStrLength)});
+            startIdx = nextIdx + 1;
+        }
+        else
+        {
+            break;
+        }
     }
-  }
-  return locations;
-}
-
-vector<vector<int>> collapse(vector<vector<int>> locations) {
-  if (locations.empty()) {
     return locations;
-  }
-  vector<vector<int>> newLocations{locations[0]};
-  vector<int> *previous = &newLocations[0];
-  for (size_t i = 1; i < locations.size(); i++) {
-    vector<int> *current = &locations[i];
-    if (current->at(0) <= previous->at(1)) {
-      previous->at(1) = current->at(1);
-    } else {
-      newLocations.push_back(*current);
-      previous = &newLocations[newLocations.size() - 1];
-    }
-  }
-  return newLocations;
 }
 
-string underscorify(string str, vector<vector<int>> locations) {
-  size_t locationsIdx = 0;
-  int stringIdx = 0;
-  bool inBetweenUnderscores = false;
-  vector<string> finalChars{};
-  int i = 0;
-  const int strLength = str.length();
-  while (stringIdx < strLength && locationsIdx < locations.size()) {
-    if (stringIdx == locations[locationsIdx][i % 2]) {
-      finalChars.push_back("_");
-      inBetweenUnderscores = !inBetweenUnderscores;
-      if (!inBetweenUnderscores) {
-        locationsIdx++;
-      }
-      i++;
+vector<vector<int>> collapse(vector<vector<int>> locations)
+{
+    if (locations.empty())
+    {
+        return locations;
     }
-    string s(1, str[stringIdx]);
-    finalChars.push_back(s);
-    stringIdx++;
-  }
-  if (locationsIdx < locations.size()) {
-    finalChars.push_back("_");
-  } else if (stringIdx < strLength) {
-    finalChars.push_back(str.substr(stringIdx));
-  }
-  return accumulate(finalChars.begin(), finalChars.end(), string());
+    vector<vector<int>> newLocations{locations[0]};
+    vector<int> *previous = &newLocations[0];
+    for (size_t i = 1; i < locations.size(); i++)
+    {
+        vector<int> *current = &locations[i];
+        if (current->at(0) <= previous->at(1))
+        {
+            previous->at(1) = current->at(1);
+        }
+        else
+        {
+            newLocations.push_back(*current);
+            previous = &newLocations[newLocations.size() - 1];
+        }
+    }
+    return newLocations;
 }
 
+string underscorify(string str, vector<vector<int>> locations)
+{
+    size_t locationsIdx = 0;
+    int stringIdx = 0;
+    bool inBetweenUnderscores = false;
+    vector<string> finalChars{};
+    int i = 0;
+    const int strLength = str.length();
+    while (stringIdx < strLength && locationsIdx < locations.size())
+    {
+        if (stringIdx == locations[locationsIdx][i % 2])
+        {
+            finalChars.push_back("_");
+            inBetweenUnderscores = !inBetweenUnderscores;
+            if (!inBetweenUnderscores)
+            {
+                locationsIdx++;
+            }
+            i++;
+        }
+        string s(1, str[stringIdx]);
+        finalChars.push_back(s);
+        stringIdx++;
+    }
+    if (locationsIdx < locations.size())
+    {
+        finalChars.push_back("_");
+    }
+    else if (stringIdx < strLength)
+    {
+        finalChars.push_back(str.substr(stringIdx));
+    }
+    return accumulate(finalChars.begin(), finalChars.end(), string());
+}
 
 int main()
 {
@@ -831,102 +849,102 @@ int getCountsAndFirstYPos(vector<char> pattern,
 // O(n^2 + m) time | O(n + m) space
 vector<string> patternMatcher(string pattern, string str)
 {
-  const int strLength = str.length();
-  if (pattern.length() > strLength)
-  {
+    const int strLength = str.length();
+    if (pattern.length() > strLength)
+    {
+        return vector<string>{};
+    }
+    vector<char> newPattern = getNewPattern(pattern);
+    bool didSwitch = newPattern[0] != pattern[0];
+    unordered_map<char, int> counts({{'x', 0}, {'y', 0}});
+    int firstYPos = getCountsAndFirstYPos(newPattern, &counts);
+    if (counts['y'] != 0)
+    {
+        for (int lenOfX = 1; lenOfX < strLength; lenOfX++)
+        {
+            double lenOfY =
+                ((double)strLength - (double)lenOfX * (double)counts['x']) /
+                (double)counts['y'];
+            if (lenOfY <= 0 || fmod(lenOfY, 1) != 0)
+            {
+                continue;
+            }
+            int yIdx = firstYPos * lenOfX;
+            string x = str.substr(0, lenOfX);
+            string y = str.substr(yIdx, lenOfY);
+            vector<string> potentialMatch(newPattern.size(), "");
+            transform(newPattern.begin(), newPattern.end(), potentialMatch.begin(),
+                      [x, y](char c) -> string
+                      { return c == 'x' ? x : y; });
+            if (str == accumulate(potentialMatch.begin(), potentialMatch.end(),
+                                  string("")))
+            {
+                return !didSwitch ? vector<string>{x, y} : vector<string>{y, x};
+            }
+        }
+    }
+    else
+    {
+        double lenOfX = strLength / counts['x'];
+        if (fmod(lenOfX, 1) == 0)
+        {
+            string x = str.substr(0, lenOfX);
+            vector<string> potentialMatch(newPattern.size(), "");
+            transform(newPattern.begin(), newPattern.end(), potentialMatch.begin(),
+                      [x](char c) -> string
+                      { return x; });
+            if (str == accumulate(potentialMatch.begin(), potentialMatch.end(),
+                                  string("")))
+            {
+                return !didSwitch ? vector<string>{x, ""} : vector<string>{"", x};
+            }
+        }
+    }
     return vector<string>{};
-  }
-  vector<char> newPattern = getNewPattern(pattern);
-  bool didSwitch = newPattern[0] != pattern[0];
-  unordered_map<char, int> counts({{'x', 0}, {'y', 0}});
-  int firstYPos = getCountsAndFirstYPos(newPattern, &counts);
-  if (counts['y'] != 0)
-  {
-    for (int lenOfX = 1; lenOfX < strLength; lenOfX++)
-    {
-      double lenOfY =
-          ((double)strLength - (double)lenOfX * (double)counts['x']) /
-          (double)counts['y'];
-      if (lenOfY <= 0 || fmod(lenOfY, 1) != 0)
-      {
-        continue;
-      }
-      int yIdx = firstYPos * lenOfX;
-      string x = str.substr(0, lenOfX);
-      string y = str.substr(yIdx, lenOfY);
-      vector<string> potentialMatch(newPattern.size(), "");
-      transform(newPattern.begin(), newPattern.end(), potentialMatch.begin(),
-                [x, y](char c) -> string
-                { return c == 'x' ? x : y; });
-      if (str == accumulate(potentialMatch.begin(), potentialMatch.end(),
-                            string("")))
-      {
-        return !didSwitch ? vector<string>{x, y} : vector<string>{y, x};
-      }
-    }
-  }
-  else
-  {
-    double lenOfX = strLength / counts['x'];
-    if (fmod(lenOfX, 1) == 0)
-    {
-      string x = str.substr(0, lenOfX);
-      vector<string> potentialMatch(newPattern.size(), "");
-      transform(newPattern.begin(), newPattern.end(), potentialMatch.begin(),
-                [x](char c) -> string
-                { return x; });
-      if (str == accumulate(potentialMatch.begin(), potentialMatch.end(),
-                            string("")))
-      {
-        return !didSwitch ? vector<string>{x, ""} : vector<string>{"", x};
-      }
-    }
-  }
-  return vector<string>{};
 }
 
 vector<char> getNewPattern(string pattern)
 {
-  vector<char> patternLetters(pattern.begin(), pattern.end());
-  if (pattern[0] == 'x')
-  {
-    return patternLetters;
-  }
-  else
-  {
-    transform(patternLetters.begin(), patternLetters.end(),
-              patternLetters.begin(),
-              [](char c) -> char
-              { return c == 'y' ? 'x' : 'y'; });
-    return patternLetters;
-  }
+    vector<char> patternLetters(pattern.begin(), pattern.end());
+    if (pattern[0] == 'x')
+    {
+        return patternLetters;
+    }
+    else
+    {
+        transform(patternLetters.begin(), patternLetters.end(),
+                  patternLetters.begin(),
+                  [](char c) -> char
+                  { return c == 'y' ? 'x' : 'y'; });
+        return patternLetters;
+    }
 }
 
 int getCountsAndFirstYPos(vector<char> pattern,
                           unordered_map<char, int> *counts)
 {
-  int firstYPos = -1;
-  const int patternSize = pattern.size();
-  for (int i = 0; i < patternSize; i++)
-  {
-    char c = pattern[i];
-    counts->at(c)++;
-    if (c == 'y' && firstYPos == -1)
+    int firstYPos = -1;
+    const int patternSize = pattern.size();
+    for (int i = 0; i < patternSize; i++)
     {
-      firstYPos = i;
+        char c = pattern[i];
+        counts->at(c)++;
+        if (c == 'y' && firstYPos == -1)
+        {
+            firstYPos = i;
+        }
     }
-  }
-  return firstYPos;
+    return firstYPos;
 }
 
 int main()
 {
-  vector<string> result = patternMatcher("xyxxy", "bloodflushbloodbloodflush");
-  if (result.size() > 0)
-  {
-    cout << result[0] << ", " << result[1];
-  }
-  return 0;
+    vector<string> result = patternMatcher("xyxxy", "bloodflushbloodbloodflush");
+    if (result.size() > 0)
+    {
+        cout << result[0] << ", " << result[1];
+    }
+    return 0;
 }
 ```
 
@@ -2039,67 +2057,67 @@ bool doesMatch(string str, string substr, vector<int> pattern);
 // O(n + m) time | O(m) space
 bool knuthMorrisPrattAlgorithm(string str, string substr)
 {
-  vector<int> pattern = buildPattern(substr);
-  return doesMatch(str, substr, pattern);
+    vector<int> pattern = buildPattern(substr);
+    return doesMatch(str, substr, pattern);
 }
 
 vector<int> buildPattern(string substr)
 {
-  vector<int> pattern(substr.size(), -1);
-  int j = 0;
-  int i = 1;
-  const int substringLength = substr.size();
-  while (i < substringLength)
-  {
-    if (substr[i] == substr[j])
+    vector<int> pattern(substr.size(), -1);
+    int j = 0;
+    int i = 1;
+    const int substringLength = substr.size();
+    while (i < substringLength)
     {
-      pattern[i] = j;
-      i++;
-      j++;
+        if (substr[i] == substr[j])
+        {
+            pattern[i] = j;
+            i++;
+            j++;
+        }
+        else if (j > 0)
+        {
+            j = pattern[j - 1] + 1;
+        }
+        else
+        {
+            i++;
+        }
     }
-    else if (j > 0)
-    {
-      j = pattern[j - 1] + 1;
-    }
-    else
-    {
-      i++;
-    }
-  }
-  return pattern;
+    return pattern;
 }
 
 bool doesMatch(string str, string substr, vector<int> pattern)
 {
-  int i = 0;
-  int j = 0;
-  const int substringLength = substr.size();
-  const int stringLength = str.size();
-  while (i + substringLength - j <= stringLength)
-  {
-    if (str[i] == substr[j])
+    int i = 0;
+    int j = 0;
+    const int substringLength = substr.size();
+    const int stringLength = str.size();
+    while (i + substringLength - j <= stringLength)
     {
-      if (j == substringLength - 1)
-        return true;
-      i++;
-      j++;
+        if (str[i] == substr[j])
+        {
+            if (j == substringLength - 1)
+                return true;
+            i++;
+            j++;
+        }
+        else if (j > 0)
+        {
+            j = pattern[j - 1] + 1;
+        }
+        else
+        {
+            i++;
+        }
     }
-    else if (j > 0)
-    {
-      j = pattern[j - 1] + 1;
-    }
-    else
-    {
-      i++;
-    }
-  }
-  return false;
+    return false;
 }
 
 int main()
 {
-  cout << knuthMorrisPrattAlgorithm("abcdefaefbcdefefabcdef", "fbcdefef") << endl;
-  return 0;
+    cout << knuthMorrisPrattAlgorithm("abcdefaefbcdefefabcdef", "fbcdefef") << endl;
+    return 0;
 }
 ```
 

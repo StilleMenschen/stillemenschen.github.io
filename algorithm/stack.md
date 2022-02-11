@@ -367,107 +367,119 @@ int main()
 
 ## 短路径生成
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+```python
+# O(n) time | O(n) space - where n is the length of the path
+def shorten_path(path):
+    # 判断是否为 / 开头, 这表示根目录
+    starts_with_slash = path[0] == "/"
+    # 拆分并过滤路径
+    tokens = filter(is_important_token, path.split("/"))
+    stack = []
+    # 如果是以 / 开头则添加一个空的字符串
+    # 因为后面使用 join 方法拼接需要将 / 也拼接上去
+    if starts_with_slash:
+        stack.append("")
+    for token in tokens:
+        # 遇到折返的路径则继续判断
+        if token == "..":
+            # 如果栈内为空或者前一个路径是折返路径
+            if len(stack) == 0 or stack[-1] == "..":
+                stack.append(token)
+            # 如果前一个路径是非空的路径 (不是 '/')
+            elif stack[-1] != "":
+                stack.pop()
+        # 遇到普通的路径则直接入栈
+        else:
+            stack.append(token)
 
-typedef struct Node
+    # 只有一个路径且为空字符串则表示只有一个父级路径 '/'
+    if len(stack) == 1 and stack[0] == "":
+        return "/"
+    # 拼接所有路径, 如果栈的第一个值是空字符串则拼接后开头会以 / 开始
+    return "/".join(stack)
+
+
+def is_important_token(token):
+    # 如果路径为 '//' 或者 './' 都是表示当前目录, 可以过滤掉
+    return len(token) > 0 and token != "."
+
+
+if __name__ == '__main__':
+    print(shorten_path('/foo/../test/../test/../foo//bar/./baz'))
+    print(shorten_path('../../foo/../../bar/baz'))
+    print(shorten_path('/../../foo/../../bar/baz'))
+```
+
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <sstream>
+using namespace std;
+
+bool isImportantToken(string token);
+
+// O(n) time | O(n) space - where n is the length of the path
+string shortenPath(string path)
 {
-    struct Node *prev, *next;
-    char *value;
-} Node, *pNode;
+    bool startsWithSlash = path[0] == '/';
+    istringstream iss(path);
+    string token;
 
-typedef struct LinkedList
-{
-    pNode head, tail;
-    int size;
-} LinkedList, *pLinkedList;
-
-char* join(char* a, char* b)
-{
-    char *c = (char*)malloc(strlen(a) + strlen(b) + 1);
-    char *head = c;
-    while( *a != '\0') *c++ = *a++;
-    while( (*c++ = *b++) != '\0') ;
-    return head;
-}
-
-/* O(n) time | O(n) space */
-LinkedList* shortenPath(char brackets[])
-{
-    const unsigned int startsWithSlash = brackets[0] == '/' ? 1 : 0;
-    const char s[2] = "/";
-    char *token;
-    pNode node;
-    pLinkedList lists = (LinkedList*)malloc(sizeof(LinkedList));
-    lists->head = (Node*)malloc(sizeof(Node));
-    lists->head->prev = NULL;
-    lists->size = 0;
-
-    /* 获取第一个子字符串 */
-    token = strtok(brackets, s);
-    while ( token != NULL && ( strlen(token) <=0 || strcmp(token, ".") == 0 ) )
-        token = strtok(NULL, s);
-    lists->head->value = token;
-    lists->size++;
-    lists->tail = lists->head;
-
-
-    /* 继续获取其他的子字符串 */
-    while( token != NULL )
+    vector<string> tokens;
+    vector<string> filteredTokens;
+    while (getline(iss, token, '/'))
     {
-        token = strtok(NULL, s);
-        if ( token == NULL || strlen(token) <= 0 || strcmp(token, ".") == 0 ) continue;
-        if ( strcmp(token, "..") == 0 && lists->size > 0 )
+        tokens.push_back(token);
+    }
+    copy_if(tokens.begin(), tokens.end(), back_inserter(filteredTokens),
+            isImportantToken);
+
+    vector<string> stack;
+    if (startsWithSlash)
+        stack.push_back("");
+    for (string token : filteredTokens)
+    {
+        if (token == "..")
         {
-            lists->tail = lists->tail->prev;
-            lists->size--;
-            continue;
+            if (stack.size() == 0 || stack[stack.size() - 1] == "..")
+            {
+                stack.push_back(token);
+            }
+            else if (stack[stack.size() - 1] != "")
+            {
+                stack.pop_back();
+            }
         }
-        node = (Node*)malloc(sizeof(Node));
-        node->value = join(token, (char*)"/");
-        if ( lists->size == 0 )
+        else
         {
-            lists->head = node;
-            lists->head->prev = NULL;
-            lists->tail = node;
-            lists->tail->next = NULL;
-            lists->size++;
-            continue;
+            stack.push_back(token);
         }
-        node->prev = lists->tail;
-        lists->tail->next = node;
-        lists->tail = node;
-        lists->size++;
     }
-    lists->tail->next = NULL;
-    if ( startsWithSlash )
+
+    const int stackSize = stack.size();
+    if (stackSize == 1 && stack[0] == "")
+        return "/";
+
+    ostringstream oss;
+    for (auto i = 0; i < stackSize; i++)
     {
-        node = (Node*)malloc(sizeof(Node));
-        node->value = (char*)"/";
-        node->prev = NULL;
-        node->next = lists->head;
-        lists->head = node;
+        if (i != 0)
+            oss << "/";
+        oss << stack[i];
     }
-    return lists;
+
+    return oss.str();
 }
 
-void printLinkedLists(Node* node)
-{
-    while ( node != NULL )
-    {
-        printf("%s", node->value);
-        node = node->next;
-    }
-    printf("\n");
-}
+bool isImportantToken(string token) { return token.length() && token != "."; }
 
 int main()
 {
-    char brackets[] = "/foo/../test/../test/../foo//bar/./baz";
-    pLinkedList lists = shortenPath(brackets);
-    printLinkedLists(lists->head);
+    cout << shortenPath("/foo/../test/../test/../foo//bar/./baz") << endl;
+    cout << shortenPath("../../foo/../../bar/baz") << endl;
+    cout << shortenPath("/../../foo/../../bar/baz") << endl;
     return 0;
 }
 ```
@@ -842,4 +854,4 @@ int main()
 }
 ```
 
-Last Modified 2022-01-19
+Last Modified 2022-02-11
