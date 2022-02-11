@@ -737,72 +737,197 @@ int main()
 ## 模式匹配器
 
 ```python
+# O(n^2 + m) time | O(n + m) space
+def pattern_matcher(pattern, string):
+    # 如果匹配模板的长度大于字符串则不处理直接返回
+    if len(pattern) > len(string):
+        return []
+    # 创建模板对应的数组
+    new_pattern = get_new_pattern(pattern)
+    # 因为需要参考第一个字符模板为 x 来计算
+    did_switch = new_pattern[0] != pattern[0]
+    # 记录模板中 x 和 y 出现的次数
+    counts = {'x': 0, 'y': 0}
+    # 计算 x 和 y 的出现次数以及 y 的首个出现位置
+    first_y_pos = get_counts_and_first_y_pos(new_pattern, counts)
+    # 如果模板中包含有 x 和 y
+    if counts['y'] != 0:
+        # 从第一个字符长度开始尝试 x 和 y
+        for len_of_x in range(1, len(string)):
+            # 计算 y 的长度, 根据字符串的总长度减去所有 x 的长度并除以 y 的出现次数
+            len_of_y = (len(string) - len_of_x * counts['x']) / counts['y']
+            # y 的长度必须为大于零的整数, 如果 y 的长度是负数或者是小数则跳过
+            if len_of_y <= 0 or len_of_y % 1 != 0:
+                continue
+            # 由于 Python 计算除法后可能会将数据转为 float 类型, 如 10.0,
+            # 因此需要先转为整数, 而且 Python 中数组的索引不能是小数
+            len_of_y = int(len_of_y)
+            # 通过 x 的长度乘以 y 首次出现的位置计算 y 的实际所在位置
+            y_idx = first_y_pos * len_of_x
+            # 根据 x 的长度通过字符串切片得出 x, 因为上面确保了第一个模板字符是 x, 所以这里可以直接得出 x
+            x = string[:len_of_x]
+            # 根据 y 的位置和长度通过字符串切片得出 y
+            y = string[y_idx: y_idx + len_of_y]
+            # 通过模板求出字符串
+            potential_match = map(lambda char: x if char == 'x' else y, new_pattern)
+            # 比较计算出来的字符串与原始的字符串是否相等
+            if string == ''.join(potential_match):
+                # 根据上面是否切换了 x 和 y 的位置来返回匹配的 x 字符串和 y 字符串
+                return [x, y] if not did_switch else [y, x]
+    # 如果模板中仅仅包含了一个模板字符
+    else:
+        # 通过模板 x 的出现次数和原始字符串长度, 计算出 x 的实际字符长度
+        len_of_x = len(string) / counts['x']
+        # x 的长度必须为大于零的整数, 如果 x 的长度是负数或者是小数则认为模板与字符串不匹配
+        if len_of_x % 1 == 0:
+            len_of_x = int(len_of_x)  # 转为整数, Python 中的索引不能是小数
+            x = string[:len_of_x]  # 字符串切片
+            potential_match = map(lambda char: x, new_pattern)  # 通过模板求出字符串
+            # 比较计算出来的字符串与原始的字符串是否相等
+            if string == ''.join(potential_match):
+                # 根据上面是否切换了 x 和 y 的位置来返回匹配的 x 字符串和 y 字符串
+                # 因为第二个模板字符串是空的, 所以这里有一个是空字符串
+                return [x, ''] if not did_switch else ['', x]
+    return []
+
+
 def get_new_pattern(pattern):
-    """调换模式中的x和y的位置"""
+    # 直接将模板转为数组
     pattern_letters = list(pattern)
     if pattern[0] == 'x':
         return pattern_letters
+    # 如果模板中首个字符不是 x 则切换 x 和 y 的位置
     else:
         return list(map(lambda char: 'x' if char == 'y' else 'y', pattern_letters))
 
 
 def get_counts_and_first_y_pos(pattern, counts):
-    """找出y的第一次出现位置"""
     first_y_pos = None
     for i, char in enumerate(pattern):
-        counts[char] += 1
+        counts[char] += 1  # 计算模板字符的出现次数
         if char == 'y' and first_y_pos is None:
-            first_y_pos = i
+            first_y_pos = i  # 记录第一个 y 出现的位置
     return first_y_pos
 
 
-# O(n^2 + m) time | O(n + m) space
-def pattern_matcher(pattern, string):
-    if len(pattern) > len(string):
-        return list()
-    new_pattern = get_new_pattern(pattern)
-    # 由于下面是从x开始猜测, 所以此处确定是否在最后猜出字符串时将x和y调换回来
-    did_switch = new_pattern[0] != pattern[0]
-    counts = {'x': 0, 'y': 0}
-    first_y_pos = get_counts_and_first_y_pos(new_pattern, counts)
-    string_length = len(string)
-    # 如果x和y都有
-    if counts['y'] != 0:
-        # 从长度1开始猜测x单词的长度
-        for len_of_x in range(1, string_length):
-            # 逆向算出y的长度
-            len_of_y = (string_length - len_of_x * counts['x']) / counts['y']
-            # y的长度必须是正整数
-            if len_of_y <= 0 or len_of_y % 1 != 0:
-                continue
-            # 切片源字符串并填充x和y
-            len_of_y = int(len_of_y)
-            y_idx = first_y_pos * len_of_x
-            x = string[:len_of_x]
-            y = string[y_idx:y_idx + len_of_y]
-            potential_match = map(lambda char: x if char == 'x' else y, new_pattern)
-            # 比较拼接好的字符串是否与源字符串完全相等
-            if string == ''.join(potential_match):
-                # 完全相等则表示猜测正确
-                return [x, y] if not did_switch else [y, x]
-    # 如果只有x
-    else:
-        # 得出x单词的长度
-        len_of_x = string_length / counts['x']
-        if len_of_x % 1 == 0:
-            len_of_x = int(len_of_x)
-            # 切片源字符串并填充x
-            x = string[:len_of_x]
-            potential_match = map(lambda char: x, new_pattern)
-            # 比较拼接好的字符串是否与源字符串完全相等
-            if string == ''.join(potential_match):
-                # 完全相等则表示猜测正确
-                return [x, ''] if not did_switch else ['', x]
-    return list()
-
-
 if __name__ == '__main__':
-    print(pattern_matcher('xxyxxy', 'gogopowerrangegogopowerrange'))
+    print(pattern_matcher('xyxxy', 'bloodflushbloodbloodflush'))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <numeric>
+#include <algorithm>
+#include <unordered_map>
+#include <math.h>
+using namespace std;
+
+vector<char> getNewPattern(string pattern);
+int getCountsAndFirstYPos(vector<char> pattern,
+                          unordered_map<char, int> *counts);
+
+// O(n^2 + m) time | O(n + m) space
+vector<string> patternMatcher(string pattern, string str)
+{
+  const int strLength = str.length();
+  if (pattern.length() > strLength)
+  {
+    return vector<string>{};
+  }
+  vector<char> newPattern = getNewPattern(pattern);
+  bool didSwitch = newPattern[0] != pattern[0];
+  unordered_map<char, int> counts({{'x', 0}, {'y', 0}});
+  int firstYPos = getCountsAndFirstYPos(newPattern, &counts);
+  if (counts['y'] != 0)
+  {
+    for (int lenOfX = 1; lenOfX < strLength; lenOfX++)
+    {
+      double lenOfY =
+          ((double)strLength - (double)lenOfX * (double)counts['x']) /
+          (double)counts['y'];
+      if (lenOfY <= 0 || fmod(lenOfY, 1) != 0)
+      {
+        continue;
+      }
+      int yIdx = firstYPos * lenOfX;
+      string x = str.substr(0, lenOfX);
+      string y = str.substr(yIdx, lenOfY);
+      vector<string> potentialMatch(newPattern.size(), "");
+      transform(newPattern.begin(), newPattern.end(), potentialMatch.begin(),
+                [x, y](char c) -> string
+                { return c == 'x' ? x : y; });
+      if (str == accumulate(potentialMatch.begin(), potentialMatch.end(),
+                            string("")))
+      {
+        return !didSwitch ? vector<string>{x, y} : vector<string>{y, x};
+      }
+    }
+  }
+  else
+  {
+    double lenOfX = strLength / counts['x'];
+    if (fmod(lenOfX, 1) == 0)
+    {
+      string x = str.substr(0, lenOfX);
+      vector<string> potentialMatch(newPattern.size(), "");
+      transform(newPattern.begin(), newPattern.end(), potentialMatch.begin(),
+                [x](char c) -> string
+                { return x; });
+      if (str == accumulate(potentialMatch.begin(), potentialMatch.end(),
+                            string("")))
+      {
+        return !didSwitch ? vector<string>{x, ""} : vector<string>{"", x};
+      }
+    }
+  }
+  return vector<string>{};
+}
+
+vector<char> getNewPattern(string pattern)
+{
+  vector<char> patternLetters(pattern.begin(), pattern.end());
+  if (pattern[0] == 'x')
+  {
+    return patternLetters;
+  }
+  else
+  {
+    transform(patternLetters.begin(), patternLetters.end(),
+              patternLetters.begin(),
+              [](char c) -> char
+              { return c == 'y' ? 'x' : 'y'; });
+    return patternLetters;
+  }
+}
+
+int getCountsAndFirstYPos(vector<char> pattern,
+                          unordered_map<char, int> *counts)
+{
+  int firstYPos = -1;
+  const int patternSize = pattern.size();
+  for (int i = 0; i < patternSize; i++)
+  {
+    char c = pattern[i];
+    counts->at(c)++;
+    if (c == 'y' && firstYPos == -1)
+    {
+      firstYPos = i;
+    }
+  }
+  return firstYPos;
+}
+
+int main()
+{
+  vector<string> result = patternMatcher("xyxxy", "bloodflushbloodbloodflush");
+  if (result.size() > 0)
+  {
+    cout << result[0] << ", " << result[1];
+  }
+  return 0;
+}
 ```
 
 ## 找出最小子字符串
@@ -1978,4 +2103,4 @@ int main()
 }
 ```
 
-Last Modified 2022-02-09
+Last Modified 2022-02-11
