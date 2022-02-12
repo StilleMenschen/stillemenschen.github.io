@@ -729,7 +729,7 @@ int main()
 }
 ```
 
-## 下一个大于的元素
+## 下一个大于元素
 
 给出一个数组，找出数组中每个元素向后查找大于此元素的元素，并记录到新的数组中。
 查找允许循环，既查找到最后一个元素时可以从头开始查找
@@ -854,4 +854,138 @@ int main()
 }
 ```
 
-Last Modified 2022-02-11
+## 最大矩形区域
+
+给定一个数组表示相邻建筑的高度，通过高度计算出在这些相邻的建筑中最大的矩形区域，
+两个建筑之间的距离为宽，两个建筑取最小高度为高，通过宽高得出矩形的面积
+
+```python
+def get_expanding_area(buildings, idx, height):
+    buildings_length = len(buildings)
+    left = idx
+    right = idx
+    # 向左拓展只要左边建筑的高度大于等于当前索引的建筑高度
+    while left > 0 and buildings[left - 1] >= height:
+        left -= 1
+    # 向右拓展只要左边建筑的高度大于等于当前索引的建筑高度
+    while right < buildings_length - 1 and buildings[right + 1] >= height:
+        right += 1
+    # 两个索引相减后必须再加上一才是实际的宽度
+    # 返回矩形的区域面积
+    return (right - left + 1) * height
+
+
+# O(n^2) time | O(1) space - where n is the number of buildings
+def largest_rectangle_under_skyline2(buildings):
+    max_area = 0  # 记录最大的矩形区域面积
+    for idx, height in enumerate(buildings):
+        # 从当前索引向左和向右拓展并计算矩形区域面积
+        # 对比计算后的矩形区域和当前记录的最大矩形区域取最大值
+        max_area = max(max_area, get_expanding_area(buildings, idx, height))
+    return max_area
+
+
+# O(n) time | O(n) space - where n is the number of buildings
+def largest_rectangle_under_skyline1(buildings):
+    pillar_indices = []  # 记录建筑索引的栈
+    max_area = 0  # 记录最大矩形区域面积
+
+    # 由于需要使用索引来向左计算矩形区域面积, 所以这里追加一个元素让最后一个元素的索引与建筑高度数组长度相等
+    for idx, height in enumerate(buildings + [0]):
+        # 索引栈不为空且索引栈的栈顶记录的建筑高度大于等于当前的高度
+        while len(pillar_indices) != 0 and buildings[pillar_indices[-1]] >= height:
+            # 出栈索引并获得该索引记录的建筑高度
+            pillar_height = buildings[pillar_indices.pop()]
+            # 如果栈为空则取当前索引作为宽度, 否则取栈顶记录的索引到当前索引之间的宽度
+            width = idx if len(pillar_indices) == 0 else idx - pillar_indices[-1] - 1
+            # 对比计算后的矩形区域和当前记录的最大矩形区域取最大值
+            max_area = max(width * pillar_height, max_area)
+
+        # 将当前索引加入栈中
+        pillar_indices.append(idx)
+
+    return max_area
+
+
+if __name__ == '__main__':
+    print(largest_rectangle_under_skyline1([1, 3, 3, 2, 4, 1, 5, 3, 2]))
+    print(largest_rectangle_under_skyline2([1, 3, 3, 2, 4, 1, 5, 3, 2]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+// O(n^2) time | O(1) space - where n is the number of buildings
+int largestRectangleUnderSkyline1(vector<int> buildings)
+{
+    int maxArea = 0;
+    const int buildingsSize = buildings.size();
+    for (int pillarIdx = 0; pillarIdx < buildingsSize; pillarIdx++)
+    {
+        int currentHeight = buildings[pillarIdx];
+
+        int furthestLeft = pillarIdx;
+        while (furthestLeft > 0 && buildings[furthestLeft - 1] >= currentHeight)
+        {
+            furthestLeft--;
+        }
+
+        int furthestRight = pillarIdx;
+        while (furthestRight < buildingsSize - 1 &&
+               buildings[furthestRight + 1] >= currentHeight)
+        {
+            furthestRight++;
+        }
+
+        int areaWithCurrentBuilding =
+            (furthestRight - furthestLeft + 1) * currentHeight;
+        maxArea = max(areaWithCurrentBuilding, maxArea);
+    }
+
+    return maxArea;
+}
+
+// O(n) time | O(n) space - where n is the number of buildings
+int largestRectangleUnderSkyline2(vector<int> buildings)
+{
+    vector<int> pillarIndices;
+    int maxArea = 0;
+
+    vector<int> extendedBuildings(buildings);
+    extendedBuildings.push_back(0);
+    const int extendedBuildingsSize = extendedBuildings.size();
+
+    for (int idx = 0; idx < extendedBuildingsSize; idx++)
+    {
+        int height = extendedBuildings[idx];
+        while (pillarIndices.size() != 0 &&
+               extendedBuildings[pillarIndices[pillarIndices.size() - 1]] >=
+                   height)
+        {
+            int pillarHeight =
+                extendedBuildings[pillarIndices[pillarIndices.size() - 1]];
+            pillarIndices.pop_back();
+            int width = pillarIndices.size() == 0
+                            ? idx
+                            : idx - pillarIndices[pillarIndices.size() - 1] - 1;
+            maxArea = max(width * pillarHeight, maxArea);
+        }
+        pillarIndices.push_back(idx);
+    }
+
+    return maxArea;
+}
+
+int main()
+{
+    vector<int> source = {1, 3, 3, 2, 4, 1, 5, 3, 2};
+    cout << largestRectangleUnderSkyline1(source) << endl;
+    cout << largestRectangleUnderSkyline2(source) << endl;
+    return 0;
+}
+```
+
+Last Modified 2022-02-12
