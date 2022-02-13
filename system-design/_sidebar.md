@@ -16,3 +16,4 @@
   - [Leader Election](system-design/leader-election.md)
   - [Peer-to-Peer Networks](system-design/peer-to-peer-networks.md)
   - [Polling And Streaming](system-design/polling-and-streaming.md)
+  - [Configuration](system-design/configuration.md)
