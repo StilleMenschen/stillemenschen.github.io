@@ -670,4 +670,158 @@ int main()
 }
 ```
 
-Last Modified 2022-01-09
+## 查找公共父节点
+
+给定一个类树结构的组织架构表示，树的根节点表示最高级别的管理者，给定两个数中的节点，找出在树中这两个节点的公共父节点。
+如下的树中节点 E 和 I 的公共父节点为 B
+
+```
+       A
+      /  \
+     B    C
+    / \  /  \
+   D   E F   G
+ /  \
+H    I
+```
+
+```python
+# O(n) time | O(d) space - where n is the number of people
+# in the org and d is the depth (height) of the org chart
+def get_lowest_common_manager(top_manager, report_one, report_two):
+    # 通过递归来进行树的深度遍历找出公共父节点
+    return get_org_info(top_manager, report_one, report_two).lowest_common_manager
+
+
+def get_org_info(manager, report_one, report_two):
+    num_important_reports = 0  # 记录易找到匹配子节点的数量
+    for direct_report in manager.direct_reports:
+        # 先递归获取子节点的数据
+        org_info = get_org_info(direct_report, report_one, report_two)
+        # 如果在子级递归中已经找到公共父节点则直接返回
+        if org_info.lowest_common_manager is not None:
+            return org_info
+        # 累加匹配子节点的数量
+        num_important_reports += org_info.num_important_reports
+    # 如果当前的节点与任意一个待查找的节点匹配则数量增加
+    if manager == report_one or manager == report_two:
+        num_important_reports += 1
+    # 判断是否已经找到两个子节点, 如果是则当前节点为公共父节点, 否则为空
+    lowest_common_manager = manager if num_important_reports == 2 else None
+    return OrgInfo(lowest_common_manager, num_important_reports)
+
+
+class OrgInfo:
+    def __init__(self, lowest_common_manager, num_important_reports):
+        self.lowest_common_manager = lowest_common_manager
+        self.num_important_reports = num_important_reports
+
+
+# This is the input class.
+class OrgChart:
+    def __init__(self, name):
+        self.name = name
+        self.direct_reports = []
+
+
+def initialize():
+    D = OrgChart('D')
+    I = OrgChart('I')
+    D.direct_reports = [OrgChart('H'), I]
+    B = OrgChart('B')
+    E = OrgChart('E')
+    B.direct_reports = [D, E]
+    C = OrgChart('C')
+    C.direct_reports = [OrgChart('F'), OrgChart('G')]
+    A = OrgChart('A')
+    A.direct_reports = [B, C]
+    return A, E, I
+
+
+if __name__ == '__main__':
+    data = get_lowest_common_manager(*initialize())
+    print(data.name)
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class OrgChart
+{
+public:
+    char name;
+    vector<OrgChart *> directReports;
+
+    OrgChart(char name)
+    {
+        this->name = name;
+        this->directReports = {};
+    }
+
+    void addDirectReports(vector<OrgChart *> directReports)
+    {
+        this->directReports = directReports;
+    }
+};
+
+struct OrgInfo
+{
+    OrgChart *lowestCommonManager;
+    int numImportantReports;
+};
+
+OrgInfo getOrgInfo(OrgChart *manager, OrgChart *reportOne, OrgChart *reportTwo);
+
+// O(n) time | O(d) space - where n is the number of people
+// in the org and d is the depth (height) of the org chart
+OrgChart *getLowestCommonManager(OrgChart *topManager, OrgChart *reportOne,
+                                 OrgChart *reportTwo)
+{
+    return getOrgInfo(topManager, reportOne, reportTwo).lowestCommonManager;
+}
+
+OrgInfo getOrgInfo(OrgChart *manager, OrgChart *reportOne,
+                   OrgChart *reportTwo)
+{
+    int numImportantReports = 0;
+    for (OrgChart *directReport : manager->directReports)
+    {
+        OrgInfo orgInfo = getOrgInfo(directReport, reportOne, reportTwo);
+        if (orgInfo.lowestCommonManager != nullptr)
+            return orgInfo;
+        numImportantReports += orgInfo.numImportantReports;
+    }
+    if (manager == reportOne || manager == reportTwo)
+        numImportantReports++;
+    OrgChart *lowestCommonManager = numImportantReports == 2 ? manager : nullptr;
+    OrgInfo newOrgInfo = {lowestCommonManager, numImportantReports};
+    return newOrgInfo;
+}
+
+vector<OrgChart *> initialize()
+{
+    OrgChart *D = new OrgChart('D');
+    OrgChart *I = new OrgChart('I');
+    D->addDirectReports({new OrgChart('H'), I});
+    OrgChart *B = new OrgChart('B');
+    OrgChart *E = new OrgChart('E');
+    B->addDirectReports({D, E});
+    OrgChart *C = new OrgChart('C');
+    C->addDirectReports({new OrgChart('F'), new OrgChart('G')});
+    OrgChart *A = new OrgChart('A');
+    A->addDirectReports({B, C});
+    return {A, E, I};
+}
+
+int main()
+{
+    vector<OrgChart *> source = initialize();
+    OrgChart *result = getLowestCommonManager(source[0], source[1], source[2]);
+    cout << result->name;
+    return 0;
+}
+```
+
+Last Modified 2022-02-13
