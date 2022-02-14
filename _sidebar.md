@@ -2,6 +2,7 @@
 - [Linux Tool](linux-tool/)
 - [Python](python/)
 - [Jmeter](jmeter/)
+- [Software Test](software-test/)
 - [Jenkins](jenkins/)
 - [Nginx](nginx/)
 - [Docker](docker/)
