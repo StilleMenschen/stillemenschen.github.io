@@ -830,7 +830,7 @@ int main()
 如 abcd-f 和 e-ghijk 可以拆解拼接成 abcd-ef-ghijk
 
 ```python
-def areInterwoven1(one, two, three, i, j, cache):
+def are_interwoven1(one, two, three, i, j, cache):
     # 如果缓存记录中已经访问过这个位置则直接返回
     # 这里可能会有 i 或者 j 索引超过实际字符串长度的情况
     if cache[i][j] is not None:
@@ -844,7 +844,7 @@ def areInterwoven1(one, two, three, i, j, cache):
     # 判断第一个字符串中的字符是否与第三个字符串的字符相等
     if i < len(one) and one[i] == three[k]:
         # 接着往下匹配
-        cache[i][j] = areInterwoven1(one, two, three, i + 1, j, cache)
+        cache[i][j] = are_interwoven1(one, two, three, i + 1, j, cache)
         # 如果完全匹配则返回, 因为下面还有一个判断步骤, 这里不能直接返回
         if cache[i][j]:
             return True
@@ -852,7 +852,7 @@ def areInterwoven1(one, two, three, i, j, cache):
     # 判断第二个字符串中的字符是否与第三个字符串的字符相等
     if j < len(two) and two[j] == three[k]:
         # 接着往下匹配
-        cache[i][j] = areInterwoven1(one, two, three, i, j + 1, cache)
+        cache[i][j] = are_interwoven1(one, two, three, i, j + 1, cache)
         # 由于下面没有判断的步骤了, 所以这里直接返回
         return cache[i][j]
     # 上面的三个条件都不满足, 记录到缓存中并返回否
@@ -862,16 +862,16 @@ def areInterwoven1(one, two, three, i, j, cache):
 
 # O(n * m) time | O(n * m) space - where n is the length
 # of the first string and m is the length of the second string
-def interweavingStrings1(one, two, three):
+def interweaving_strings1(one, two, three):
     # 第一第二个字符串的长度想加与第三个字符串不匹配可以直接返回否
     if len(three) != len(one) + len(two):
         return False
     # 缓存已经访问过的位置, 缓存的行和列都加一是为了防止数组越界访问
     cache = [[None for _ in range(len(two) + 1)] for _ in range(len(one) + 1)]
-    return areInterwoven1(one, two, three, 0, 0, cache)
+    return are_interwoven1(one, two, three, 0, 0, cache)
 
 
-def areInterwoven2(one, two, three, i, j):
+def are_interwoven2(one, two, three, i, j):
     # 第三个字符串的索引可以通过第一第二个字符串的索引想加获得
     k = i + j
     # 如果两个索引想加已经等于第三个字符串的长度则表示匹配直接返回对
@@ -881,13 +881,13 @@ def areInterwoven2(one, two, three, i, j):
     # 判断第一个字符串中的字符是否与第三个字符串的字符相等
     if i < len(one) and one[i] == three[k]:
         # 如果完全匹配则返回, 因为下面还有一个判断步骤, 这里不能直接返回
-        if areInterwoven2(one, two, three, i + 1, j):
+        if are_interwoven2(one, two, three, i + 1, j):
             return True
 
     # 判断第二个字符串中的字符是否与第三个字符串的字符相等
     if j < len(two) and two[j] == three[k]:
         # 由于下面没有判断的步骤了, 所以这里直接返回
-        return areInterwoven2(one, two, three, i, j + 1)
+        return are_interwoven2(one, two, three, i, j + 1)
 
     # 上面的三个条件都不满足返回否
     return False
@@ -895,17 +895,17 @@ def areInterwoven2(one, two, three, i, j):
 
 # O(2^(n + m)) time | O(n + m) space - where n is the length
 # of the first string and m is the length of the second string
-def interweavingStrings2(one, two, three):
+def interweaving_strings2(one, two, three):
     # 第一第二个字符串的长度想加与第三个字符串不匹配可以直接返回否
     if len(three) != len(one) + len(two):
         return False
     # 从第一和第二个字符串的首个位置开始搜索
-    return areInterwoven2(one, two, three, 0, 0)
+    return are_interwoven2(one, two, three, 0, 0)
 
 
 if __name__ == '__main__':
-    print(interweavingStrings1('algoexpert', 'your-dream-job', 'your-algodream-expertjob'))
-    print(interweavingStrings2('algoexpert', 'your-dream-job', 'your-algodream-expertjob'))
+    print(interweaving_strings1('algoexpert', 'your-dream-job', 'your-algodream-expertjob'))
+    print(interweaving_strings2('algoexpert', 'your-dream-job', 'your-algodream-expertjob'))
 ```
 
 ```cpp
