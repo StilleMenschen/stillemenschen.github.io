@@ -80,13 +80,19 @@ table th:first-of-type {
 
 进程列表上方为摘要，从上往下分别为
 
-- 第一部分包括系统自最后一次启动以来运行的时间(时分秒、天)、当前登录用户数(users)、系统负载(1 分钟、5 分钟、15 分钟)
+- 第一部分包括系统自最后一次启动以来运行的时间 (时分秒、天)、当前登录用户数 (users)、系统负载 (1 分钟、5 分钟、15 分钟)
 - 第二部分包括进程或线程统计、CPU 和内存使用率
-  - 进程或线程包括总计(total)、运行中(running)、睡眠中(sleeping)、停止(stoped)、僵死(zombie)
-  - CPU 使用率包括用户进程时间(us,user)、系统内核时间(sy,system)、调度优先级(ni,nice)、空闲内核时间(id,idle)、IO 等待时
-    间(wa,io-wait)、time spent servicing hardware interrupts (hi)、time spent servicing software interrupts (si)、time
-    stolen from this vm by the hypervisor (st)
-  - 内存和交换空间使用率包括总计(total)、空闲(free)、已使用(used)、缓存(buff/cache)、可用(avail)
+  - 进程或线程包括总计 (total)、运行中 (running)、睡眠中 (sleeping)、停止 (stoped)、僵死 (zombie)
+  - CPU 使用率包括
+    - 用户进程时间 (us, user)
+    - 系统内核时间 (sy, system)
+    - 调度优先级 (ni, nice)
+    - 空闲内核时间 (id, idle)
+    - IO 等待时间 (wa, io-wait)
+    - 硬件中断时间 (hi, time spent servicing hardware interrupts)
+    - 软件中断时间 (si, time spent servicing software interrupts)、
+    - time stolen from this vm by the hypervisor (st)
+  - 内存和交换空间使用率包括总计 (total)、空闲 (free)、已使用 (used)、缓存 (buff/cache)、可用 (avail)
 
 ## 字段说明
 
