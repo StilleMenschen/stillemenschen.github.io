@@ -18,3 +18,4 @@
   - [Polling And Streaming](system-design/polling-and-streaming.md)
   - [Configuration](system-design/configuration.md)
   - [Rate Limiting](system-design/rate-limiting.md)
+  - [Logging And Monitoring](system-design/logging-and-monitoring.md)
