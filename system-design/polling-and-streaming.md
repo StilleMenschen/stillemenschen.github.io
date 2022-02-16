@@ -75,6 +75,7 @@ app.post("/messages", (req, res) => {
   for (const socket of sockets) {
     socket.send(JSON.stringify(message));
   }
+  res.send();
 });
 
 app.ws("/messages", (socket) => {
@@ -156,10 +157,6 @@ for (let i = 1; i <= 10; i++) {
     messagingApi.sendMessage(message);
   }, i * 1000);
 }
-
-setTimeout(() => {
-  process.exit(0);
-}, 12000);
 ```
 
 ```bash
