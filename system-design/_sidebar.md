@@ -19,3 +19,4 @@
   - [Configuration](system-design/configuration.md)
   - [Rate Limiting](system-design/rate-limiting.md)
   - [Logging And Monitoring](system-design/logging-and-monitoring.md)
+  - [Publish/Subscribe Pattern](system-design/publish-subscribe-pattern.md)
