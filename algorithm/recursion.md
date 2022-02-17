@@ -1008,4 +1008,212 @@ int main()
 }
 ```
 
-Last Modified 2022-02-14
+## 解决数独
+
+```python
+# O(1) time | O(1) space - assuming a 9x9 input board
+def solve_sudoku(board):
+    # 从左上角的位置开始
+    solve_partial_sudoku(0, 0, board)
+    return board
+
+
+def solve_partial_sudoku(row, col, board):
+    current_row = row
+    current_col = col
+
+    # 如果列索引越界则切换到下一行
+    if current_col == len(board[current_row]):
+        current_row += 1  # 切换到下一行
+        current_col = 0  # 重置列索引到开头
+        # 如果行索引越界则表示已经处理完成
+        if current_row == len(board):
+            return True  # board is completed
+
+    # 需要填空的格子值为 0
+    if board[current_row][current_col] == 0:
+        # 尝试填写数字
+        return try_digits_at_position(current_row, current_col, board)
+    # 如果是不需要处理的格子则继续向右走
+    return solve_partial_sudoku(current_row, current_col + 1, board)
+
+
+def try_digits_at_position(row, col, board):
+    # 尝试填写数字 1 到 9
+    for digit in range(1, 10):
+        # 如果行, 列, 宫格都符合条件则填写
+        if is_valid_at_position(digit, row, col, board):
+            board[row][col] = digit
+            # 接着尝试下一个格子, 这里是产生递归的关键, 因为第一个需要填写的格子一定存在一个有效的值
+            # 所以尝试填写第一个格子不会走到下面的返回逻辑, 从而实现调用递归
+            if solve_partial_sudoku(row, col + 1, board):
+                # 第一个需要填写的格子必定会走到这一步
+                return True
+    # 没有符合条件的值, 还原为 0 表示未填写
+    board[row][col] = 0
+    # 返回否表示这个格子尝试失败
+    return False
+
+
+def is_valid_at_position(value, row, col, board):
+    # 规则一 行不能有重复的值
+    row_is_valid = value not in board[row]
+    # 规则二 列不能有重复的值
+    column_is_valid = value not in map(lambda r: r[col], board)
+
+    if not row_is_valid or not column_is_valid:
+        return False
+
+    # Check subgrid constraint.
+    subgrid_row_start = (row // 3) * 3
+    subgrid_col_start = (col // 3) * 3
+    # 规则三 格子所在的九宫格区域里不能有重复的值
+    for row_idx in range(3):
+        for col_idx in range(3):
+            row_to_check = subgrid_row_start + row_idx
+            col_to_check = subgrid_col_start + col_idx
+            existing_value = board[row_to_check][col_to_check]
+
+            if existing_value == value:
+                return False
+
+    # 上面三个规则都符合则返回对
+    return True
+
+
+if __name__ == '__main__':
+    source = [
+        [7, 8, 0, 4, 0, 0, 1, 2, 0],
+        [6, 0, 0, 0, 7, 5, 0, 0, 9],
+        [0, 0, 0, 6, 0, 1, 0, 7, 8],
+        [0, 0, 7, 0, 4, 0, 2, 6, 0],
+        [0, 0, 1, 0, 5, 0, 9, 3, 0],
+        [9, 0, 4, 0, 6, 0, 0, 0, 5],
+        [0, 7, 0, 3, 0, 0, 0, 1, 2],
+        [1, 2, 0, 0, 0, 7, 4, 0, 0],
+        [0, 4, 9, 2, 0, 6, 0, 0, 7]
+    ]
+    for rows in solve_sudoku(source):
+        print(rows)
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+bool solvePartialSudoku(int row, int col, vector<vector<int>> &board);
+bool tryDigitsAtPosition(int row, int col, vector<vector<int>> &board);
+bool isValidAtPosition(int value, int row, int col, vector<vector<int>> &board);
+
+// O(1) time | O(1) space - assuming a 9x9 input board
+vector<vector<int>> solveSudoku(vector<vector<int>> board)
+{
+    solvePartialSudoku(0, 0, board);
+    return board;
+}
+
+bool solvePartialSudoku(int row, int col, vector<vector<int>> &board)
+{
+    int currentRow = row;
+    int currentCol = col;
+
+    const int rowSize = board[currentRow].size();
+    if (currentCol == rowSize)
+    {
+        currentRow++;
+        currentCol = 0;
+        const int boardSize = board.size();
+        if (currentRow == boardSize)
+            return true;
+    }
+
+    if (board[currentRow][currentCol] == 0)
+    {
+        return tryDigitsAtPosition(currentRow, currentCol, board);
+    }
+
+    return solvePartialSudoku(currentRow, currentCol + 1, board);
+}
+
+bool tryDigitsAtPosition(int row, int col, vector<vector<int>> &board)
+{
+    for (int digit = 1; digit < 10; digit++)
+    {
+        if (isValidAtPosition(digit, row, col, board))
+        {
+            board[row][col] = digit;
+            if (solvePartialSudoku(row, col + 1, board))
+                return true;
+        }
+    }
+
+    board[row][col] = 0;
+    return false;
+}
+
+bool isValidAtPosition(int value, int row, int col,
+                       vector<vector<int>> &board)
+{
+    bool rowIsValid =
+        find(board[row].begin(), board[row].end(), value) == board[row].end();
+    bool colIsValid = true;
+    for (auto arr : board)
+    {
+        if (arr[col] == value)
+        {
+            colIsValid = false;
+            break;
+        }
+    }
+
+    if (!rowIsValid || !colIsValid)
+        return false;
+
+    // Check subgrid constraint.
+    int subgridRowStart = row / 3 * 3;
+    int subgridColStart = col / 3 * 3;
+    for (int rowIdx = 0; rowIdx < 3; rowIdx++)
+    {
+        for (int colIdx = 0; colIdx < 3; colIdx++)
+        {
+            int rowToCheck = subgridRowStart + rowIdx;
+            int colToCheck = subgridColStart + colIdx;
+            int existingValue = board[rowToCheck][colToCheck];
+
+            if (existingValue == value)
+                return false;
+        }
+    }
+
+    return true;
+}
+
+int main()
+{
+    vector<vector<int>> source = {
+        {7, 8, 0, 4, 0, 0, 1, 2, 0},
+        {6, 0, 0, 0, 7, 5, 0, 0, 9},
+        {0, 0, 0, 6, 0, 1, 0, 7, 8},
+        {0, 0, 7, 0, 4, 0, 2, 6, 0},
+        {0, 0, 1, 0, 5, 0, 9, 3, 0},
+        {9, 0, 4, 0, 6, 0, 0, 0, 5},
+        {0, 7, 0, 3, 0, 0, 0, 1, 2},
+        {1, 2, 0, 0, 0, 7, 4, 0, 0},
+        {0, 4, 9, 2, 0, 6, 0, 0, 7}};
+    source = solveSudoku(source);
+    for (vector<int> rows : source)
+    {
+        cout << "[ ";
+        for (int element : rows)
+        {
+            cout << element << " ";
+        }
+        cout << "]" << endl;
+    }
+    return 0;
+}
+```
+
+Last Modified 2022-02-17
