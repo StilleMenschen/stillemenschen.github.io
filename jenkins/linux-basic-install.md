@@ -134,7 +134,7 @@ sed -i 's/http:\/\/www.google.com/https:\/\/www.baidu.com/g' default.json
 
 ## 初始化
 
-再次执行`. ./startup.sh`启动 Jenkins，然后访问`http://192.168.0.1:8888`，根据提示找到管理员密码，填写到文本框点击继续
+再次执行`sh ./startup.sh`启动 Jenkins，然后访问`http://192.168.0.1:8888`，根据提示找到管理员密码，填写到文本框点击继续
 
 可以直接复制给出的路径，执行`cat`命令查看，如
 
