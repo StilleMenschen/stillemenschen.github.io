@@ -1,4 +1,4 @@
-# Linux 系统 Docker 安装
+# Linux 系统 Docker Compose 安装
 
 - 指定以宿主机的 root 用户运行
 - 获取官方最新版镜像
@@ -31,4 +31,4 @@ services:
       - "/usr/src/test/data:/var/jenkins_home"
 ```
 
-Last Modified 2021-03-11
+Last Modified 2022-01-19
