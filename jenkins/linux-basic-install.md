@@ -128,8 +128,8 @@ kill -9 $(ps -aux|grep '[j]enkins'|awk '{print $2}')
 替换下载地址为清华大学镜像地址，替换网络检测地址为百度，命令如下
 
 ```bash
-sed -i 's/https:\/\/updates.jenkins.io\/download/https:\/\/mirrors.tuna.tsinghua.edu.cn\/jenkins/g' default.json
-sed -i 's/http:\/\/www.google.com/https:\/\/www.baidu.com/g' default.json
+sed -i 's#https://updates.jenkins.io/download#https://mirrors.tuna.tsinghua.edu.cn/jenkins#g' default.json
+sed -i 's#http://www.google.com#https://www.baidu.com#g' default.json
 ```
 
 ## 初始化
