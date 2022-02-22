@@ -1216,4 +1216,90 @@ int main()
 }
 ```
 
-Last Modified 2022-02-17
+## 生成 DIV 标签
+
+```python
+# O((2n)!/((n!((n + 1)!)))) time | O((2n)!/((n!((n + 1)!)))) space -
+# where n is the input number
+def generate_div_tags(number_of_tags):
+    matched_div_tags = []
+    # 递归创建, 传递所需的开始标签数量和结束标签数量
+    generate_div_tags_from_prefix(number_of_tags, number_of_tags, '', matched_div_tags)
+    return matched_div_tags
+
+
+def generate_div_tags_from_prefix(opening_tags_needed, closing_tags_needed, prefix, result):
+    # 如果开始标签大于零
+    if opening_tags_needed > 0:
+        # 追加开始标签
+        new_prefix = prefix + '<div>'
+        # 开始标签数量减一, 继续递归
+        generate_div_tags_from_prefix(opening_tags_needed - 1, closing_tags_needed, new_prefix, result)
+
+    # 如果开始标签小于结束标签
+    if opening_tags_needed < closing_tags_needed:
+        # 追加结束标签
+        new_prefix = prefix + '</div>'
+        # 结束标签数量减一, 继续递归
+        generate_div_tags_from_prefix(opening_tags_needed, closing_tags_needed - 1, new_prefix, result)
+
+    # 由于是先减少开始标签数量, 所以这里只需要判断结束标签数量为零时存储计算结果
+    if closing_tags_needed == 0:
+        result.append(prefix)
+
+
+if __name__ == '__main__':
+    print(generate_div_tags(3))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+void generateDivTagsFromPrefix(int openingTagsNeeded, int closingTagsNeeded,
+                               string prefix, vector<string> &result);
+
+// O((2n)!/((n!((n + 1)!)))) time | O((2n)!/((n!((n + 1)!)))) space -
+// where n is the input number
+vector<string> generateDivTags(int numberOfTags)
+{
+    vector<string> matchedDivTags;
+    generateDivTagsFromPrefix(numberOfTags, numberOfTags, "", matchedDivTags);
+    return matchedDivTags;
+}
+
+void generateDivTagsFromPrefix(int openingTagsNeeded, int closingTagsNeeded,
+                               string prefix, vector<string> &result)
+{
+    if (openingTagsNeeded > 0)
+    {
+        string newPrefix = prefix + "<div>";
+        generateDivTagsFromPrefix(openingTagsNeeded - 1, closingTagsNeeded,
+                                  newPrefix, result);
+    }
+
+    if (openingTagsNeeded < closingTagsNeeded)
+    {
+        string newPrefix = prefix + "</div>";
+        generateDivTagsFromPrefix(openingTagsNeeded, closingTagsNeeded - 1,
+                                  newPrefix, result);
+    }
+
+    if (closingTagsNeeded == 0)
+        result.push_back(prefix);
+}
+
+int main()
+{
+    vector<string> result = generateDivTags(3);
+    for (string element : result)
+    {
+        cout << element << endl;
+    }
+    return 0;
+}
+```
+
+Last Modified 2022-02-22
