@@ -1302,4 +1302,137 @@ int main()
 }
 ```
 
-Last Modified 2022-02-22
+## 计算测量范围
+
+给定一组量杯，每组量杯只有一个最小值刻度和最大值刻度，给定一个测量范围，判断这个测量范围是否可以使用这一组量杯完成测量。
+量杯可以多次使用，但是每次量杯装下的范围必须是在量杯的范围之内，不能超出量杯的可测量最小或最大范围
+
+```python
+# O(low * high * n) time | O(low * high) space - where n is the number of measuring cups
+def ambiguous_measurements(measuring_cups, low, high):
+    # 缓存已经处理过的测量范围
+    memoization = {}
+    # 递归处理
+    return can_measure_in_range(measuring_cups, low, high, memoization)
+
+
+def can_measure_in_range(measuring_cups, low, high, memoization):
+    # 使用测量范围创建一个 hash key
+    memoize_key = create_hashable_key(low, high)
+    # 如果已经有缓存则直接返回
+    if memoize_key in memoization:
+        return memoization[memoize_key]
+
+    # 测量范围不能是负数或者零
+    if low <= 0 and high <= 0:
+        return False
+
+    # 先预置一个值缓存当前函数的判断结果
+    can_measure = False
+    for cup_low, cup_high in measuring_cups:
+        # 如果量杯的测量范围能够测量当前的范围
+        # 量杯的最小范围大于等于测量最小范围
+        # 量杯的最大范围小于等于测量最大范围
+        if low <= cup_low and cup_high <= high:
+            can_measure = True
+            # 已经有满足条件的情况, 不用再继续递归
+            break
+
+        # 根据量杯的测量范围计算新的测量范围
+        new_low = max(0, low - cup_low)
+        new_high = max(0, high - cup_high)
+        # 递归处理
+        can_measure = can_measure_in_range(measuring_cups, new_low, new_high, memoization)
+        if can_measure:
+            # 已经有满足条件的情况, 不用再继续递归
+            break
+
+    # 缓存当前的已经处理过的测量范围
+    memoization[memoize_key] = can_measure
+    return can_measure
+
+
+def create_hashable_key(low, high):
+    return '{0}:{1}'.format(low, high)
+
+
+if __name__ == '__main__':
+    print(ambiguous_measurements(
+        [[200, 210],
+         [450, 465],
+         [800, 850]], 2100, 2300
+    ))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <string>
+using namespace std;
+
+bool canMeasureInRange(vector<vector<int>> &measuringCups, int low, int high,
+                       unordered_map<string, bool> &memoization);
+string createHashableKey(int low, int high);
+
+// O(low * high * n) time | O(low * high) space - where n is the number of
+// measuring cups
+bool ambiguousMeasurements(vector<vector<int>> measuringCups, int low,
+                           int high)
+{
+    unordered_map<string, bool> memoization;
+    return canMeasureInRange(measuringCups, low, high, memoization);
+}
+
+bool canMeasureInRange(vector<vector<int>> &measuringCups, int low, int high,
+                       unordered_map<string, bool> &memoization)
+{
+    string memoizeKey = createHashableKey(low, high);
+    if (memoization.find(memoizeKey) != memoization.end())
+    {
+        return memoization[memoizeKey];
+    }
+
+    if (low <= 0 && high <= 0)
+    {
+        return false;
+    }
+
+    bool canMeasure = false;
+    for (auto cup : measuringCups)
+    {
+        int cupLow = cup[0];
+        int cupHigh = cup[1];
+        if (low <= cupLow && cupHigh <= high)
+        {
+            canMeasure = true;
+            break;
+        }
+
+        int newLow = max(0, low - cupLow);
+        int newHigh = max(0, high - cupHigh);
+        canMeasure = canMeasureInRange(measuringCups, newLow, newHigh, memoization);
+        if (canMeasure)
+            break;
+    }
+
+    memoization[memoizeKey] = canMeasure;
+    return canMeasure;
+}
+
+string createHashableKey(int low, int high)
+{
+    return to_string(low) + ":" + to_string(high);
+}
+
+int main()
+{
+    cout << ambiguousMeasurements({{200, 210},
+                                   {450, 465},
+                                   {800, 850}},
+                                  2100, 2300);
+    return 0;
+}
+```
+
+Last Modified 2022-02-24
