@@ -16,6 +16,7 @@
 - chmod 目录或文件的权限变更
 - ps 查看当前进程
 - top 查看实时进程
+- iotop 查看实时 I/O
 - useradd 新增用户
 - usermod 修改用户
 - userdel 删除用户
