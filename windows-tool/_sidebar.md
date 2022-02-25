@@ -1,4 +1,4 @@
 - [Home](/)
 - [Windows Tool](windows-tool/)
-  - [netstat](windows-tool/netstat.md)
+  - [netstat](windows-tool/windows-netstat.md)
   - [findstr](windows-tool/findstr.md)
