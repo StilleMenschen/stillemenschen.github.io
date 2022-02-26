@@ -22,3 +22,4 @@
   - [Publish/Subscribe Pattern](system-design/publish-subscribe-pattern.md)
   - [MapReduce](system-design/map-reduce.md)
   - [Security And HTTPS](system-design/security-and-https.md)
+  - [API Design](system-design/api-design.md)
