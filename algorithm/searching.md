@@ -356,4 +356,225 @@ int main()
 }
 ```
 
-Last Modified 2022-02-27
+## 数值所在范围
+
+给定一个排序好的数组和一个目标值，找出目标值在数组中连续出现的开始和结束位置，未找到则返回 [-1, -1]
+
+```python
+# O(log(n)) time | O(log(n)) space
+def search_for_range1(array, target):
+    # 创建数组存储开始和结束范围
+    final_range = [-1, -1]
+    # 搜索目标值出现的开始位置
+    altered_binary_search1(array, target, 0, len(array) - 1, final_range, True)
+    # 搜索目标值出现的结束位置
+    altered_binary_search1(array, target, 0, len(array) - 1, final_range, False)
+    return final_range
+
+
+def altered_binary_search1(array, target, left, right, final_range, to_left):
+    # 如果左指针位置已经大于右指针位置, 说明已经搜索完数组
+    if left > right:
+        return
+    # 计算中间位置索引
+    mid = (left + right) // 2
+    # 由于数组是排序的, 所以先判断当前中间位置的值是大于还是小于
+    if array[mid] < target:
+        # 当前中间位置的值小于目标值, 继续搜索右边
+        altered_binary_search1(array, target, mid + 1, right, final_range, to_left)
+    elif array[mid] > target:
+        # 当前中间位置的值大于目标值, 继续搜索左边
+        altered_binary_search1(array, target, left, mid - 1, final_range, to_left)
+    else:
+        # 这里用一个标记判断要搜索的是开始位置还是结束位置
+        if to_left:
+            # 如果开始位置是零或者向左一个位置的值不等于目标值, 则记录开始位置并结束搜索
+            if mid == 0 or array[mid - 1] != target:
+                final_range[0] = mid
+            else:
+                # 不满足上述条件则继续搜索开始位置
+                altered_binary_search1(array, target, left, mid - 1, final_range, to_left)
+        else:
+            # 如果结束位置是数组末尾或者向右一个位置的值不等于目标值, 则记录结束位置并结束搜索
+            if mid == len(array) - 1 or array[mid + 1] != target:
+                final_range[1] = mid
+            else:
+                # 不满足上述条件则继续搜索结束位置
+                altered_binary_search1(array, target, mid + 1, right, final_range, to_left)
+
+
+# O(log(n)) time | O(1) space
+def search_for_range2(array, target):
+    final_range = [-1, -1]
+    # 非递归实现, 搜索目标值的开始和结束位置
+    altered_binary_search2(array, target, 0, len(array) - 1, final_range, True)
+    altered_binary_search2(array, target, 0, len(array) - 1, final_range, False)
+    return final_range
+
+
+def altered_binary_search2(array, target, left, right, final_range, to_left):
+    # 如果左指针位置小于等于右指针位置则继续循环
+    while left <= right:
+        mid = (left + right) // 2
+        if array[mid] < target:
+            # 当前中间值小于目标值, 修改左指针为中间位置向右加一
+            left = mid + 1
+        elif array[mid] > target:
+            # 当前中间值大于目标值, 修改左指针为中间位置向左减一
+            right = mid - 1
+        else:
+            if to_left:
+                # 如果开始位置是零或者向左一个位置的值不等于目标值, 则记录开始位置并结束搜索
+                if mid == 0 or array[mid - 1] != target:
+                    final_range[0] = mid
+                    # 结束循环
+                    break
+                else:
+                    right = mid - 1
+            else:
+                # 如果结束位置是数组末尾或者向右一个位置的值不等于目标值, 则记录结束位置并结束搜索
+                if mid == len(array) - 1 or array[mid + 1] != target:
+                    final_range[1] = mid
+                    # 结束循环
+                    break
+                else:
+                    left = mid + 1
+
+
+if __name__ == '__main__':
+    print(search_for_range1([0, 1, 21, 33, 45, 45, 45, 45, 45, 45, 61, 71, 73], 45))
+    print(search_for_range2([0, 1, 21, 33, 45, 45, 45, 45, 45, 45, 61, 71, 73], 45))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<int> searchForRange1(vector<int> array, int target);
+void alteredBinarySearch1(vector<int> array, int target, int left, int right,
+                          vector<int> *finalRange, bool goLeft);
+
+// O(log(n)) time | O(log(n)) space
+vector<int> searchForRange1(vector<int> array, int target)
+{
+    vector<int> finalRange{-1, -1};
+    alteredBinarySearch1(array, target, 0, array.size() - 1, &finalRange, true);
+    alteredBinarySearch1(array, target, 0, array.size() - 1, &finalRange, false);
+    return finalRange;
+}
+
+void alteredBinarySearch1(vector<int> array, int target, int left, int right,
+                          vector<int> *finalRange, bool goLeft)
+{
+    if (left > right)
+    {
+        return;
+    }
+    int mid = (left + right) / 2;
+    if (array[mid] < target)
+    {
+        alteredBinarySearch1(array, target, mid + 1, right, finalRange, goLeft);
+    }
+    else if (array[mid] > target)
+    {
+        alteredBinarySearch1(array, target, left, mid - 1, finalRange, goLeft);
+    }
+    else
+    {
+        if (goLeft)
+        {
+            if (mid == 0 || array[mid - 1] != target)
+            {
+                finalRange->at(0) = mid;
+            }
+            else
+            {
+                alteredBinarySearch1(array, target, left, mid - 1, finalRange, goLeft);
+            }
+        }
+        else
+        {
+            const int arraySize = array.size();
+            if (mid == arraySize - 1 || array[mid + 1] != target)
+            {
+                finalRange->at(1) = mid;
+            }
+            else
+            {
+                alteredBinarySearch1(array, target, mid + 1, right, finalRange, goLeft);
+            }
+        }
+    }
+}
+
+vector<int> searchForRange2(vector<int> array, int target);
+void alteredBinarySearch2(vector<int> array, int target, int left, int right,
+                          vector<int> *finalRange, bool goLeft);
+
+// O(log(n)) time | O(1) space
+vector<int> searchForRange2(vector<int> array, int target)
+{
+    vector<int> finalRange{-1, -1};
+    alteredBinarySearch2(array, target, 0, array.size() - 1, &finalRange, true);
+    alteredBinarySearch2(array, target, 0, array.size() - 1, &finalRange, false);
+    return finalRange;
+}
+
+void alteredBinarySearch2(vector<int> array, int target, int left, int right,
+                          vector<int> *finalRange, bool goLeft)
+{
+    while (left <= right)
+    {
+        int mid = (left + right) / 2;
+        if (array[mid] < target)
+        {
+            left = mid + 1;
+        }
+        else if (array[mid] > target)
+        {
+            right = mid - 1;
+        }
+        else
+        {
+            if (goLeft)
+            {
+                if (mid == 0 || array[mid - 1] != target)
+                {
+                    finalRange->at(0) = mid;
+                    return;
+                }
+                else
+                {
+                    right = mid - 1;
+                }
+            }
+            else
+            {
+                const int arraySize = array.size();
+                if (mid == arraySize - 1 || array[mid + 1] != target)
+                {
+                    finalRange->at(1) = mid;
+                    return;
+                }
+                else
+                {
+                    left = mid + 1;
+                }
+            }
+        }
+    }
+}
+
+int main()
+{
+    vector<int> source = {0, 1, 21, 33, 45, 45, 45, 45, 45, 45, 61, 71, 73};
+    vector<int> result = searchForRange1(source, 45);
+    cout << "[" << result[0] << ", " << result[1] << "]" << endl;
+    result = searchForRange2(source, 45);
+    cout << "[" << result[0] << ", " << result[1] << "]" << endl;
+    return 0;
+}
+```
+
+Last Modified 2022-02-28
