@@ -577,4 +577,128 @@ int main()
 }
 ```
 
-Last Modified 2022-02-28
+## 快速选择
+
+给定一个包含不重复数据且为乱序的数组，找出第 K 个最小值并返回
+
+```python
+# Best: O(n) time | O(1) space
+# Average: O(n) time | O(1) space
+# Worst: O(n^2) time | O(1) space
+def quickselect(array, k):
+    position = k - 1  # 查找位置对应数组索引
+    return quickselect_helper(array, 0, len(array) - 1, position)
+
+
+def quickselect_helper(array, start_idx, end_idx, position):
+    while True:
+        if start_idx > end_idx:
+            raise Exception("Your algorithm should never arrive here!")
+        # 设置一个中枢元素
+        pivot_idx = start_idx
+        # 左指针
+        left_idx = start_idx + 1
+        # 右指针
+        right_idx = end_idx
+        # 处理左右指针范围内的数据
+        while left_idx <= right_idx:
+            # 如果左指针对应的元素大于中枢元素, 同时中枢元素小于右指针对应的元素, 则交换
+            if array[left_idx] > array[pivot_idx] > array[right_idx]:
+                swap(left_idx, right_idx, array)
+            # 左指针对应的元素小于等于中枢元素则向右移动
+            if array[left_idx] <= array[pivot_idx]:
+                left_idx += 1
+            # 右指针对应的元素大于等于中枢元素则向左移动
+            if array[right_idx] >= array[pivot_idx]:
+                right_idx -= 1
+        # 最后交换中枢元素和右指针对应的元素
+        swap(pivot_idx, right_idx, array)
+        # 如果右指针指向的位置已经符合待查找的第 K 个最小数则直接返回
+        if right_idx == position:
+            return array[right_idx]
+        # 如果右指针在待查找位置之前, 说明要找的元素在右半部分
+        # 则修改开始查找位置为右指针向后一位
+        elif right_idx < position:
+            start_idx = right_idx + 1
+        # 如果右指针在待查找位置之后, 说明要找的元素在左半部分
+        # 则修改末尾查找位置为右指针向前一位
+        else:
+            end_idx = right_idx - 1
+
+
+def swap(one, two, array):
+    array[one], array[two] = array[two], array[one]
+
+
+if __name__ == '__main__':
+    print(quickselect([8, 3, 2, 5, 1, 7, 4, 6], 3))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int quickselectHelper(vector<int> array, int startIdx, int endIdx, int position);
+
+// Best: O(n) time | O(1) space
+// Average: O(n) time | O(1) space
+// Worst: O(n^2) time | O(1) space
+int quickselect(vector<int> array, int k)
+{
+    int position = k - 1;
+    return quickselectHelper(array, 0, array.size() - 1, position);
+}
+
+int quickselectHelper(vector<int> array, int startIdx, int endIdx, int position)
+{
+    while (true)
+    {
+        if (startIdx > endIdx)
+        {
+            perror("Your Algorithm should never arrive here!");
+            exit(1);
+        }
+        int pivotIdx = startIdx;
+        int leftIdx = startIdx + 1;
+        int rightIdx = endIdx;
+        while (leftIdx <= rightIdx)
+        {
+            if (array[leftIdx] > array[pivotIdx] &&
+                array[rightIdx] < array[pivotIdx])
+            {
+                swap(array[leftIdx], array[rightIdx]);
+            }
+            if (array[leftIdx] <= array[pivotIdx])
+            {
+                leftIdx++;
+            }
+            if (array[rightIdx] >= array[pivotIdx])
+            {
+                rightIdx--;
+            }
+        }
+        swap(array[pivotIdx], array[rightIdx]);
+        if (rightIdx == position)
+        {
+            return array[rightIdx];
+        }
+        else if (rightIdx < position)
+        {
+            startIdx = rightIdx + 1;
+        }
+        else
+        {
+            endIdx = rightIdx - 1;
+        }
+    }
+}
+
+int main()
+{
+    cout << quickselect({8, 3, 2, 5, 1, 7, 4, 6}, 3);
+    return 0;
+}
+```
+
+Last Modified 2022-03-01
