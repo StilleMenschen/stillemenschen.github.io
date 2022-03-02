@@ -701,4 +701,176 @@ int main()
 }
 ```
 
-Last Modified 2022-03-01
+## 最小等于索引的数
+
+给定一个排序好的数组，找出数组中索引等于其对应值的数，且这个数的索引是最小的
+
+```python
+# O(n) time | O(1) space - where n is the length of the input array
+def index_equals_value1(array):
+    # 从第一个索引向后比较找出最小的索引与值相同的位置
+    for index in range(len(array)):
+        value = array[index]
+        if index == value:
+            return index
+    # 没有满足条件的数据则返回 -1
+    return -1
+
+
+# O(log(n)) time | O(1) space - where n is the length of the input array
+def index_equals_value2(array):
+    left_index = 0
+    right_index = len(array) - 1
+    # 非递归形式的二分查找
+    while left_index <= right_index:
+        middle_index = left_index + (right_index - left_index) // 2
+        middle_value = array[middle_index]
+
+        if middle_value < middle_index:
+            # 这里不再是递归而是直接修改左指针为中间指针加 1
+            left_index = middle_index + 1
+        elif middle_value == middle_index and middle_index == 0:
+            return middle_index
+        elif middle_value == middle_index and array[middle_index - 1] < middle_index - 1:
+            return middle_index
+        else:
+            # 这里不再是递归而是直接修改右指针为中间指针减 1
+            right_index = middle_index - 1
+
+    return -1
+
+
+# O(log(n)) time | O(log(n)) space - where n is the length of the input array
+def index_equals_value3(array):
+    # 递归二分查找, 从第一个和最后一个位置开始
+    return index_equals_value_helper(array, 0, len(array) - 1)
+
+
+def index_equals_value_helper(array, left_index, right_index):
+    # 超出查找范围后返回默认的 -1
+    if left_index > right_index:
+        return -1
+    # 求出中间位置的索引
+    middle_index = left_index + (right_index - left_index) // 2
+    middle_value = array[middle_index]
+    # 因为传入的数组是已经排序好的, 如果中间位置索引前面的值都比索引要小, 说明前面的数据都是不符合的
+    if middle_value < middle_index:
+        # 递归查找右区间
+        return index_equals_value_helper(array, middle_index + 1, right_index)
+    # 如果当前索引等于索引对应的值且为第一个位置则返回, 第一个位置必定是最小索引
+    elif middle_value == middle_index and middle_index == 0:
+        return middle_index
+    # 如果当前索引等于索引且前一个索引的值不是当前索引的递减
+    # 说明前面的数据都是不符合的, 当前的树已经属于最小索引了
+    elif middle_value == middle_index and array[middle_index - 1] < middle_index - 1:
+        return middle_index
+    # 上面三个条件都不符合, 递归查找左区间
+    else:
+        return index_equals_value_helper(array, left_index, middle_index - 1)
+
+
+if __name__ == '__main__':
+    source = [-5, -4, -3, -2, -1, 0, 1, 3, 5, 6, 7, 11, 12, 14, 19, 20]
+    print(index_equals_value1(source))
+    print(index_equals_value2(source))
+    print(index_equals_value3(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// O(n) time | O(1) space - where n is the length of the input array
+int indexEqualsValue1(vector<int> array)
+{
+    const int arraySize = array.size();
+    for (int i = 0; i < arraySize; i++)
+    {
+        if (i == array[i])
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// O(log(n)) time | O(1) space - where n is the length of the input array
+int indexEqualsValue2(vector<int> array)
+{
+    int leftIndex = 0;
+    int rightIndex = array.size() - 1;
+
+    while (leftIndex <= rightIndex)
+    {
+        int middleIndex = leftIndex + (rightIndex - leftIndex) / 2;
+        int middleValue = array[middleIndex];
+
+        if (middleValue < middleIndex)
+        {
+            leftIndex = middleIndex + 1;
+        }
+        else if (middleValue == middleIndex && middleIndex == 0)
+        {
+            return middleIndex;
+        }
+        else if (middleValue == middleIndex &&
+                 array[middleIndex - 1] < middleIndex - 1)
+        {
+            return middleIndex;
+        }
+        else
+        {
+            rightIndex = middleIndex - 1;
+        }
+    }
+    return -1;
+}
+
+int indexEqualsValueHelper(vector<int> &, int leftIndex, int rightIndex);
+
+// O(log(n)) time | O(log(n)) space - where n is the length of the input array
+int indexEqualsValue3(vector<int> array)
+{
+    return indexEqualsValueHelper(array, 0, array.size() - 1);
+}
+
+int indexEqualsValueHelper(vector<int> &array, int leftIndex, int rightIndex)
+{
+    if (leftIndex > rightIndex)
+    {
+        return -1;
+    }
+
+    int middleIndex = leftIndex + (rightIndex - leftIndex) / 2;
+    int middleValue = array[middleIndex];
+    if (middleValue < middleIndex)
+    {
+        return indexEqualsValueHelper(array, middleIndex + 1, rightIndex);
+    }
+    else if (middleValue == middleIndex && middleIndex == 0)
+    {
+        return middleIndex;
+    }
+    else if (middleValue == middleIndex &&
+             array[middleIndex - 1] < middleIndex - 1)
+    {
+        return middleIndex;
+    }
+    else
+    {
+        return indexEqualsValueHelper(array, leftIndex, middleIndex - 1);
+    }
+}
+
+int main()
+{
+    vector<int> source = {-5, -4, -3, -2, -1, 0, 1, 3, 5, 6, 7, 11, 12, 14, 19, 20};
+    cout << indexEqualsValue1(source) << endl;
+    cout << indexEqualsValue2(source) << endl;
+    cout << indexEqualsValue3(source) << endl;
+    return 0;
+}
+```
+
+Last Modified 2022-03-02
