@@ -425,29 +425,42 @@ int main()
 # Average: O(nlog(n)) time | O(log(n)) space
 # Worst: O(n^2) time | O(log(n)) space
 def quick_sort(array):
+    # 从数组的两端开始执行递归
     quick_sort_helper(array, 0, len(array) - 1)
     return array
 
 
 def quick_sort_helper(array, start_idx, end_idx):
+    # 如果开始索引大于等于结束索引说明已经排序完成
     if start_idx >= end_idx:
         return False
+    # 取开始索引作为中枢元素
     pivot_idx = start_idx
+    # 取开始索引加 1 为左指针
     left_idx = start_idx + 1
+    # 取结束索引为右指针
     right_idx = end_idx
+    # 不停比较并移动左右指针
     while right_idx >= left_idx:
+        # 如果左指针的值比中枢值大且右指针的值, 说明左右指针的值需要做交换
         if array[left_idx] > array[pivot_idx] > array[right_idx]:
             swap(left_idx, right_idx, array)
+        # 如果左指针的值小于等于中枢值, 说明左指针的值已经在正确的位置, 移动左指针
         if array[left_idx] <= array[pivot_idx]:
             left_idx += 1
+        # 如果右指针的值大于等于中枢值, 说明右指针的值已经在正确的位置, 移动右指针
         if array[right_idx] >= array[pivot_idx]:
             right_idx -= 1
+    # 处理完成后交换右指针和中枢位置的值, 右指针最后一次指向的位置必定是小于中枢值的
     swap(pivot_idx, right_idx, array)
+    # 通过索引判断左右区间大小, 优先处理区间范围小的数据
     left_subarray_is_smaller = right_idx - 1 - start_idx < end_idx - (right_idx + 1)
     if left_subarray_is_smaller:
+        # 左边的区间小, 先排序左边的数据
         quick_sort_helper(array, start_idx, right_idx - 1)
         quick_sort_helper(array, right_idx + 1, end_idx)
     else:
+        # 右边的区间小, 先排序右边的数据
         quick_sort_helper(array, right_idx + 1, end_idx)
         quick_sort_helper(array, start_idx, right_idx - 1)
 
@@ -793,4 +806,4 @@ int main()
 }
 ```
 
-Last Modified 2022-01-27
+Last Modified 2022-03-03
