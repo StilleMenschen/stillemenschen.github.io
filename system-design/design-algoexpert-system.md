@@ -95,11 +95,11 @@ AlgoExpert 上有很多静态 API 内容：即问题列表及其所有解决方�
 
 第二个表可能是 user_solutions：
 
-id：integer，主键（例如自动递增的整数）
-user_id: string，引用用户的 id（可以从 auth 获取）
-question_id: string，引用问题的 id
-language：string，引用解决方案的语言
-solution：string，包含用户的解决方案
+- id：integer，主键（例如自动递增的整数）
+- user_id: string，引用用户的 id（可以从 auth 获取）
+- question_id: string，引用问题的 id
+- language：string，引用解决方案的语言
+- solution：string，包含用户的解决方案
 
 我们可以在 ( user_id, question_id, language ) 上设置唯一性约束，在 user_id 上设置索引，在 question_id 上设置索引。如果语言数量显着增加，我们可能还希望对语言进行索引以允许快速查询每种语言，这样 UI 就不会同时获取用户的所有解决方案（对于大量数据传输但为慢速连接的情况）。
 
