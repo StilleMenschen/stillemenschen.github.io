@@ -778,48 +778,64 @@ if __name__ == '__main__':
 def radix_sort(array):
     if len(array) == 0:
         return array
-
+    # 找出数组中最大的数
+    # 因为基数排序是按最大数的位数来计算并排序的
     max_number = max(array)
-
+    # 从第一位基数开始
     digit = 0
-    while max_number / 10 ** digit > 0:
+    # 超过最大数的整数位数则表示排序完成
+    while max_number // 10 ** digit > 0:
+        # 计算基数并排序
         counting_sort(array, digit)
+        # 累加基数, 如 个位 -> 十位 -> 百位 以此类推
         digit += 1
 
     return array
 
 
 def counting_sort(array, digit):
-    sorted_array = [0] * len(array)
-    count_array = [0] * 10
-
+    # 缓存, 用来记录排序后的数组
+    sorted_array = [0 for _ in array]
+    # 基数缓存(0-9), 记录每个基数的数量
+    # 如当前排序的是每个元素的个位数, 假设数组中有三个元素的个位数为 1, 则缓存数组中索引 1 记录为 3
+    count_array = [0 for _ in range(10)]
+    # 表示当前处理的是第几位基数, 如 个位 -> 十位 -> 百位 以此类推
     digit_column = 10 ** digit
     for num in array:
+        # 取出元素的基数, 如果当前元素没有此基数
+        # 如 42 是没有百位数的, 则此数的基数缓存索引为 0
         count_index = (num // digit_column) % 10
+        # 记录到基数缓存数组中
         count_array[count_index] += 1
-
+    # 从左向右累加基数缓存数组中的数量, 后面重新调整元素的顺序需要
     for idx in range(1, 10):
         count_array[idx] += count_array[idx - 1]
-
-    for idx in range(len(array) - 1, -1, -1):
+    # 根据基数缓存数组中的数量来确定元素的位置
+    # 逆序处理是为了防止打乱前面已经排序正确的元素位置
+    # 比如有两个元素的个位数大小不一样, 但十位数的大小一致, 如 67 和 68
+    # 正序处理的话可能会把原来正确的 67, 68 变成了 68, 67
+    for idx in reversed(range(len(array))):
+        # 获取当前元素的基数
         count_index = (array[idx] // digit_column) % 10
+        # 递减基数缓存数组中当前元素的基数记录数量
         count_array[count_index] -= 1
+        # 获得该元素的正确排序位置
         sorted_index = count_array[count_index]
+        # 根据计算正确的位置重新记录元素的位置
         sorted_array[sorted_index] = array[idx]
-
+    # 将排序好的数组拷贝到原来的数组中
     for idx in range(len(array)):
         array[idx] = sorted_array[idx]
 
 
 if __name__ == '__main__':
-    source = [518, 15, 42, 109, 5, 376, 3001]
-    print(radix_sort(source))
+    print(radix_sort([12, 123, 456, 986, 2, 3, 34, 543, 97654, 34200]))
 ```
 
 ```cpp
+#include <iostream>
 #include <vector>
 #include <algorithm>
-#include <iostream>
 using namespace std;
 
 void countingSort(vector<int> &array, int digit);
@@ -841,17 +857,18 @@ vector<int> radixSort(vector<int> array)
         countingSort(array, digit);
         digit++;
     }
+
     return array;
 }
 
 void countingSort(vector<int> &array, int digit)
 {
-    vector<int> sortedArray(array.size(), 0);
+    const int arraySize = array.size();
+    vector<int> sortedArray(arraySize, 0);
     vector<int> countArray(10, 0);
-    int arraySize = array.size();
 
     int digitColumn = myPow(10, digit);
-    for (auto num : array)
+    for (int num : array)
     {
         int countIndex = num / digitColumn % 10;
         countArray[countIndex]++;
@@ -886,14 +903,14 @@ int myPow(int base, int exponent)
 
 int main()
 {
-    vector<int> source = {8762, 654, 3008, 345, 87, 65, 234, 12, 2};
+    vector<int> source = {12, 123, 456, 986, 2, 3, 34, 543, 97654, 34200};
     source = radixSort(source);
-    for(const int e : source)
+    for (const int element : source)
     {
-        cout << e << " ";
+        cout << element << " ";
     }
     return 0;
 }
 ```
 
-Last Modified 2022-03-03
+Last Modified 2022-03-06
