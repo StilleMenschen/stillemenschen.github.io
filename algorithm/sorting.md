@@ -549,35 +549,55 @@ int main()
 堆是一棵完全二叉树，堆的每个节点的值都大于或等于其子节点的值，为最大堆；反之为最小堆。
 
 ```python
-# O(n * log(n)) time | O(1) space
+# Best: O(nlog(n)) time | O(1) space
+# Average: O(nlog(n)) time | O(1) space
+# Worst: O(nlog(n)) time | O(1) space
 def heap_sort(array):
+    # 先创建一个最大堆
     build_max_heap(array)
+    # 使用堆算法将值较大的元素放到后面
+    # 从数组最后一个位置逆序迭代第二个位置
     for end_idx in reversed(range(1, len(array))):
+        # 先交换第一个元素和当前元素
         swap(0, end_idx, array)
+        # 然后通过堆算法将当前元素移位到合适的位置
         sift_down(0, end_idx - 1, array)
     return array
 
 
 def build_max_heap(array):
-    first_parent_idx = (len(array) - 1) // 2
+    # 最大堆的特点是祖先元素总是大于等于子元素, 最小堆则相反
+    # 从数组的中间位置开始
+    first_parent_idx = (len(array) - 2) // 2
+    # 从中间位置逆序到数组开始位置
     for current_idx in reversed(range(first_parent_idx + 1)):
+        # 通过堆算法将较大的元素移位到合适的位置
         sift_down(current_idx, len(array) - 1, array)
 
 
 def sift_down(current_idx, end_idx, heap):
+    # 先获得左子树的位置
     child_one_idx = current_idx * 2 + 1
+    # 循环直到左子树索引超过结束索引
     while child_one_idx <= end_idx:
+        # 获取右子树的索引, 如果已经越界则表示没有右子树, 设置为 -1
         child_two_idx = current_idx * 2 + 2 if current_idx * 2 + 2 <= end_idx else -1
+        # 如果存在右子树, 则比较左右子树找出最大的值并标记为待交换的值
         if child_two_idx > -1 and heap[child_two_idx] > heap[child_one_idx]:
             idx_to_swap = child_two_idx
+        # 没有右子树则待交换的元素为左子树
         else:
             idx_to_swap = child_one_idx
+        # 判断当前元素和待交换的子元素大小, 子元素比当前元素大则进行交换
         if heap[idx_to_swap] > heap[current_idx]:
+            # 交换祖先元素和其子元素
             swap(current_idx, idx_to_swap, heap)
+            # 将交换后的子元素设置为下一个待处理的祖先元素
             current_idx = idx_to_swap
+            # 重新计算左子树位置
             child_one_idx = current_idx * 2 + 1
         else:
-            return False
+            break
 
 
 def swap(i, j, array):
@@ -585,8 +605,78 @@ def swap(i, j, array):
 
 
 if __name__ == '__main__':
-    a = [8, 5, 2, 9, 5, 6, 3]
-    print(heap_sort(a))
+    print(heap_sort([8, 9, -2, -6, 0, 5, 1]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void buildMaxHeap(vector<int> &array);
+void siftDown(int currentIdx, int endIdx, vector<int> &heap);
+
+// Best: O(nlog(n)) time | O(1) space
+// Average: O(nlog(n)) time | O(1) space
+// Worst: O(nlog(n)) time | O(1) space
+vector<int> heapSort(vector<int> array)
+{
+    buildMaxHeap(array);
+    for (int endIdx = array.size() - 1; endIdx > 0; endIdx--)
+    {
+        swap(array[0], array[endIdx]);
+        siftDown(0, endIdx - 1, array);
+    }
+    return array;
+}
+
+void buildMaxHeap(vector<int> &array)
+{
+    int firstParentIdx = (array.size() - 2) / 2;
+    for (int currentIdx = firstParentIdx; currentIdx >= 0; currentIdx--)
+    {
+        siftDown(currentIdx, array.size() - 1, array);
+    }
+}
+
+void siftDown(int currentIdx, int endIdx, vector<int> &heap)
+{
+    int childOneIdx = currentIdx * 2 + 1;
+    while (childOneIdx <= endIdx)
+    {
+        int childTwoIdx = currentIdx * 2 + 2 <= endIdx ? currentIdx * 2 + 2 : -1;
+        int idxToSwap;
+        if (childTwoIdx != -1 && heap.at(childTwoIdx) > heap.at(childOneIdx))
+        {
+            idxToSwap = childTwoIdx;
+        }
+        else
+        {
+            idxToSwap = childOneIdx;
+        }
+        if (heap.at(idxToSwap) > heap.at(currentIdx))
+        {
+            swap(heap[currentIdx], heap[idxToSwap]);
+            currentIdx = idxToSwap;
+            childOneIdx = currentIdx * 2 + 1;
+        }
+        else
+        {
+            return;
+        }
+    }
+}
+
+int main()
+{
+    vector<int> source = {8, 9, -2, -6, 0, 5, 1};
+    source = heapSort(source);
+    for (int element : source)
+    {
+        cout << element << " ";
+    }
+    return 0;
+}
 ```
 
 > 堆排序是不稳定的排序算法，堆的结构是节点 i 的孩子为 2 * i 和 2 * i + 1 节点，大顶堆要求父节点大于等于其 2 个子节点，
