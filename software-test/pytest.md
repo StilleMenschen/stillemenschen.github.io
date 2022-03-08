@@ -201,7 +201,6 @@ def test_string_and_int(order, first_entry):
 
 ## 捕获异常
 
-
 ```python
 import pytest
 
@@ -313,4 +312,217 @@ def test_create_file(tmp_path):
     assert 0
 ```
 
-Last Modified 2022-03-04
+## 模拟数据
+
+模拟属性
+
+```python
+# contents of test_app.py, a simple test for our API retrieval
+# import requests for the purposes of monkeypatching
+import requests
+
+
+# our app.py that includes the get_json() function
+# this is the previous code block example
+def get_json(url):
+    """Takes a URL, and returns the JSON."""
+    r = requests.get(url)
+    return r.json()
+
+
+# custom class to be the mock return value
+# will override the requests.Response returned from requests.get
+class MockResponse:
+
+    # mock json() method always returns a specific testing dictionary
+    @staticmethod
+    def json():
+        return {"mock_key": "mock_response"}
+
+
+def test_get_json(monkeypatch):
+    # Any arguments may be passed and mock_get() will always return our
+    # mocked object, which only has the .json() method.
+    def mock_get(*args, **kwargs):
+        return MockResponse()
+
+    # apply the monkeypatch for requests.get to mock_get
+    monkeypatch.setattr(requests, "get", mock_get)
+
+    # app.get_json, which contains requests.get, uses the monkeypatch
+    result = get_json("https://fakeurl")
+    assert result["mock_key"] == "mock_response"
+```
+
+模拟环境变量
+
+```python
+# contents of our test file e.g. test_code.py
+import pytest
+import os
+
+
+def get_os_user_lower():
+    """Simple retrieval function.
+    Returns lowercase USER or raises OSError."""
+    username = os.getenv("USER")
+
+    if username is None:
+        raise OSError("USER environment is not set.")
+
+    return username.lower()
+
+
+@pytest.fixture
+def mock_env_user(monkeypatch):
+    monkeypatch.setenv("USER", "TestingUser")
+
+
+@pytest.fixture
+def mock_env_missing(monkeypatch):
+    monkeypatch.delenv("USER", raising=False)
+
+
+# notice the tests reference the fixtures for mocks
+def test_upper_to_lower(mock_env_user):
+    assert get_os_user_lower() == "testinguser"
+
+
+def test_raise_exception(mock_env_missing):
+    with pytest.raises(OSError):
+        _ = get_os_user_lower()
+```
+
+模拟字典键值
+
+```python
+# contents of test_app.py
+import pytest
+
+DEFAULT_CONFIG = {"user": "user1", "database": "db1"}
+
+
+def create_connection_string(config=None):
+    """Creates a connection string from input or defaults."""
+    config = config or DEFAULT_CONFIG
+    return f"User Id={config['user']}; Location={config['database']};"
+
+
+# all of the mocks are moved into separated fixtures
+@pytest.fixture
+def mock_test_user(monkeypatch):
+    """Set the DEFAULT_CONFIG user to test_user."""
+    monkeypatch.setitem(DEFAULT_CONFIG, "user", "test_user")
+
+
+@pytest.fixture
+def mock_test_database(monkeypatch):
+    """Set the DEFAULT_CONFIG database to test_db."""
+    monkeypatch.setitem(DEFAULT_CONFIG, "database", "test_db")
+
+
+@pytest.fixture
+def mock_missing_default_user(monkeypatch):
+    """Remove the user key from DEFAULT_CONFIG"""
+    monkeypatch.delitem(DEFAULT_CONFIG, "user", raising=False)
+
+
+# tests reference only the fixture mocks that are needed
+def test_connection(mock_test_user, mock_test_database):
+    expected = "User Id=test_user; Location=test_db;"
+
+    result = create_connection_string()
+    assert result == expected
+
+
+def test_missing_user(mock_missing_default_user):
+    with pytest.raises(KeyError):
+        _ = create_connection_string()
+```
+
+## 重试失败测试
+
+```python
+# content of test_50.py
+import pytest
+
+
+@pytest.mark.parametrize("i", range(50))
+def test_num(i):
+    if i in (17, 25):
+        pytest.fail("bad luck")
+```
+
+先运行一次
+
+```bash
+pytest test_50.py -q
+```
+
+重新运行上次失败的用例
+
+```bash
+pytest test_50.py --last-failed
+```
+
+重新运行所有用例，但先运行上次失败用例
+
+```bash
+pytest test_50.py --failed-first
+```
+
+## 执行前后钩子
+
+模块执行前后调用
+
+```python
+def setup_module(module):
+    """ setup any state specific to the execution of the given module."""
+
+
+def teardown_module(module):
+    """teardown any state that was previously setup with a setup_module method."""
+```
+
+测试类执行前后调用
+
+```python
+@classmethod
+def setup_class(cls):
+    """setup any state specific to the execution of the given class (which
+    usually contains tests).
+    """
+
+
+@classmethod
+def teardown_class(cls):
+    """teardown any state that was previously setup with a call to setup_class."""
+```
+
+测试类中的方法执行前后调用
+
+```python
+def setup_method(self, method):
+    """setup any state tied to the execution of the given method in a
+    class.  setup_method is invoked for every test method of a class.
+    """
+
+
+def teardown_method(self, method):
+    """teardown any state that was previously setup with a setup_method call."""
+```
+
+模块内的方法执行前后调用（非测试类中的方法）
+
+```python
+def setup_function(function):
+    """setup any state tied to the execution of the given function.
+    Invoked for every test function in the module.
+    """
+
+
+def teardown_function(function):
+    """teardown any state that was previously setup with a setup_function call."""
+```
+
+Last Modified 2022-03-08
