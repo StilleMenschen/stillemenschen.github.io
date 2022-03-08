@@ -1,16 +1,43 @@
 # pytest
 
+## 命令行选项
+
+<style>
+table th:first-of-type {
+    width: 30%;
+}
+</style>
+
+| 选项                 | 说明                                                                                                                                               |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| -v, --verbose        | 展示更详细的输出信息                                                                                                                               |
+| -q, --quiet          | 精简输出信息                                                                                                                                       |
+| --lf, --last-failed  | 仅运行上次失败的测试                                                                                                                               |
+| --ff, --failed-first | 先运行上次失败的测试再运行上次通过的测试                                                                                                           |
+| -x, --exitfirst      | 遇到一次失败后停止执行测试                                                                                                                         |
+| --maxfail=NUM        | 遇到第 NUM 次测试失败后停止执行测试                                                                                                                |
+| -l, --showlocals     | 显示本地变量的值                                                                                                                                   |
+| -r char              | 列出指定类型的摘要信息，可用的枚举包括：<br>(f)ailed, (E)rror, (s)kipped, (x)failed, (X)passed, (p)assed, (P)assed, (a) 除了 passed 的, (A) 所有的 |
+
 ## 跳过测试
 
 直接跳过
 
-```
+```python
+import pytest
+
+
 @pytest.mark.skip(reason="no way of currently testing this")
 def test_the_unknown():
     pass
 ```
 
-```
+按条件跳过
+
+```python
+import pytest
+
+
 def test_function():
     if not valid_config():
         pytest.skip("unsupported configuration")
@@ -23,8 +50,6 @@ import pytest
 if not sys.platform.startswith("win"):
     pytest.skip("skipping windows-only tests", allow_module_level=True)
 ```
-
-按条件跳过
 
 ```python
 import sys
@@ -438,37 +463,6 @@ def test_connection(mock_test_user, mock_test_database):
 def test_missing_user(mock_missing_default_user):
     with pytest.raises(KeyError):
         _ = create_connection_string()
-```
-
-## 重试失败测试
-
-```python
-# content of test_50.py
-import pytest
-
-
-@pytest.mark.parametrize("i", range(50))
-def test_num(i):
-    if i in (17, 25):
-        pytest.fail("bad luck")
-```
-
-先运行一次
-
-```bash
-pytest test_50.py -q
-```
-
-重新运行上次失败的用例
-
-```bash
-pytest test_50.py --last-failed
-```
-
-重新运行所有用例，但先运行上次失败用例
-
-```bash
-pytest test_50.py --failed-first
 ```
 
 ## 执行前后钩子
