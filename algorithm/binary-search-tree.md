@@ -845,24 +845,93 @@ int main()
 
 ## 相同二叉搜索树
 
+给定两个数组，分别表示二叉搜索树不同方式遍历的结果，在不构造二叉搜索树的情况下判断这两棵树是否相同
+
 ```python
+# O(n^2) time | O(n^2) space - where n is the number of
+# nodes in each array, respectively
+def same_bst_s_1(array_one, array_two):
+    # 表示二叉树的数组元素不相等择表示这两棵树不相同
+    if len(array_one) != len(array_two):
+        return False
+    # 如果两棵二叉树都没有元素, 则两棵树相同
+    if len(array_one) == 0 and len(array_two) == 0:
+        return True
+    # 因为第一个元素表示树的根节点, 如果树的根节点不相等则表示两棵树不相同
+    if array_one[0] != array_two[0]:
+        return False
+    # 二叉搜索树的特点是左子树的值一定小于根节点, 右子树的值一定大于等于根节点
+    # 获取第一棵树相对于根节点的的最小值数组, 即左子树
+    left_one = get_smaller(array_one)
+    # 获取第二棵树相对于根节点的的最小值数组, 即左子树
+    left_two = get_smaller(array_two)
+    # 获取第一棵树相对于根节点的的最大值数组, 即右子树
+    right_one = get_bigger_or_equal(array_one)
+    # 获取第二棵树相对于根节点的的最大值数组, 即右子树
+    right_two = get_bigger_or_equal(array_two)
+    # 递归判断两棵树的左子树和右子树
+    return same_bst_s_1(left_one, left_two) and same_bst_s_1(right_one, right_two)
+
+
 def get_smaller(array):
-    smaller = list()
+    smaller = []
     for i in range(1, len(array)):
+        # 找出所有小于根节点的子节点
         if array[i] < array[0]:
             smaller.append(array[i])
     return smaller
 
 
 def get_bigger_or_equal(array):
-    bigger_or_equal = list()
+    bigger_or_equal = []
     for i in range(1, len(array)):
+        # 找出所有大于等于根节点的子节点
         if array[i] >= array[0]:
             bigger_or_equal.append(array[i])
     return bigger_or_equal
 
 
+# O(n^2) time | O(d) space - where n is the number of
+# nodes in each array, respectively, and d is the depth
+# of the BST that they represent
+def same_bst_s_2(array_one, array_two):
+    # 递归判断两棵树的左右子树, 只跟踪根节点的索引和子树中的最大最小值
+    # 初始情况下还没有开始遍历两棵树, 所以最大和最小值设为无穷大和无穷小
+    return are_same_bst_s(array_one, array_two, 0, 0, float("-inf"), float("inf"))
+
+
+def are_same_bst_s(array_one, array_two, root_idx_one, root_idx_two, min_val, max_val):
+    # 这里判断 -1 与下面的工具函数相对应, 表示已经找不到最大值或最小值
+    if root_idx_one == -1 or root_idx_two == -1:
+        # 如果两棵树都已经遍历完(都找不到下一个最大值和最小值)则表示两棵树相同, 否则两棵树不相同
+        return root_idx_one == root_idx_two
+    # 因为第一个元素表示树的根节点, 如果树的根节点不相等则表示两棵树不相同
+    if array_one[root_idx_one] != array_two[root_idx_two]:
+        return False
+    # 二叉搜索树的特点是左子树的值一定小于根节点, 右子树的值一定大于等于根节点
+    # 获取第一棵树左子树的下一个根节点位置
+    left_root_idx_one = get_idx_of_first_smaller(array_one, root_idx_one, min_val)
+    # 获取第二棵树左子树的下一个根节点位置
+    left_root_idx_two = get_idx_of_first_smaller(array_two, root_idx_two, min_val)
+    # 获取第一棵树右子树的下一个根节点位置
+    right_root_idx_one = get_idx_of_first_bigger_or_equal(array_one, root_idx_one, max_val)
+    # 获取第二棵树右子树的下一个根节点位置
+    right_root_idx_two = get_idx_of_first_bigger_or_equal(array_two, root_idx_two, max_val)
+    # 当前根节点的值, 因为上面已经判断过两棵树的根节点是否相等, 所以这里取哪一棵树的值都一样
+    current_value = array_one[root_idx_one]
+    # 递归左子树, 最大值传递当前值
+    left_are_same = are_same_bst_s(array_one, array_two, left_root_idx_one, left_root_idx_two, min_val, current_value)
+    # 递归右子树, 最小值传递当前值
+    right_are_same = are_same_bst_s(array_one, array_two, right_root_idx_one, right_root_idx_two, current_value,
+                                    max_val)
+    # 左右子树都相同则表示两棵树相同
+    return left_are_same and right_are_same
+
+
 def get_idx_of_first_smaller(array, starting_idx, min_val):
+    # 查找 starting_idx 位置之后的第一个较小值的索引
+    # 确保该值大于等于 min_val, 即 BST 中前一个父节点的值
+    # 如果不是, 则表示该值位于前一个父节点的左子树中
     for i in range(starting_idx + 1, len(array)):
         if array[starting_idx] > array[i] >= min_val:
             return i
@@ -870,171 +939,153 @@ def get_idx_of_first_smaller(array, starting_idx, min_val):
 
 
 def get_idx_of_first_bigger_or_equal(array, starting_idx, max_val):
+    # 在 starting_idx 位置之后找到第一个大于或等于值的索引
+    # 确保该值小于 max_val, max_val 是 BST 中前一个父节点的值
+    # 如果不是, 则表示该值位于前一个父节点的右子树中
     for i in range(starting_idx + 1, len(array)):
         if array[starting_idx] <= array[i] < max_val:
             return i
     return -1
 
 
-def are_same_bst_s(array1, array2, root_idx1, root_idx2, min_val, max_val):
-    if root_idx1 == -1 or root_idx2 == -1:
-        return root_idx1 == root_idx2
-
-    if array1[root_idx1] != array2[root_idx2]:
-        return False
-
-    left_root_idx1 = get_idx_of_first_smaller(array1, root_idx1, min_val)
-    left_root_idx2 = get_idx_of_first_smaller(array2, root_idx2, min_val)
-    right_root_idx1 = get_idx_of_first_bigger_or_equal(array1, root_idx1, max_val)
-    right_root_idx2 = get_idx_of_first_bigger_or_equal(array2, root_idx2, max_val)
-
-    current_value = array1[root_idx1]
-    left_are_same = are_same_bst_s(array1, array2, left_root_idx1, left_root_idx2, min_val, current_value)
-    right_are_same = are_same_bst_s(array1, array2, right_root_idx1, right_root_idx2, current_value, max_val)
-
-    return left_are_same and right_are_same
-
-
-# O(n^2) time | O(n^2) space
-def same_bst_s1(array1, array2):
-    if len(array1) != len(array2):
-        return False
-    if len(array1) == 0 and len(array2) == 0:
-        return True
-    if array1[0] != array2[0]:
-        return False
-    left1 = get_smaller(array1)
-    left2 = get_smaller(array1)
-    right1 = get_bigger_or_equal(array1)
-    right2 = get_bigger_or_equal(array2)
-
-    return same_bst_s1(left1, left2) and same_bst_s1(right1, right2)
-
-
-# O(n^2) time | O(d) space
-def same_bst_s2(array1, array2):
-    return are_same_bst_s(array1, array2, 0, 0, float('-inf'), float('inf'))
-
-
 if __name__ == '__main__':
     source1 = [10, 15, 8, 12, 94, 81, 5, 2, 11]
     source2 = [10, 8, 5, 15, 2, 12, 11, 94, 81]
-    print(same_bst_s1(source1, source2))
-    print(same_bst_s2(source1, source2))
+    print(same_bst_s_1(source1, source2))
+    print(same_bst_s_2(source1, source2))
 ```
 
-## 右侧小于数量
+```cpp
+#include <iostream>
+#include <vector>
 
-```python
-class SpecialBST1:
+using namespace std;
 
-    def __init__(self, value, idx, num_smaller_at_insert_time):
-        self.value = value
-        self.idx = idx
-        self.num_smaller_at_insert_time = num_smaller_at_insert_time
-        self.left_subtree_size = 0
-        self.left = None
-        self.right = None
+vector<int> getSmaller(vector<int>);
+vector<int> getBiggerOrEqual(vector<int> array);
 
-    def insert(self, value, idx, num_smaller_at_insert_time=0):
-        if value < self.value:
-            self.left_subtree_size += 1
-            if self.left is None:
-                self.left = SpecialBST1(value, idx, num_smaller_at_insert_time)
-            else:
-                self.left.insert(value, idx, num_smaller_at_insert_time)
-        else:
-            num_smaller_at_insert_time += self.left_subtree_size
-            if value > self.value:
-                num_smaller_at_insert_time += 1
-            if self.right is None:
-                self.right = SpecialBST1(value, idx, num_smaller_at_insert_time)
-            else:
-                self.right.insert(value, idx, num_smaller_at_insert_time)
+// O(n^2) time | O(n^2) space - where n is the number of
+// nodes in each array, respectively
+bool sameBsts1(vector<int> arrayOne, vector<int> arrayTwo)
+{
+    if (arrayOne.size() != arrayTwo.size())
+        return false;
 
+    if (arrayOne.size() == 0 && arrayTwo.size() == 0)
+        return true;
 
-class SpecialBST2:
+    if (arrayOne[0] != arrayTwo[0])
+        return false;
 
-    def __init__(self, value):
-        self.value = value
-        self.left_subtree_size = 0
-        self.left = None
-        self.right = None
+    vector<int> leftOne = getSmaller(arrayOne);
+    vector<int> leftTwo = getSmaller(arrayTwo);
+    vector<int> rightOne = getBiggerOrEqual(arrayOne);
+    vector<int> rightTwo = getBiggerOrEqual(arrayTwo);
 
-    def insert(self, value, idx, right_smaller_counts, num_smaller_at_insert_time=0):
-        if value < self.value:
-            self.left_subtree_size += 1
-            if self.left is None:
-                self.left = SpecialBST2(value)
-                right_smaller_counts[idx] = num_smaller_at_insert_time
-            else:
-                self.left.insert(value, idx, right_smaller_counts, num_smaller_at_insert_time)
-        else:
-            num_smaller_at_insert_time += self.left_subtree_size
-            if value > self.value:
-                num_smaller_at_insert_time += 1
-            if self.right is None:
-                self.right = SpecialBST2(value)
-                right_smaller_counts[idx] = num_smaller_at_insert_time
-            else:
-                self.right.insert(value, idx, right_smaller_counts, num_smaller_at_insert_time)
+    return sameBsts1(leftOne, leftTwo) && sameBsts1(rightOne, rightTwo);
+}
 
+vector<int> getSmaller(vector<int> array)
+{
+    vector<int> smaller = {};
+    const int arraySize = array.size();
+    for (int i = 1; i < arraySize; i++)
+    {
+        if (array[i] < array[0])
+            smaller.push_back(array[i]);
+    }
+    return smaller;
+}
 
-def get_right_smaller_counts(bst, right_smaller_counts):
-    if bst is None:
-        return False
-    right_smaller_counts[bst.idx] = bst.num_smaller_at_insert_time
-    get_right_smaller_counts(bst.left, right_smaller_counts)
-    get_right_smaller_counts(bst.right, right_smaller_counts)
+vector<int> getBiggerOrEqual(vector<int> array)
+{
+    vector<int> biggerOrEqual = {};
+    const int arraySize = array.size();
+    for (int i = 1; i < arraySize; i++)
+    {
+        if (array[i] >= array[0])
+            biggerOrEqual.push_back(array[i]);
+    }
+    return biggerOrEqual;
+}
 
+bool areSameBsts(vector<int> arrayOne, vector<int> arrayTwo, int rootIdxOne,
+                 int rootIdxTwo, int minVal, int maxVal);
+int getIdxOfFirstSmaller(vector<int> array, int startingIdx, int minVal);
+int getIdxOfFirstBiggerOrEqual(vector<int> array, int startingIdx, int maxVal);
 
-# O(n^2) time | O(n) space
-def right_smaller_than1(array):
-    right_smaller_counts = list()
-    for i in range(len(array)):
-        right_smaller_count = 0
-        for j in range(i + 1, len(array)):
-            if array[j] < array[i]:
-                right_smaller_count += 1
-        right_smaller_counts.append(right_smaller_count)
-    return right_smaller_counts
+// O(n^2) time | O(d) space - where n is the number of
+// nodes in each array, respectively, and d is the depth
+// of the BST that they represent
+bool sameBsts2(vector<int> arrayOne, vector<int> arrayTwo)
+{
+    return areSameBsts(arrayOne, arrayTwo, 0, 0, INT_MIN, INT_MAX);
+}
 
+bool areSameBsts(vector<int> arrayOne, vector<int> arrayTwo, int rootIdxOne,
+                 int rootIdxTwo, int minVal, int maxVal)
+{
+    if (rootIdxOne == -1 || rootIdxTwo == -1)
+        return rootIdxOne == rootIdxTwo;
 
-# O(n * log(n)) time | O(n) space
-def right_smaller_than2(array):
-    if len(array) == 0:
-        return list()
+    if (arrayOne[rootIdxOne] != arrayTwo[rootIdxTwo])
+        return false;
 
-    last_idx = len(array) - 1
-    bst = SpecialBST1(array[last_idx], last_idx, 0)
-    for i in reversed(range(len(array) - 1)):
-        bst.insert(array[i], i)
+    int leftRootIdxOne = getIdxOfFirstSmaller(arrayOne, rootIdxOne, minVal);
+    int leftRootIdxTwo = getIdxOfFirstSmaller(arrayTwo, rootIdxTwo, minVal);
+    int rightRootIdxOne =
+        getIdxOfFirstBiggerOrEqual(arrayOne, rootIdxOne, maxVal);
+    int rightRootIdxTwo =
+        getIdxOfFirstBiggerOrEqual(arrayTwo, rootIdxTwo, maxVal);
 
-    right_smaller_counts = array[:]
-    get_right_smaller_counts(bst, right_smaller_counts)
-    return right_smaller_counts
+    int currentValue = arrayOne[rootIdxOne];
+    bool leftAreSame = areSameBsts(arrayOne, arrayTwo, leftRootIdxOne,
+                                   leftRootIdxTwo, minVal, currentValue);
+    bool rightAreSame = areSameBsts(arrayOne, arrayTwo, rightRootIdxOne,
+                                    rightRootIdxTwo, currentValue, maxVal);
 
+    return leftAreSame && rightAreSame;
+}
 
-# O(n * log(n)) time | O(n) space
-def right_smaller_than3(array):
-    if len(array) == 0:
-        return list()
+int getIdxOfFirstSmaller(vector<int> array, int startingIdx, int minVal)
+{
+    // Find the index of the first smaller value after the startingIdx.
+    // Make sure that this value is greater than or equal to the minVal,
+    // which is the value of the previous parent node in the BST. If it
+    // isn't, then that value is located in the left subtree of the
+    // previous parent node.
+    const int arraySize = array.size();
+    for (int i = startingIdx + 1; i < arraySize; i++)
+    {
+        if (array[i] < array[startingIdx] && array[i] >= minVal)
+            return i;
+    }
+    return -1;
+}
 
-    right_smaller_counts = array[:]
-    last_idx = len(array) - 1
-    bst = SpecialBST2(array[last_idx])
-    right_smaller_counts[last_idx] = 0
-    for i in reversed(range(len(array) - 1)):
-        bst.insert(array[i], i, right_smaller_counts)
+int getIdxOfFirstBiggerOrEqual(vector<int> array, int startingIdx, int maxVal)
+{
+    // Find the index of the first bigger/equal value after the startingIdx.
+    // Make sure that this value is smaller than maxVal, which is the value
+    // of the previous parent node in the BST. If it isn't, then that value
+    // is located in the right subtree of the previous parent node.
+    const int arraySize = array.size();
+    for (int i = startingIdx + 1; i < arraySize; i++)
+    {
+        if (array[i] >= array[startingIdx] && array[i] < maxVal)
+            return i;
+    }
+    return -1;
+}
 
-    return right_smaller_counts
-
-
-if __name__ == '__main__':
-    source = [8, 5, 11, -1, 3, 4, 2]
-    print(right_smaller_than1(source))
-    print(right_smaller_than2(source))
-    print(right_smaller_than3(source))
+int main()
+{
+    vector<int> source1 = {10, 15, 8, 12, 94, 81, 5, 2, 11};
+    vector<int> source2 = {10, 8, 5, 15, 2, 12, 11, 94, 81};
+    cout << sameBsts1(source1, source2) << endl;
+    cout << sameBsts2(source1, source2) << endl;
+    return 0;
+}
 ```
 
 ## 验证二叉搜索树
