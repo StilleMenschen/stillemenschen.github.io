@@ -1660,4 +1660,373 @@ int main()
 }
 ```
 
-Last Modified 2021-11-26
+## 判断三个关联节点
+
+给定三个二叉搜索树中的随机节点`1, 2, 3`，这三个节点不重复；找出这三个节点是否为父子关系，可能的父子关系为 `1 -> 2 -> 3` 或者 `3 -> 2 -> 1`
+
+```python
+class BST:
+    def __init__(self, value, left=None, right=None):
+        self.value = value
+        self.left = left
+        self.right = right
+
+    def insert(self, value):
+        current_node = self
+        while True:
+            if value < current_node.value:
+                if current_node.left is None:
+                    current_node.left = BST(value)
+                    break
+                current_node = current_node.left
+            else:
+                if current_node.right is None:
+                    current_node.right = BST(value)
+                    break
+                current_node = current_node.right
+        return self
+
+    def contains(self, value):
+        current_node = self
+        while current_node is not None:
+            if value < current_node.value:
+                current_node = current_node.left
+            elif value > current_node.value:
+                current_node = current_node.right
+            else:
+                return current_node
+        return None
+
+
+# O(h) time | O(h) space - where h is the height of the tree
+def validate_three_nodes1(node_one, node_two, node_three):
+    # 由于第二个节点处在中间, 所以仅有两种情况, 从第二个节点推断祖先元素
+
+    # 1. 第三个节点是祖先元素, 第二个节点为第三个节点的子元素, 第一个节点为第二个节点的子元素
+    if is_descendant1(node_two, node_one):
+        return is_descendant1(node_three, node_two)
+    # 2. 第一个节点是祖先元素, 第二个节点为第一个节点的子元素, 第三个节点为第二个节点的子元素
+    if is_descendant1(node_two, node_three):
+        return is_descendant1(node_one, node_two)
+    # 没有找到上述两种情况则表示不符合
+    return False
+
+
+# Whether the `target` is a descendant of the `node`.
+def is_descendant1(node, target):
+    # 递归调用的终点, 如果节点为空则结束
+    if node is None:
+        return False
+    # 如果找到符合的数据则直接返回
+    if node is target:
+        return True
+    # 根据二叉搜索树的特点
+    # 如果当前值小于节点的值则选择左子树
+    if target.value < node.value:
+        return is_descendant1(node.left, target)
+    # 如果当前值大于等于节点的值则选择右子树
+    else:
+        return is_descendant1(node.right, target)
+
+
+# O(h) time | O(h) space - where h is the height of the tree
+def validate_three_nodes2(node_one, node_two, node_three):
+    if is_descendant2(node_two, node_one):
+        return is_descendant2(node_three, node_two)
+
+    if is_descendant2(node_two, node_three):
+        return is_descendant2(node_one, node_two)
+
+    return False
+
+
+# Whether the `target` is a descendant of the `node`.
+def is_descendant2(node, target):
+    # 非递归方式调用
+    # 先判断当前节点是否为空, 再判断当前节点是否与查找目标相同
+    while node is not None and node is not target:
+        # 根据二叉搜索树的特点
+        # 如果当前值小于节点的值则选择左子树
+        if target.value < node.value:
+            node = node.left
+        # 如果当前值大于等于节点的值则选择右子树
+        else:
+            node = node.right
+    # 最后判断节点是否与查找目标相同, 如果节点已经遍历完成, 则变量为 None 与目标也不相同
+    return node is target
+
+
+# O(d) time | O(1) space - where d is the distance between node_one and node_three
+def validate_three_nodes3(node_one, node_two, node_three):
+    # 由于第二个节点处在中间, 所以仅有两种情况, 从第二个节点推断祖先元素
+    # 1. 第一个节点是祖先元素, 第二个节点为第一个节点的子元素, 第三个节点为第二个节点的子元素
+    search_one = node_one
+    # 2. 第三个节点是祖先元素, 第二个节点为第三个节点的子元素, 第一个节点为第二个节点的子元素
+    search_two = node_three
+    # 同时考虑两种情况进行搜索
+    while True:
+        # 如果从第三个节点下找到了第一个节点
+        found_three_from_one = search_one is node_three
+        # 如果从第一个节点下找到了第三个节点
+        found_one_from_three = search_two is node_one
+        # 如果两个搜索路线有其中一个找到了第二个节点
+        found_node_two = search_one is node_two or search_two is node_two
+        # 两条搜索路线都已经搜索结束
+        finished_searching = search_one is None and search_two is None
+        # 满足任意条件则结束搜索
+        if any([found_three_from_one, found_one_from_three, found_node_two, finished_searching]):
+            break
+        # 根据二叉搜索树的特点来切换两条搜索路线
+        # 因为第二个节点必定是在中间, 所以用第二个节点的值来做判断
+        if search_one is not None:
+            search_one = search_one.left if search_one.value > node_two.value else search_one.right
+
+        if search_two is not None:
+            search_two = search_two.left if search_two.value > node_two.value else search_two.right
+    # 搜索结束后有三种条件不成立的情况
+    # 1. 如果从第一个节点开始直接搜索到了第三个节点, 未搜索到第二个节点
+    # 2. 如果从第三个节点开始直接搜索到了第一个节点, 未搜索到第二个节点
+    found_node_from_other = search_one is node_three or search_two is node_one
+    # 3. 两条路线都没有搜索到第二个节点
+    found_node_two = search_one is node_two or search_two is node_two
+    if not found_node_two or found_node_from_other:
+        return False
+    # 上述三个否到的条件都不满足, 则再根据第二个节点搜索其子节点
+    if search_one is node_two:
+        # 如果先搜索到的是第一条路线, 则第二个节点的子节可能是第三个节点
+        return search_for_target(node_two, node_three)
+    else:
+        # 如果先搜索到的是第二条路线, 则第二个节点的子节可能是第一个节点
+        return search_for_target(node_two, node_one)
+
+
+def search_for_target(node, target):
+    while node is not None and node is not target:
+        # 根据二叉搜索树的特点
+        # 如果当前值小于节点的值则选择左子树
+        # 如果当前值大于等于节点的值则选择右子树
+        node = node.left if target.value < node.value else node.right
+
+    return node is target
+
+
+def initialize():
+    array = [5, 2, 7, 1, 4, 6, 8, 0, 3]
+    root_node = BST(array[0])
+    for idx in range(1, len(array)):
+        root_node.insert(array[idx])
+    a = root_node.contains(5)
+    b = root_node.contains(4)
+    c = root_node.contains(3)
+    return a, b, c
+
+
+if __name__ == '__main__':
+    one, two, three = initialize()
+    print(validate_three_nodes1(one, two, three))
+    print(validate_three_nodes2(one, two, three))
+    print(validate_three_nodes3(one, two, three))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class BST
+{
+public:
+    int value;
+    BST *left = nullptr;
+    BST *right = nullptr;
+
+    BST(int value) { this->value = value; }
+    BST &insert(int val)
+    {
+        if (val < value)
+        {
+            if (left == nullptr)
+            {
+                BST *item = new BST(val);
+                left = item;
+            }
+            else
+            {
+                left->insert(val);
+            }
+        }
+        else
+        {
+            if (right == nullptr)
+            {
+                BST *item = new BST(val);
+                right = item;
+            }
+            else
+            {
+                right->insert(val);
+            }
+        }
+        return *this;
+    }
+
+    BST *contains(int val)
+    {
+        if (val < value)
+        {
+            if (left == nullptr)
+            {
+                return nullptr;
+            }
+            else
+            {
+                return left->contains(val);
+            }
+        }
+        else if (val > value)
+        {
+            if (right == nullptr)
+            {
+                return nullptr;
+            }
+            else
+            {
+                return right->contains(val);
+            }
+        }
+        else
+        {
+            return this;
+        }
+    }
+};
+
+bool isDescendant1(BST *node, BST *target);
+
+// O(h) time | O(h) space - where h is the height of the tree
+bool validateThreeNodes1(BST *nodeOne, BST *nodeTwo, BST *nodeThree)
+{
+    if (isDescendant1(nodeTwo, nodeOne))
+        return isDescendant1(nodeThree, nodeTwo);
+
+    if (isDescendant1(nodeTwo, nodeThree))
+        return isDescendant1(nodeOne, nodeTwo);
+
+    return false;
+}
+
+// Whether the `target` is a descendant of the `node`.
+bool isDescendant1(BST *node, BST *target)
+{
+    if (node == nullptr)
+        return false;
+
+    if (node == target)
+        return true;
+
+    if (target->value < node->value)
+        return isDescendant1(node->left, target);
+    else
+        return isDescendant1(node->right, target);
+}
+
+bool isDescendant2(BST *node, BST *target);
+
+// O(h) time | O(1) space - where h is the height of the tree
+bool validateThreeNodes2(BST *nodeOne, BST *nodeTwo, BST *nodeThree)
+{
+    if (isDescendant2(nodeTwo, nodeOne))
+        return isDescendant2(nodeThree, nodeTwo);
+
+    if (isDescendant2(nodeTwo, nodeThree))
+        return isDescendant2(nodeOne, nodeTwo);
+
+    return false;
+}
+
+// Whether the `target` is a descendant of the `node`.
+bool isDescendant2(BST *node, BST *target)
+{
+    BST *currentNode = node;
+    while (currentNode != nullptr && currentNode != target)
+    {
+        if (target->value < currentNode->value)
+            currentNode = currentNode->left;
+        else
+            currentNode = currentNode->right;
+    }
+
+    return currentNode == target;
+}
+
+bool searchForTarget(BST *node, BST *target);
+
+// O(d) time | O(1) space - where d is the distance between nodeOne and
+// nodeThree
+bool validateThreeNodes3(BST *nodeOne, BST *nodeTwo, BST *nodeThree)
+{
+    BST *searchOne = nodeOne;
+    BST *searchTwo = nodeThree;
+
+    while (true)
+    {
+        bool foundThreeFromOne = searchOne == nodeThree;
+        bool foundOneFromThree = searchTwo == nodeOne;
+        bool foundNodeTwo = searchOne == nodeTwo || searchTwo == nodeTwo;
+        bool finishedSearching = searchOne == nullptr && searchTwo == nullptr;
+        if (foundThreeFromOne || foundOneFromThree || foundNodeTwo ||
+            finishedSearching)
+        {
+            break;
+        }
+
+        if (searchOne != nullptr)
+        {
+            searchOne = searchOne->value > nodeTwo->value ? searchOne->left
+                                                          : searchOne->right;
+        }
+
+        if (searchTwo != nullptr)
+        {
+            searchTwo = searchTwo->value > nodeTwo->value ? searchTwo->left
+                                                          : searchTwo->right;
+        }
+    }
+
+    bool foundNodeFromOther = searchOne == nodeThree || searchTwo == nodeOne;
+    bool foundNodeTwo = searchOne == nodeTwo || searchTwo == nodeTwo;
+    if (!foundNodeTwo || foundNodeFromOther)
+        return false;
+
+    return searchForTarget(nodeTwo, searchOne == nodeTwo ? nodeThree : nodeOne);
+}
+
+bool searchForTarget(BST *node, BST *target)
+{
+    BST *currentNode = node;
+    while (currentNode != nullptr && currentNode != target)
+    {
+        currentNode = target->value < currentNode->value ? currentNode->left
+                                                         : currentNode->right;
+    }
+
+    return currentNode == target;
+}
+
+int main()
+{
+    vector<int> array = {5, 2, 7, 1, 4, 6, 8, 0, 3};
+    BST *root = new BST(array[0]);
+    for (size_t i = 1; i < array.size(); i++)
+        root->insert(array[i]);
+    BST *one = root->contains(5);
+    BST *two = root->contains(2);
+    BST *three = root->contains(3);
+    cout << validateThreeNodes1(one, two, three) << endl;
+    cout << validateThreeNodes2(one, two, three) << endl;
+    cout << validateThreeNodes3(one, two, three) << endl;
+    return 0;
+}
+```
+
+Last Modified 2022-03-09
