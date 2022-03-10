@@ -623,6 +623,16 @@ int main()
 
 ## 最大路径之和
 
+给定一个二叉树，找出二叉树中连接两个节点所经过的所有节点的值相加的最大和，如下二叉树的最大路径和为`5 + 2 + 1 + 3 + 7 = 18`
+
+```
+       1
+     /   \
+    2     3
+   / \   /  \
+  4   5 6    7
+```
+
 ```python
 class BinaryTree:
 
@@ -640,31 +650,116 @@ def insert_level_order(array, tree, index, length):
     return tree
 
 
-def find_max_sum(tree):
-    if tree is None:
-        return 0, 0
-    left_max_sum_as_branch, left_max_path_sum = find_max_sum(tree.left)
-    right_max_sum_as_branch, right_max_path_sum = find_max_sum(tree.right)
-    max_child_sum_as_branch = max(left_max_sum_as_branch, right_max_sum_as_branch)
-
-    value = tree.value
-    max_sum_as_branch = max(max_child_sum_as_branch + value, value)
-    max_sum_as_root_node = max(left_max_sum_as_branch + value + right_max_sum_as_branch, max_sum_as_branch)
-    max_path_sum = max(left_max_path_sum, right_max_path_sum, max_sum_as_root_node)
-
-    return max_sum_as_branch, max_path_sum
-
-
 # O(n) time | O(log(n)) space
-def get_max_path_sum(tree):
+def max_path_sum(tree):
+    # 调用辅助函数, 接收两个值
+    # 第一个值表示包含父节点和单个子节点的最长路径
+    # 第二个值表示包含父节点或左节点或右节点的最长路径
     _, max_sum = find_max_sum(tree)
     return max_sum
 
 
+def find_max_sum(tree):
+    if tree is None:
+        # 如果节点是空的则表示子树路径为零
+        # 第二个参数返回无穷小是因为二叉树中可能存在负数值的节点
+        # 为了确保 max 方法正常求出最大值, 故返回无穷小
+        return 0, float("-inf")
+    # 递归调用求出左子树的路径
+    left_max_sum_as_branch, left_max_path_sum = find_max_sum(tree.left)
+    # 递归调用求出右子树的路径
+    right_max_sum_as_branch, right_max_path_sum = find_max_sum(tree.right)
+    # 1. 最长路径: 仅左子树, 仅右子树; 这里可能会出现负数
+    max_child_sum_as_branch = max(left_max_sum_as_branch, right_max_sum_as_branch)
+
+    value = tree.value
+    # 2. 最长路径: 左右子树最大路径加上当前节点的值, 仅当前节点; 这里可能会出现负数
+    max_sum_as_branch = max(max_child_sum_as_branch + value, value)
+    # 3. 最长路径: 累加当前值与左右子树的路径, 仅当前值加上子树路径
+    max_sum_as_root_node = max(left_max_sum_as_branch + value + right_max_sum_as_branch, max_sum_as_branch)
+    # 4. 最长路径: 左子树最长路径, 右子树最长路径, 包含当前节点的最长路径
+    max_path_of_sum = max(left_max_path_sum, right_max_path_sum, max_sum_as_root_node)
+    # 返回: 仅子树最长路径, 包含当前节点计算出的最长路径
+    return max_sum_as_branch, max_path_of_sum
+
+
 if __name__ == '__main__':
-    source = [1, 2, 3, 4, 5, 6, 7]
+    source = list(range(1, 8))
     root = insert_level_order(source, None, 0, len(source))
-    print(get_max_path_sum(root))
+    print(max_path_sum(root))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class BinaryTree
+{
+public:
+    int value;
+    BinaryTree *left;
+    BinaryTree *right;
+
+    BinaryTree(int value)
+    {
+        this->value = value;
+        left = nullptr;
+        right = nullptr;
+    }
+};
+
+BinaryTree *insertLevelOrder(vector<int> &array, BinaryTree *tree, int index, int length)
+{
+    if (index < length)
+    {
+        tree = new BinaryTree(array[index]);
+        tree->left = insertLevelOrder(array, tree->left, 2 * index + 1, length);
+        tree->right = insertLevelOrder(array, tree->right, 2 * index + 2, length);
+    }
+    return tree;
+}
+
+vector<int> findMaxSum(BinaryTree *tree);
+
+// O(n) time | O(log(n)) space
+int maxPathSum(BinaryTree *tree)
+{
+    vector<int> maxSumArray = findMaxSum(tree);
+    return maxSumArray[1];
+}
+
+vector<int> findMaxSum(BinaryTree *tree)
+{
+    if (tree == nullptr)
+    {
+        return vector<int>{0, INT_MIN};
+    }
+
+    vector<int> leftMaxSumArray = findMaxSum(tree->left);
+    int leftMaxSumAsBranch = leftMaxSumArray[0];
+    int leftMaxPathSum = leftMaxSumArray[1];
+
+    vector<int> rightMaxSumArray = findMaxSum(tree->right);
+    int rightMaxSumAsBranch = rightMaxSumArray[0];
+    int rightMaxPathSum = rightMaxSumArray[1];
+
+    int maxChildSumAsBranch = max(leftMaxSumAsBranch, rightMaxSumAsBranch);
+    int maxSumAsBranch = max(maxChildSumAsBranch + tree->value, tree->value);
+    int maxSumAsRootNode = max(
+        leftMaxSumAsBranch + tree->value + rightMaxSumAsBranch, maxSumAsBranch);
+    int maxPathSum = max(leftMaxPathSum, max(rightMaxPathSum, maxSumAsRootNode));
+
+    return vector<int>{maxSumAsBranch, maxPathSum};
+}
+
+int main()
+{
+    vector<int> source = {1, 2, 3, 4, 5, 6, 7};
+    BinaryTree *root = insertLevelOrder(source, nullptr, 0, source.size());
+    cout << maxPathSum(root);
+    return 0;
+}
 ```
 
 ## 线性前序遍历
