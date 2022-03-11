@@ -17,6 +17,7 @@
   - [ps](linux-tool/ps.md)
   - [top](linux-tool/top.md)
   - [iotop](linux-tool/iotop.md)
+  - [iftop](linux-tool/iftop.md)
   - [useradd](linux-tool/useradd.md)
   - [usermod](linux-tool/usermod.md)
   - [userdel](linux-tool/userdel.md)
