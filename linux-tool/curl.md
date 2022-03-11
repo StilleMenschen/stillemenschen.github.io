@@ -8,6 +8,10 @@ RTMP, RTMPS, RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET and TFTP）从服�
 
 `libcurl`为所有与传输相关的功能提供 curl 支持。有关详细信息，请参见 libcurl(3)
 
+```
+curl [options] [URL...]
+```
+
 ## 链接
 
 `URL`语法与协议有关。您会在[RFC 3986](http://www.ietf.org/rfc/rfc3986.txt)中找到详细的说明。
