@@ -1259,4 +1259,374 @@ int main()
 }
 ```
 
-Last Modified 2021-11-28
+## 符合距离的节点
+
+给定三个参数，第一个参数为节点不重复的二叉树，第二个参数为待查找的目标值，第三个参数为距离 K；在二叉树中找出与目标节点距离为 K 的所有节点。
+如下二叉树中与节点 3 距离为 2 的节点有 7 8 2
+
+```
+       1
+     /   \
+    2     3
+  /   \     \
+ 4     5     6
+           /   \
+          7     8
+```
+
+```python
+class BinaryTree:
+    def __init__(self, value, left=None, right=None):
+        self.value = value
+        self.left = left
+        self.right = right
+
+
+def insert_level_order(array, tree, index, length):
+    if index < length and array[index] is not None:
+        tree = BinaryTree(array[index])
+        tree.left = insert_level_order(array, tree.left, 2 * index + 1, length)
+        tree.right = insert_level_order(array, tree.right, 2 * index + 2, length)
+    return tree
+
+
+# O(n) time | O(n) space - where n is the number of nodes in the tree
+def find_nodes_distance_k1(tree, target, k):
+    # 创建一个哈希表缓存已经访问过的子节点的父节点
+    nodes_to_parents = {}
+    # 遍历二叉树记录父子节点关系
+    populate_nodes_to_parents(tree, nodes_to_parents)
+    # 在缓存哈希表中找到目标节点
+    target_node = get_node_from_value(target, tree, nodes_to_parents)
+    # 通过广度优先搜索找到与目标节点距离为 K 的节点
+    return breadth_first_search_for_nodes_distance_k(target_node, nodes_to_parents, k)
+
+
+def breadth_first_search_for_nodes_distance_k(target_node, nodes_to_parents, k):
+    # 在 Python 中可以考虑使用 deque 来优化队列访问
+    # 记录树节点, 初始位置为目标节点, 与目标的距离为 0
+    queue = [(target_node, 0)]
+    # 记录已经访问的节点, 防止重复添加
+    seen = {target_node.value}
+    # 如果队列不为空则继续循环
+    while len(queue) > 0:
+        # 获取队尾的记录节点
+        current_node, distance_from_target = queue.pop(0)
+        # 如果与目标距离 K 相等, 则表示已经找到所有符合条件的节点
+        if distance_from_target == k:
+            # 记录队列中所有的节点
+            nodes_distance_k = [node.value for node, _ in queue]
+            nodes_distance_k.append(current_node.value)
+            # 返回结果
+            return nodes_distance_k
+        # 与当前节点相连的所有节点, 左子树, 右子树, 父节点
+        connected_nodes = [current_node.left, current_node.right, nodes_to_parents[current_node.value]]
+        for node in connected_nodes:
+            # 节点为空, 忽略
+            if node is None:
+                continue
+            # 节点已经访问过, 忽略
+            if node.value in seen:
+                continue
+            # 将此节点标记为已经访问
+            seen.add(node.value)
+            # 添加节点到队列中且距离加 1
+            queue.append((node, distance_from_target + 1))
+    # 没有符合条件的结果则返回空的数组
+    return []
+
+
+def get_node_from_value(value, tree, nodes_to_parents):
+    # 如果当前节点与目标值相符则返回
+    if tree.value == value:
+        return tree
+    # 由于已经记录了所有节点的父节点, 可通过目标节点的父节点来找出目标节点
+    node_parent = nodes_to_parents[value]
+    # 先检查左子树是否为目标节点
+    if node_parent.left is not None and node_parent.left.value == value:
+        return node_parent.left
+    # 如果左子树不是, 则右子树为目标节点
+    return node_parent.right
+
+
+def populate_nodes_to_parents(node, nodes_to_parents, parent=None):
+    # 节点不为空则递归记录子节点的父节点
+    if node is not None:
+        nodes_to_parents[node.value] = parent
+        # 将当前节点递归传递给子节点做记录
+        populate_nodes_to_parents(node.left, nodes_to_parents, node)
+        populate_nodes_to_parents(node.right, nodes_to_parents, node)
+
+
+# O(n) time | O(n) space - where n is the number of nodes in the tree
+def find_nodes_distance_k2(tree, target, k):
+    # 记录结果的数组
+    nodes_distance_k = []
+    # 递归查找符合条件的数据
+    find_distance_from_node_to_target(tree, target, k, nodes_distance_k)
+    return nodes_distance_k
+
+
+def find_distance_from_node_to_target(node, target, k, nodes_distance_k):
+    # 因为下面的逻辑需要通过返回值来判断距离, 所以节点为空则返回 -1, 表示未在子树中找到目标节点
+    if node is None:
+        return -1
+    # 如果当前节点与目标相同
+    if node.value == target:
+        # 递归在其子树中搜索符合条件的节点
+        add_subtree_nodes_at_distance_k(node, 0, k, nodes_distance_k)
+        # 由于递归的性质, 未结束执行的函数会停留等待其子级递归结束, 所以这里返回 1 表示已经找到目标节点
+        return 1
+    # 记录左右子树返回的值
+    left_distance = find_distance_from_node_to_target(node.left, target, k, nodes_distance_k)
+    right_distance = find_distance_from_node_to_target(node.right, target, k, nodes_distance_k)
+    # 如果左右子树返回的目标距离符合 K 则记录到结果集中
+    if left_distance == k or right_distance == k:
+        nodes_distance_k.append(node.value)
+    # 如果在左子树中找到了目标节点
+    if left_distance != -1:
+        # 在右子树中查找符合距离 K 的节点
+        add_subtree_nodes_at_distance_k(node.right, left_distance + 1, k, nodes_distance_k)
+        # 由于递归的性质, 未结束执行的函数会停留等待其子级递归结束, 所以这里返回累加的距离
+        return left_distance + 1
+    # 如果在右子树中找到了目标节点
+    if right_distance != -1:
+        # 在左子树中查找符合距离 K 的节点
+        add_subtree_nodes_at_distance_k(node.left, right_distance + 1, k, nodes_distance_k)
+        # 由于递归的性质, 未结束执行的函数会停留等待其子级递归结束, 所以这里返回累加的距离
+        return right_distance + 1
+    # 左右子树中都没有找到符合条件的目标节点, 返回 -1
+    return -1
+
+
+def add_subtree_nodes_at_distance_k(node, distance, k, nodes_distance_k):
+    # 递归的终点, 节点为空不做操作
+    if node is None:
+        return
+    # 如果与目标的距离等于 K 则记录到结果集中
+    if distance == k:
+        nodes_distance_k.append(node.value)
+    else:
+        # 在左右子树中搜索并累加当前的距离值
+        add_subtree_nodes_at_distance_k(node.left, distance + 1, k, nodes_distance_k)
+        add_subtree_nodes_at_distance_k(node.right, distance + 1, k, nodes_distance_k)
+
+
+def initialize():
+    source = [1, 2, 3, 4, 5, None, 6, None, None, None, None, None, None, 7, 8]
+    return insert_level_order(source, None, 0, len(source))
+
+
+if __name__ == '__main__':
+    tree = initialize()
+    print(find_nodes_distance_k1(tree, 3, 2))
+    print(find_nodes_distance_k2(tree, 3, 2))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <utility>
+#include <unordered_map>
+#include <deque>
+#include <unordered_set>
+using namespace std;
+
+class BinaryTree
+{
+public:
+    int value;
+    BinaryTree *left;
+    BinaryTree *right;
+
+    BinaryTree(int value)
+    {
+        this->value = value;
+        left = nullptr;
+        right = nullptr;
+    }
+};
+
+BinaryTree *insertLevelOrder(vector<int> &array, BinaryTree *tree, int index, int length)
+{
+    if (index < length && array[index] != -1)
+    {
+        tree = new BinaryTree(array[index]);
+        tree->left = insertLevelOrder(array, tree->left, 2 * index + 1, length);
+        tree->right = insertLevelOrder(array, tree->right, 2 * index + 2, length);
+    }
+    return tree;
+}
+
+vector<int> breadthFirstSearchForNodesDistanceK(
+    BinaryTree *targetNode, unordered_map<int, BinaryTree *> &nodesToParent,
+    int k);
+BinaryTree *getNodeFromValue(int value, BinaryTree *tree,
+                             unordered_map<int, BinaryTree *> &nodesToParents);
+void populateNodesToParents(BinaryTree *node,
+                            unordered_map<int, BinaryTree *> &nodesToParents,
+                            BinaryTree *parent);
+
+// O(n) time | O(n) space - where n is the number of nodes in the tree
+vector<int> findNodesDistanceK1(BinaryTree *tree, int target, int k)
+{
+    unordered_map<int, BinaryTree *> nodesToParents;
+    populateNodesToParents(tree, nodesToParents, nullptr);
+    auto targetNode = getNodeFromValue(target, tree, nodesToParents);
+
+    return breadthFirstSearchForNodesDistanceK(targetNode, nodesToParents, k);
+}
+
+vector<int> breadthFirstSearchForNodesDistanceK(
+    BinaryTree *targetNode, unordered_map<int, BinaryTree *> &nodesToParents,
+    int k)
+{
+    deque<pair<BinaryTree *, int>> queue = {
+        pair<BinaryTree *, int>(targetNode, 0)};
+    unordered_set<int> seen = {targetNode->value};
+    while (queue.size() > 0)
+    {
+        auto currentNode = queue.front().first;
+        auto distanceFromTarget = queue.front().second;
+        queue.pop_front();
+
+        if (distanceFromTarget == k)
+        {
+            vector<int> nodesDistanceK;
+            for (auto item : queue)
+            {
+                nodesDistanceK.push_back(item.first->value);
+            }
+            nodesDistanceK.push_back(currentNode->value);
+            return nodesDistanceK;
+        }
+
+        vector<BinaryTree *> connectedNodes = {
+            currentNode->left,
+            currentNode->right,
+            nodesToParents[currentNode->value],
+        };
+        for (auto node : connectedNodes)
+        {
+            if (node == nullptr)
+                continue;
+
+            if (seen.find(node->value) != seen.end())
+                continue;
+
+            seen.insert(node->value);
+            queue.push_back(pair<BinaryTree *, int>(node, distanceFromTarget + 1));
+        }
+    }
+
+    return {};
+}
+
+BinaryTree *getNodeFromValue(int value, BinaryTree *tree,
+                             unordered_map<int, BinaryTree *> &nodesToParents)
+{
+    if (tree->value == value)
+        return tree;
+
+    auto nodeParent = nodesToParents[value];
+    if (nodeParent->left != nullptr && nodeParent->left->value == value)
+        return nodeParent->left;
+
+    return nodeParent->right;
+}
+
+void populateNodesToParents(BinaryTree *node,
+                            unordered_map<int, BinaryTree *> &nodesToParents,
+                            BinaryTree *parent)
+{
+    if (node != nullptr)
+    {
+        nodesToParents[node->value] = parent;
+        populateNodesToParents(node->left, nodesToParents, node);
+        populateNodesToParents(node->right, nodesToParents, node);
+    }
+}
+
+int findDistanceFromNodeToTarget(BinaryTree *node, int target, int k,
+                                 vector<int> &nodesDistanceK);
+void addSubtreeNodeAtDistanceK(BinaryTree *node, int distance, int k,
+                               vector<int> &nodesDistanceK);
+
+// O(n) time | O(n) space - where n is the number of nodes in the tree
+vector<int> findNodesDistanceK2(BinaryTree *tree, int target, int k)
+{
+    vector<int> nodesDistanceK;
+    findDistanceFromNodeToTarget(tree, target, k, nodesDistanceK);
+    return nodesDistanceK;
+}
+
+int findDistanceFromNodeToTarget(BinaryTree *node, int target, int k,
+                                 vector<int> &nodesDistanceK)
+{
+    if (node == nullptr)
+        return -1;
+
+    if (node->value == target)
+    {
+        addSubtreeNodeAtDistanceK(node, 0, k, nodesDistanceK);
+        return 1;
+    }
+
+    int leftDistance =
+        findDistanceFromNodeToTarget(node->left, target, k, nodesDistanceK);
+    int rightDistance =
+        findDistanceFromNodeToTarget(node->right, target, k, nodesDistanceK);
+
+    if (leftDistance == k || rightDistance == k)
+        nodesDistanceK.push_back(node->value);
+
+    if (leftDistance != -1)
+    {
+        addSubtreeNodeAtDistanceK(node->right, leftDistance + 1, k, nodesDistanceK);
+        return leftDistance + 1;
+    }
+
+    if (rightDistance != -1)
+    {
+        addSubtreeNodeAtDistanceK(node->left, rightDistance + 1, k, nodesDistanceK);
+        return rightDistance + 1;
+    }
+
+    return -1;
+}
+
+void addSubtreeNodeAtDistanceK(BinaryTree *node, int distance, int k,
+                               vector<int> &nodesDistanceK)
+{
+    if (node == nullptr)
+        return;
+
+    if (distance == k)
+        nodesDistanceK.push_back(node->value);
+    else
+    {
+        addSubtreeNodeAtDistanceK(node->left, distance + 1, k, nodesDistanceK);
+        addSubtreeNodeAtDistanceK(node->right, distance + 1, k, nodesDistanceK);
+    }
+}
+
+void iteration(vector<int> a)
+{
+    for (const int element : a)
+    {
+        cout << element << " ";
+    }
+    cout << endl;
+}
+
+int main()
+{
+    vector<int> source = {1, 2, 3, 4, 5, -1, 6, -1, -1, -1, -1, -1, -1, 7, 8};
+    BinaryTree *root = insertLevelOrder(source, nullptr, 0, source.size());
+    iteration(findNodesDistanceK1(root, 3, 2));
+    iteration(findNodesDistanceK2(root, 3, 2));
+    return 0;
+}
+```
+
+Last Modified 2022-03-12
