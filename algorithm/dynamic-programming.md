@@ -347,78 +347,112 @@ int main()
 }
 ```
 
-## 最大递增子序列
+## 最大和递增子序列
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
+给定一个数组，找出数组中数值累加和最大的连续递增序列，如`[10, 70, 20, 30, 50, 11, 30]`中，`10 + 20 + 30 + 50 = 110` 是最大累加和的递增子序列
 
-typedef struct Result
+```python
+# O(n^2) time | O(n) space
+def max_sum_increasing_subsequence(array):
+    # 缓存索引递增序列的位置
+    sequences = [None for _ in array]
+    # 缓存累加的和
+    sums = [num for num in array]
+    # 记录最大和的序列最后一个值的索引, 默认为数组开头
+    max_sum_idx = 0
+    # 第一个循环从数组开头开始
+    for i in range(len(array)):
+        current_num = array[i]
+        # 第二个循环从数组开头到第一个循环的当前索引处
+        for j in range(0, i):
+            other_num = array[j]
+            # 逐个判断前面的值是否比当前值小, 且累加的和是否比已经缓存的累加和大
+            if other_num < current_num and sums[j] + current_num >= sums[i]:
+                # 更新缓存
+                sums[i] = sums[j] + current_num
+                # 记录索引, 后面需要根据索引来生成递增子序列
+                sequences[i] = j
+        # 判断最大累加和是否比上一次记录的值大
+        if sums[i] >= sums[max_sum_idx]:
+            # 更新累加和的索引
+            max_sum_idx = i
+    # 根据索引缓存数组来生成结果, 即递增子序列
+    return [sums[max_sum_idx], build_sequence(array, sequences, max_sum_idx)]
+
+
+def build_sequence(array, sequences, current_idx):
+    sequence = []
+    # 缓存中的索引非空则继续添加下一个位置的值
+    while current_idx is not None:
+        sequence.append(array[current_idx])
+        current_idx = sequences[current_idx]
+    # 因为是逆向添加递增子序列的, 这里返回时需要反转数组
+    return list(reversed(sequence))
+
+
+if __name__ == '__main__':
+    source = [10, 70, 20, 30, 50, 11, 30]
+    print(max_sum_increasing_subsequence(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+vector<vector<int>> buildSequence(vector<int> array, vector<int> sequences,
+                                  int currentIdx, int sum);
+
+// O(n^2) time | O(n) space
+vector<vector<int>> maxSumIncreasingSubsequence(vector<int> array)
 {
-    int sequenceLength;
-    int sum;
-    int *sequence;
-} Result, *pResult;
-
-pResult buildSequence(int array[], int sequence[], int maxSumIdx)
-{
-    pResult r = (Result*)malloc(sizeof(Result));
-    r->sequenceLength = r->sum = 0;
-    int i;
-    for ( i=maxSumIdx; i>=0; )
+    const int arraySize = array.size();
+    vector<int> sequences(arraySize, INT_MIN);
+    vector<int> sums = array;
+    int maxSumIdx = 0;
+    for (int i = 0; i < arraySize; i++)
     {
-        r->sequenceLength++;
-        i = sequence[i];
-    }
-    r->sequence = (int*)malloc(r->sequenceLength * sizeof(int));
-    for ( i=r->sequenceLength-1; i>=0; i--)
-    {
-        r->sequence[i] = array[maxSumIdx];
-        r->sum += array[maxSumIdx];
-        maxSumIdx = sequence[maxSumIdx];
-    }
-    return r;
-}
-
-/* O(n^2) time | O(n) space */
-pResult maxSumIncreasingSubsequence(int array[], int length)
-{
-    int sequence[length] = {0}, sums[length] = {0};
-    int i, j, currentNum, otherNum, maxSumIdx = 0;
-    for ( i=0; i<length; i++)
-    {
-        sequence[i] = -1;
-        sums[i] = array[i];
-    }
-    for ( i=0; i<length; i++)
-    {
-        currentNum = array[i];
-        for ( j=0; j<i; j++)
+        int currentNum = array[i];
+        for (int j = 0; j < i; j++)
         {
-            otherNum = array[j];
-            if ( otherNum < currentNum && sums[j] + currentNum >= sums[i] )
+            int otherNum = array[j];
+            if (otherNum < currentNum && sums[j] + currentNum >= sums[i])
             {
                 sums[i] = sums[j] + currentNum;
-                sequence[i] = j;
+                sequences[i] = j;
             }
         }
-        if ( sums[i] >= sums[maxSumIdx] )
+        if (sums[i] >= sums[maxSumIdx])
         {
             maxSumIdx = i;
         }
     }
-    return buildSequence(array, sequence, maxSumIdx);
+    return buildSequence(array, sequences, maxSumIdx, sums[maxSumIdx]);
 }
 
-int main(void)
+vector<vector<int>> buildSequence(vector<int> array, vector<int> sequences,
+                                  int currentIdx, int sum)
 {
-    int array[] = {8, 13, 2, 3, 15, 2, 6};
-    int length = sizeof(array) / sizeof(array[0]);
-    pResult result = maxSumIncreasingSubsequence(array, length);
-    int i = 0;
-    printf("%d, ", result->sum);
-    while ( i < result->sequenceLength )
-        printf("%d ", result->sequence[i++]);
+    vector<vector<int>> sequence = {{}, {}};
+    sequence[0].push_back(sum);
+    while (currentIdx != INT_MIN)
+    {
+        sequence[1].insert(sequence[1].begin(), array[currentIdx]);
+        currentIdx = sequences[currentIdx];
+    }
+    return sequence;
+}
+
+int main()
+{
+    vector<int> source = {10, 70, 20, 30, 50, 11, 30};
+    vector<vector<int>> result = maxSumIncreasingSubsequence(source);
+    cout << result[0][0] << ", ";
+    for (const int element : result[1])
+    {
+        cout << element << " ";
+    }
     return 0;
 }
 ```
@@ -681,7 +715,7 @@ if __name__ == '__main__':
 
 ## 磁盘堆叠
 
-每个子阵列都包含三个整数并表示磁盘。这些整数分别表示每个磁盘的宽度，深度和高度。目标是堆叠磁盘并最大限度地提高堆栈的总高度。磁盘必须具有比其下方的任何其他磁盘更小的宽度，深度和高度。写一个函数，返回nal堆栈中的磁盘数组，从顶部磁盘开始，并以底部磁盘结尾。
+每个子阵列都包含三个整数并表示磁盘。这些整数分别表示每个磁盘的宽度，深度和高度。目标是堆叠磁盘并最大限度地提高堆栈的总高度。磁盘必须具有比其下方的任何其他磁盘更小的宽度，深度和高度。写一个函数，返回 nal 堆栈中的磁盘数组，从顶部磁盘开始，并以底部磁盘结尾。
 
 ```python
 # O(n^2) time | O(n) space
@@ -779,7 +813,7 @@ if __name__ == '__main__':
     print(numbers_in_pi3("3141592", ["3141", "5", "31", "2", "4159", "9", "42", "314"]))
 ```
 
-## 第K次投资最大利润
+## 第 K 次投资最大利润
 
 ```python
 # O(nk) time | O(nk) space
@@ -1345,4 +1379,4 @@ int main()
 }
 ```
 
-Last Modified 2021-12-06
+Last Modified 2022-03-14
