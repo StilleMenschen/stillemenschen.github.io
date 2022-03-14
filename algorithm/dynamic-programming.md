@@ -459,36 +459,87 @@ int main()
 
 ## 最长公共子序列
 
+给定两个字符串，找出两个字符串中相同的字符组成的公共字符串，如`ABCDEHF`和`ACEHDF`的最长公共字符串为`ACEHF`
+
 ```python
-# O(n * m * min(n, m)) time | O(n * m * min(n, m)) space
-def longest_common_subsequence1(s1, s2):
-    lcs = [[[] for _ in range(len(s1) + 1)] for _ in range(len(s2) + 1)]
-    for i in range(1, len(s2) + 1):
-        for j in range(len(s1) + 1):
-            if s2[i - 1] == s1[j - 1]:
-                lcs[i][j] = lcs[i - 1][j - 1] + [s2[i - 1]]
+# O(nm*min(n, m)) time | O(nm*min(n, m)) space
+def longest_common_subsequence1(str1, str2):
+    # 根据传入参数的字符串长度创建一个缓存二维数组, 由于要考虑空字符串, 二维数组的宽高分别加 1
+    lcs = [[[] for _ in range(len(str1) + 1)] for _ in range(len(str2) + 1)]
+    # 两重循环, 逐个比较两个字符串的字符
+    for i in range(1, len(str2) + 1):
+        for j in range(1, len(str1) + 1):
+            # 如果遇到两个字符相同的情况
+            if str2[i - 1] == str1[j - 1]:
+                # 连接左上位置的字符和当前字符, 这里如果是空的数组则会被 Python 忽略
+                # 这里也是导致出现 min(n ,m) 算法复杂度出现的逻辑, 因为拼接数组也占用时间和空间
+                lcs[i][j] = lcs[i - 1][j - 1] + [str2[i - 1]]
+            # 如果两字符不相等
             else:
+                # 取上一行同一列和同一行前一列的字符长度最大的
                 lcs[i][j] = max(lcs[i - 1][j], lcs[i][j - 1], key=len)
+    # 由于每一步操作都是在拼接字符, 所以最后完成二维数组遍历后, 最后一行最后一列的数据即是结果
     return lcs[-1][-1]
 
 
-# O(n * m) time | O(n * m) space
-def longest_common_subsequence2(s1, s2):
-    lcs = [[[None, 0, None, None] for _ in range(len(s1) + 1)] for _ in range(len(s2) + 1)]
-    for i in range(len(s2) + 1):
-        for j in range(len(s1) + 1):
-            if s2[i - 1] == s1[j - 1]:
-                lcs[i][j] = [s2[i - 1], lcs[i - 1][j - 1][1] + 1, i - 1, j - 1]
+# O(nm*min(n, m)) time | O((min(n, m))^2) space
+def longest_common_subsequence2(str1, str2):
+    # 这里的处理方式相较于上面的方式节省了一定的空间
+    # 计算两个字符串中长度较小的字符串
+    small = str1 if len(str1) < len(str2) else str2
+    # 计算两个字符串中长度较大的字符串
+    big = str1 if len(str1) >= len(str2) else str2
+    # 因为每次执行循环实际上只需要上一行的数据, 前面几行的数据其实可以抛弃
+    # 这里就声明了两个数组来表示需要的缓存数据, 通过前面找出来较短的字符串创建, 减少空间使用
+    even_lcs = [[] for _ in range(len(small) + 1)]
+    odd_lcs = [[] for _ in range(len(small) + 1)]
+    # 长度较长的数组作为循环矩阵访问中的列
+    for i in range(1, len(big) + 1):
+        # 通过列索引的奇偶切换两个缓存数组的指针, 重复使用
+        if i % 2 == 1:
+            current_lcs = odd_lcs
+            previous_lcs = even_lcs
+        else:
+            current_lcs = even_lcs
+            previous_lcs = odd_lcs
+        # 长度较短的数组作为循环矩阵访问中的行
+        for j in range(1, len(small) + 1):
+            if big[i - 1] == small[j - 1]:
+                current_lcs[j] = previous_lcs[j - 1] + [big[i - 1]]
             else:
+                current_lcs[j] = max(previous_lcs[j], current_lcs[j - 1], key=len)
+    return even_lcs[-1] if len(big) % 2 == 0 else odd_lcs[-1]
+
+
+# O(nm) time | O(nm) space
+def longest_common_subsequence3(str1, str2):
+    # 这里创建的缓存数组相比上面的两种实现, 简化了记录的方式, 只记录以下四个关键数据
+    # 1. 出现相同的字符
+    # 2. 字符的长度
+    # 3. 前一个字符出现位置的 x 坐标 (行索引)
+    # 4. 前一个字符出现位置的 y 坐标 (列索引)
+    lcs = [[[None, 0, None, None] for _ in range(len(str1) + 1)] for _ in range(len(str2) + 1)]
+    for i in range(1, len(str2) + 1):
+        for j in range(1, len(str1) + 1):
+            # 如果字符出现相同
+            if str2[i - 1] == str1[j - 1]:
+                # 第一个位置记录相同的字符
+                # 第二个位置取左上位置的字符记录长度加 1
+                # 第三和第四个位置则记录左上位置的索引 (前一行且前一列)
+                lcs[i][j] = [str2[i - 1], lcs[i - 1][j - 1][1] + 1, i - 1, j - 1]
+            # 字符不相同
+            else:
+                # 取上一行同一列和同一行前一列的字符长度最大的数据
                 if lcs[i - 1][j][1] > lcs[i][j - 1][1]:
                     lcs[i][j] = [None, lcs[i - 1][j][1], i - 1, j]
                 else:
                     lcs[i][j] = [None, lcs[i][j - 1][1], i, j - 1]
-    return build_sequence(lcs)
+    return build_sequence1(lcs)
 
 
-def build_sequence(lcs):
+def build_sequence1(lcs):
     sequence = []
+    # 从最后位置开始连接实际的结果
     i = len(lcs) - 1
     j = len(lcs[0]) - 1
     while i != 0 and j != 0:
@@ -497,46 +548,268 @@ def build_sequence(lcs):
             sequence.append(current_entry[0])
         i = current_entry[2]
         j = current_entry[3]
+    # 因为连接的结果数组是从后往前的, 所以这里需要反转数组
+    return list(reversed(sequence))
+
+
+# O(nm) time | O(nm) space
+def longest_common_subsequence4(str1, str2):
+    # 这里只创建了缓存字符长度的二维数组
+    lengths = [[0 for _ in range(len(str1) + 1)] for _ in range(len(str2) + 1)]
+    for i in range(1, len(str2) + 1):
+        for j in range(1, len(str1) + 1):
+            if str2[i - 1] == str1[j - 1]:
+                # 如果字符相等则取前一行前一列位置的长度加 1
+                lengths[i][j] = lengths[i - 1][j - 1] + 1
+            else:
+                lengths[i][j] = max(lengths[i - 1][j], lengths[i][j - 1])
+    return build_sequence2(lengths, str1)
+
+
+def build_sequence2(lengths, string):
+    sequence = []
+    i = len(lengths) - 1
+    j = len(lengths[0]) - 1
+    while i != 0 and j != 0:
+        # 如果字符串长度与前一行同一列的相同则递减行索引
+        if lengths[i][j] == lengths[i - 1][j]:
+            i -= 1
+        # 如果字符串长度与前一列同一行的相同则递减列索引
+        elif lengths[i][j] == lengths[i][j - 1]:
+            j -= 1
+        # 上面两个条件都不满足, 说明当前位置的长度是通过左上位置的字符长度累加的
+        # 而在前面的逻辑中, 只有出现字符相同的情况下才会取左上位置的字符长度加 1
+        else:
+            # 记录字符
+            sequence.append(string[j - 1])
+            # 同时递减行列索引
+            i -= 1
+            j -= 1
+    # 因为连接的结果数组是从后往前的, 所以这里需要反转数组
     return list(reversed(sequence))
 
 
 if __name__ == '__main__':
-    print(longest_common_subsequence1('zxvAyzw', 'xkykzpw'))
-    print(longest_common_subsequence2('zxvAyzw', 'xkykzpw'))
+    s1 = 'ZXVVYZW'
+    s2 = 'XKYZPW'
+    print(longest_common_subsequence1(s1, s2))
+    print(longest_common_subsequence2(s1, s2))
+    print(longest_common_subsequence3(s1, s2))
+    print(longest_common_subsequence4(s1, s2))
 ```
 
 ```cpp
 #include <iostream>
-#include <set>
-#include <vector>
 #include <string>
-
+#include <vector>
 using namespace std;
 
-/* O(n + m) time | O(min(n, m)) space */
-vector<char> longestCommonSubsequence(string s1, string s2)
+// O(nm*min(n, m)) time | O(nm*min(n, m)) space
+vector<char> longestCommonSubsequence1(string str1, string str2)
 {
-    set<char> lcs;
-    vector<char> result;
-    unsigned int i;
-    for ( i=0; i<s1.size(); i++ )
-        lcs.insert(s1[i]);
-    for ( i=0; i<s2.size(); i++ )
+    const int str1Length = str1.length();
+    const int str2Length = str2.length();
+    vector<vector<vector<char>>> lcs;
+    for (int i = 0; i < str2Length + 1; i++)
     {
-        if ( lcs.count(s2[i]) > 0 )
-            result.push_back(s2[i]);
+        lcs.push_back(vector<vector<char>>());
+        for (int j = 0; j < str1Length + 1; j++)
+        {
+            lcs[i].push_back(vector<char>());
+        }
     }
-    return result;
+    for (int i = 1; i < str2Length + 1; i++)
+    {
+        for (int j = 1; j < str1Length + 1; j++)
+        {
+            if (str2[i - 1] == str1[j - 1])
+            {
+                vector<char> copy = lcs[i - 1][j - 1];
+                copy.push_back(str2[i - 1]);
+                lcs[i][j] = copy;
+            }
+            else
+            {
+                lcs[i][j] = lcs[i - 1][j].size() > lcs[i][j - 1].size() ? lcs[i - 1][j]
+                                                                        : lcs[i][j - 1];
+            }
+        }
+    }
+    return lcs[str2Length][str1Length];
+}
+
+// O(nm*min(n, m)) time | O((min(n, m))^2) space
+vector<char> longestCommonSubsequence2(string str1, string str2)
+{
+    string small = str1.length() < str2.length() ? str1 : str2;
+    string big = str1.length() >= str2.length() ? str1 : str2;
+    vector<vector<char>> evenLcs;
+    vector<vector<char>> oddLcs;
+    const int smallLength = small.length();
+    const int bigLength = big.length();
+    for (int i = 0; i < smallLength + 1; i++)
+    {
+        evenLcs.push_back(vector<char>());
+    }
+    for (int i = 0; i < smallLength + 1; i++)
+    {
+        oddLcs.push_back(vector<char>());
+    }
+    for (int i = 1; i < bigLength + 1; i++)
+    {
+        vector<vector<char>> *currentLcs;
+        vector<vector<char>> *previousLcs;
+        if (i % 2 == 1)
+        {
+            currentLcs = &oddLcs;
+            previousLcs = &evenLcs;
+        }
+        else
+        {
+            currentLcs = &evenLcs;
+            previousLcs = &oddLcs;
+        }
+        for (int j = 1; j < smallLength + 1; j++)
+        {
+            if (big[i - 1] == small[j - 1])
+            {
+                vector<char> copy = previousLcs->at(j - 1);
+                copy.push_back(big[i - 1]);
+                currentLcs->at(j) = copy;
+            }
+            else
+            {
+                currentLcs->at(j) =
+                    previousLcs->at(j).size() > currentLcs->at(j - 1).size()
+                        ? previousLcs->at(j)
+                        : currentLcs->at(j - 1);
+            }
+        }
+    }
+    return bigLength % 2 == 0 ? evenLcs[smallLength]
+                              : oddLcs[smallLength];
+}
+
+vector<char> buildSequence1(vector<vector<vector<int>>> lcs);
+
+// O(nm) time | O(nm) space
+vector<char> longestCommonSubsequence3(string str1, string str2)
+{
+    const int str1Length = str1.length();
+    const int str2Length = str2.length();
+    vector<vector<vector<int>>> lcs(
+        str2Length + 1,
+        vector<vector<int>>(str1Length + 1, vector<int>(4, 0)));
+    for (int i = 1; i < str2Length + 1; i++)
+    {
+        for (int j = 1; j < str1Length + 1; j++)
+        {
+            if (str2[i - 1] == str1[j - 1])
+            {
+                lcs[i][j] = {str2[i - 1], lcs[i - 1][j - 1][1] + 1, i - 1, j - 1};
+            }
+            else
+            {
+                if (lcs[i - 1][j][1] > lcs[i][j - 1][1])
+                {
+                    lcs[i][j] = {-1, lcs[i - 1][j][1], i - 1, j};
+                }
+                else
+                {
+                    lcs[i][j] = {-1, lcs[i][j - 1][1], i, j - 1};
+                }
+            }
+        }
+    }
+    return buildSequence1(lcs);
+}
+
+vector<char> buildSequence1(vector<vector<vector<int>>> lcs)
+{
+    vector<char> sequence;
+    int i = lcs.size() - 1;
+    int j = lcs[0].size() - 1;
+    while (i != 0 && j != 0)
+    {
+        vector<int> currentEntry = lcs[i][j];
+        if (currentEntry[0] != -1)
+        {
+            sequence.insert(sequence.begin(), currentEntry[0]);
+        }
+        i = currentEntry[2];
+        j = currentEntry[3];
+    }
+    return sequence;
+}
+
+vector<char> buildSequence2(vector<vector<int>> lengths, string str);
+
+// O(nm) time | O(nm) space
+vector<char> longestCommonSubsequence4(string str1, string str2)
+{
+    const int str1Length = str1.length();
+    const int str2Length = str2.length();
+    vector<vector<int>> lengths(
+        str2Length + 1, vector<int>(str1Length + 1, 0));
+    for (int i = 1; i < str2Length + 1; i++)
+    {
+        for (int j = 1; j < str1Length + 1; j++)
+        {
+            if (str2[i - 1] == str1[j - 1])
+            {
+                lengths[i][j] = lengths[i - 1][j - 1] + 1;
+            }
+            else
+            {
+                lengths[i][j] = max(lengths[i - 1][j], lengths[i][j - 1]);
+            }
+        }
+    }
+    return buildSequence2(lengths, str1);
+}
+
+vector<char> buildSequence2(vector<vector<int>> lengths, string str)
+{
+    vector<char> sequence;
+    int i = lengths.size() - 1;
+    int j = lengths[0].size() - 1;
+    while (i != 0 && j != 0)
+    {
+        if (lengths[i][j] == lengths[i - 1][j])
+        {
+            i--;
+        }
+        else if (lengths[i][j] == lengths[i][j - 1])
+        {
+            j--;
+        }
+        else
+        {
+            sequence.insert(sequence.begin(), str[j - 1]);
+            i--;
+            j--;
+        }
+    }
+    return sequence;
+}
+
+void iteration(vector<char> array)
+{
+    for (const char element : array)
+    {
+        cout << element << " ";
+    }
+    cout << endl;
 }
 
 int main()
 {
-    string s1 = "zxvvyzw";
-    string s2 = "xkykzpw";
-    vector<char> result = longestCommonSubsequence(s1, s2);
-    vector<char>::iterator iter = result.begin();
-    while ( iter != result.end() )
-        cout << *iter++ << " ";
+    string s1 = "ZXVVYZW";
+    string s2 = "XKYZPW";
+    iteration(longestCommonSubsequence1(s1, s2));
+    iteration(longestCommonSubsequence2(s1, s2));
+    iteration(longestCommonSubsequence3(s1, s2));
+    iteration(longestCommonSubsequence4(s1, s2));
     return 0;
 }
 ```
