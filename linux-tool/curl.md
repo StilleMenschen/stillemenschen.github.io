@@ -171,4 +171,10 @@ table th:first-of-type {
    curl -X POST -H "Authorization: token" -F "user=black" -F "age=18" -F "picture=@p1.jpg" "https://www.example.com/api/user"
    ```
 
-Last Modified 2021-04-11
+4. 以 telnet 协议检查端口是否可以连通
+
+   ```bash
+   curl -vv telnet://192.168.1.100:9527
+   ```
+
+Last Modified 2022-03-12
