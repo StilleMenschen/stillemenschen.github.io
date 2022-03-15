@@ -818,66 +818,109 @@ int main()
 
 给定一个整数数组，数组中的值表示可前进的步数，计算出穿过数组的最小步数
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
-#define MAX_INTEGER 2147483647
+```python
+# O(n^2) time | O(n) space
+def min_number_of_jumps1(array):
+    # 缓存跳跃数, 默认为无穷大
+    jumps = [float("inf") for _ in array]
+    # 第一个跳跃数为 0
+    jumps[0] = 0
+    # 从第二个位置开始循环
+    for i in range(1, len(array)):
+        # 第二层循环从开始位置到第一层循环的当前位置
+        for j in range(0, i):
+            # 如果可跳跃步长的比两个位置的距离要大, 则更新
+            if array[j] >= i - j:
+                # 取缓存和当前获得的步长的最大值
+                jumps[i] = min(jumps[j] + 1, jumps[i])
+    return jumps[-1]
 
-int max(int a, int b)
-{
-    if ( a > b ) return a;
-    return b;
-}
 
-int min(int a, int b)
-{
-    if ( a < b ) return a;
-    return b;
-}
+# O(n) time | O(1) space
+def min_number_of_jumps2(array):
+    # 长度小于等于 1 的数组无需跳跃
+    if len(array) == 1:
+        return 0
+    # 记录跳跃次数
+    jumps = 0
+    # 记录最大可跳跃步长, 默认为第一个步长值
+    max_reach = array[0]
+    # 记录步数
+    steps = array[0]
+    # 前面已经处理了第一个位置的数据, 直接从第二个位置开始循环到倒数第二个位置
+    for i in range(1, len(array) - 1):
+        # 每次都更新最大可跳跃步长, 因为前面已经走过一定的步数, 所以要加上索引的值
+        max_reach = max(max_reach, i + array[i])
+        # 递减步数
+        steps -= 1
+        # 如果步数为 0
+        if steps == 0:
+            # 递增跳跃步数
+            jumps += 1
+            # 重新根据当前最大可跳跃步长更新可用步数
+            steps = max_reach - i
+    # 上面的循环没有走到最后一个位置, 所以这里的跳跃步数加 1
+    return jumps + 1
 
-/* O(n^2) time | O(n) space */
-int minNumberOfJumps1(int array[], int length)
+
+if __name__ == '__main__':
+    print(min_number_of_jumps1([3, 4, 2, 1, 2, 3, 7, 1, 1, 1, 3]))
+    print(min_number_of_jumps2([2, 1, 1]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+// O(n^2) time | O(n) space
+int minNumberOfJumps1(vector<int> array)
 {
-    int jumps[length] = {0}, i, j;
-    for ( i=1; i<length; i++) jumps[i] = MAX_INTEGER;
-    for ( i=1; i<length; i++)
+    const int arraySize = array.size();
+    vector<int> jumps(arraySize, INT_MAX);
+    jumps[0] = 0;
+    for (int i = 1; i < arraySize; i++)
     {
-        for ( j=0; j<i; j++ )
+        for (int j = 0; j < i; j++)
         {
-            if ( array[j] + j >= i )
+            if (array[j] >= i - j)
+            {
                 jumps[i] = min(jumps[j] + 1, jumps[i]);
+            }
         }
     }
-    if ( jumps[length - 1] == MAX_INTEGER ) return 1;
-    return jumps[length - 1];
+    return jumps[jumps.size() - 1];
 }
 
-/* O(n) time | O(1) space */
-int minNumberOfJumps2(int array[], int length)
+// O(n) time | O(1) space
+int minNumberOfJumps2(vector<int> array)
 {
-    if ( length == 1 ) return 1;
-    length--;
-    int maxReach = array[0], steps = array[0], jumps = 0, i;
-    for ( i=1; i<length; i++)
+    const int arraySize = array.size();
+    if (arraySize == 1)
     {
-        maxReach = max(maxReach, array[i] + i);
-        steps -= 1;
-        if ( steps == 0 )
+        return 0;
+    }
+    int jumps = 0;
+    int maxReach = array[0];
+    int steps = array[0];
+    for (int i = 1; i < arraySize - 1; i++)
+    {
+        maxReach = max(maxReach, i + array[i]);
+        steps--;
+        if (steps == 0)
         {
-            jumps += 1;
+            jumps++;
             steps = maxReach - i;
         }
-        else if ( steps < 0 ) break;
     }
     return jumps + 1;
 }
 
 int main()
 {
-    int array[] = {3, 4, 2, 1, 2, 3, 7, 1, 1, 1, 3};
-    int length = sizeof(array) / sizeof(array[0]);
-    printf("%d ", minNumberOfJumps1(array, length));
-    printf("%d ", minNumberOfJumps2(array, length));
+    cout << minNumberOfJumps1({2, 1, 1}) << endl;
+    cout << minNumberOfJumps2({3, 4, 2, 1, 2, 3, 7, 1, 1, 1, 3}) << endl;
     return 0;
 }
 ```
@@ -1652,4 +1695,4 @@ int main()
 }
 ```
 
-Last Modified 2022-03-14
+Last Modified 2022-03-15
