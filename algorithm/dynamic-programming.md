@@ -939,52 +939,163 @@ int main()
 0 3 0 0 1 0 5 0
 ```
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
+```python
+# O(n) time | O(n) space - where n is the length of the input array
+def water_area1(heights):
+    # 缓存水面高度
+    maxes = [0 for _ in heights]
+    # 因为需要挡住水流至少要在数组的边界有一面墙
+    # 所以数组开头和末尾其实都是 0 的水域面积
+    # 记录最大墙高度, 初始为 0
+    left_max = 0
+    # 先从左边开始
+    for i in range(len(heights)):
+        height = heights[i]
+        # 1. 根据墙面高度记录水面高度
+        maxes[i] = left_max
+        # 2. 求出下一个墙面的高度
+        # 根据记录的高度和当前的高度比较, 取最大值
+        # 由于是仅从左向右计算, 所以可以认为左边的墙越高, 则墙右面的水面也越高
+        left_max = max(left_max, height)
+    # 记录最大墙高度, 初始为 0
+    right_max = 0
+    # 然后从右边开始
+    for i in reversed(range(len(heights))):
+        height = heights[i]
+        # 1. 由于前面已经计算过了从左向右的可用水域面积
+        # 这里通过从右向左的墙面高度和之前记录的高度取最小值作为水面实际高度
+        # 因为两面墙之间的水面高度是取高度较小的那一面墙
+        min_height = min(right_max, maxes[i])
+        # 2. 判断得出的水面实际高度是否高于当前的墙
+        if height < min_height:
+            # 减去水面没过的墙
+            maxes[i] = min_height - height
+        else:
+            # 墙比水面还要高则表示水面高度为 0
+            maxes[i] = 0
+        # 3. 求出下一个墙面的高度
+        right_max = max(right_max, height)
+    # 最后求和所有的水面高度就是最终的水域面积了
+    return sum(maxes)
 
-int max(int a, int b)
-{
-    if ( a > b ) return a;
-    return b;
-}
 
-int min(int a, int b)
-{
-    if ( a < b ) return a;
-    return b;
-}
+# O(n) time | O(1) space - where n is the length of the input array
+def water_area2(heights):
+    if len(heights) == 0:
+        return 0
+    # 同时从左右两边开始
+    left_idx = 0
+    right_idx = len(heights) - 1
+    # 记录左右两边的最大水面高度
+    left_max = heights[left_idx]
+    right_max = heights[right_idx]
+    # 记录水域面积
+    surface_area = 0
+    # 循环直到左右指针相遇
+    # 因为需要挡住水流至少要在数组的边界有一面墙
+    # 初始指针位置都是在边界上, 所以下面都是先移动指针再求值的
+    while left_idx < right_idx:
+        # 判断左指针的墙是否比右指针的墙高度小
+        if heights[left_idx] < heights[right_idx]:
+            # 移动左指针
+            left_idx += 1
+            # 求出下一个位置的墙高度
+            left_max = max(left_max, heights[left_idx])
+            # 求出水域面积
+            surface_area += left_max - heights[left_idx]
+        else:
+            # 移动右指针
+            right_idx -= 1
+            # 求出下一个位置的墙高度
+            right_max = max(right_max, heights[right_idx])
+            # 求出水域面积
+            surface_area += right_max - heights[right_idx]
 
-/* O(n) time | O(n) space */
-int waterArea(int heights[], int length)
+    return surface_area
+
+
+if __name__ == '__main__':
+    source = [0, 8, 0, 0, 5, 0, 0, 10, 0, 0, 1, 1, 0, 3]
+    print(water_area1(source))
+    print(water_area2(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// O(n) time | O(n) space - where n is the length of the input array
+int waterArea1(vector<int> heights)
 {
-    int maxes[length] = {0};
-    int leftMax=0, rigthMax=0, i, sum;
-    for ( i=0; i<length; i++ )
+    const int heightsSize = heights.size();
+    vector<int> maxes(heightsSize, 0);
+    int leftMax = 0;
+    for (int i = 0; i < heightsSize; i++)
     {
+        int height = heights[i];
         maxes[i] = leftMax;
-        leftMax = max(leftMax, heights[i]);
+        leftMax = max(leftMax, height);
     }
-    for ( i=length - 1; i>=0; i-- )
+    int rightMax = 0;
+    for (int i = heightsSize - 1; i >= 0; i--)
     {
-        sum = heights[i];
-        leftMax = min(rigthMax, maxes[i]);
-        if ( sum < leftMax )
-            maxes[i] = leftMax - sum;
+        int height = heights[i];
+        int minHeight = min(rightMax, maxes[i]);
+        if (height < minHeight)
+        {
+            maxes[i] = minHeight - height;
+        }
         else
+        {
             maxes[i] = 0;
-        rigthMax = max(rigthMax, sum);
+        }
+        rightMax = max(rightMax, height);
     }
-    for ( i=0,sum=0; i<length; i++ )
-        sum += maxes[i];
-    return sum;
+    int total = 0;
+    for (int i = 0; i < heightsSize; i++)
+    {
+        total += maxes[i];
+    }
+    return total;
+}
+
+// O(n) time | O(1) space - where n is the length of the input array
+int waterArea2(vector<int> heights)
+{
+    if (heights.size() == 0)
+        return 0;
+
+    int leftIdx = 0;
+    int rightIdx = heights.size() - 1;
+    int leftMax = heights[leftIdx];
+    int rightMax = heights[rightIdx];
+    int surfaceArea = 0;
+
+    while (leftIdx < rightIdx)
+    {
+        if (heights[leftIdx] < heights[rightIdx])
+        {
+            leftIdx++;
+            leftMax = max(leftMax, heights[leftIdx]);
+            surfaceArea += leftMax - heights[leftIdx];
+        }
+        else
+        {
+            rightIdx--;
+            rightMax = max(rightMax, heights[rightIdx]);
+            surfaceArea += rightMax - heights[rightIdx];
+        }
+    }
+
+    return surfaceArea;
 }
 
 int main()
 {
-    int heights[] = {0, 8, 0, 0, 5, 0, 0, 10, 0, 0, 1, 1, 0, 3};
-    int length = sizeof(heights) / sizeof(heights[0]);
-    printf("%d", waterArea(heights, length));
+    vector<int> source = {0, 8, 0, 0, 5, 0, 0, 10, 0, 0, 1, 1, 0, 3};
+    cout << waterArea1(source) << endl;
+    cout << waterArea2(source) << endl;
     return 0;
 }
 ```
@@ -1695,4 +1806,4 @@ int main()
 }
 ```
 
-Last Modified 2022-03-15
+Last Modified 2022-03-17
