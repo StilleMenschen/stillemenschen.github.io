@@ -1102,42 +1102,148 @@ int main()
 
 ## 背包问题
 
-给定一组物品，每种物品都有自己的重量和价格，在限定的总重量内，我们如何选择，才能使得物品的总价格最高
+给定一组物品，每种物品都有自己的价值和重量，在限定的总重量内，找出最优的装包方式，能使得物品的总价值达到最高，
+如给出三个物品，`[(60, 10,), (100, 20,), (120, 30,)]`，每个物品中第一个值表示其价值，第二个值表示其重量，
+限制背包可容纳`50`的重量，则最优的装包为第二和第三个物品，即`[50, [1, 2]]`
+
+> 返回的物品位置为数组索引
 
 ```python
-# O(n * c) time | O(n * c) space
-def knapsack_problem(items, capacity):
-    knapsack_values = [[0 for _ in range(capacity + 1)] for _ in range(len(items) + 1)]
-    for i in range(1, len(items) + 1):
-        current_weight = items[i - 1][1]
-        current_value = items[i - 1][0]
-        for c in range(capacity + 1):
-            if current_weight > c:
-                knapsack_values[i][c] = knapsack_values[i - 1][c]
-            else:
-                knapsack_values[i][c] = max(knapsack_values[i - 1][c],
-                                            knapsack_values[i - 1][c - current_weight] + current_value)
-    return [knapsack_values[-1][-1], get_knapsack_items(knapsack_values, items)]
-
-
 def get_knapsack_items(knapsack_values, items):
-    sequence = list()
+    # 由于计算结果多了一行和一列, 这里需要相应减去
     i = len(knapsack_values) - 1
+    # 其实这里得到的也是背包的最大可容纳重量
     c = len(knapsack_values[0]) - 1
+    # 记录物品索引的数组
+    sequence = []
     while i > 0:
+        # 前一次相同重量下的计算结果(物品价值)相同, 说明最优解是取了上一行的
         if knapsack_values[i][c] == knapsack_values[i - 1][c]:
+            # 向上一行
             i -= 1
         else:
+            # 记录物品在物品数组的索引
             sequence.append(i - 1)
+            # 根据物品的重量递减可容纳重量
             c -= items[i - 1][1]
+            # 向上一行
             i -= 1
+        # 如果可容纳物品重量已经为 0, 则表示已经获取完了所有的物品索引了
         if c == 0:
             break
+    # 由于是从后往前计算的, 所以还需要反转记录数组再返回
     return list(reversed(sequence))
 
 
+# O(nc) time | O(nc) space
+def knapsack_problem(items, capacity):
+    # 声明缓存二维数组, 行表示可用的物品, 列表示重量, 存储的值表示物品价值
+    # 由于下面的逻辑需要考虑重量为 0 和可用物品为空的情况 (本来也是从重量为 0 开始计算)
+    # 所以声明的二维数组多了一行一列
+    knapsack_values = [[0 for _ in range(capacity + 1)] for _ in range(len(items) + 1)]
+    # 忽略第一行, 因为第一行是用来表示默认物品为空的情况
+    for i in range(1, len(items) + 1):
+        # 获取物品的价值和其占用的重量
+        value, weight = items[i - 1]
+        # 从重量 0 开始计算, 判断当前物品是否能够放入背包
+        # 因为只要物品的占用重量小于背包最大可容纳重量, 都认为是可以放入物品的
+        for c in range(capacity + 1):
+            # 物品的重量超过了背包重量
+            if weight > c:
+                # 取前一次相同重量下的计算结果(物品价值)
+                knapsack_values[i][c] = knapsack_values[i - 1][c]
+            # 物品的重量小于等于背包重量
+            else:
+                # 这里需要做判断, 为了尽可能地放满背包(重量), 取下面的两个值中的最大值(物品价值)
+                knapsack_values[i][c] = max(
+                    # 1. 前一次相同重量下的计算结果(物品价值)
+                    knapsack_values[i - 1][c],
+                    # 2. 减去了当前重量后的前一次的计算结果(物品价值)加上当前物品的价值总和
+                    knapsack_values[i - 1][c - weight] + value
+                )
+    # 返回最早计算出的价值以及背包可以装下的物品在物品数组中的索引
+    return [knapsack_values[-1][-1], get_knapsack_items(knapsack_values, items)]
+
+
 if __name__ == '__main__':
+    print(knapsack_problem([(1, 2,), (4, 3,), (5, 6,), (6, 7,)], 10))
     print(knapsack_problem([(60, 10,), (100, 20,), (120, 30,)], 50))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<vector<int>> getKnapsackItems(vector<vector<int>> knapsackValues,
+                                     vector<vector<int>> items, int weight);
+
+// O(nc) time | O(nc) space
+vector<vector<int>> knapsackProblem(vector<vector<int>> items, int capacity)
+{
+    const int itemsSize = items.size();
+    vector<vector<int>> knapsackValues(itemsSize + 1,
+                                       vector<int>(capacity + 1, 0));
+    for (int i = 1; i <= itemsSize; i++)
+    {
+        int currentWeight = items[i - 1][1];
+        int currentValue = items[i - 1][0];
+        for (int c = 0; c <= capacity; c++)
+        {
+            if (currentWeight > c)
+            {
+                knapsackValues[i][c] = knapsackValues[i - 1][c];
+            }
+            else
+            {
+                knapsackValues[i][c] =
+                    max(knapsackValues[i - 1][c],
+                        knapsackValues[i - 1][c - currentWeight] + currentValue);
+            }
+        }
+    }
+    return getKnapsackItems(knapsackValues, items,
+                            knapsackValues[itemsSize][capacity]);
+}
+
+vector<vector<int>> getKnapsackItems(vector<vector<int>> knapsackValues,
+                                     vector<vector<int>> items, int weight)
+{
+    vector<vector<int>> solution = {{}, {}};
+    int i = knapsackValues.size() - 1;
+    int c = knapsackValues[0].size() - 1;
+    while (i > 0)
+    {
+        if (knapsackValues[i][c] == knapsackValues[i - 1][c])
+        {
+            i--;
+        }
+        else
+        {
+            solution[1].insert(solution[1].begin(), i - 1);
+            c -= items[i - 1][1];
+            i--;
+        }
+        if (c == 0)
+        {
+            break;
+        }
+    }
+    solution[0].push_back(weight);
+    return solution;
+}
+
+int main()
+{
+    vector<vector<int>> source = {{1, 2}, {4, 3}, {5, 6}, {6, 7}};
+    vector<vector<int>> result = knapsackProblem(source, 10);
+    cout << result[0][0] << ", ";
+    for (const int element : result[1])
+    {
+        cout << element << " ";
+    }
+    return 0;
+}
 ```
 
 ## 磁盘堆叠
@@ -1806,4 +1912,4 @@ int main()
 }
 ```
 
-Last Modified 2022-03-17
+Last Modified 2022-03-18
