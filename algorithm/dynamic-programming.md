@@ -1248,42 +1248,141 @@ int main()
 
 ## 磁盘堆叠
 
-每个子阵列都包含三个整数并表示磁盘。这些整数分别表示每个磁盘的宽度，深度和高度。目标是堆叠磁盘并最大限度地提高堆栈的总高度。磁盘必须具有比其下方的任何其他磁盘更小的宽度，深度和高度。写一个函数，返回 nal 堆栈中的磁盘数组，从顶部磁盘开始，并以底部磁盘结尾。
+给定一个数组，数组中包含多个磁盘，每个磁盘信含有三个信息，分别表示每个磁盘的宽度，深度和高度。目标是堆叠磁盘并最大限度地提高堆栈的总高度。
+磁盘必须满足比其下方的任何其他磁盘更小的宽度，深度和高度。找出最适合的磁盘堆叠方式
 
 ```python
 # O(n^2) time | O(n) space
-def disk_problem(disks):
+def disk_stacking(disks):
+    # 先根据磁盘的高度从小到大排序
     disks.sort(key=lambda disk: disk[2])
+    # 缓存磁盘的累加高度, 初始的高度为每个磁盘的高度
     heights = [disk[2] for disk in disks]
-    sequences = [-1 for _ in disks]
+    # 记录符合堆叠条件的磁盘索引, 初始全部为空
+    sequences = [None for _ in disks]
+    # 记录最大累加高度的索引, 参考索引数组
     max_height_idx = 0
+    # 因为需要与前面的磁盘做比较, 从第二个位置开始循环
     for i in range(1, len(disks)):
+        # 当前索引指向的磁盘
         current_disk = disks[i]
+        # 当前索引前面的所有磁盘
         for j in range(i):
             other_disk = disks[j]
+            # 判断是否满足堆叠条件, 宽度深度高度都比当前索引指向的磁盘小
             if are_valid_dimensions(other_disk, current_disk):
+                # 尝试累加高度并和当前已经记录的高度比较
                 if heights[i] <= current_disk[2] + heights[j]:
+                    # 符合条件则更新累加高度
                     heights[i] = current_disk[2] + heights[j]
+                    # 记录成功累加高度的索引
                     sequences[i] = j
+        # 一次循环完成后, 如果当前累加高度大于历史的最大累加高度, 更新最大累加高度索引
         if heights[i] >= heights[max_height_idx]:
             max_height_idx = i
+    # 通过缓存的索引生成结果
     return build_sequence(disks, sequences, max_height_idx)
 
 
 def are_valid_dimensions(o, c):
+    # 比较两个磁盘的宽度深度高度
     return o[0] < c[0] and o[1] < c[1] and o[2] < c[2]
 
 
 def build_sequence(array, sequences, current_idx):
-    sequence = list()
-    while current_idx != -1:
+    sequence = []
+    # 通过记录的最大累加高度索引从后向前寻找符合堆叠要求的所有磁盘
+    while current_idx is not None:
         sequence.append(array[current_idx])
         current_idx = sequences[current_idx]
+    # 由于是从后往前添加的磁盘, 需要反转数组
     return list(reversed(sequence))
 
 
 if __name__ == '__main__':
-    print(disk_problem([(2, 2, 1,), (2, 1, 2,), (2, 3, 4,), (3, 2, 3,), (2, 2, 8,), (4, 4, 5,), ]))
+    print(disk_stacking([(3, 2, 3,), (2, 1, 2,), (2, 3, 4,),
+                         (1, 3, 1,), (4, 4, 5,), (2, 2, 8,)]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+bool areValidDimensions(vector<int> o, vector<int> c);
+vector<vector<int>> buildSequence(vector<vector<int>> array,
+                                  vector<int> sequences, int currentIdx);
+
+// O(n^2) time | O(n) space
+vector<vector<int>> diskStacking(vector<vector<int>> disks)
+{
+    const int disksSize = disks.size();
+    sort(disks.begin(), disks.end(),
+         [](vector<int> &a, vector<int> &b)
+         { return a[2] < b[2]; });
+    vector<int> heights;
+    for (int i = 0; i < disksSize; i++)
+    {
+        heights.push_back(disks[i][2]);
+    }
+    vector<int> sequences;
+    for (int i = 0; i < disksSize; i++)
+    {
+        sequences.push_back(INT_MIN);
+    }
+    int maxHeightIdx = 0;
+    for (int i = 1; i < disksSize; i++)
+    {
+        vector<int> currentDisk = disks[i];
+        for (int j = 0; j < i; j++)
+        {
+            vector<int> otherDisk = disks[j];
+            if (areValidDimensions(otherDisk, currentDisk))
+            {
+                if (heights[i] <= currentDisk[2] + heights[j])
+                {
+                    heights[i] = currentDisk[2] + heights[j];
+                    sequences[i] = j;
+                }
+            }
+        }
+        if (heights[i] >= heights[maxHeightIdx])
+        {
+            maxHeightIdx = i;
+        }
+    }
+    return buildSequence(disks, sequences, maxHeightIdx);
+}
+
+bool areValidDimensions(vector<int> o, vector<int> c)
+{
+    return o[0] < c[0] && o[1] < c[1] && o[2] < c[2];
+}
+
+vector<vector<int>> buildSequence(vector<vector<int>> array,
+                                  vector<int> sequences, int currentIdx)
+{
+    vector<vector<int>> sequence;
+    while (currentIdx != INT_MIN)
+    {
+        sequence.insert(sequence.begin(), array[currentIdx]);
+        currentIdx = sequences[currentIdx];
+    }
+    return sequence;
+}
+
+int main()
+{
+    vector<vector<int>> source = {{3, 2, 3}, {2, 1, 2}, {2, 3, 4}, {1, 3, 1}, {4, 4, 5}, {2, 2, 8}};
+    vector<vector<int>> result = diskStacking(source);
+    for (const vector<int> element : result)
+    {
+        cout << "(" << element[0] << ", " << element[1] << ", " << element[2] << ") ";
+    }
+    return 0;
+}
 ```
 
 ## 圆周率中的数字
@@ -1912,4 +2011,4 @@ int main()
 }
 ```
 
-Last Modified 2022-03-18
+Last Modified 2022-03-19
