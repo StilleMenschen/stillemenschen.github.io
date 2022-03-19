@@ -8,9 +8,9 @@ Set-ExecutionPolicy Unrestricted
 
 全局配置文件路径
 
-```
+```powershell
 $PSHOME\Profile.ps1
-C:\Windows\System32\WindowsPowerShell\v1.0\\Profile.ps1
+C:\Windows\System32\WindowsPowerShell\v1.0\Profile.ps1
 ```
 
 配置文件内容
