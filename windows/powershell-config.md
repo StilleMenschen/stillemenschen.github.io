@@ -1,10 +1,14 @@
 # PowerShell 配置
 
-关闭脚本执行限制（需要管理员权限）
+调整脚本执行限制（需要管理员权限）
 
 ```powershell
-Set-ExecutionPolicy Unrestricted
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
 ```
+
+> 全部都不限制也可以指定 ExecutionPolicy 为 Unrestricted，[参考说明](https://docs.microsoft.com/zh-cn/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.2)
 
 全局配置文件路径
 
@@ -22,4 +26,4 @@ $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 
 > 中文为`936`，西文为`437`
 
-Last Modified 2022-03-19
+Last Modified 2022-03-22
