@@ -1387,62 +1387,150 @@ int main()
 
 ## 圆周率中的数字
 
+给定一个表示圆周率数字的字符串和一个字符串数组，将圆周率字符串进行切片可以得到数组中的子字符串，找出所需切片的最小次数，
+如圆周率为`3141592653589793238462643383279`，给定的数组`["3", "314", "49", "9001", "15926535897", "14", "9323", "8462643383279", "4", "793"]`，
+通过最少 3 次切片可以得到`314 | 15926535897 | 9323 | 8462643383279`与数组中的子字符串匹配
+
 ```python
-# O(n^3 + m) time | O(n + m) space
+# O(n^3 + m) time | O(n + m) space - where n is the number of digits in Pi and m is the number of favorite numbers
 def numbers_in_pi1(pi, numbers):
-    numbers_set = set(numbers)
-    min_space = get_min_space(pi, numbers_set, dict(), 0)
-    return -1 if min_space == float('inf') else min_space
+    # 将所有的数值字符串缓存到哈希表, 方便快速查找
+    numbers_table = {number: True for number in numbers}
+    length_of_pi = len(pi)
+    # 从 PI 字符串的开始位置递归
+    min_spaces = get_min_spaces(pi, length_of_pi, numbers_table, {}, 0)
+    # 如果返回的最小切片数不是无穷大则表示存在有效的结果, 否则返回 -1
+    return -1 if min_spaces == float("inf") else min_spaces
 
 
-# O(n^3 + m) time | O(n + m) space
-def numbers_in_pi2(pi, numbers):
-    numbers_set = set(numbers)
-    cache = dict()
-    for i in reversed(range(len(pi))):
-        get_min_space(pi, numbers_set, cache, i)
-    return -1 if cache[0] == float('inf') else cache[0]
-
-
-def get_min_space(pi, numbers_set, cache, idx):
-    if idx == len(pi):
+def get_min_spaces(pi, length_of_pi, numbers_table, cache, idx):
+    # 下标越界则返回 -1
+    if idx == length_of_pi:
         return -1
+    # 如果已经记录在缓存中则直接返回
     if idx in cache:
         return cache[idx]
-    min_space = float('inf')
-    for i in range(idx, len(pi)):
+    # 最小所需空格数设置为无穷大
+    min_spaces = float("inf")
+    # 从字符串指定位置开始向后搜索
+    for i in range(idx, length_of_pi):
+        # 逐个切片作为前缀
         prefix = pi[idx: i + 1]
-        if prefix in numbers_set:
-            min_space_in_suffix = get_min_space(pi, numbers_set, cache, i + 1)
-            min_space = min(min_space, min_space_in_suffix + 1)
-    cache[idx] = min_space
+        # 如果前缀字符串存在于给定的列表中
+        if prefix in numbers_table:
+            # 递归判断后缀是否也存在
+            min_spaces_in_suffix = get_min_spaces(pi, length_of_pi, numbers_table, cache, i + 1)
+            # 重新获取最小切片次数, 这里需要将返回的后缀最小切片数加 1, 因为上面的第一个下标越界的判断中会返回 -1
+            min_spaces = min(min_spaces, min_spaces_in_suffix + 1)
+    # 缓存计算结果
+    cache[idx] = min_spaces
+    # 返回当前索引处的计算结果
     return cache[idx]
 
 
-# O(n^2 + m) time | O(m) space
-def numbers_in_pi3(pi, numbers):
-    numbers_set = set(numbers)
-    count = 0
-    for i in range(len(pi) + 1):
-        if pi[:i] in numbers_set:
-            if helper(i, pi, numbers_set):
-                count += 1
-    return count
-
-
-def helper(start, pi, numbers_set):
-    i = start + 1
-    while i <= len(pi):
-        if pi[start:i] in numbers_set:
-            start = i
-        i += 1
-    return start == i - 1
+# O(n^3 + m) time | O(n + m) space - where n is the number of digits in Pi and m is the number of favorite numbers
+def numbers_in_pi2(pi, numbers):
+    # 将所有的数值字符串缓存到哈希表, 方便快速查找
+    numbers_table = {number: True for number in numbers}
+    # 缓存已经计算过的结果
+    cache = {}
+    length_of_pi = len(pi)
+    # 从后向前计算
+    for i in reversed(range(length_of_pi)):
+        get_min_spaces(pi, length_of_pi, numbers_table, cache, i)
+    # 取缓存中的第一个结果(索引最开始处), 如果最小切片数不是无穷大则表示存在有效的结果, 否则返回 -1
+    return -1 if cache[0] == float("inf") else cache[0]
 
 
 if __name__ == '__main__':
-    print(numbers_in_pi1("3141592", ["3141", "5", "31", "2", "4159", "9", "42", "314"]))
-    print(numbers_in_pi2("3141592", ["3141", "5", "31", "2", "4159", "9", "42", "314"]))
-    print(numbers_in_pi3("3141592", ["3141", "5", "31", "2", "4159", "9", "42", "314"]))
+    source = ['14159265358979323846264338327', '314159265358979323846', '327', '26433',
+              '8', '3279', '9', '314159265', '35897932384626433832', '79', '3']
+    print(numbers_in_pi1('3141592653589793238462643383279', source))
+    print(numbers_in_pi2('3141592653589793238462643383279', source))
+```
+
+```cpp
+#include <iostream>
+#include <set>
+#include <unordered_map>
+#include <algorithm>
+#include <climits>
+#include <vector>
+using namespace std;
+
+int getMinSpaces(string pi, int lengthOfPI, set<string> numbersTable,
+                 unordered_map<int, int> *cache, int idx);
+
+// O(n^3 + m) time | O(n + m) space
+// where n is the number of digits in Pi and m is the number of favorite numbers
+int numbersInPi1(string pi, vector<string> numbers)
+{
+    set<string> numbersTable;
+    for (string number : numbers)
+    {
+        numbersTable.insert(number);
+    }
+    unordered_map<int, int> cache;
+    const int lengthOfPI = pi.length();
+    int minSpaces = getMinSpaces(pi, lengthOfPI, numbersTable, &cache, 0);
+    return minSpaces == INT_MAX ? -1 : minSpaces;
+}
+
+int getMinSpaces(string pi, int lengthOfPI, set<string> numbersTable,
+                 unordered_map<int, int> *cache, int idx)
+{
+    if (idx == lengthOfPI)
+        return -1;
+    if (cache->find(idx) != cache->end())
+        return cache->at(idx);
+    int minSpaces = INT_MAX;
+    for (int i = idx; i < lengthOfPI; i++)
+    {
+        string prefix = pi.substr(idx, i + 1 - idx);
+        if (numbersTable.find(prefix) != numbersTable.end())
+        {
+            int minSpacesInSuffix = getMinSpaces(pi, lengthOfPI, numbersTable, cache, i + 1);
+            // Handle int overflow.
+            if (minSpacesInSuffix == INT_MAX)
+            {
+                minSpaces = min(minSpaces, minSpacesInSuffix);
+            }
+            else
+            {
+                minSpaces = min(minSpaces, minSpacesInSuffix + 1);
+            }
+        }
+    }
+    cache->insert({idx, minSpaces});
+    return cache->at(idx);
+}
+
+// O(n^3 + m) time | O(n + m) space
+// where n is the number of digits in Pi and m is the number of favorite numbers
+int numbersInPi2(string pi, vector<string> numbers)
+{
+    set<string> numbersTable;
+    for (string number : numbers)
+    {
+        numbersTable.insert(number);
+    }
+    unordered_map<int, int> cache;
+    const int lengthOfPI = pi.length();
+    for (int i = lengthOfPI - 1; i >= 0; i--)
+    {
+        getMinSpaces(pi, lengthOfPI, numbersTable, &cache, i);
+    }
+    return cache.at(0) == INT_MAX ? -1 : cache.at(0);
+}
+
+int main()
+{
+    string pi = "3141592653589793238462643383279";
+    vector<string> source = {"314159265358979323846", "26433", "8", "3279", "314159265", "35897932384626433832", "79"};
+    cout << numbersInPi1(pi, source) << endl;
+    cout << numbersInPi2(pi, source) << endl;
+    return 0;
+}
 ```
 
 ## 第 K 次投资最大利润
