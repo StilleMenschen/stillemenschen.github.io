@@ -2099,4 +2099,175 @@ int main()
 }
 ```
 
-Last Modified 2022-03-19
+## 最大和子矩阵
+
+给出一个二维数组表示的矩阵，给定一个小于矩阵大小的尺寸值（如给定的矩阵大小为`10 x 10`，则给定尺寸为`3`表示找出`3 x 3`的子矩阵），
+找出在矩阵内所有符合尺寸的子矩阵的最大累加和（子矩阵的每个元素数值想加得出）
+
+```python
+# O(w * h) time | O(w * h) space
+# where w is the width of the matrix and h is the height
+def maximum_sum_sub_matrix(matrix, size):
+    # 创建一个累加和缓存矩阵
+    sums = create_sum_matrix(matrix)
+    # 最大值设置为无穷小
+    max_sub_matrix_sum = float('-inf')
+    # 第一行第一列不需要处理
+    for row in range(size - 1, len(matrix)):
+        for col in range(size - 1, len(matrix[row])):
+            # 先获得当前单元格的累加和
+            total = sums[row][col]
+            # 判断是否靠近左侧边界
+            touches_top_border = row - size < 0
+            # 不靠近左侧边界还需要减去左侧多累加的数值
+            if not touches_top_border:
+                total -= sums[row - size][col]
+            # 判断是否靠近上边界
+            touches_left_border = col - size < 0
+            # 不靠近上边界还需要减去上面多累加的数值
+            if not touches_left_border:
+                total -= sums[row][col - size]
+            # 判断是否靠近上面或者左侧的边界
+            touches_top_or_left_border = touches_top_border or touches_left_border
+            # 如果存在未靠近的边界的情况, 需要把行与列交界点的数值再加回来一次
+            # 上面的两个判断逻辑中可能多减去了一次
+            if not touches_top_or_left_border:
+                total += sums[row - size][col - size]
+            # 判断子矩阵的最大累加和
+            max_sub_matrix_sum = max(max_sub_matrix_sum, total)
+
+    return max_sub_matrix_sum
+
+
+def create_sum_matrix(matrix):
+    sums = [[0 for _ in range(len(matrix[row]))] for row in range(len(matrix))]
+    # 第一行第一列默认取矩阵的数值, 因为从左或从上都没有可累加的数值
+    sums[0][0] = matrix[0][0]
+
+    # 填充第一行的每一列, 第一行的每一列都会累加前一列的数值
+    # 这样第一行的每一列都会包含有它前面所有列的累加和
+    for idx in range(1, len(matrix[0])):
+        sums[0][idx] = sums[0][idx - 1] + matrix[0][idx]
+
+    # 填充第一列的每一行, 第一列的每一行都会累加前一行的数值
+    # 这样第一列的每一行都会包含有它前面所有行的累加和
+    for idx in range(1, len(matrix)):
+        sums[idx][0] = sums[idx - 1][0] + matrix[idx][0]
+
+    # 填充第一行第一列之外的其它单元格
+    for row in range(1, len(matrix)):
+        for col in range(1, len(matrix[row])):
+            # 取前一行同一列/同一行前一列/矩阵的三个数值想加
+            # 然后减去前一行前一列的数值
+            sums[row][col] = sums[row - 1][col] + sums[row][col - 1] - sums[row - 1][col - 1] + matrix[row][col]
+
+    return sums
+
+
+if __name__ == '__main__':
+    source = [[-1, -2, -3, -4, -5],
+              [1, 1, 1, 1, 1],
+              [-1, -10, -10, -4, -5],
+              [5, 5, 5, 5, 5],
+              [-5, -4, -3, -10, -1]]
+    print(maximum_sum_sub_matrix(source, 2))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <limits>
+using namespace std;
+
+vector<vector<int>> createSumMatrix(vector<vector<int>> matrix);
+
+// O(w * h) time | O(w * h) space - where w is
+// the width of the matrix and h is the height
+int maximumSumSubmatrix(vector<vector<int>> matrix, int size)
+{
+    vector<vector<int>> sums = createSumMatrix(matrix);
+    int maxSubMatrixSum = numeric_limits<int>::min();
+    const int matrixSize = matrix.size();
+    for (int row = size - 1; row < matrixSize; row++)
+    {
+        const int matrixRowSize = matrix[row].size();
+        for (int col = size - 1; col < matrixRowSize; col++)
+        {
+            int total = sums[row][col];
+
+            int touchesTopBorder = row - size < 0;
+            if (!touchesTopBorder)
+                total -= sums[row - size][col];
+
+            int touchesLeftBorder = col - size < 0;
+            if (!touchesLeftBorder)
+                total -= sums[row][col - size];
+
+            int touchesTopOrLeftBorder = touchesTopBorder || touchesLeftBorder;
+            if (!touchesTopOrLeftBorder)
+                total += sums[row - size][col - size];
+
+            maxSubMatrixSum = max(maxSubMatrixSum, total);
+        }
+    }
+
+    return maxSubMatrixSum;
+}
+
+vector<vector<int>> createSumMatrix(vector<vector<int>> matrix)
+{
+    vector<vector<int>> sums;
+    const int matrixSize = matrix.size();
+    for (int row = 0; row < matrixSize; row++)
+    {
+        sums.push_back({});
+        const int matrixRowSize = matrix[row].size();
+        for (int col = 0; col < matrixRowSize; col++)
+        {
+            sums[row].push_back(0);
+        }
+    }
+    sums[0][0] = matrix[0][0];
+
+    // Fill the first row.
+    const int matrixRowSize = matrix[0].size();
+    for (int idx = 1; idx < matrixRowSize; idx++)
+    {
+        sums[0][idx] = sums[0][idx - 1] + matrix[0][idx];
+    }
+
+    // Fill the first column.
+    for (int idx = 1; idx < matrixSize; idx++)
+    {
+        sums[idx][0] = sums[idx - 1][0] + matrix[idx][0];
+    }
+
+    // Fill the rest of the matrix.
+    for (int row = 1; row < matrixSize; row++)
+    {
+        const int matrixRowSize = matrix[row].size();
+        for (int col = 1; col < matrixRowSize; col++)
+        {
+            sums[row][col] = sums[row - 1][col] + sums[row][col - 1] -
+                             sums[row - 1][col - 1] + matrix[row][col];
+        }
+    }
+
+    return sums;
+}
+
+int main()
+{
+    vector<vector<int>> source = {
+        {-1, -2, -3, -4, -5},
+        {1, 1, 1, 1, 1},
+        {-1, -10, -10, -4, -5},
+        {5, 5, 5, 5, 5},
+        {-5, -4, -3, -10, -1}};
+    cout << maximumSumSubmatrix(source, 2);
+    return 0;
+}
+```
+
+Last Modified 2022-03-23
