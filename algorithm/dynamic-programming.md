@@ -2270,4 +2270,166 @@ int main()
 }
 ```
 
+## 求表达式最大值
+
+给定一个整数数组，找出四个不同索引处的数值以表达式`A - B + C - D`求出一个最终值，要求四个元素的索引位置满足`A < B < C < D`，
+找出最大的最终值，如`[3, 6, 1, -3, 2, 7]`中可以得到最大值的表达式为` 6 - (-3) + 2 - 7 = 4`
+
+```python
+# O(n^4) time | O(1) space - where n is the length of the array
+def maximize_expression1(array):
+    if len(array) < 4:
+        return 0
+
+    maximum_value_found = float("-inf")
+
+    for a in range(len(array)):
+        a_value = array[a]
+        for b in range(a + 1, len(array)):
+            b_value = array[b]
+            for c in range(b + 1, len(array)):
+                c_value = array[c]
+                for d in range(c + 1, len(array)):
+                    d_value = array[d]
+                    expression_value = evaluate_expression(a_value, b_value, c_value, d_value)
+                    maximum_value_found = max(expression_value, maximum_value_found)
+
+    return maximum_value_found
+
+
+def evaluate_expression(a, b, c, d):
+    return a - b + c - d
+
+
+# O(n) time | O(n) space - where n is the length of the array
+def maximize_expression2(array):
+    length = len(array)
+    # 小于四个元素无法满足表达式 A - B + C - D
+    if length < 4:
+        return 0
+    # 创建两个缓存数组, 反复使用
+    maximum_temp_one = [float('-inf') for _ in array]
+    maximum_temp_two = [float('-inf') for _ in array]
+    # 因为每一步计算都是取最大值, 其实可以分步骤计算
+    # 1. 找出 A 的最大值, 从第二个元素开始
+    maximum_temp_one[0] = array[0]
+    for idx in range(1, length):
+        # 循环判断保留最大值
+        maximum_temp_one[idx] = max(maximum_temp_one[idx - 1], array[idx])
+    # 2. 根据步骤 1 的缓存, 找出 A - B 的最大值, 从第二个元素开始
+    for idx in range(1, length):
+        # 循环判断保留最大值
+        maximum_temp_two[idx] = max(maximum_temp_two[idx - 1], maximum_temp_one[idx - 1] - array[idx])
+    # 3. 根据步骤 2 的缓存, 找出 A - B + C 的最大值, 从第三个元素开始
+    maximum_temp_one[1] = float('-inf')  # 设置前一个数组为无穷小, 便于下面的最大值判断
+    for idx in range(2, length):
+        maximum_temp_one[idx] = max(maximum_temp_one[idx - 1], maximum_temp_two[idx - 1] + array[idx])
+    maximum_temp_two[2] = float('-inf')  # 设置前一个数组为无穷小, 便于下面的最大值判断
+    # 4. 根据步骤 3 的缓存, 找出 A - B + C - D 的最大值, 从第四个元素开始
+    for idx in range(3, length):
+        maximum_temp_two[idx] = max(maximum_temp_two[idx - 1], maximum_temp_one[idx - 1] - array[idx])
+    return maximum_temp_two[-1]
+
+
+if __name__ == '__main__':
+    print(maximize_expression1([3, 6, 1, -3, 2, 7]))
+    print(maximize_expression2([3, 6, 1, -3, 2, 7]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <limits>
+#include <algorithm>
+using namespace std;
+
+int evaluateExpression(int a, int b, int c, int d);
+
+// O(n^4) time | O(1) space - where n is the length of the array
+int maximizeExpression1(vector<int> array)
+{
+    const int arraySize = array.size();
+    if (arraySize < 4)
+    {
+        return 0;
+    }
+
+    int maximumValueFound = numeric_limits<int>::min();
+
+    for (int a = 0; a < arraySize; a++)
+    {
+        int aValue = array[a];
+        for (int b = a + 1; b < arraySize; b++)
+        {
+            int bValue = array[b];
+            for (int c = b + 1; c < arraySize; c++)
+            {
+                int cValue = array[c];
+                for (int d = c + 1; d < arraySize; d++)
+                {
+                    int dValue = array[d];
+                    int expressionValue =
+                        evaluateExpression(aValue, bValue, cValue, dValue);
+                    maximumValueFound = max(expressionValue, maximumValueFound);
+                }
+            }
+        }
+    }
+
+    return maximumValueFound;
+}
+
+int evaluateExpression(int a, int b, int c, int d) { return a - b + c - d; }
+
+// O(n) time | O(n) space - where n is the length of the array
+int maximizeExpression2(vector<int> array)
+{
+    const int arraySize = array.size();
+    if (arraySize < 4)
+    {
+        return 0;
+    }
+    vector<int> maxOfA = {array[0]};
+    vector<int> maxOfAMinusB = {numeric_limits<int>::min()};
+    vector<int> maxOfAMinusBPlusC(2, numeric_limits<int>::min());
+    vector<int> maxOfAMinusBPlusCMinusD(3, numeric_limits<int>::min());
+
+    for (int idx = 1; idx < arraySize; idx++)
+    {
+        int currentMax = max(maxOfA[idx - 1], array[idx]);
+        maxOfA.push_back(currentMax);
+    }
+
+    for (int idx = 1; idx < arraySize; idx++)
+    {
+        int currentMax = max(maxOfAMinusB[idx - 1], maxOfA[idx - 1] - array[idx]);
+        maxOfAMinusB.push_back(currentMax);
+    }
+
+    for (int idx = 2; idx < arraySize; idx++)
+    {
+        int currentMax =
+            max(maxOfAMinusBPlusC[idx - 1], maxOfAMinusB[idx - 1] + array[idx]);
+        maxOfAMinusBPlusC.push_back(currentMax);
+    }
+
+    for (int idx = 3; idx < arraySize; idx++)
+    {
+        int currentMax = max(maxOfAMinusBPlusCMinusD[idx - 1],
+                             maxOfAMinusBPlusC[idx - 1] - array[idx]);
+        maxOfAMinusBPlusCMinusD.push_back(currentMax);
+    }
+
+    return maxOfAMinusBPlusCMinusD[maxOfAMinusBPlusCMinusD.size() - 1];
+}
+
+int main()
+{
+    vector<int> source = {3, 6, 1, -3, 2, 7};
+    cout << maximizeExpression1(source) << endl;
+    cout << maximizeExpression2(source) << endl;
+    return 0;
+}
+```
+
 Last Modified 2022-03-23
