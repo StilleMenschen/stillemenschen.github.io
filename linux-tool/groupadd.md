@@ -45,4 +45,9 @@ table th:first-of-type {
    groupadd -r -g 368 test
    ```
 
-Last Modified 2021-04-11
+3. 使当前用户的`test`组分配立即生效
+   ```bash
+   newgrp test
+   ```
+
+Last Modified 2022-03-24
