@@ -1526,12 +1526,12 @@ class MinHeap:
         child_one_idx = current_idx * 2 + 1
         while child_one_idx <= end_idx:
             child_two_idx = current_idx * 2 + 2 if current_idx * 2 + 2 <= end_idx else -1
-            # 根据有向图的边的距离来判断大小下坠节点
+            # 根据加权图的边的距离来判断大小下坠节点
             if child_two_idx != -1 and heap[child_two_idx][1] < heap[child_one_idx][1]:
                 idx_to_swap = child_two_idx
             else:
                 idx_to_swap = child_one_idx
-            # 根据有向图的边的距离来判断大小下坠节点
+            # 根据加权图的边的距离来判断大小下坠节点
             if heap[idx_to_swap][1] < heap[current_idx][1]:
                 self.swap(current_idx, idx_to_swap, heap)
                 current_idx = idx_to_swap
@@ -1542,7 +1542,7 @@ class MinHeap:
     # O(log(n)) time | O(1) space
     def sift_up(self, current_idx, heap):
         parent_idx = (current_idx - 1) // 2
-        # 根据有向图的边的距离来判断大小上升节点
+        # 根据加权图的边的距离来判断大小上升节点
         while current_idx > 0 and heap[current_idx][1] < heap[parent_idx][1]:
             self.swap(current_idx, parent_idx, heap)
             current_idx = parent_idx
@@ -1577,7 +1577,7 @@ class MinHeap:
 if __name__ == '__main__':
     # 起始顶点
     start = 0
-    # 使用邻接表表示的有向图
+    # 使用邻接表表示的加权图
     edges = [[[1, 7]], [[2, 6], [3, 20], [4, 3]], [[3, 14]], [[4, 2]], [], []]
     print(dijkstras_algorithm1(start, edges))
     print(dijkstras_algorithm2(start, edges))
