@@ -1608,8 +1608,12 @@ vector<int> dijkstrasAlgorithm1(int start, vector<vector<vector<int>>> edges)
 
     while (visited.size() != numberOfVertices)
     {
-        auto [vertex, currentMinDistance] =
+        int vertex = 0;
+        int currentMinDistance = 0;
+        tuple<int, int> temp =
             getVertexWithMinDistances(minDistances, visited);
+        vertex = get<0>(temp);
+        currentMinDistance = get<1>(temp);
         if (currentMinDistance == numeric_limits<int>::max())
         {
             break;
@@ -1673,7 +1677,7 @@ tuple<int, int> getVertexWithMinDistances(vector<int> distances,
         }
     }
 
-    return {vertex, currentMinDistance};
+    return tuple<int, int>{vertex, currentMinDistance};
 }
 
 struct Item
@@ -1755,7 +1759,9 @@ public:
     Item remove()
     {
         swap(0, heap.size() - 1);
-        auto [vertex, distance] = heap.back();
+        Item temp = heap.back();
+        const int vertex = temp.vertex;
+        const int distance = temp.distance;
         heap.pop_back();
         vertexMap.erase(vertex);
         siftDown(0, heap.size() - 1, heap);
@@ -1798,7 +1804,9 @@ vector<int> dijkstrasAlgorithm2(int start, vector<vector<vector<int>>> edges)
 
     while (!minDistancesHeap.isEmpty())
     {
-        auto [vertex, currentMinDistance] = minDistancesHeap.remove();
+        Item temp = minDistancesHeap.remove();
+        const int vertex = temp.vertex;
+        const int currentMinDistance = temp.distance;
 
         if (currentMinDistance == numeric_limits<int>::max())
         {
