@@ -1408,4 +1408,448 @@ int main()
 }
 ```
 
-Last Modified 2021-12-20
+## 迪杰斯特拉算法
+
+Dijkstra 算法，是由荷兰计算机科学家 Edsger Wybe Dijkstra 在 1956 年发现的算法，迪克斯特拉算法使用类似广度优先搜索的方法解决赋权图的单源最短路径问题。Dijkstra 算法原始版本仅适用于找到两个顶点之间的最短路径，后来更常见的变体固定了一个顶点作为源结点然后找到该顶点到图中所有其它结点的最短路径，产生一个最短路径树。本算法每次取出未访问结点中距离最小的，用该结点更新其他结点的距离。
+
+```python
+# O(v^2 + e) time | O(v) space - where v is the number of
+# vertices and e is the number of edges in the input graph
+def dijkstras_algorithm1(start, edges):
+    number_of_vertices = len(edges)
+    # 记录每个顶点的最短到达路径
+    min_distances = [float("inf") for _ in range(number_of_vertices)]
+    # 初始位置的最短路径为 0, 即顶点到达自身的距离为 0
+    # 这里的预设值是下面循环开始的关键
+    # 下面获取开始顶点时默认是找路径最小的作为开始
+    min_distances[start] = 0
+    # 缓存已经访问过的顶点
+    visited = set()
+    # 通过缓存的顶点数量来判断图是否已经遍历完
+    while len(visited) != number_of_vertices:
+        # 获取当前路径最短的顶点
+        vertex, current_min_distance = get_vertex_with_min_distance(min_distances, visited)
+        # 最短路径为无穷大说明没有找到合适的路径, 结束搜索
+        if current_min_distance == float("inf"):
+            break
+        # 将顶点标记为已访问
+        visited.add(vertex)
+        # 循环顶点中的有向边
+        for edge in edges[vertex]:
+            # 解构获得单个边的目标顶点和距离
+            destination, distance_to_destination = edge
+            # 如果目标顶点已经访问过则忽略
+            if destination in visited:
+                continue
+            # 计算当前最短路径和当前边的路径和
+            new_path_distance = current_min_distance + distance_to_destination
+            # 获取缓存的到达当前边指向的顶点的路径
+            current_destination_distance = min_distances[destination]
+            # 如果新计算的路径比缓存的路径小则更新
+            if new_path_distance < current_destination_distance:
+                min_distances[destination] = new_path_distance
+    # 由于上面初始化时, 最短路径都是默认无穷大, 题目要求找不到路径的标记为 -1, 这里做一些过滤
+    return list(map(lambda x: -1 if x == float("inf") else x, min_distances))
+
+
+def get_vertex_with_min_distance(distances, visited):
+    # 当前最短路径先默认为无穷大
+    current_min_distance = float("inf")
+    # 表示当前顶点
+    vertex = -1
+    # 循环缓存中记录的顶点和已经记录的最短到达路径
+    # 由于给定的图(顶点与边)数据是通过邻接表的索引来表示顶点的
+    # 所以这里可以直接以数组的索引来表示顶点
+    for vertex_idx, distance in enumerate(distances):
+        # 顶点已访问过则忽略
+        if vertex_idx in visited:
+            continue
+        # 根据记录中的到达路径更新当前最短到达路径
+        if distance <= current_min_distance:
+            vertex = vertex_idx
+            current_min_distance = distance
+
+    return vertex, current_min_distance
+
+
+# O((v + e) * log(v)) time | O(v) space - where v is the number
+# of vertices and e is the number of edges in the input graph
+def dijkstras_algorithm2(start, edges):
+    number_of_vertices = len(edges)
+
+    min_distances = [float("inf") for _ in range(number_of_vertices)]
+    min_distances[start] = 0
+    # 与上面第一种方式不同的是用最小堆来记录
+    # 操作最小堆的时间复杂度平均为 log(v)
+    min_distances_heap = MinHeap([(idx, float("inf")) for idx in range(number_of_vertices)])
+    min_distances_heap.update(start, 0)
+
+    while not min_distances_heap.is_empty():
+        vertex, current_min_distance = min_distances_heap.remove()
+
+        if current_min_distance == float("inf"):
+            break
+
+        for edge in edges[vertex]:
+            destination, distance_to_destination = edge
+
+            new_path_distance = current_min_distance + distance_to_destination
+            current_destination_distance = min_distances[destination]
+            if new_path_distance < current_destination_distance:
+                min_distances[destination] = new_path_distance
+                min_distances_heap.update(destination, new_path_distance)
+
+    return list(map(lambda x: -1 if x == float("inf") else x, min_distances))
+
+
+class MinHeap:
+    def __init__(self, array):
+        # 记录每个顶点在堆中的位置, key 表示堆中相应的数组索引, value 表示顶点
+        self.vertex_map = {idx: idx for idx in range(len(array))}
+        # 最小堆的实际存储方式是数组, 数组索引 i 表示堆中的节点
+        # 则 2 * i + 1 表示左子树, 而 2 * i + 2 表示右子树
+        self.heap = self.build_heap(array)
+
+    def is_empty(self):
+        return len(self.heap) == 0
+
+    # O(n) time | O(1) space
+    def build_heap(self, array):
+        # 构建最小堆, 从中间位置开始向前下坠节点
+        first_parent_idx = (len(array) - 2) // 2
+        for current_idx in reversed(range(first_parent_idx + 1)):
+            self.sift_down(current_idx, len(array) - 1, array)
+        return array
+
+    # O(log(n)) time | O(1) space
+    def sift_down(self, current_idx, end_idx, heap):
+        child_one_idx = current_idx * 2 + 1
+        while child_one_idx <= end_idx:
+            child_two_idx = current_idx * 2 + 2 if current_idx * 2 + 2 <= end_idx else -1
+            # 根据有向图的边的距离来判断大小下坠节点
+            if child_two_idx != -1 and heap[child_two_idx][1] < heap[child_one_idx][1]:
+                idx_to_swap = child_two_idx
+            else:
+                idx_to_swap = child_one_idx
+            # 根据有向图的边的距离来判断大小下坠节点
+            if heap[idx_to_swap][1] < heap[current_idx][1]:
+                self.swap(current_idx, idx_to_swap, heap)
+                current_idx = idx_to_swap
+                child_one_idx = current_idx * 2 + 1
+            else:
+                return
+
+    # O(log(n)) time | O(1) space
+    def sift_up(self, current_idx, heap):
+        parent_idx = (current_idx - 1) // 2
+        # 根据有向图的边的距离来判断大小上升节点
+        while current_idx > 0 and heap[current_idx][1] < heap[parent_idx][1]:
+            self.swap(current_idx, parent_idx, heap)
+            current_idx = parent_idx
+            parent_idx = (current_idx - 1) // 2
+
+    # O(log(n)) time | O(1) space
+    def remove(self):
+        if self.is_empty():
+            return
+        # 将堆的顶端节点交换至末尾
+        self.swap(0, len(self.heap) - 1, self.heap)
+        # 取出末尾的节点数据
+        vertex, distance = self.heap.pop()
+        # 清理缓存记录
+        self.vertex_map.pop(vertex)
+        # 重新下坠顶端节点
+        self.sift_down(0, len(self.heap) - 1, self.heap)
+        # 返回顶端节点
+        return vertex, distance
+
+    def swap(self, i, j, heap):
+        # 更新缓存, 交换记录的顶点位置
+        self.vertex_map[heap[i][0]] = j
+        self.vertex_map[heap[j][0]] = i
+        heap[i], heap[j] = heap[j], heap[i]
+
+    def update(self, vertex, value):
+        self.heap[self.vertex_map[vertex]] = (vertex, value)
+        self.sift_up(self.vertex_map[vertex], self.heap)
+
+
+if __name__ == '__main__':
+    # 起始顶点
+    start = 0
+    # 使用邻接表表示的有向图
+    edges = [[[1, 7]], [[2, 6], [3, 20], [4, 3]], [[3, 14]], [[4, 2]], [], []]
+    print(dijkstras_algorithm1(start, edges))
+    print(dijkstras_algorithm2(start, edges))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <limits>
+#include <unordered_map>
+#include <set>
+#include <tuple>
+using namespace std;
+
+tuple<int, int> getVertexWithMinDistances(vector<int> minDistances,
+                                          set<int> distances);
+
+// O(v^2 + e) time | O(v) space - where v is the number of
+// vertices and e is the number of edges in the input graph
+vector<int> dijkstrasAlgorithm1(int start, vector<vector<vector<int>>> edges)
+{
+    size_t numberOfVertices = edges.size();
+
+    vector<int> minDistances(edges.size(), numeric_limits<int>::max());
+    minDistances[start] = 0;
+
+    set<int> visited;
+
+    while (visited.size() != numberOfVertices)
+    {
+        auto [vertex, currentMinDistance] =
+            getVertexWithMinDistances(minDistances, visited);
+        if (currentMinDistance == numeric_limits<int>::max())
+        {
+            break;
+        }
+
+        visited.insert(vertex);
+
+        for (auto edge : edges[vertex])
+        {
+            auto destination = edge[0];
+            auto distanceToDestination = edge[1];
+
+            if (visited.find(destination) != visited.end())
+            {
+                continue;
+            }
+
+            auto newPathDistance = currentMinDistance + distanceToDestination;
+            auto currentDestinationDistance = minDistances[destination];
+            if (newPathDistance < currentDestinationDistance)
+            {
+                minDistances[destination] = newPathDistance;
+            }
+        }
+    }
+
+    vector<int> finalDistances;
+    for (auto distance : minDistances)
+    {
+        if (distance == numeric_limits<int>::max())
+        {
+            finalDistances.push_back(-1);
+        }
+        else
+        {
+            finalDistances.push_back(distance);
+        }
+    }
+    return finalDistances;
+}
+
+tuple<int, int> getVertexWithMinDistances(vector<int> distances,
+                                          set<int> visited)
+{
+    int currentMinDistance = numeric_limits<int>::max();
+    int vertex = -1;
+
+    for (size_t vertexIdx = 0; vertexIdx < distances.size(); vertexIdx++)
+    {
+        int distance = distances[vertexIdx];
+
+        if (visited.find(vertexIdx) != visited.end())
+        {
+            continue;
+        }
+
+        if (distance <= currentMinDistance)
+        {
+            vertex = vertexIdx;
+            currentMinDistance = distance;
+        }
+    }
+
+    return {vertex, currentMinDistance};
+}
+
+struct Item
+{
+    int vertex, distance;
+};
+
+class MinHeap
+{
+public:
+    vector<Item> heap;
+    unordered_map<int, int> vertexMap;
+
+    MinHeap(vector<Item> array)
+    {
+        for (auto item : array)
+        {
+            vertexMap[item.vertex] = item.vertex;
+        }
+        heap = buildHeap(array);
+    }
+
+    // O(n) time | O(1) space
+    vector<Item> buildHeap(vector<Item> &array)
+    {
+        int firstParentIdx = (array.size() - 2) / 2;
+        for (int currentIdx = firstParentIdx + 1; currentIdx >= 0; currentIdx--)
+        {
+            siftDown(currentIdx, array.size() - 1, array);
+        }
+        return array;
+    }
+
+    bool isEmpty() { return heap.size() == 0; }
+
+    // O(log(n)) time | O(1) space
+    void siftDown(int currentIdx, int endIdx, vector<Item> &heap)
+    {
+        int childOneIdx = currentIdx * 2 + 1;
+        while (childOneIdx <= endIdx)
+        {
+            int childTwoIdx = currentIdx * 2 + 2 <= endIdx ? currentIdx * 2 + 2 : -1;
+            int idxToSwap;
+            if (childTwoIdx != -1 &&
+                heap[childTwoIdx].distance < heap[childOneIdx].distance)
+            {
+                idxToSwap = childTwoIdx;
+            }
+            else
+            {
+                idxToSwap = childOneIdx;
+            }
+            if (heap[idxToSwap].distance < heap[currentIdx].distance)
+            {
+                swap(currentIdx, idxToSwap);
+                currentIdx = idxToSwap;
+                childOneIdx = currentIdx * 2 + 1;
+            }
+            else
+            {
+                return;
+            }
+        }
+    }
+
+    // O(log(n)) time | O(1) space
+    void siftUp(int currentIdx)
+    {
+        int parentIdx = (currentIdx - 1) / 2;
+        while (currentIdx > 0 &&
+               heap[currentIdx].distance < heap[parentIdx].distance)
+        {
+            swap(currentIdx, parentIdx);
+            currentIdx = parentIdx;
+            parentIdx = (currentIdx - 1) / 2;
+        }
+    }
+
+    Item remove()
+    {
+        swap(0, heap.size() - 1);
+        auto [vertex, distance] = heap.back();
+        heap.pop_back();
+        vertexMap.erase(vertex);
+        siftDown(0, heap.size() - 1, heap);
+        return Item{vertex, distance};
+    }
+
+    void update(int vertex, int value)
+    {
+        heap[vertexMap[vertex]] = Item{vertex, value};
+        siftUp(vertexMap[vertex]);
+    }
+
+    void swap(int i, int j)
+    {
+        vertexMap[heap[i].vertex] = j;
+        vertexMap[heap[j].vertex] = i;
+        auto temp = heap[i];
+        heap[i] = heap[j];
+        heap[j] = temp;
+    }
+};
+
+// O((v + e) * log(v)) time | O(v) space - where v is the number
+// of vertices and e is the number of edges in the input graph
+vector<int> dijkstrasAlgorithm2(int start, vector<vector<vector<int>>> edges)
+{
+    const int edgesSize = edges.size();
+
+    vector<int> minDistances(edgesSize, numeric_limits<int>::max());
+    minDistances[start] = 0;
+
+    vector<Item> minDistancesPairs;
+    for (int i = 0; i < edgesSize; i++)
+    {
+        minDistancesPairs.push_back(Item{i, numeric_limits<int>::max()});
+    }
+
+    MinHeap minDistancesHeap(minDistancesPairs);
+    minDistancesHeap.update(start, 0);
+
+    while (!minDistancesHeap.isEmpty())
+    {
+        auto [vertex, currentMinDistance] = minDistancesHeap.remove();
+
+        if (currentMinDistance == numeric_limits<int>::max())
+        {
+            break;
+        }
+
+        for (auto edge : edges[vertex])
+        {
+            auto destination = edge[0];
+            auto distanceToDestination = edge[1];
+            auto newPathDistance = currentMinDistance + distanceToDestination;
+            auto currentDestinationDistance = minDistances[destination];
+            if (newPathDistance < currentDestinationDistance)
+            {
+                minDistances[destination] = newPathDistance;
+                minDistancesHeap.update(destination, newPathDistance);
+            }
+        }
+    }
+
+    vector<int> finalDistances;
+    for (auto distance : minDistances)
+    {
+        if (distance == numeric_limits<int>::max())
+        {
+            finalDistances.push_back(-1);
+        }
+        else
+        {
+            finalDistances.push_back(distance);
+        }
+    }
+    return finalDistances;
+}
+
+void iteration(vector<int> array)
+{
+    for (int element : array)
+    {
+        cout << element << " ";
+    }
+    cout << endl;
+}
+
+int main()
+{
+    vector<vector<vector<int>>> source = {{{1, 7}}, {{2, 6}, {3, 20}, {4, 3}}, {{3, 14}}, {{4, 2}}, {}, {}};
+    iteration(dijkstrasAlgorithm1(0, source));
+    iteration(dijkstrasAlgorithm2(0, source));
+    return 0;
+}
+```
+
+Last Modified 2022-03-25
