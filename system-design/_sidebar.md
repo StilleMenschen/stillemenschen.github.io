@@ -28,3 +28,4 @@
   - [Design: A Stockbroker](system-design/design-a-stockbroker.md)
   - [Design: Amazon](system-design/design-amazon.md)
   - [Design: The Reddit API](system-design/design-the-reddit-api.md)
+  - [Design: Facebook News Feed](system-design/design-facebook-news-feed.md)
