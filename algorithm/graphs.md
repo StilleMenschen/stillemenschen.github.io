@@ -1860,4 +1860,449 @@ int main()
 }
 ```
 
-Last Modified 2022-03-25
+## 拓扑排序
+
+给定一组任务和任务执行的前置依赖，前置依赖表示一个任务执行之前必须先执行另一个要求的任务才能执行此任务，找出在符合每个任务前置依赖的前提下执行该组任务的实际顺序
+
+```python
+# O(j + d) time | O(j + d) space
+def topological_sort1(jobs, deps):
+    # 创建一个有向图, 顶点表示每个任务, 边表示任务相互之间的依赖
+    job_graph = create_job_graph1(jobs, deps)
+    # 计算任务的执行顺序
+    return get_ordered_jobs1(job_graph)
+
+
+def create_job_graph1(jobs, deps):
+    # 先创建一个基础的图
+    graph = JobGraph1(jobs)
+    # 根据任务的前置依赖创建有向图的边
+    for pre_requirement, job in deps:
+        graph.add_pre_requirement(job, pre_requirement)
+    return graph
+
+
+def get_ordered_jobs1(graph):
+    # 记录已经排序好的任务索引
+    ordered_jobs = []
+    nodes = graph.nodes
+    # 按顺序遍历所有节点
+    while len(nodes):
+        node = nodes.pop()
+        # 深度搜索图的顶点, 并判断是否存在循环依赖的任务
+        contains_cycle = depth_first_traverse(node, ordered_jobs)
+        # 如果有循环依赖的任务意味着总会有任务因为依赖的原因而无法执行
+        # 说明按给定的任务依赖无法顺序执行这组任务
+        if contains_cycle:
+            return []
+    return ordered_jobs
+
+
+def depth_first_traverse(node, ordered_jobs):
+    # 如果顶点已经访问则直接返回
+    if node.visited:
+        return False
+    # 如果顶点已经访问过, 但还从此顶点出发的深度优先遍历还未结束,
+    # 意味着已经循环回来了, 有任务存在循环依赖
+    if node.visiting:
+        return True
+    # 设置为搜索中
+    node.visiting = True
+    # 搜索此顶点对应任务的依赖任务
+    for pre_requirement_node in node.pre_requirements:
+        # 递归调用深度优先搜索
+        contains_cycle = depth_first_traverse(pre_requirement_node, ordered_jobs)
+        if contains_cycle:
+            return True
+    # 搜索结束后标记为已访问
+    node.visited = True
+    # 标记为已经搜索结束
+    node.visiting = False
+    # 添加此任务到执行顺序记录表中
+    ordered_jobs.append(node.job)
+    return False
+
+
+class JobGraph1:
+    def __init__(self, jobs):
+        # 记录所有任务节点
+        self.nodes = []
+        # 记录任务相互间依赖的有向图
+        self.graph = {}
+        for job in jobs:
+            self.add_node(job)
+
+    def add_pre_requirement(self, job, pre_requirement):
+        # 获取任务
+        job_node = self.get_node(job)
+        # 获取任务的前置依赖
+        pre_requirement_node = self.get_node(pre_requirement)
+        # 记录任务的前置依赖
+        job_node.pre_requirements.append(pre_requirement_node)
+
+    def add_node(self, job):
+        self.graph[job] = JobNode1(job)
+        self.nodes.append(self.graph[job])
+
+    def get_node(self, job):
+        # 如果任务不存在于有向图中则添加
+        if job not in self.graph:
+            self.add_node(job)
+        return self.graph[job]
+
+
+class JobNode1:
+    def __init__(self, job):
+        # 表示当前任务
+        self.job = job
+        # 表示任务的前置依赖
+        self.pre_requirements = []
+        # 记录图的顶点是否已经被访问
+        self.visited = False
+        # 记录图的顶点是否正被访问且未完成深度优先遍历
+        self.visiting = False
+
+
+# O(j + d) time | O(j + d) space
+def topological_sort2(jobs, deps):
+    # 创建一个有向图, 顶点表示每个任务, 边表示任务相互之间的依赖
+    job_graph = create_job_graph2(jobs, deps)
+    return get_ordered_jobs2(job_graph)
+
+
+def create_job_graph2(jobs, deps):
+    # 创建一个基础的图
+    graph = JobGraph2(jobs)
+    # 通过任务和其依赖创建有向图
+    for job, dep in deps:
+        graph.add_dep(job, dep)
+    return graph
+
+
+# 与上面的第一种方法不同的是这里直接通过搜索依赖并递减任务的被依赖次数来计算最终的任务执行顺序
+def get_ordered_jobs2(graph):
+    ordered_jobs = []
+    # 找到所有没有前置依赖的任务
+    nodes_with_no_pre_requirements = list(filter(lambda element: element.num_of_pre_requirements == 0, graph.nodes))
+    # 从没有前置依赖的任务开始逐个搜索
+    while len(nodes_with_no_pre_requirements):
+        node = nodes_with_no_pre_requirements.pop()
+        # 没有前置依赖的任务表面已经解决了依赖, 可以添加早任务顺序记录中
+        ordered_jobs.append(node.job)
+        # 重新计算所有依赖此任务的任务, 递减依赖此任务的后置任务的依赖次数
+        remove_deps(node, nodes_with_no_pre_requirements)
+    graph_has_edges = any(node.num_of_pre_requirements for node in graph.nodes)
+    return [] if graph_has_edges else ordered_jobs
+
+
+def remove_deps(node, nodes_with_no_pre_requirements):
+    # 循环此任务的所有依赖任务
+    while len(node.deps):
+        dep = node.deps.pop()
+        # 递减任务的依赖次数
+        dep.num_of_pre_requirements -= 1
+        # 如果任务的已经没有前置依赖, 添加到执行队列中
+        if dep.num_of_pre_requirements == 0:
+            nodes_with_no_pre_requirements.append(dep)
+
+
+class JobGraph2:
+    def __init__(self, jobs):
+        self.nodes = []
+        self.graph = {}
+        for job in jobs:
+            self.add_node(job)
+
+    def add_dep(self, job, dep):
+        job_node = self.get_node(job)
+        dep_node = self.get_node(dep)
+        # 记录任务的依赖
+        job_node.deps.append(dep_node)
+        # 累加任务的被依赖次数
+        dep_node.num_of_pre_requirements += 1
+
+    def add_node(self, job):
+        self.graph[job] = JobNode2(job)
+        self.nodes.append(self.graph[job])
+
+    def get_node(self, job):
+        if job not in self.graph:
+            self.add_node(job)
+        return self.graph[job]
+
+
+class JobNode2:
+    def __init__(self, job):
+        self.job = job
+        # 表示此任务的前置依赖
+        self.deps = []
+        # 表示此任务的被依赖次数
+        self.num_of_pre_requirements = 0
+
+
+if __name__ == '__main__':
+    print(topological_sort1([1, 2, 3, 4], [[1, 2], [1, 3], [3, 2], [4, 2], [4, 3]]))
+    print(topological_sort2([1, 2, 3, 4], [[1, 2], [1, 3], [3, 2], [4, 2], [4, 3]]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
+using namespace std;
+
+class JobNode1
+{
+public:
+    int job;
+    vector<JobNode1 *> preRequirement;
+    bool visited;
+    bool visiting;
+
+    JobNode1(int job);
+};
+
+class JobGraph1
+{
+public:
+    vector<JobNode1 *> nodes;
+    unordered_map<int, JobNode1 *> graph;
+
+    JobGraph1(vector<int> jobs);
+    void addPrereq(int job, int prereq);
+    void addNode(int job);
+    JobNode1 *getNode(int job);
+};
+
+JobGraph1 *createJobGraph1(vector<int> jobs, vector<vector<int>> deps);
+vector<int> getOrderedJobs1(JobGraph1 *graph);
+bool depthFirstTraverse1(JobNode1 *node, vector<int> *orderedJobs);
+
+// O(j + d) time | O(j + d) space
+vector<int> topologicalSort1(vector<int> jobs, vector<vector<int>> deps)
+{
+    JobGraph1 *jobGraph = createJobGraph1(jobs, deps);
+    return getOrderedJobs1(jobGraph);
+}
+
+JobGraph1 *createJobGraph1(vector<int> jobs, vector<vector<int>> deps)
+{
+    JobGraph1 *graph = new JobGraph1(jobs);
+    for (vector<int> dep : deps)
+    {
+        graph->addPrereq(dep[1], dep[0]);
+    }
+    return graph;
+}
+
+vector<int> getOrderedJobs1(JobGraph1 *graph)
+{
+    vector<int> orderedJobs = {};
+    vector<JobNode1 *> nodes = graph->nodes;
+    while (nodes.size())
+    {
+        JobNode1 *node = nodes.back();
+        nodes.pop_back();
+        bool containsCycle = depthFirstTraverse1(node, &orderedJobs);
+        if (containsCycle)
+            return {};
+    }
+    return orderedJobs;
+}
+
+bool depthFirstTraverse1(JobNode1 *node, vector<int> *orderedJobs)
+{
+    if (node->visited)
+        return false;
+    if (node->visiting)
+        return true;
+    node->visiting = true;
+    for (JobNode1 *prereqNode : node->preRequirement)
+    {
+        bool containsCycle = depthFirstTraverse1(prereqNode, orderedJobs);
+        if (containsCycle)
+            return true;
+    }
+    node->visited = true;
+    node->visiting = false;
+    orderedJobs->push_back(node->job);
+    return false;
+}
+
+JobGraph1::JobGraph1(vector<int> jobs)
+{
+    nodes = {};
+    for (int job : jobs)
+    {
+        addNode(job);
+    }
+}
+
+void JobGraph1::addPrereq(int job, int prereq)
+{
+    JobNode1 *jobNode = getNode(job);
+    JobNode1 *prereqNode = getNode(prereq);
+    jobNode->preRequirement.push_back(prereqNode);
+}
+
+void JobGraph1::addNode(int job)
+{
+    graph[job] = new JobNode1(job);
+    nodes.push_back(graph[job]);
+}
+
+JobNode1 *JobGraph1::getNode(int job)
+{
+    if (graph.find(job) == graph.end())
+        addNode(job);
+    return graph[job];
+}
+
+JobNode1::JobNode1(int job)
+{
+    this->job = job;
+    preRequirement = {};
+    visited = false;
+    visiting = false;
+}
+
+class JobNode2
+{
+public:
+    int job;
+    vector<JobNode2 *> deps;
+    int numOfPreRequirement;
+
+    JobNode2(int job);
+};
+
+class JobGraph2
+{
+public:
+    vector<JobNode2 *> nodes;
+    unordered_map<int, JobNode2 *> graph;
+
+    JobGraph2(vector<int> jobs);
+    void addDep(int job, int dep);
+    void addNode(int job);
+    JobNode2 *getNode(int job);
+};
+
+JobGraph2 *createJobGraph2(vector<int> jobs, vector<vector<int>> deps);
+vector<int> getOrderedJobs2(JobGraph2 *graph);
+void removeDeps2(JobNode2 *node, vector<JobNode2 *> *nodesWithNoPreRequirement);
+
+// O(j + d) time | O(j + d) space
+vector<int> topologicalSort2(vector<int> jobs, vector<vector<int>> deps)
+{
+    JobGraph2 *jobGraph = createJobGraph2(jobs, deps);
+    return getOrderedJobs2(jobGraph);
+}
+
+JobGraph2 *createJobGraph2(vector<int> jobs, vector<vector<int>> deps)
+{
+    JobGraph2 *graph = new JobGraph2(jobs);
+    for (vector<int> dep : deps)
+    {
+        graph->addDep(dep[0], dep[1]);
+    }
+    return graph;
+}
+
+vector<int> getOrderedJobs2(JobGraph2 *graph)
+{
+    vector<int> orderedJobs = {};
+    vector<JobNode2 *> nodesWithNoPreRequirement(graph->nodes.size());
+    auto it = copy_if(graph->nodes.begin(), graph->nodes.end(),
+                      nodesWithNoPreRequirement.begin(),
+                      [](JobNode2 *node)
+                      { return node->numOfPreRequirement == 0; });
+    nodesWithNoPreRequirement.resize(distance(nodesWithNoPreRequirement.begin(), it));
+    while (nodesWithNoPreRequirement.size())
+    {
+        JobNode2 *node = nodesWithNoPreRequirement.back();
+        nodesWithNoPreRequirement.pop_back();
+        orderedJobs.push_back(node->job);
+        removeDeps2(node, &nodesWithNoPreRequirement);
+    }
+    bool graphHasEdges = false;
+    for (JobNode2 *node : graph->nodes)
+    {
+        if (node->numOfPreRequirement)
+        {
+            graphHasEdges = true;
+        }
+    }
+    return graphHasEdges ? vector<int>{} : orderedJobs;
+}
+
+void removeDeps2(JobNode2 *node, vector<JobNode2 *> *nodesWithNoPreRequirement)
+{
+    while (node->deps.size())
+    {
+        JobNode2 *dep = node->deps.back();
+        node->deps.pop_back();
+        dep->numOfPreRequirement--;
+        if (!dep->numOfPreRequirement)
+            nodesWithNoPreRequirement->push_back(dep);
+    }
+}
+
+JobGraph2::JobGraph2(vector<int> jobs)
+{
+    nodes = {};
+    for (int job : jobs)
+    {
+        addNode(job);
+    }
+}
+
+void JobGraph2::addDep(int job, int dep)
+{
+    JobNode2 *jobNode = getNode(job);
+    JobNode2 *depNode = getNode(dep);
+    jobNode->deps.push_back(depNode);
+    depNode->numOfPreRequirement++;
+}
+
+void JobGraph2::addNode(int job)
+{
+    graph[job] = new JobNode2(job);
+    nodes.push_back(graph[job]);
+}
+
+JobNode2 *JobGraph2::getNode(int job)
+{
+    if (graph.find(job) == graph.end())
+        addNode(job);
+    return graph[job];
+}
+
+JobNode2::JobNode2(int job)
+{
+    this->job = job;
+    deps = {};
+    numOfPreRequirement = 0;
+}
+
+void iteration(vector<int> array)
+{
+    for (int element : array)
+    {
+        cout << element << " ";
+    }
+    cout << endl;
+}
+
+int main()
+{
+    vector<int> jobs = {1, 2, 3, 4};
+    vector<vector<int>> deps = {{1, 2}, {1, 3}, {3, 2}, {4, 2}, {4, 3}};
+    iteration(topologicalSort1(jobs, deps));
+    iteration(topologicalSort2(jobs, deps));
+    return 0;
+}
+```
+
+Last Modified 2022-03-27
