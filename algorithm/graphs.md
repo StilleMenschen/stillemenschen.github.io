@@ -2305,4 +2305,268 @@ int main()
 }
 ```
 
-Last Modified 2022-03-27
+## 拼词板
+
+给定一个二维数组和一个字符串数组，二维数组的每个元素表示单个字母，遍历字符串数组，判断每个字符串是否可以使用二维数组中的单词拼接出来，
+要求在二维数组中拼成字符串的单词是相连的（上、下、左、右、左上、右上、左下、右下），且使用过的字符不可以再次使用，假设二维数组中存在三个位置连续的字符`a`、`b`、`c`，
+这三个连续的字符可以拼接出`abc`和`cba`，但是不能拼出`abcb`，因为`b`字母已经使用过了
+
+```python
+# O(nm*8^s + ws) time | O(nm + ws) space
+def boggle_board(board, words):
+    # 创建一个字典树, 记录所有的字符串到树中, 方便访问
+    trie = Trie()
+    for word in words:
+        trie.add(word)
+    # 记录可以拼出的字符串
+    final_words = {}
+    # 标记或者追踪已经访问过的位置, 因为要求字符不可重复使用
+    visited = [[False for _ in row] for row in board]
+    # 从每一个字母位置开始深度优先搜索
+    for row in range(len(board)):
+        for col in range(len(board[row])):
+            explore(row, col, board, trie.root, visited, final_words)
+    # 最后返回找到的可以拼接出来的所有字符串
+    return list(final_words.keys())
+
+
+def explore(row, col, board, trie_node, visited, final_words):
+    # 已经使用过的字母不可以重复使用
+    if visited[row][col]:
+        return
+    letter = board[row][col]
+    # 字母不在字典树中, 结束递归
+    if letter not in trie_node:
+        return
+    # 标记为已访问
+    visited[row][col] = True
+    # 切换到字典树的下一个字母
+    trie_node = trie_node[letter]
+    # 如果已经到达字典树的末尾, 表示可以拼接出字符串
+    if "*" in trie_node:
+        # 记录拼接成功的字符串
+        final_words[trie_node["*"]] = True
+    # 找到相邻的节点, 上、下、左、右、左上、右上、左下、右下
+    neighbors = get_neighbors(row, col, board)
+    for neighbor in neighbors:
+        # 在相邻的位置中继续查找, 即深度优先搜索
+        explore(neighbor[0], neighbor[1], board, trie_node, visited, final_words)
+    visited[row][col] = False
+
+
+def get_neighbors(row, col, board):
+    board_size = len(board)
+    board_row_size = len(board[0])
+    neighbors = []
+    # 添加相邻的位置并考虑索引越界的情况
+    # 包括: 上、下、左、右、左上、右上、左下、右下
+    if row > 0 and col > 0:
+        neighbors.append([row - 1, col - 1])
+    if row > 0 and col < board_row_size - 1:
+        neighbors.append([row - 1, col + 1])
+    if row < board_size - 1 and col < board_row_size - 1:
+        neighbors.append([row + 1, col + 1])
+    if row < board_size - 1 and col > 0:
+        neighbors.append([row + 1, col - 1])
+    if row > 0:
+        neighbors.append([row - 1, col])
+    if row < board_size - 1:
+        neighbors.append([row + 1, col])
+    if col > 0:
+        neighbors.append([row, col - 1])
+    if col < board_row_size - 1:
+        neighbors.append([row, col + 1])
+    return neighbors
+
+
+class Trie:
+    def __init__(self):
+        self.root = {}
+        self.endSymbol = "*"
+
+    def add(self, word):
+        current = self.root
+        for letter in word:
+            if letter not in current:
+                current[letter] = {}
+            current = current[letter]
+        # 字典树的末端保存最终字符串, 方便记录
+        current[self.endSymbol] = word
+
+
+def algo():
+    print(boggle_board([
+        ["y", "g", "f", "y", "e", "i"],
+        ["c", "o", "r", "p", "o", "u"],
+        ["j", "u", "z", "s", "e", "l"],
+        ["s", "y", "u", "r", "h", "p"],
+        ["e", "a", "e", "g", "n", "d"],
+        ["h", "e", "l", "s", "a", "t"]
+    ], ["san", "sana", "at", "vomit", "yours", "help", "end", "been", "bed", "danger", "calm", "ok", "chaos",
+        "complete", "rear", "going", "storm", "face", "epual", "dangerous"]))
+```
+
+```cpp
+#include <iostream>
+#include <unordered_set>
+#include <unordered_map>
+#include <vector>
+using namespace std;
+
+class TrieNode
+{
+public:
+    unordered_map<char, TrieNode *> children;
+    string word = "";
+};
+
+class Trie
+{
+public:
+    TrieNode *root;
+    char endSymbol;
+
+    Trie();
+    void add(string str);
+};
+
+void explore(int i, int j, vector<vector<char>> board, TrieNode *trieNode,
+             vector<vector<bool>> *visited, unordered_set<string> *finalWords);
+vector<vector<int>> getNeighbors(int i, int j, vector<vector<char>> board);
+
+// O(nm*8^s + ws) time | O(nm + ws) space
+vector<string> boggleBoard(vector<vector<char>> board, vector<string> words)
+{
+    Trie trie;
+    for (string word : words)
+    {
+        trie.add(word);
+    }
+    unordered_set<string> finalWords;
+    vector<vector<bool>> visited(board.size(),
+                                 vector<bool>(board[0].size(), false));
+    const int boardSize = board.size();
+    for (int row = 0; row < boardSize; row++)
+    {
+        const int boardRowSize = board[0].size();
+        for (int col = 0; col < boardRowSize; col++)
+        {
+            explore(row, col, board, trie.root, &visited, &finalWords);
+        }
+    }
+    vector<string> finalWordsArray;
+    for (auto it : finalWords)
+    {
+        finalWordsArray.push_back(it);
+    }
+    return finalWordsArray;
+}
+
+void explore(int i, int j, vector<vector<char>> board, TrieNode *trieNode,
+             vector<vector<bool>> *visited, unordered_set<string> *finalWords)
+{
+    if (visited->at(i)[j])
+    {
+        return;
+    }
+    char letter = board[i][j];
+    if (trieNode->children.find(letter) == trieNode->children.end())
+    {
+        return;
+    }
+    visited->at(i)[j] = true;
+    trieNode = trieNode->children[letter];
+    if (trieNode->children.find('*') != trieNode->children.end())
+    {
+        finalWords->insert(trieNode->word);
+    }
+    vector<vector<int>> neighbors = getNeighbors(i, j, board);
+    for (vector<int> neighbor : neighbors)
+    {
+        explore(neighbor[0], neighbor[1], board, trieNode, visited, finalWords);
+    }
+    visited->at(i)[j] = false;
+}
+
+vector<vector<int>> getNeighbors(int i, int j, vector<vector<char>> board)
+{
+    const int boardSize = board.size();
+    const int boardRowSize = board[0].size();
+    vector<vector<int>> neighbors;
+    if (i > 0 && j > 0)
+    {
+        neighbors.push_back({i - 1, j - 1});
+    }
+    if (i > 0 && j < boardRowSize - 1)
+    {
+        neighbors.push_back({i - 1, j + 1});
+    }
+    if (i < boardSize - 1 && j < boardRowSize - 1)
+    {
+        neighbors.push_back({i + 1, j + 1});
+    }
+    if (i < boardSize - 1 && j > 0)
+    {
+        neighbors.push_back({i + 1, j - 1});
+    }
+    if (i > 0)
+    {
+        neighbors.push_back({i - 1, j});
+    }
+    if (i < boardSize - 1)
+    {
+        neighbors.push_back({i + 1, j});
+    }
+    if (j > 0)
+    {
+        neighbors.push_back({i, j - 1});
+    }
+    if (j < boardRowSize - 1)
+    {
+        neighbors.push_back({i, j + 1});
+    }
+    return neighbors;
+}
+
+Trie::Trie()
+{
+    this->root = new TrieNode();
+    this->endSymbol = '*';
+}
+
+void Trie::add(string str)
+{
+    TrieNode *node = this->root;
+    for (char letter : str)
+    {
+        if (node->children.find(letter) == node->children.end())
+        {
+            TrieNode *newNode = new TrieNode();
+            node->children.insert({letter, newNode});
+        }
+        node = node->children[letter];
+    }
+    node->children.insert({this->endSymbol, nullptr});
+    node->word = str;
+}
+
+int main()
+{
+    vector<vector<char>> boards = {
+        {'y', 'g', 'f', 'y', 'e', 'i'},
+        {'c', 'o', 'r', 'p', 'o', 'u'},
+        {'j', 'u', 'z', 's', 'e', 'l'},
+        {'s', 'y', 'u', 'r', 'h', 'p'},
+        {'e', 'a', 'e', 'g', 'n', 'd'},
+        {'h', 'e', 'l', 's', 'a', 't'}};
+    vector<string> words = {"san", "sana", "at", "vomit", "yours", "help", "end", "been", "bed", "danger", "calm", "ok", "chaos", "complete", "rear", "going", "storm", "face", "epual", "dangerous"};
+    vector<string> result = boggleBoard(boards, words);
+    for (string element : result)
+    {
+        cout << element << " ";
+    }
+    return 0;
+}
+```
+
+Last Modified 2022-03-29
