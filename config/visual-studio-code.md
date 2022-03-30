@@ -11,9 +11,8 @@ settings.json
     "emmet.triggerExpansionOnTab": true,
     "python.formatting.provider": "yapf",
     "python.linting.pylintPath": "pylint",
-    "python.pythonPath": "python.exe",
-    "php.validate.executablePath": "php.exe",
-    "php.executablePath": "php.exe",
+    "php.validate.executablePath": "C:\\Programs Files\\php\\php.exe",
+    "php.executablePath": "C:\\Programs Files\\php\\php.exe",
     "prettier.printWidth": 120,
     "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
     "typescript.format.insertSpaceBeforeFunctionParenthesis": true,
@@ -52,6 +51,9 @@ settings.json
     "[json]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
+    "[markdown]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
     "[jsonc]": {
         "editor.defaultFormatter": "vscode.json-language-features"
     },
@@ -81,21 +83,22 @@ settings.json
     },
     "files.trimTrailingWhitespace": true,
     "git.autofetch": "all",
-    "remote.SSH.remotePlatform": {
-        "sz.tystnad.tech": "linux",
-        "192.168.55.80": "linux",
-        "192.168.52.64": "linux"
-    },
     "terminal.integrated.profiles.windows": {
         "Git-Bash": {
-            "path": "bash.exe",
+            "path": "C:\\Programs Files\\Git\\bin\\bash.exe",
             "args": [
                 "--login"
             ],
             "icon": "terminal-bash"
         },
     },
-    "terminal.integrated.defaultProfile.windows": "Git-Bash",
+    "python.autoComplete.extraPaths": [
+        "C:\\Programs Files\\Python3\\Lib\\site-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "C:\\Programs Files\\Python3\\Lib\\site-packages"
+    ],
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
     "security.workspace.trust.enabled": false,
     "editor.fontFamily": "Consolas, 'Microsoft Yahei', 'Courier New', monospace",
     "workbench.colorTheme": "One Dark Pro Darker",
@@ -109,8 +112,11 @@ settings.json
     "gitlens.views.contributors.avatars": false,
     "gitlens.views.searchAndCompare.avatars": false,
     "gitlens.blame.avatars": false,
-    "bracket-pair-colorizer-2.depreciation-notice": false
+    "bracket-pair-colorizer-2.depreciation-notice": false,
+    "diffEditor.ignoreTrimWhitespace": false,
+    "gitlens.views.searchAndCompare.files.layout": "tree",
+    "local-history.daysLimit": 7
 }
 ```
 
-Last Modified 2021-12-29
+Last Modified 2022-03-30
