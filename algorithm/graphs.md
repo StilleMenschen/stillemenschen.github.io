@@ -2351,6 +2351,7 @@ def explore(row, col, board, trie_node, visited, final_words):
     for neighbor in neighbors:
         # 在相邻的位置中继续查找, 即深度优先搜索
         explore(neighbor[0], neighbor[1], board, trie_node, visited, final_words)
+    # 标记为未访问
     visited[row][col] = False
 
 
@@ -2394,7 +2395,7 @@ class Trie:
         current[self.endSymbol] = word
 
 
-def algo():
+if __name__ == '__main__':
     print(boggle_board([
         ["y", "g", "f", "y", "e", "i"],
         ["c", "o", "r", "p", "o", "u"],
