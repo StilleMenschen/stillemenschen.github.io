@@ -202,7 +202,10 @@ class Heap:
     def __init__(self, comparison_function, array):
         self.comparison_function = comparison_function
         self.heap = self.build_heap(array)
-        self.length = len(self.heap)
+
+    @property
+    def length(self):
+        return len(self.heap)
 
     def build_heap(self, array):
         first_parent_idx = (len(array) - 2) // 2
@@ -244,13 +247,11 @@ class Heap:
     def remove(self):
         self.swap(0, self.length - 1, self.heap)
         value_to_remove = self.heap.pop()
-        self.length -= 1
         self.sift_down(0, self.length - 1, self.heap)
         return value_to_remove
 
     def insert(self, value):
         self.heap.append(value)
-        self.length += 1
         self.sift_up(self.length - 1, self.heap)
 
     @staticmethod
@@ -322,7 +323,7 @@ if __name__ == '__main__':
     root.insert(100)
     print(root.get_median())
     root.insert(1000)
-    root.insert(35.5)
+    root.insert(35)
     print(root.get_median())
 ```
 
