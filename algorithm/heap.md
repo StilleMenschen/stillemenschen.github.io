@@ -61,26 +61,20 @@ class MinHeap:
         heap[i], heap[j] = heap[j], heap[i]
 
 
-def iterator_list(array):
-    for element in array:
-        print(element, end=' ')
-    print()
-
-
 if __name__ == '__main__':
-    source = [48, 12, 24, 7, 8, -5, 24, 391, 24, 56, 2, 6, 8, 41]
-    heap = MinHeap(source)
-    iterator_list(heap.heap)
-    heap.insert(36)
-    iterator_list(heap.heap)
-    print("peek", heap.peek())
-    print("remove", heap.remove())
-    iterator_list(heap.heap)
-    print("peek", heap.peek())
-    print("remove", heap.remove())
-    iterator_list(heap.heap)
-    heap.insert(67)
-    iterator_list(heap.heap)
+    source = [48, 12, 7, 8, -5, 24, 391, 24, 56, 2, 8, 41]
+    min_heap = MinHeap(source)
+    print(min_heap.heap)
+    min_heap.insert(36)
+    print(min_heap.heap)
+    print("peek", min_heap.peek())
+    print("remove", min_heap.remove())
+    print(min_heap.heap)
+    print("peek", min_heap.peek())
+    print("remove", min_heap.remove())
+    print(min_heap.heap)
+    min_heap.insert(67)
+    print(min_heap.heap)
 ```
 
 ```cpp
