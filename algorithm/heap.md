@@ -512,4 +512,225 @@ int main()
 }
 ```
 
-Last Modified 2022-03-30
+## 按 K 次排序
+
+给定一个数组和一个整数 K ，K 表示数组内的元素最多只需要向左或向右移动 K 次就可以处在正确的排序位置，按此限制从小到大排序输入数组
+
+```python
+# O(nlog(k)) time | O(k) space - where n is the number
+# of elements in the array and k is how far away elements
+# are from their sorted position
+def sort_k_sorted_array(array, k):
+    # 先将前面第 K 个元素构建成最小堆
+    min_heap_with_k_elements = MinHeap(array[: min(k + 1, len(array))])
+    # 记录最小元素放置的位置, 从第一个位置开始
+    next_index_to_insert_element = 0
+    # 从 K + 1 位置开始
+    for idx in range(k + 1, len(array)):
+        # 取出最小堆顶端元素, 最小堆中顶端元素为最小
+        min_element = min_heap_with_k_elements.remove()
+        # 将最小的元素放到前面
+        array[next_index_to_insert_element] = min_element
+        # 移动下一个到位置
+        next_index_to_insert_element += 1
+        # 将当前元素放入最小堆中
+        current_element = array[idx]
+        min_heap_with_k_elements.insert(current_element)
+    # 将最小堆中剩余的元素全部放入数组中
+    while not min_heap_with_k_elements.is_empty():
+        min_element = min_heap_with_k_elements.remove()
+        array[next_index_to_insert_element] = min_element
+        next_index_to_insert_element += 1
+
+    return array
+
+
+class MinHeap:
+    def __init__(self, array):
+        self.heap = self.build_heap(array)
+
+    def is_empty(self):
+        return len(self.heap) == 0
+
+    def build_heap(self, array):
+        first_parent_idx = (len(array) - 2) // 2
+        for current_idx in reversed(range(first_parent_idx + 1)):
+            self.sift_down(current_idx, len(array) - 1, array)
+        return array
+
+    def sift_down(self, current_idx, end_idx, heap):
+        child_one_idx = current_idx * 2 + 1
+        while child_one_idx <= end_idx:
+            child_two_idx = current_idx * 2 + 2 if current_idx * 2 + 2 <= end_idx else -1
+            if child_two_idx != -1 and heap[child_two_idx] < heap[child_one_idx]:
+                idx_to_swap = child_two_idx
+            else:
+                idx_to_swap = child_one_idx
+            if heap[idx_to_swap] < heap[current_idx]:
+                self.swap(current_idx, idx_to_swap, heap)
+                current_idx = idx_to_swap
+                child_one_idx = current_idx * 2 + 1
+            else:
+                return
+
+    def sift_up(self, current_idx, heap):
+        parent_idx = (current_idx - 1) // 2
+        while current_idx > 0 and heap[current_idx] < heap[parent_idx]:
+            self.swap(current_idx, parent_idx, heap)
+            current_idx = parent_idx
+            parent_idx = (current_idx - 1) // 2
+
+    def peek(self):
+        return self.heap[0]
+
+    def remove(self):
+        self.swap(0, len(self.heap) - 1, self.heap)
+        value_to_remove = self.heap.pop()
+        self.sift_down(0, len(self.heap) - 1, self.heap)
+        return value_to_remove
+
+    def insert(self, value):
+        self.heap.append(value)
+        self.sift_up(len(self.heap) - 1, self.heap)
+
+    @staticmethod
+    def swap(i, j, heap):
+        heap[i], heap[j] = heap[j], heap[i]
+
+
+if __name__ == '__main__':
+    print(sort_k_sorted_array([3, 2, 1, 5, 4, 7, 6, 5], 3))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class MinHeap
+{
+public:
+    vector<int> heap;
+
+    MinHeap(vector<int> array) { heap = buildHeap(array); }
+
+    bool isEmpty() { return heap.size() == 0; }
+
+    vector<int> buildHeap(vector<int> array)
+    {
+        int firstParentIdx = (array.size() - 2) / 2;
+        for (int currentIdx = firstParentIdx; currentIdx >= 0; currentIdx--)
+        {
+            siftDown(currentIdx, array.size() - 1, array);
+        }
+        return array;
+    }
+
+    void siftDown(int currentIdx, int endIdx, vector<int> &heap)
+    {
+        int childOneIdx = currentIdx * 2 + 1;
+        while (childOneIdx <= endIdx)
+        {
+            int childTwoIdx = currentIdx * 2 + 2 <= endIdx ? currentIdx * 2 + 2 : -1;
+            int idxToSwap;
+            if (childTwoIdx != -1 && heap[childTwoIdx] < heap[childOneIdx])
+            {
+                idxToSwap = childTwoIdx;
+            }
+            else
+            {
+                idxToSwap = childOneIdx;
+            }
+            if (heap[idxToSwap] < heap[currentIdx])
+            {
+                swap(currentIdx, idxToSwap, heap);
+                currentIdx = idxToSwap;
+                childOneIdx = currentIdx * 2 + 1;
+            }
+            else
+            {
+                return;
+            }
+        }
+    }
+
+    void siftUp(int currentIdx, vector<int> &heap)
+    {
+        int parentIdx = (currentIdx - 1) / 2;
+        while (currentIdx > 0 && heap[currentIdx] < heap[parentIdx])
+        {
+            swap(currentIdx, parentIdx, heap);
+            currentIdx = parentIdx;
+            parentIdx = (currentIdx - 1) / 2;
+        }
+    }
+
+    int peek() { return heap[0]; }
+
+    int remove()
+    {
+        swap(0, heap.size() - 1, heap);
+        int valueToRemove = heap.back();
+        heap.pop_back();
+        siftDown(0, heap.size() - 1, heap);
+        return valueToRemove;
+    }
+
+    void insert(int value)
+    {
+        heap.push_back(value);
+        siftUp(heap.size() - 1, heap);
+    }
+
+    void swap(int i, int j, vector<int> &heap)
+    {
+        int temp = heap[j];
+        heap[j] = heap[i];
+        heap[i] = temp;
+    }
+};
+
+// O(nlog(k)) time | O(k) space - where n is the number
+// of elements in the array and k is how far away elements
+// are from their sorted position
+vector<int> sortKSortedArray(vector<int> array, int k)
+{
+    vector<int> minHeapInputArray(array.begin(),
+                                  array.begin() + min(k + 1, (int)array.size()));
+    auto minHeapWithKElements = new MinHeap(minHeapInputArray);
+
+    int nextIndexToInsertElement = 0;
+    const int arraySize = array.size();
+    for (int idx = k + 1; idx < arraySize; idx++)
+    {
+        auto minElement = minHeapWithKElements->remove();
+        array[nextIndexToInsertElement] = minElement;
+        nextIndexToInsertElement++;
+
+        auto currentElement = array[idx];
+        minHeapWithKElements->insert(currentElement);
+    }
+
+    while (!minHeapWithKElements->isEmpty())
+    {
+        auto minElement = minHeapWithKElements->remove();
+        array[nextIndexToInsertElement] = minElement;
+        nextIndexToInsertElement++;
+    }
+
+    return array;
+}
+
+int main()
+{
+    vector<int> result = sortKSortedArray({3, 2, 1, 5, 4, 7, 6, 5}, 3);
+    for (const int element : result)
+    {
+        cout << element << " ";
+    }
+    return 0;
+}
+```
+
+Last Modified 2022-03-31
