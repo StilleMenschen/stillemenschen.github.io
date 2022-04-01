@@ -112,7 +112,7 @@ def two_number_sum2(array, target_sum):
     return tuple()
 
 
-# O(n*log(n)) time | O(1) space
+# O(n * log(n)) time | O(1) space
 def two_number_sum3(array, target_sum):
     array.sort()
     right_idx = len(array) - 1
@@ -224,7 +224,7 @@ int main()
 在两个序列中分别找出序列 1 和序列 2 中相差最小的两个数
 
 ```python
-# O(n*log(n) + m*log(m)) time | O(1) space
+# O(n * log(n) + m*log(m)) time | O(1) space
 def smallest_difference(array1, array2):
     array1.sort()
     array2.sort()
@@ -262,7 +262,7 @@ if __name__ == '__main__':
 #include <algorithm>
 using namespace std;
 
-// O(n*log(n) + m*log(m)) time | O(1) space
+// O(n * log(n) + m*log(m)) time | O(1) space
 vector<int> smallestDifference(vector<int> arrayOne, vector<int> arrayTwo)
 {
     sort(arrayOne.begin(), arrayOne.end());

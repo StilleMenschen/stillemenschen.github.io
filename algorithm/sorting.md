@@ -421,8 +421,8 @@ int main()
 ## 快速排序
 
 ```python
-# Best: O(nlog(n)) time | O(log(n)) space
-# Average: O(nlog(n)) time | O(log(n)) space
+# Best: O(n * log(n)) time | O(log(n)) space
+# Average: O(n * log(n)) time | O(log(n)) space
 # Worst: O(n^2) time | O(log(n)) space
 def quick_sort(array):
     # 从数组的两端开始执行递归
@@ -481,8 +481,8 @@ using namespace std;
 
 void quickSortHelper(vector<int> &array, int startIdx, int endIdx);
 
-// Best: O(nlog(n)) time | O(log(n)) space
-// Average: O(nlog(n)) time | O(log(n)) space
+// Best: O(n * log(n)) time | O(log(n)) space
+// Average: O(n * log(n)) time | O(log(n)) space
 // Worst: O(n^2) time | O(log(n)) space
 vector<int> quickSort(vector<int> array)
 {
@@ -549,9 +549,9 @@ int main()
 堆是一棵完全二叉树，堆的每个节点的值都大于或等于其子节点的值，为最大堆；反之为最小堆。
 
 ```python
-# Best: O(nlog(n)) time | O(1) space
-# Average: O(nlog(n)) time | O(1) space
-# Worst: O(nlog(n)) time | O(1) space
+# Best: O(n * log(n)) time | O(1) space
+# Average: O(n * log(n)) time | O(1) space
+# Worst: O(n * log(n)) time | O(1) space
 def heap_sort(array):
     # 先创建一个最大堆
     build_max_heap(array)
@@ -616,9 +616,9 @@ using namespace std;
 void buildMaxHeap(vector<int> &array);
 void siftDown(int currentIdx, int endIdx, vector<int> &heap);
 
-// Best: O(nlog(n)) time | O(1) space
-// Average: O(nlog(n)) time | O(1) space
-// Worst: O(nlog(n)) time | O(1) space
+// Best: O(n * log(n)) time | O(1) space
+// Average: O(n * log(n)) time | O(1) space
+// Worst: O(n * log(n)) time | O(1) space
 vector<int> heapSort(vector<int> array)
 {
     buildMaxHeap(array);

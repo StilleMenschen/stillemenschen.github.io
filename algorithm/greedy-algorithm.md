@@ -53,7 +53,7 @@ public class Algorithm {
 ## 按身高排列
 
 ```python
-# O(nlog(n)) time | O(1) space - where n is the number of students
+# O(n * log(n)) time | O(1) space - where n is the number of students
 def class_photos(red_shirt_heights, blue_shirt_heights):
     red_shirt_heights.sort(reverse=True)
     blue_shirt_heights.sort(reverse=True)
