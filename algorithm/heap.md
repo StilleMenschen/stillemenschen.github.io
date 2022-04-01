@@ -517,7 +517,7 @@ int main()
 给定一个数组和一个整数 K ，K 表示数组内的元素最多只需要向左或向右移动 K 次就可以处在正确的排序位置，按此限制从小到大排序输入数组
 
 ```python
-# O(nlog(k)) time | O(k) space - where n is the number
+# O(n * log(k)) time | O(k) space - where n is the number
 # of elements in the array and k is how far away elements
 # are from their sorted position
 def sort_k_sorted_array(array, k):
@@ -691,7 +691,7 @@ public:
     }
 };
 
-// O(nlog(k)) time | O(k) space - where n is the number
+// O(n * log(k)) time | O(k) space - where n is the number
 // of elements in the array and k is how far away elements
 // are from their sorted position
 vector<int> sortKSortedArray(vector<int> array, int k)
@@ -733,4 +733,304 @@ int main()
 }
 ```
 
-Last Modified 2022-03-31
+## 笔记本电脑需求
+
+给定一个数组，每个数组元素为两个元素的数组，第一个元素表示开始时间，第二个元素表示结束时间，代表着使用笔记本的时间，在使用时间不冲突的情况下，找出最小的笔记本电脑需求数量
+
+```python
+class MinHeap:
+    def __init__(self, array):
+        self.heap = self.build_heap(array)
+
+    # O(n) time | O(1) space
+    def build_heap(self, array):
+        first_parent_idx = (len(array) - 2) // 2
+        for current_idx in reversed(range(first_parent_idx + 1)):
+            self.sift_down(current_idx, len(array) - 1, array)
+        return array
+
+    # O(log(n)) time | O(1) space
+    def sift_down(self, current_idx, end_idx, heap):
+        child_one_idx = current_idx * 2 + 1
+        while child_one_idx <= end_idx:
+            child_two_idx = current_idx * 2 + 2 if current_idx * 2 + 2 <= end_idx else -1
+            # 比较结束时间的大小
+            if child_two_idx != -1 and heap[child_two_idx][1] < heap[child_one_idx][1]:
+                idx_to_swap = child_two_idx
+            else:
+                idx_to_swap = child_one_idx
+            # 比较结束时间的大小
+            if heap[idx_to_swap][1] < heap[current_idx][1]:
+                self.swap(current_idx, idx_to_swap, heap)
+                current_idx = idx_to_swap
+                child_one_idx = current_idx * 2 + 1
+            else:
+                return
+
+    # O(log(n)) time | O(1) space
+    def sift_up(self, current_idx, heap):
+        parent_idx = (current_idx - 1) // 2
+        # 比较结束时间的大小
+        while current_idx > 0 and heap[current_idx][1] < heap[parent_idx][1]:
+            self.swap(current_idx, parent_idx, heap)
+            current_idx = parent_idx
+            parent_idx = (current_idx - 1) // 2
+
+    # O(1) time | O(1) space
+    def peek(self):
+        return self.heap[0]
+
+    # O(log(n)) time | O(1) space
+    def remove(self):
+        self.swap(0, len(self.heap) - 1, self.heap)
+        value_to_remove = self.heap.pop()
+        self.sift_down(0, len(self.heap) - 1, self.heap)
+        return value_to_remove
+
+    # O(log(n)) time | O(1) space
+    def insert(self, value):
+        self.heap.append(value)
+        self.sift_up(len(self.heap) - 1, self.heap)
+
+    @staticmethod
+    def swap(i, j, heap):
+        heap[i], heap[j] = heap[j], heap[i]
+
+
+# O(n * log(n)) time | O(n) space - where n is the number of times
+def laptop_rentals1(times):
+    # 没有使用需求则认为所需的笔记本数量为 0
+    if len(times) == 0:
+        return 0
+    # 按使用开始时间排序
+    times.sort(key=lambda x: x[0])
+    # 记录到最小堆中的需求, 默认取第一个需求
+    times_when_laptop_is_used = [times[0]]
+    # 创建最小堆, 参考需求的结束时间来构建最小堆
+    heap = MinHeap(times_when_laptop_is_used)
+    # 从第二个位置开始
+    for idx in range(1, len(times)):
+        current_interval = times[idx]
+        # 如果当前需求结束时间小于等于最小堆中最小的需求结束时间
+        # 认为已经有使用需求结束, 减少需求数量
+        if heap.peek()[1] <= current_interval[0]:
+            # 移除最小堆顶部元素
+            heap.remove()
+        # 将当前需求添加到最小堆中
+        heap.insert(current_interval)
+    # 最后返回最小堆中剩余的需求数量
+    return len(times_when_laptop_is_used)
+
+
+# O(n * log(n)) time | O(n) space - where n is the number of times
+def laptop_rentals2(times):
+    # 没有使用需求则认为所需的笔记本数量为 0
+    if len(times) == 0:
+        return 0
+    # 所需笔记本数量
+    used_laptops = 0
+    # 记录并排序所有需求的开始时间
+    start_times = sorted([interval[0] for interval in times])
+    # 记录并排序所有需求的结束时间
+    end_times = sorted([interval[1] for interval in times])
+    # 从两个记录数组的第一个位置开始
+    start_iterator = 0
+    end_iterator = 0
+
+    while start_iterator < len(times):
+        # 如果开始时间数组的时间已经超过了当前结束时间, 则表示使用笔记本结束
+        if start_times[start_iterator] >= end_times[end_iterator]:
+            # 递减使用需求数
+            used_laptops -= 1
+            # 移动结束时间记录数组索引
+            end_iterator += 1
+        # 默认递增使用需求数
+        used_laptops += 1
+        start_iterator += 1
+    # 最后返回使用的需求数
+    return used_laptops
+
+
+# O(n * max(t)) time | O(t) space - where t is maximum end time
+def laptop_rentals3(times):
+    if not len(times):
+        return 0
+    times_map = {}
+    max_laptop = 0
+    for time in times:
+        start, end = time
+        for t in range(start, end):
+            if t not in times_map:
+                times_map[t] = 1
+            else:
+                times_map[t] += 1
+            max_laptop = max(max_laptop, times_map[t])
+    return max_laptop
+
+
+if __name__ == '__main__':
+    print(laptop_rentals1([[0, 2], [1, 4], [4, 6], [0, 4], [7, 8], [9, 11], [3, 10]]))
+    print(laptop_rentals2([[0, 2], [1, 4], [4, 6], [0, 4], [7, 8], [9, 11], [3, 10]]))
+    print(laptop_rentals3([[0, 2], [1, 4], [4, 6], [0, 4], [7, 8], [9, 11], [3, 10]]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class MinHeap
+{
+public:
+    vector<vector<int>> *heap;
+
+    MinHeap(vector<vector<int>> *vector)
+    {
+        heap = vector;
+        buildHeap();
+    }
+
+    // O(n) time | O(1) space
+    void buildHeap()
+    {
+        int firstParentIdx = (heap->size() - 2) / 2;
+        for (int currentIdx = firstParentIdx; currentIdx >= 0; currentIdx--)
+        {
+            siftDown(currentIdx, heap->size() - 1);
+        }
+    }
+
+    // O(log(n)) time | O(1) space
+    void siftDown(int currentIdx, int endIdx)
+    {
+        int childOneIdx = currentIdx * 2 + 1;
+        while (childOneIdx <= endIdx)
+        {
+            int childTwoIdx = currentIdx * 2 + 2 <= endIdx ? currentIdx * 2 + 2 : -1;
+            int idxToSwap;
+            if (childTwoIdx != -1 &&
+                heap->at(childTwoIdx)[1] < heap->at(childOneIdx)[1])
+            {
+                idxToSwap = childTwoIdx;
+            }
+            else
+            {
+                idxToSwap = childOneIdx;
+            }
+            if (heap->at(idxToSwap)[1] < heap->at(currentIdx)[1])
+            {
+                swap(heap->at(currentIdx), heap->at(idxToSwap));
+                currentIdx = idxToSwap;
+                childOneIdx = currentIdx * 2 + 1;
+            }
+            else
+            {
+                return;
+            }
+        }
+    }
+
+    // O(log(n)) time | O(1) space
+    void siftUp(int currentIdx)
+    {
+        int parentIdx = (currentIdx - 1) / 2;
+        while (currentIdx > 0 && heap->at(currentIdx)[1] < heap->at(parentIdx)[1])
+        {
+            swap(heap->at(currentIdx), heap->at(parentIdx));
+            currentIdx = parentIdx;
+            parentIdx = (currentIdx - 1) / 2;
+        }
+    }
+
+    vector<int> peek() { return heap->at(0); }
+
+    vector<int> remove()
+    {
+        swap(heap->at(0), heap->at(heap->size() - 1));
+        vector<int> valueToRemove = heap->back();
+        heap->pop_back();
+        siftDown(0, heap->size() - 1);
+        return valueToRemove;
+    }
+
+    void insert(vector<int> value)
+    {
+        heap->push_back(value);
+        siftUp(heap->size() - 1);
+    }
+};
+
+// O(n * log(n)) time | O(n) space - where n is the number of times
+int laptopRentals1(vector<vector<int>> times)
+{
+    const int timesSize = times.size();
+    if (timesSize == 0)
+        return 0;
+
+    sort(times.begin(), times.end(),
+         [](vector<int> a, vector<int> b)
+         { return a[0] < b[0]; });
+
+    vector<vector<int>> *timesWhenLaptopIsUsed =
+        new vector<vector<int>>{times[0]};
+    MinHeap *heap = new MinHeap(timesWhenLaptopIsUsed);
+
+    for (int idx = 1; idx < timesSize; idx++)
+    {
+        vector<int> currentInterval = times[idx];
+        if (heap->peek()[1] <= currentInterval[0])
+            heap->remove();
+
+        heap->insert(currentInterval);
+    }
+
+    return timesWhenLaptopIsUsed->size();
+}
+
+// O(n * log(n)) time | O(n) space - where n is the number of times
+int laptopRentals2(vector<vector<int>> times)
+{
+    const int timesSize = times.size();
+    if (timesSize == 0)
+        return 0;
+
+    int usedLaptops = 0;
+    vector<int> startTimes;
+    vector<int> endTimes;
+
+    for (auto interval : times)
+    {
+        startTimes.push_back(interval[0]);
+        endTimes.push_back(interval[1]);
+    }
+    sort(startTimes.begin(), startTimes.end());
+    sort(endTimes.begin(), endTimes.end());
+
+    int startIterator = 0;
+    int endIterator = 0;
+
+    while (startIterator < timesSize)
+    {
+        if (startTimes[startIterator] >= endTimes[endIterator])
+        {
+            usedLaptops--;
+            endIterator++;
+        }
+
+        usedLaptops++;
+        startIterator++;
+    }
+
+    return usedLaptops;
+}
+int main()
+{
+    vector<vector<int>> source = {{0, 2}, {1, 4}, {4, 6}, {0, 4}, {7, 8}, {9, 11}, {3, 10}};
+    cout << laptopRentals1(source) << endl;
+    cout << laptopRentals2(source) << endl;
+    return 0;
+}
+```
+
+Last Modified 2022-04-01
