@@ -161,9 +161,9 @@ public:
 
 void iteration(vector<int> array)
 {
-    for (const int value : array)
+    for (const int element : array)
     {
-        cout << value << " ";
+        cout << element << " ";
     }
     cout << endl;
 }
