@@ -159,7 +159,7 @@ public:
     }
 };
 
-void iteratorList(vector<int> array)
+void iteration(vector<int> array)
 {
     for (const int value : array)
     {
@@ -172,17 +172,17 @@ int main()
 {
     vector<int> source = {48, 12, 24, 7, 8, -5, 24, 391, 24, 56, 2, 6, 8, 41};
     MinHeap heap(source);
-    iteratorList(heap.heap);
+    iteration(heap.heap);
     heap.insert(36);
-    iteratorList(heap.heap);
+    iteration(heap.heap);
     cout << "peek " << heap.peek() << endl;
     cout << "remove " << heap.remove() << endl;
-    iteratorList(heap.heap);
+    iteration(heap.heap);
     cout << "peek " << heap.peek() << endl;
     cout << "remove " << heap.remove() << endl;
-    iteratorList(heap.heap);
+    iteration(heap.heap);
     heap.insert(67);
-    iteratorList(heap.heap);
+    iteration(heap.heap);
     return 0;
 }
 ```
@@ -1033,4 +1033,4 @@ int main()
 }
 ```
 
-Last Modified 2022-04-01
+Last Modified 2022-04-03

@@ -394,7 +394,7 @@ vector<int> threeNumberSort3(vector<int> array, vector<int> order)
     return array;
 }
 
-void iterArray(vector<int> array)
+void iteration(vector<int> array)
 {
     for (const int e : array)
     {
@@ -409,11 +409,11 @@ int main()
     vector<int> order = {-2, -3, 0};
     vector<int> result;
     result = threeNumberSort1(source, order);
-    iterArray(result);
+    iteration(result);
     result = threeNumberSort2(source, order);
-    iterArray(result);
+    iteration(result);
     result = threeNumberSort3(source, order);
-    iterArray(result);
+    iteration(result);
     return 0;
 }
 ```
@@ -913,4 +913,4 @@ int main()
 }
 ```
 
-Last Modified 2022-03-06
+Last Modified 2022-04-03

@@ -473,7 +473,7 @@ vector<vector<string>> groupAnagrams(vector<string> words)
     return output;
 }
 
-void iterArray(vector<vector<string>> array)
+void iteration(vector<vector<string>> array)
 {
     for (const vector<string> elements : array)
     {
@@ -490,7 +490,7 @@ void iterArray(vector<vector<string>> array)
 int main()
 {
     vector<string> source = {"yo", "act", "flop", "tac", "foo", "cat", "oy", "olfp"};
-    iterArray(groupAnagrams(source));
+    iteration(groupAnagrams(source));
     return 0;
 }
 ```
@@ -1524,18 +1524,13 @@ string join(vector<string> strings)
     return s;
 }
 
-void iterArray(vector<string> array)
+int main()
 {
-    for (const string element : array)
+    vector<string> result = validIPAddresses("1921680");
+    for (const string element : result)
     {
         cout << element << endl;
     }
-    cout << endl;
-}
-
-int main()
-{
-    iterArray(validIPAddresses("1921680"));
     return 0;
 }
 ```
@@ -2121,4 +2116,4 @@ int main()
 }
 ```
 
-Last Modified 2022-02-11
+Last Modified 2022-04-03

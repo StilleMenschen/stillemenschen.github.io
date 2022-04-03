@@ -888,7 +888,7 @@ vector<vector<int>> fourNumberSum(vector<int> array, int targetSum)
     return quadruplets;
 }
 
-void iterArrays(vector<vector<int>> array)
+void iteration(vector<vector<int>> array)
 {
     for (const vector<int> element : array)
     {
@@ -900,7 +900,7 @@ void iterArrays(vector<vector<int>> array)
 int main()
 {
     vector<int> source = {7, 6, 4, -1, 1, 2};
-    iterArrays(fourNumberSum(source, 16));
+    iteration(fourNumberSum(source, 16));
     return 0;
 }
 ```
@@ -1546,7 +1546,7 @@ bool isOutOfBounds(int row, int col, int height, int width)
     return row < 0 || row > height || col < 0 || col > width;
 }
 
-void iterArray(vector<int> array)
+void iteration(vector<int> array)
 {
     for (const int e : array)
     {
@@ -1557,12 +1557,12 @@ void iterArray(vector<int> array)
 
 int main()
 {
-    iterArray(zigzagTraverse({{1, 3, 4, 10},
+    iteration(zigzagTraverse({{1, 3, 4, 10},
                               {2, 5, 9, 11},
                               {6, 8, 12, 15},
                               {7, 13, 14, 16}}));
-    iterArray(zigzagTraverse({{1, 2, 3, 4, 5}}));
-    iterArray(zigzagTraverse({{1}, {2}, {3}, {4}, {5}}));
+    iteration(zigzagTraverse({{1, 2, 3, 4, 5}}));
+    iteration(zigzagTraverse({{1}, {2}, {3}, {4}, {5}}));
     return 0;
 }
 ```
@@ -2039,4 +2039,4 @@ int main()
 }
 ```
 
-Last Modified 2022-01-29
+Last Modified 2022-04-03

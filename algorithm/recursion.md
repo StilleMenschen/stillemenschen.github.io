@@ -237,7 +237,7 @@ void permutationsHelper2(size_t i, vector<int> &array,
     }
 }
 
-void iterationArray(const vector<vector<int>> &array)
+void iteration(const vector<vector<int>> &array)
 {
     for (size_t i = 0; i < array.size(); i++)
     {
@@ -257,9 +257,9 @@ int main()
     vector<int> source = {1, 2, 3};
     vector<vector<int>> result;
     result = getPermutations1(source);
-    iterationArray(result);
+    iteration(result);
     result = getPermutations2(source);
-    iterationArray(result);
+    iteration(result);
     return 0;
 }
 ```
@@ -349,7 +349,7 @@ vector<vector<int>> powerset2(vector<int> array)
     return subsets;
 }
 
-void iterationArray(const vector<vector<int>> &array)
+void iteration(const vector<vector<int>> &array)
 {
     for (size_t i = 0; i < array.size(); i++)
     {
@@ -369,9 +369,9 @@ int main()
     vector<int> source = {1, 2, 3};
     vector<vector<int>> result;
     result = powerset1(source);
-    iterationArray(result);
+    iteration(result);
     result = powerset2(source);
-    iterationArray(result);
+    iteration(result);
     return 0;
 }
 ```
@@ -1435,4 +1435,4 @@ int main()
 }
 ```
 
-Last Modified 2022-02-24
+Last Modified 2022-04-03

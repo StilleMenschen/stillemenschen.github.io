@@ -630,7 +630,7 @@ vector<int> sunsetViews2(vector<int> buildings, string direction)
     return candidateBuildings;
 }
 
-void iterArray(vector<int> array)
+void iteration(vector<int> array)
 {
     for (const int element : array)
     {
@@ -642,8 +642,8 @@ void iterArray(vector<int> array)
 int main()
 {
     vector<int> source = {3, 5, 4, 4, 3, 1, 3, 2};
-    iterArray(sunsetViews1(source, "EAST"));
-    iterArray(sunsetViews1(source, "WEST"));
+    iteration(sunsetViews1(source, "EAST"));
+    iteration(sunsetViews1(source, "WEST"));
     return 0;
 }
 ```
@@ -836,7 +836,7 @@ vector<int> nextGreaterElement2(vector<int> array)
     return result;
 }
 
-void iterArray(vector<int> array)
+void iteration(vector<int> array)
 {
     for (const int element : array)
     {
@@ -848,8 +848,8 @@ void iterArray(vector<int> array)
 int main()
 {
     vector<int> source = {-3, -5, 1, 4, 6, 8, 2};
-    iterArray(nextGreaterElement1(source));
-    iterArray(nextGreaterElement2(source));
+    iteration(nextGreaterElement1(source));
+    iteration(nextGreaterElement2(source));
     return 0;
 }
 ```
@@ -988,4 +988,4 @@ int main()
 }
 ```
 
-Last Modified 2022-02-12
+Last Modified 2022-04-03
