@@ -29,3 +29,4 @@
   - [Design: Amazon](system-design/design-amazon.md)
   - [Design: The Reddit API](system-design/design-the-reddit-api.md)
   - [Design: Facebook News Feed](system-design/design-facebook-news-feed.md)
+  - [Design: Google Drive](system-design/design-google-drive.md)
