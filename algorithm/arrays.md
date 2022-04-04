@@ -1567,26 +1567,37 @@ int main()
 }
 ```
 
-## 寻找合适公寓
+## 合适的公寓
+
+给定一组公寓数据和一个需求列表，公寓数据为一个字典数据，里面存储了该公寓是否存在某个需求（如健身房、学校、商店等等），公寓数据的索引也同时表示其位置，
+而需求列表则表示期望在公寓中找到特定的需求且每一个需求的相对距离都是最小的，找出最合适的公寓位置（索引）
 
 ```python
-# O(b^2 * r) time | O(b) space
-def apartment_hunting1(blocks, request_lists):
-    max_distances_at_blocks = [float('-inf') for _ in blocks]
-    length = len(blocks)
-    for i in range(length):
-        for req in request_lists:
-            closest_req_distance = float('inf')
-            for j in range(length):
+# O(b^2*r) time | O(b) space - where b is the number of blocks and r is the number of requirements
+def apartment_hunting1(blocks, reqs):
+    # 记录每个公寓的每个需求中最大距离的需求
+    max_distances_at_blocks = [float("-inf") for _ in blocks]
+    # 遍历每个公寓
+    for i in range(len(blocks)):
+        # 在每个公寓中遍历每个需求
+        for req in reqs:
+            # 根据特定需求, 得出距离此公寓最近的一处位置
+            closest_req_distance = float("inf")
+            for j in range(len(blocks)):
+                # 如果搜索的公寓存在此需求
                 if blocks[j][req]:
+                    # 计算最小的距离, 由于可能存在小值减去大值的情况, 这里使用绝对值
                     closest_req_distance = min(closest_req_distance, distance_between(i, j))
+            # 遍历一个需求完成后, 更新最大距离
             max_distances_at_blocks[i] = max(max_distances_at_blocks[i], closest_req_distance)
+    # 由于已经知道了每个公寓中某个需求的最大距离, 只要找出需求最大距离相对于其它公寓是最小的, 就是最佳的位置了
     return get_idx_at_min_value(max_distances_at_blocks)
 
 
 def get_idx_at_min_value(array):
     idx_at_min_value = 0
-    min_value = float('inf')
+    # 最小值设置为无穷大, 方便比较
+    min_value = float("inf")
     for i in range(len(array)):
         current_value = array[i]
         if current_value < min_value:
@@ -1599,46 +1610,187 @@ def distance_between(a, b):
     return abs(a - b)
 
 
-# O(br) time | O(b * r) space
-def apartment_hunting2(blocks, request_lists):
-    min_distances_from_blocks = list(map(lambda req: get_min_distances(blocks, req), request_lists))
-    max_distance_at_blocks = get_max_distance_at_blocks(blocks, min_distances_from_blocks)
-    return get_idx_at_min_value(max_distance_at_blocks)
+# O(br) time | O(br) space - where b is the number of blocks and r is the number of requirements
+def apartment_hunting2(blocks, reqs):
+    # 直接求出每个需求在每个公寓中的最小距离
+    min_distances_from_blocks = list(map(lambda req: get_min_distances(blocks, req), reqs))
+    # 通过每个需求在每个公寓中的最小距离得出某个需求最大距离
+    max_distances_at_blocks = get_max_distances_at_blocks(blocks, min_distances_from_blocks)
+    # 由于已经知道了每个公寓中某个需求的最大距离, 只要找出需求最大距离相对于其它公寓是最小的, 就是最佳的位置了
+    return get_idx_at_min_value(max_distances_at_blocks)
 
 
 def get_min_distances(blocks, req):
+    # 记录指定需求相对当前位置的最小距离
     min_distances = [0 for _ in blocks]
-    closest_req_idx = float('inf')
+    # 记录存在指定需求的位置
+    closest_req_idx = float("inf")
+    # 1. 从左向右计算一次
     for i in range(len(blocks)):
+        # 只要存在指定需求则更新位置缓存
         if blocks[i][req]:
             closest_req_idx = i
+        # 计算最小的距离, 由于可能存在小值减去大值的情况, 这里使用绝对值
         min_distances[i] = distance_between(i, closest_req_idx)
+    # 2. 从右向左再计算一次
     for i in reversed(range(len(blocks))):
         if blocks[i][req]:
             closest_req_idx = i
+        # 由于第一次计算已经有缓存, 这里需要先做最小值比较再进行记录
         min_distances[i] = min(min_distances[i], distance_between(i, closest_req_idx))
     return min_distances
 
 
-def get_max_distance_at_blocks(blocks, min_distance_form_blocks):
-    max_distance_at_blocks = [0 for _ in blocks]
+def get_max_distances_at_blocks(blocks, min_distances_from_blocks):
+    # 记录每个公寓的每个需求中最大距离的需求
+    max_distances_at_blocks = [0 for _ in blocks]
     for i in range(len(blocks)):
-        min_distance_at_block = list(map(lambda distances: distances[i], min_distance_form_blocks))
-        max_distance_at_blocks[i] = max(min_distance_at_block)
-    return max_distance_at_blocks
+        # 由于每个公寓的需求有多个, 这里需要聚合相对于每个公寓索引处的所有需求最小距离
+        min_distances_at_block = list(map(lambda distances: distances[i], min_distances_from_blocks))
+        # 然后再根据获得的多个需求最小距离计算最大距离
+        max_distances_at_blocks[i] = max(min_distances_at_block)
+    return max_distances_at_blocks
 
 
 if __name__ == '__main__':
-    block = [
-        {'School': True, 'Gym': False, 'Store': False},
-        {'School': False, 'Gym': True, 'Store': False},
-        {'School': True, 'Gym': True, 'Store': False},
-        {'School': True, 'Gym': False, 'Store': False},
-        {'School': True, 'Gym': False, 'Store': True}
+    apartments = [
+        {'gym': False, 'school': True, 'store': False},
+        {'gym': True, 'school': False, 'store': False},
+        {'gym': True, 'school': True, 'store': False},
+        {'gym': False, 'school': True, 'store': False},
+        {'gym': False, 'school': True, 'store': True}
     ]
-    r = ['Gym', 'School', 'Store']
-    print(apartment_hunting1(block, r))
-    print(apartment_hunting2(block, r))
+    requirements = ['gym', 'school', 'store']
+    print(apartment_hunting1(apartments, requirements))
+    print(apartment_hunting2(apartments, requirements))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <climits>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+
+int getIdxAtMinValue(vector<int> array);
+int distanceBetween(int a, int b);
+
+// O(b^2*r) time | O(b) space - where b is the number of blocks and r is the number of requirements
+int apartmentHunting1(vector<unordered_map<string, bool>> blocks, vector<string> reqs)
+{
+    const int blocksSize = blocks.size();
+    vector<int> maxDistancesAtBlocks(blocksSize, INT_MIN);
+    for (int i = 0; i < blocksSize; i++)
+    {
+        for (string req : reqs)
+        {
+            int closestReqDistance = INT_MAX;
+            for (int j = 0; j < blocksSize; j++)
+            {
+                if (blocks[j][req])
+                {
+                    closestReqDistance = min(closestReqDistance, distanceBetween(i, j));
+                }
+            }
+            maxDistancesAtBlocks[i] =
+                max(maxDistancesAtBlocks[i], closestReqDistance);
+        }
+    }
+    return getIdxAtMinValue(maxDistancesAtBlocks);
+}
+
+int getIdxAtMinValue(vector<int> array)
+{
+    int idxAtMinValue = 0;
+    int minValue = INT_MAX;
+    const int arraySize = array.size();
+    for (int i = 0; i < arraySize; i++)
+    {
+        int currentValue = array[i];
+        if (currentValue < minValue)
+        {
+            minValue = currentValue;
+            idxAtMinValue = i;
+        }
+    }
+    return idxAtMinValue;
+}
+
+int distanceBetween(int a, int b)
+{
+    return abs(a - b);
+}
+
+vector<int> getMinDistances(vector<unordered_map<string, bool>> blocks, string req);
+vector<int> getMaxDistancesAtBlocks(vector<unordered_map<string, bool>> blocks,
+                                    vector<vector<int>> minDistancesFromBlocks);
+
+// O(br) time | O(br) space - where b is the number of blocks and r is the number of requirements
+int apartmentHunting2(vector<unordered_map<string, bool>> blocks,
+                      vector<string> reqs)
+{
+    vector<vector<int>> minDistancesFromBlocks;
+    for (string req : reqs)
+    {
+        minDistancesFromBlocks.push_back(getMinDistances(blocks, req));
+    }
+    vector<int> maxDistancesAtBlocks = getMaxDistancesAtBlocks(blocks, minDistancesFromBlocks);
+    return getIdxAtMinValue(maxDistancesAtBlocks);
+}
+
+vector<int> getMinDistances(vector<unordered_map<string, bool>> blocks, string req)
+{
+    const int blocksSize = blocks.size();
+    vector<int> minDistances(blocksSize);
+    int closestReqIdx = INT_MAX;
+
+    for (int i = 0; i < blocksSize; i++)
+    {
+        if (blocks[i][req])
+            closestReqIdx = i;
+        minDistances[i] = distanceBetween(i, closestReqIdx);
+    }
+    for (int i = blocksSize - 1; i >= 0; i--)
+    {
+        if (blocks[i][req])
+            closestReqIdx = i;
+        minDistances[i] = min(minDistances[i], distanceBetween(i, closestReqIdx));
+    }
+    return minDistances;
+}
+
+vector<int> getMaxDistancesAtBlocks(vector<unordered_map<string, bool>> blocks,
+                                    vector<vector<int>> minDistancesFromBlocks)
+{
+    const int blocksSize = blocks.size();
+    vector<int> maxDistancesAtBlocks(blocksSize);
+    for (int i = 0; i < blocksSize; i++)
+    {
+        vector<int> minDistancesAtBlock;
+        for (vector<int> distances : minDistancesFromBlocks)
+        {
+            minDistancesAtBlock.push_back(distances[i]);
+        }
+        maxDistancesAtBlocks[i] = *max_element(minDistancesAtBlock.begin(), minDistancesAtBlock.end());
+    }
+    return maxDistancesAtBlocks;
+}
+
+int main()
+{
+    vector<unordered_map<string, bool>> apartments = {
+        {{"gym", false}, {"school", true}, {"store", false}},
+        {{"gym", true}, {"school", false}, {"store", false}},
+        {{"gym", true}, {"school", true}, {"store", false}},
+        {{"gym", false}, {"school", true}, {"store", false}},
+        {{"gym", false}, {"school", true}, {"store", true}}};
+    vector<string> requirements = {"gym", "school", "store"};
+    cout << apartmentHunting1(apartments, requirements) << endl;
+    cout << apartmentHunting2(apartments, requirements) << endl;
+    return 0;
+}
 ```
 
 ## 日程表匹配
@@ -2039,4 +2191,4 @@ int main()
 }
 ```
 
-Last Modified 2022-04-03
+Last Modified 2022-04-04
