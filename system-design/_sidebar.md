@@ -32,3 +32,4 @@
   - [Design: Google Drive](system-design/design-google-drive.md)
   - [Design: Netflix](system-design/design-netflix.md)
   - [Design: The Uber API](system-design/design-the-uber-api.md)
+  - [Design: Tinder](system-design/design-tinder.md)
