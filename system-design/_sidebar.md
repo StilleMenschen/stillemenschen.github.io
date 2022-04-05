@@ -31,3 +31,4 @@
   - [Design: Facebook News Feed](system-design/design-facebook-news-feed.md)
   - [Design: Google Drive](system-design/design-google-drive.md)
   - [Design: Netflix](system-design/design-netflix.md)
+  - [Design: The Uber API](system-design/design-the-uber-api.md)
