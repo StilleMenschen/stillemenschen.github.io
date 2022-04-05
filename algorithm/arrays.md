@@ -1798,99 +1798,293 @@ int main()
 在两个日程表以及对应日程表的工作时间范围内，找出符合指定会议时间的可用会议时段
 
 ```python
-# O(c1 + c2) time | O(c1 + c2) space
+# O(c1 + c2) time | O(c1 + c2) space - where c1 and c2 are the respective numbers of meetings in calendar1 and calendar2
 def calendar_matching(calendar1, daily_bounds1, calendar2, daily_bounds2, meeting_duration):
+    # 先将日程表和工作时间转为一个比较直观的日程表, 非工作时间可以认为是日程中的一部分, 不可以安排会仪
     updated_calendar1 = update_calendar(calendar1, daily_bounds1)
     updated_calendar2 = update_calendar(calendar2, daily_bounds2)
-    merged_calendar = merge_calendar(updated_calendar1, updated_calendar2)
+    # 合并两个日程表
+    merged_calendar = merge_calendars(updated_calendar1, updated_calendar2)
+    # 筛选日程表中时间间隔有重叠的部分, 如 9:30 - 12:00 与 10:25 - 13:45 实际可以合并为 9:30 - 13:45
     flattened_calendar = flatten_calendar(merged_calendar)
+    # 搜索筛选后的日程表, 找出合适的会议时间段
     return get_matching_availabilities(flattened_calendar, meeting_duration)
 
 
 def update_calendar(calendar, daily_bounds):
+    # 复制一个新的日程表, 这里注意要复制数据, 保证不修改原始的数据
     updated_calendar = calendar[:]
-    updated_calendar.insert(0, ('0:00', daily_bounds[0],))
-    updated_calendar.append((daily_bounds[1], '23:59',))
-    return list(map(lambda m: (time_to_minutes(m[0]), time_to_minutes(m[1]),), updated_calendar))
+    # 添加前部分为一天的开始时间到工作的开始时间
+    updated_calendar.insert(0, ["0:00", daily_bounds[0]])
+    # 添加后部分为工作的结束时间到一天的结束时间
+    updated_calendar.append([daily_bounds[1], "23:59"])
+    # 将时间字符串转为分钟数, 方便进行比较
+    return list(map(time_pair_to_minutes_pair, updated_calendar))
 
 
-def merge_calendar(calendar1, calendar2):
-    merged = list()
+def merge_calendars(calendar1, calendar2):
+    merged = []
     i, j = 0, 0
-    length1 = len(calendar1)
-    length2 = len(calendar2)
-    while i < length1 and j < length2:
+    calendar_one_length = len(calendar1)
+    calendar_two_length = len(calendar2)
+    # 合并两个日程表
+    while i < calendar_one_length and j < calendar_two_length:
         meeting1, meeting2 = calendar1[i], calendar2[j]
+        # 简单地比较两个日程表当前位置的日程开始时间, 优先把开始时间小的添加到合并的日程表中
         if meeting1[0] < meeting2[0]:
             merged.append(meeting1)
             i += 1
         else:
             merged.append(meeting2)
             j += 1
-    while i < length1:
+    # 如果两个日程表中还存在未添加完的日程则继续将其添加完毕
+    while i < calendar_one_length:
         merged.append(calendar1[i])
         i += 1
-    while j < length2:
+    while j < calendar_two_length:
         merged.append(calendar2[j])
         j += 1
     return merged
 
 
 def flatten_calendar(calendar):
+    # 合并日程需要与前一个日程进行比较, 所以合并记录表初始值为原日程表中的第一个日程, 这里注意要复制数据, 保证不修改原始的数据
     flattened = [calendar[0][:]]
+    # 从第二个日程开始
     for i in range(1, len(calendar)):
         current_meeting = calendar[i]
+        # 每次都需要取合并记录表中的最后一个日程进行比较
         previous_meeting = flattened[-1]
         current_start, current_end = current_meeting
         previous_start, previous_end = previous_meeting
+        # 判断前一个日程的结束时间是否覆盖到了当前日程开始时间
         if previous_end >= current_start:
-            new_previous_meeting = (previous_start, max(previous_end, current_end),)
+            # 如果存在覆盖的情况, 仅更新最后一个日程表
+            new_previous_meeting = [previous_start, max(previous_end, current_end)]
             flattened[-1] = new_previous_meeting
         else:
+            # 如果没有重叠则将当前日程添加到合并记录表中, 这里注意要复制数据, 保证不修改原始的数据
             flattened.append(current_meeting[:])
     return flattened
 
 
 def get_matching_availabilities(calendar, meeting_duration):
-    matching_availabilities = list()
+    matching_availabilities = []
+    # 搜索合适的会议时间段, 因为需要和前一个日程进行比较, 所以这里从第二个位置开始
     for i in range(1, len(calendar)):
+        # 取前一个日程的结束时间
         start = calendar[i - 1][1]
+        # 取当前日程的开始时间
         end = calendar[i][0]
-        availabilities_duration = end - start
-        if availabilities_duration >= meeting_duration:
-            matching_availabilities.append((start, end,))
-    return list(map(lambda m: (minutes_to_time(m[0]), minutes_to_time(m[1]),), matching_availabilities))
+        # 判断时间间隔是否与需求符合
+        availability_duration = end - start
+        # 如果符合需求则添加到记录中
+        if availability_duration >= meeting_duration:
+            matching_availabilities.append([start, end])
+    # 最后需要再将分钟表示的时间转换为时间字符串
+    return list(map(minutes_pair_to_time_pair, matching_availabilities))
 
 
 def time_to_minutes(time):
-    hours, minutes = list(map(int, time.split(':')))
+    hours, minutes = list(map(int, time.split(":")))
     return hours * 60 + minutes
+
+
+def time_pair_to_minutes_pair(time_pair):
+    return [time_to_minutes(time_pair[0]), time_to_minutes(time_pair[1])]
 
 
 def minutes_to_time(minutes):
     hours = minutes // 60
     minute = minutes % 60
     hours_string = str(hours)
-    minute_string = '0' + str(minute) if minute < 10 else str(minute)
-    return ':'.join((hours_string, minute_string,))
+    minutes_string = "0" + str(minute) if minute < 10 else str(minute)
+    return hours_string + ":" + minutes_string
 
 
-if __name__ == '__main__':
-    cal1 = [
-        ('9:00', '10:30',),
-        ('12:00', '13:00',),
-        ('16:00', '18:00',)
-    ]
-    db1 = ('9:00', '20:00',)
-    cal2 = [
-        ('10:00', '11:30',),
-        ('12:30', '14:30',),
-        ('14:30', '15:00',),
-        ('16:00', '17:00',)
-    ]
-    db2 = ('10:00', '18:30',)
-    duration = 30
-    print(calendar_matching(cal1, db1, cal2, db2, duration))
+def minutes_pair_to_time_pair(minutes_pair):
+    return [minutes_to_time(minutes_pair[0]), minutes_to_time(minutes_pair[1])]
+
+
+def algo():
+    print(calendar_matching(
+        [["9:00", "10:30"], ["12:00", "13:00"], ["16:00", "18:00"]],
+        ["9:00", "20:00"],
+        [["10:00", "11:30"], ["12:30", "14:30"], ["14:30", "15:00"], ["16:00", "17:00"]],
+        ["10:00", "18:30"], 30))
+```
+
+```cpp
+#include <iostream>
+#include <cmath>
+#include <vector>
+
+using namespace std;
+
+struct StringMeeting
+{
+    string start;
+    string end;
+};
+
+struct Meeting
+{
+    int start;
+    int end;
+};
+
+vector<Meeting> updateCalendar(vector<StringMeeting> calendar, StringMeeting dailyBounds);
+vector<Meeting> mergeCalendars(vector<Meeting> calendar1, vector<Meeting> calendar2);
+vector<Meeting> flattenCalendar(vector<Meeting> calendar);
+vector<StringMeeting> getMatchingAvailabilities(vector<Meeting> calendar, int meetingDuration);
+int timeToMinutes(string time);
+string minutesToTime(int minutes);
+
+// O(c1 + c2) time | O(c1 + c2) space - where c1 and c2 are the respective numbers of meetings in calendar1 and calendar2
+vector<StringMeeting> calendarMatching(vector<StringMeeting> calendar1,
+                                       StringMeeting dailyBounds1,
+                                       vector<StringMeeting> calendar2,
+                                       StringMeeting dailyBounds2,
+                                       int meetingDuration)
+{
+    vector<Meeting> updatedCalendar1 = updateCalendar(calendar1, dailyBounds1);
+    vector<Meeting> updatedCalendar2 = updateCalendar(calendar2, dailyBounds2);
+    vector<Meeting> mergedCalendar = mergeCalendars(updatedCalendar1, updatedCalendar2);
+    vector<Meeting> flattenedCalendar = flattenCalendar(mergedCalendar);
+    return getMatchingAvailabilities(flattenedCalendar, meetingDuration);
+}
+
+vector<Meeting> updateCalendar(vector<StringMeeting> calendar,
+                               StringMeeting dailyBounds)
+{
+    vector<StringMeeting> updatedCalendar;
+    updatedCalendar.push_back({"0:00", dailyBounds.start});
+    updatedCalendar.insert(updatedCalendar.end(), calendar.begin(),
+                           calendar.end());
+    updatedCalendar.push_back({dailyBounds.end, "23:59"});
+    vector<Meeting> calendarInMinutes;
+    const int updatedCalendarSize = updatedCalendar.size();
+    for (int i = 0; i < updatedCalendarSize; i++)
+    {
+        calendarInMinutes.push_back({timeToMinutes(updatedCalendar[i].start),
+                                     timeToMinutes(updatedCalendar[i].end)});
+    }
+    return calendarInMinutes;
+}
+
+vector<Meeting> mergeCalendars(vector<Meeting> calendar1, vector<Meeting> calendar2)
+{
+    vector<Meeting> merged;
+    int i = 0;
+    int j = 0;
+    const int calendar1Size = calendar1.size();
+    const int calendar2Size = calendar2.size();
+    while (i < calendar1Size && j < calendar2Size)
+    {
+        Meeting meeting1 = calendar1[i];
+        Meeting meeting2 = calendar2[j];
+        if (meeting1.start < meeting2.start)
+        {
+            merged.push_back(meeting1);
+            i++;
+        }
+        else
+        {
+            merged.push_back(meeting2);
+            j++;
+        }
+    }
+    while (i < calendar1Size)
+        merged.push_back(calendar1[i++]);
+    while (j < calendar2Size)
+        merged.push_back(calendar2[j++]);
+    return merged;
+}
+
+vector<Meeting> flattenCalendar(vector<Meeting> calendar)
+{
+    vector<Meeting> flattened = {calendar[0]};
+    const int calendarSize = calendar.size();
+    for (int i = 1; i < calendarSize; i++)
+    {
+        Meeting currentMeeting = calendar[i];
+        Meeting previousMeeting = flattened[flattened.size() - 1];
+        if (previousMeeting.end >= currentMeeting.start)
+        {
+            Meeting newPreviousMeeting = {
+                previousMeeting.start, max(previousMeeting.end, currentMeeting.end)};
+            flattened[flattened.size() - 1] = newPreviousMeeting;
+        }
+        else
+        {
+            flattened.push_back(currentMeeting);
+        }
+    }
+    return flattened;
+}
+
+vector<StringMeeting> getMatchingAvailabilities(vector<Meeting> calendar, int meetingDuration)
+{
+    vector<Meeting> matchingAvailabilities;
+    const int calendarSize = calendar.size();
+
+    for (int i = 1; i < calendarSize; i++)
+    {
+        int start = calendar[i - 1].end;
+        int end = calendar[i].start;
+        int availabilityDuration = end - start;
+        if (availabilityDuration >= meetingDuration)
+        {
+            matchingAvailabilities.push_back({start, end});
+        }
+    }
+
+    vector<StringMeeting> matchingAvailabilitiesInHours;
+    const int matchingAvailabilitiesSize = matchingAvailabilities.size();
+    for (int i = 0; i < matchingAvailabilitiesSize; i++)
+    {
+        matchingAvailabilitiesInHours.push_back(
+            {minutesToTime(matchingAvailabilities[i].start),
+             minutesToTime(matchingAvailabilities[i].end)});
+    }
+    return matchingAvailabilitiesInHours;
+}
+
+int timeToMinutes(string time)
+{
+    int delimiterPos = time.find(":");
+    int hours = stoi(time.substr(0, delimiterPos));
+    int minutes = stoi(time.substr(delimiterPos + 1, time.length()));
+    return hours * 60 + minutes;
+}
+
+string minutesToTime(int minutes)
+{
+    int hours = minutes / 60;
+    int mins = minutes % 60;
+    string hoursString = to_string(hours);
+    string minutesString = mins < 10 ? "0" + to_string(mins) : to_string(mins);
+    return hoursString + ":" + minutesString;
+}
+
+void iteration(vector<StringMeeting> meetings)
+{
+    cout << "[ ";
+    for (StringMeeting element : meetings)
+    {
+        cout << "[" << element.start << ", " << element.end << "] ";
+    }
+    cout << "]" << endl;
+}
+
+int main()
+{
+    iteration(calendarMatching({{"9:00", "10:30"}, {"12:00", "13:00"}, {"16:00", "18:00"}},
+                               {"9:00", "20:00"},
+                               {{"10:00", "11:30"}, {"12:30", "14:30"}, {"14:30", "15:00"}, {"16:00", "17:00"}},
+                               {"10:00", "18:30"}, 30));
+    return 0;
+}
 ```
 
 ## 瀑布流
@@ -2191,4 +2385,4 @@ int main()
 }
 ```
 
-Last Modified 2022-04-04
+Last Modified 2022-04-05
