@@ -2093,62 +2093,182 @@ int main()
 分为二向左和向右流动，遇到可以向下流动的位置后继续往下，计算出最后到达瀑布底部剩余的水量百分比
 
 ```python
-# O(w^2 * h) time | O(w) space
+# O(w^2 * h) time | O(w) space - where w and h
+# are the width and height of the input array
 def waterfall_streams(array, source):
+    # 取第一行作为起始
     row_above = array[0][:]
+    # 使用 -1 表示水流, 1 已经用来表示墙壁了
     row_above[source] = -1
-
+    # 从第二行开始
     for row in range(1, len(array)):
+        # 取出当前行, 使用复制, 保证不修改原始的数据
         current_row = array[row][:]
-
+        # 遍历当前行
         for idx in range(len(row_above)):
+            # 取出上一行对应列的值
             value_above = row_above[idx]
-
+            # 判断是否包含有水流 -1
             has_water_above = value_above < 0
-            has_block = current_row[idx] == 1
-
+            # 没有水流则表示当前列不能流动水, 跳过
             if not has_water_above:
                 continue
-
+            # 判断是否为墙壁
+            has_block = current_row[idx] == 1
+            # 如果当前列不是墙壁, 表示水流可以继续向下
             if not has_block:
+                # 由于水流可能会汇聚, 所以这里使用加等于计算
                 current_row[idx] += value_above
                 continue
-
+            # 如果遇到了墙壁, 水流将会平分
             split_water = value_above / 2
-            right_idx = idx
-            length = len(row_above) - 1
-            while right_idx < length:
-                right_idx += 1
-                if row_above[right_idx] == 1:
-                    break
-                if current_row[right_idx] != 1:
-                    current_row[right_idx] += split_water
-                    break
 
+            # 向左判断找到水流可以向下的位置
             left_idx = idx
-            while left_idx > 1:
+            while left_idx - 1 >= 0:
                 left_idx -= 1
+                # 如果上一行的当前位置为墙壁, 意味着水流被阻挡, 不能向下流动了
                 if row_above[left_idx] == 1:
                     break
+                # 如果不是墙壁则让水流继续向下, 由于水流可能会汇聚, 所以这里使用加等于计算
                 if current_row[left_idx] != 1:
                     current_row[left_idx] += split_water
                     break
+            # 向右判断找到水流可以向下的位置
+            right_idx = idx
+            while right_idx + 1 < len(row_above):
+                right_idx += 1
+                # 如果上一行的当前位置为墙壁, 意味着水流被阻挡, 不能向下流动了
+                if row_above[right_idx] == 1:
+                    break
+                # 如果不是墙壁则让水流继续向下, 由于水流可能会汇聚, 所以这里使用加等于计算
+                if current_row[right_idx] != 1:
+                    current_row[right_idx] += split_water
+                    break
+        # 将当前行切换为下一行的上一行
         row_above = current_row
 
+    # 由于需要返回实际的百分比, 前面使用 -1 来表示水流的量, 这里需要转换为正数的百分比
     final_percentages = list(map(lambda num: num * -100, row_above))
 
     return final_percentages
 
 
 if __name__ == '__main__':
-    a = [[0, 0, 0, 0, 0, 0, 0],
-         [1, 0, 0, 0, 0, 0, 0],
-         [0, 0, 1, 1, 1, 0, 0],
-         [0, 0, 0, 0, 0, 0, 0],
-         [1, 1, 1, 0, 0, 1, 0],
-         [0, 0, 0, 0, 0, 0, 1],
-         [0, 0, 0, 0, 0, 0, 0]]
-    print(waterfall_streams(a, 3))
+    print(waterfall_streams([
+        [0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 1, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 0, 0, 1, 0],
+        [0, 0, 0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 0, 0, 0]], 3))
+```
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// O(w^2 * h) time | O(w) space - where w and h
+// are the width and height of the input array
+vector<double> waterfallStreams(vector<vector<double>> array, int source)
+{
+    vector<double> rowAbove = array[0];
+    // We'll use -1 to represent water, since 1 is used for a block.
+    rowAbove[source] = -1;
+    const int arraySize = array.size();
+    for (int row = 1; row < arraySize; row++)
+    {
+        const int rowAboveSize = rowAbove.size();
+        vector<double> currentRow = array[row];
+        for (int idx = 0; idx < rowAboveSize; idx++)
+        {
+            double valueAbove = rowAbove[idx];
+
+            bool hasWaterAbove = valueAbove < 0;
+            bool hasBlock = currentRow[idx] == 1.0;
+
+            if (!hasWaterAbove)
+            {
+                continue;
+            }
+
+            if (!hasBlock)
+            {
+                // If there is no block in the current column, move the water down.
+                currentRow[idx] += valueAbove;
+                continue;
+            }
+
+            double splitWater = valueAbove / 2;
+            // Move water right.
+            int rightIdx = idx;
+            while (rightIdx + 1 < rowAboveSize)
+            {
+                rightIdx += 1;
+                if (rowAbove[rightIdx] == 1.0)
+                { // if there is a block in the way
+                    break;
+                }
+                if (currentRow[rightIdx] != 1)
+                { // if there is no block below us
+                    currentRow[rightIdx] += splitWater;
+                    break;
+                }
+            }
+
+            // Move water left.
+            int leftIdx = idx;
+            while (leftIdx - 1 >= 0)
+            {
+                leftIdx -= 1;
+                if (rowAbove[leftIdx] == 1.0)
+                { // if there is a block in the way
+                    break;
+                }
+                if (currentRow[leftIdx] != 1.0)
+                { // if there is no block below us
+                    currentRow[leftIdx] += splitWater;
+                    break;
+                }
+            }
+        }
+
+        rowAbove = currentRow;
+    }
+
+    vector<double> finalPercentages;
+    for (double num : rowAbove)
+    {
+        if (num == 0)
+        {
+            finalPercentages.push_back(num);
+        }
+        else
+        {
+            finalPercentages.push_back(num * -100);
+        }
+    }
+    return finalPercentages;
+}
+
+int main()
+{
+    vector<double> result = waterfallStreams(
+        {{0, 0, 0, 0, 0, 0, 0},
+         {1, 0, 0, 0, 0, 0, 0},
+         {0, 0, 1, 1, 1, 0, 0},
+         {0, 0, 0, 0, 0, 0, 0},
+         {1, 1, 1, 0, 0, 1, 0},
+         {0, 0, 0, 0, 0, 0, 1},
+         {0, 0, 0, 0, 0, 0, 0}},
+        3);
+    for (const double element : result)
+    {
+        cout << element << " ";
+    }
+    return 0;
+}
 ```
 
 ## 锦标赛冠军
@@ -2363,7 +2483,7 @@ if __name__ == '__main__':
 using namespace std;
 
 // O(n) time | O(1) space
-int kadanesAlgorithm( vector<int> array)
+int kadanesAlgorithm(vector<int> array)
 {
     int maxEndingHere = array[0];
     int maxSoFar = array[0];
@@ -2385,4 +2505,4 @@ int main()
 }
 ```
 
-Last Modified 2022-04-05
+Last Modified 2022-04-06
