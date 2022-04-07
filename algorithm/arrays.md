@@ -2164,6 +2164,7 @@ if __name__ == '__main__':
         [0, 0, 0, 0, 0, 0, 1],
         [0, 0, 0, 0, 0, 0, 0]], 3))
 ```
+
 ```cpp
 #include <iostream>
 #include <vector>
@@ -2505,4 +2506,250 @@ int main()
 }
 ```
 
-Last Modified 2022-04-06
+## 最小面积矩形
+
+给定一个数组，数组的每个元素分布表示一个平面中的坐标点，数组中的坐标点不会重复，在平面中能够连接四个坐标点并组成一个矩形，
+矩形的四条边必须和坐标轴平行，找出所有矩形中面积最小并返回最小面积
+
+```python
+# O(n^2) time | O(n) space - where n is the number of points
+def minimum_area_rectangle1(points):
+    # 创建一个字典, 将所有的 X 轴作为 KEY, 而不同的多个 Y 轴作为数组值
+    columns = initialize_columns(points)
+    # 默认最小值设置为无穷大, 方便后面做比较
+    minimum_area_found = float("inf")
+    # 记录同 X 轴的两个 Y 轴点组成的边
+    edges_parallel_to_y_axis = {}
+    # 排序 X 轴坐标, 从小到大搜索
+    sorted_columns = sorted(columns.keys())
+    for x in sorted_columns:
+        # 取出 X 轴对应的 Y 轴点
+        y_values_in_current_column = columns[x]
+        # 从小到大搜索
+        y_values_in_current_column.sort()
+
+        for current_idx, y2 in enumerate(y_values_in_current_column):
+            # 取前面的 Y 轴点和当前的 Y 轴点组成一条边
+            for previous_idx in range(current_idx):
+                y1 = y_values_in_current_column[previous_idx]
+                # 拼接两个 Y 轴表示一条边
+                point_string = convert_point_to_string(y1, y2)
+                # 判断是否存在同 Y 轴但不同 X 轴的边
+                if point_string in edges_parallel_to_y_axis:
+                    # 如果存在这条边则计算矩形面积
+                    current_area = (x - edges_parallel_to_y_axis[point_string]) * (y2 - y1)
+                    minimum_area_found = min(minimum_area_found, current_area)
+                # 记录当前这条边, 如果前面已经有这条边的记录则会被覆盖掉, 确保每条边只使用一次
+                edges_parallel_to_y_axis[point_string] = x
+    # 如果没有找到过合适的矩形则最小值仍然是无穷大, 返回 0, 否则返回找到的最小面积
+    return minimum_area_found if minimum_area_found != float("inf") else 0
+
+
+def initialize_columns(points):
+    columns = {}
+    # 简单地记录每个 X 轴对应的多个 Y 轴点
+    for point in points:
+        x, y = point
+        if x not in columns:
+            columns[x] = []
+
+        columns[x].append(y)
+
+    return columns
+
+
+# O(n^2) time | O(n) space - where n is the number of points
+def minimum_area_rectangle2(points):
+    # 创建一个坐标点的 SET 集合
+    point_set = create_point_set(points)
+    # 默认最小值设置为无穷大, 方便后面做比较
+    minimum_area_found = float("inf")
+    # 遍历每一个坐标点, 通过找矩形对角线的方式来搜索矩形并计算面积
+    for current_idx, p2 in enumerate(points):
+        p2x, p2y = p2
+        # 遍历当前坐标点前的坐标点
+        for previous_idx in range(current_idx):
+            p1x, p1y = points[previous_idx]
+            # 判断是否有 X 轴或者 Y 轴有相同
+            points_share_value = p1x == p2x or p1y == p2y
+            # 只有四个点才能构成一个矩形, X 轴和 Y 轴有相同意味着只有 3 个坐标点, 无法构成一个矩形
+            if points_share_value:
+                continue
+
+            # 判断两个坐标点对角线是否存在, 如矩形的左上角和右下角, 或者矩形的右上角和左下角
+            point1_on_opposite_diagonal_exists = convert_point_to_string(p1x, p2y) in point_set
+            point2_on_opposite_diagonal_exists = convert_point_to_string(p2x, p1y) in point_set
+            opposite_diagonal_exists = point1_on_opposite_diagonal_exists and point2_on_opposite_diagonal_exists
+            # 如果存在这个对角线, 即存在这四个坐标点, 则表示找到了一个矩形
+            if opposite_diagonal_exists:
+                # 计算矩形面积, 因为没有对坐标点进行排序可能存在相减为负数的情况, 所以取绝对值来作为长和宽计算矩形
+                current_area = abs(p2x - p1x) * abs(p2y - p1y)
+                minimum_area_found = min(minimum_area_found, current_area)
+    # 如果没有找到过合适的矩形则最小值仍然是无穷大, 返回 0, 否则返回找到的最小面积
+    return minimum_area_found if minimum_area_found != float("inf") else 0
+
+
+def create_point_set(points):
+    point_set = set()
+    # 将坐标点拼接起来记录到哈希表中
+    for point in points:
+        x, y = point
+        point_string = convert_point_to_string(x, y)
+        point_set.add(point_string)
+
+    return point_set
+
+
+def convert_point_to_string(x, y):
+    return str(x) + ":" + str(y)
+
+
+if __name__ == '__main__':
+    ps = [[1, 5], [5, 1], [4, 2], [2, 4], [2, 2], [1, 2], [4, 5], [2, 5], [-1, -2]]
+    print(minimum_area_rectangle1(ps))
+    print(minimum_area_rectangle2(ps))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <limits>
+#include <algorithm>
+#include <set>
+#include <cmath>
+using namespace std;
+
+unordered_map<int, vector<int>> initializeColumns(vector<vector<int>> points);
+string convertPointToString(int x, int y);
+
+// O(n^2) time | O(n) space - where n is the number of points
+int minimumAreaRectangle1(vector<vector<int>> points)
+{
+    auto columns = initializeColumns(points);
+    int minimumAreaFound = numeric_limits<int>::max();
+    unordered_map<string, int> edgesParallelToYAxis;
+
+    vector<int> sortedColumns;
+    for (auto it : columns)
+    {
+        sortedColumns.push_back(it.first);
+    }
+    sort(sortedColumns.begin(), sortedColumns.end());
+
+    for (auto x : sortedColumns)
+    {
+        vector<int> yValuesInCurrentColumn = columns[x];
+        sort(yValuesInCurrentColumn.begin(), yValuesInCurrentColumn.end());
+        for (size_t currentIdx = 0; currentIdx < yValuesInCurrentColumn.size();
+             currentIdx++)
+        {
+            int y2 = yValuesInCurrentColumn[currentIdx];
+            for (size_t previousIdx = 0; previousIdx < currentIdx; previousIdx++)
+            {
+                int y1 = yValuesInCurrentColumn[previousIdx];
+                string pointString = convertPointToString(y1, y2);
+
+                if (edgesParallelToYAxis.find(pointString) !=
+                    edgesParallelToYAxis.end())
+                {
+                    int currentArea = (x - edgesParallelToYAxis[pointString]) * (y2 - y1);
+                    minimumAreaFound = min(minimumAreaFound, currentArea);
+                }
+
+                edgesParallelToYAxis[pointString] = x;
+            }
+        }
+    }
+
+    return minimumAreaFound != numeric_limits<int>::max() ? minimumAreaFound : 0;
+}
+
+unordered_map<int, vector<int>> initializeColumns(vector<vector<int>> points)
+{
+    unordered_map<int, vector<int>> columns;
+
+    for (auto point : points)
+    {
+        int x = point[0];
+        int y = point[1];
+        if (columns.find(x) == columns.end())
+        {
+            columns[x] = {};
+        }
+        columns[x].push_back(y);
+    }
+
+    return columns;
+}
+
+set<string> createPointSet(vector<vector<int>> points);
+
+// O(n^2) time | O(n) space - where n is the number of points
+int minimumAreaRectangle2(vector<vector<int>> points)
+{
+    set<string> pointSet = createPointSet(points);
+    int minimumAreaFound = numeric_limits<int>::max();
+
+    for (size_t currentIdx = 0; currentIdx < points.size(); currentIdx++)
+    {
+        int p2x = points[currentIdx][0];
+        int p2y = points[currentIdx][1];
+        for (size_t previousIdx = 0; previousIdx < currentIdx; previousIdx++)
+        {
+            int p1x = points[previousIdx][0];
+            int p1y = points[previousIdx][1];
+            bool pointsShareValue = p1x == p2x || p1y == p2y;
+
+            if (pointsShareValue)
+                continue;
+
+            // If (p1x, p2y) and (p2x, p1y), exist we've found a rectangle.
+            bool point1OnOppositeDiagonalExists =
+                pointSet.find((convertPointToString(p1x, p2y))) != pointSet.end();
+            bool point2OnOppositeDiagonalExists =
+                pointSet.find((convertPointToString(p2x, p1y))) != pointSet.end();
+            bool oppositeDiagonalExists =
+                point1OnOppositeDiagonalExists && point2OnOppositeDiagonalExists;
+
+            if (oppositeDiagonalExists)
+            {
+                int currentArea = abs(p2x - p1x) * abs(p2y - p1y);
+                minimumAreaFound = min(minimumAreaFound, currentArea);
+            }
+        }
+    }
+
+    return minimumAreaFound != numeric_limits<int>::max() ? minimumAreaFound : 0;
+}
+
+set<string> createPointSet(vector<vector<int>> points)
+{
+    set<string> pointSet;
+
+    for (auto point : points)
+    {
+        int x = point[0];
+        int y = point[1];
+        string pointString = convertPointToString(x, y);
+        pointSet.insert(pointString);
+    }
+
+    return pointSet;
+}
+
+string convertPointToString(int x, int y)
+{
+    return to_string(x) + ":" + to_string(y);
+}
+
+int main()
+{
+    vector<vector<int>> points = {{1, 5}, {5, 1}, {4, 2}, {2, 4}, {2, 2}, {1, 2}, {4, 5}, {2, 5}, {-1, -2}};
+    cout << minimumAreaRectangle1(points) << endl;
+    cout << minimumAreaRectangle2(points) << endl;
+    return 0;
+}
+```
+
+Last Modified 2022-04-07
