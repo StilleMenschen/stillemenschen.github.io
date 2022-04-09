@@ -2752,4 +2752,188 @@ int main()
 }
 ```
 
-Last Modified 2022-04-07
+## 直线通过最多点数量
+
+给定一组数据，每个数据表示平面上的一个坐标点，坐标点可以使用一根直线连接起来，找出可以通过一根直线连接起来的最大坐标点数量
+
+```python
+# O(n^2) time | O(n) space - where n is the number of points
+def line_through_points(points):
+    # 默认直线至少通过一个点
+    max_number_of_points_on_line = 1
+    for idx1, p1 in enumerate(points):
+        # 记录遍历过的坐标点与当前坐标点的斜率, y = ax + b
+        # 值记录有相同斜率的两个坐标点, 如果有多个坐标点的斜率相同
+        # 说明直线可以通过这一些坐标点
+        slopes = {}
+        # 只计算当前位置之后的坐标点
+        for idx2 in range(idx1 + 1, len(points)):
+            p2 = points[idx2]
+            # 计算两个坐标点之间的斜率
+            rise, run = get_slope_of_line_between_points(p1, p2)
+            # 拼接一个 KEY 存入哈希表
+            slope_key = create_hashable_key_for_rational(rise, run)
+            # 如果没有这个 KEY 则新增一个
+            if slope_key not in slopes:
+                slopes[slope_key] = 1
+            # 累加 KEY 对应的数量
+            slopes[slope_key] += 1
+        # 重新计算直线可通过的最大坐标点数量, 如果斜率记录表中没有数据, 则默认取 0
+        max_number_of_points_on_line = max(max_number_of_points_on_line, max(slopes.values(), default=0))
+
+    return max_number_of_points_on_line
+
+
+def get_slope_of_line_between_points(p1, p2):
+    p1x, p1y = p1
+    p2x, p2y = p2
+    slope = [1, 0]  # 垂直的线的斜率
+    # 判断两个坐标点的 X 轴是否相同
+    # 不相同说明不是垂直的线
+    if p1x != p2x:
+        # 求出长宽
+        x_diff = p1x - p2x
+        y_diff = p1y - p2y
+        # 求出长宽的最大公因数
+        gcd = get_greatest_common_divisor(abs(x_diff), abs(y_diff))
+        # 通过最大公因数化简长宽比
+        x_diff = x_diff // gcd
+        y_diff = y_diff // gcd
+        if x_diff < 0:
+            x_diff *= -1
+            y_diff *= -1
+        # 保存斜率, 这里没有之间去计算长宽比值, 因为可能存在小数位精度的问题
+        # 不方便进行判断, 所以这里直接记录长宽的一个比值(即分子分母的表示方法)
+        slope = [y_diff, x_diff]
+
+    return slope
+
+
+def create_hashable_key_for_rational(numerator, denominator):
+    return str(numerator) + ":" + str(denominator)
+
+
+def get_greatest_common_divisor(num1, num2):
+    a = num1
+    b = num2
+    # 求出两数的最大公因数
+    while True:
+        if a == 0:
+            return b
+        if b == 0:
+            return a
+        # 不停的对两个数取余数并交换计算, 一直到其中一个数等于 0
+        a, b = b, a % b
+
+
+if __name__ == '__main__':
+    print(line_through_points([[1, 1], [2, 2], [3, 3], [0, 4], [-2, 6], [4, 0], [2, 1]]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <cmath>
+#include <algorithm>
+using namespace std;
+
+vector<int> getSlopeOfLineBetweenPoints(vector<int> p1, vector<int> p2);
+string createHashableKeyForRational(int numerator, int denominator);
+int getGreatestCommonDivisor(int num1, int num2);
+
+// O(n^2) time | O(n) space - where n is the number of points
+int lineThroughPoints(vector<vector<int>> points)
+{
+    int maxNumberOfPointsOnLine = 1;
+    const int pointsSize = points.size();
+    for (int idx1 = 0; idx1 < pointsSize; idx1++)
+    {
+        auto p1 = points[idx1];
+        unordered_map<string, int> slopes;
+        for (int idx2 = idx1 + 1; idx2 < pointsSize; idx2++)
+        {
+            auto p2 = points[idx2];
+            auto slope = getSlopeOfLineBetweenPoints(p1, p2);
+            int rise = slope[0];
+            int run = slope[1];
+            string slopeKey = createHashableKeyForRational(rise, run);
+            if (slopes.find(slopeKey) == slopes.end())
+                slopes[slopeKey] = 1;
+
+            slopes[slopeKey]++;
+        }
+
+        int currentMaxNumberOfPointsOnLine = 0;
+        for (auto it : slopes)
+        {
+            if (it.second > currentMaxNumberOfPointsOnLine)
+            {
+                currentMaxNumberOfPointsOnLine = it.second;
+            }
+        }
+
+        maxNumberOfPointsOnLine = max(maxNumberOfPointsOnLine, currentMaxNumberOfPointsOnLine);
+    }
+
+    return maxNumberOfPointsOnLine;
+}
+
+vector<int> getSlopeOfLineBetweenPoints(vector<int> p1, vector<int> p2)
+{
+    int p1x = p1[0];
+    int p1y = p1[1];
+    int p2x = p2[0];
+    int p2y = p2[1];
+    vector<int> slope = {1, 0}; // slope of a vertical lines
+
+    if (p1x != p2x)
+    {
+        // if line is not vertical
+        int xDiff = p1x - p2x;
+        int yDiff = p1y - p2y;
+        int gcd = getGreatestCommonDivisor(abs(xDiff), abs(yDiff));
+        xDiff = xDiff / gcd;
+        yDiff = yDiff / gcd;
+        if (xDiff < 0)
+        {
+            xDiff *= -1;
+            yDiff *= -1;
+        }
+
+        slope = {yDiff, xDiff};
+    }
+
+    return slope;
+}
+
+string createHashableKeyForRational(int numerator, int denominator)
+{
+    return to_string(numerator) + ":" + to_string(denominator);
+}
+
+int getGreatestCommonDivisor(int num1, int num2)
+{
+    int a = num1;
+    int b = num2;
+    while (true)
+    {
+        if (a == 0)
+            return b;
+        if (b == 0)
+            return a;
+
+        int tempA = a;
+        a = b;
+        b = tempA % b;
+    }
+}
+
+int main()
+{
+    cout << lineThroughPoints({{1, 1}, {2, 2}, {3, 3}, {0, 4}, {-2, 6}, {4, 0}, {2, 1}});
+    return 0;
+}
+```
+
+Last Modified 2022-04-09
