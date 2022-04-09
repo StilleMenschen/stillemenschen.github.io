@@ -2029,4 +2029,353 @@ int main()
 }
 ```
 
-Last Modified 2022-03-09
+## 右侧小于数量
+
+给定一个数组，找出数组中每个元素相较于右侧比它更小的元素数量，如数组`[8, 5, 11, -1, 3, 4, 2]`中，第一个元素`8`右侧小于它的树有`5`个，而第二个元素`5`右侧小于它的数有`4`个，以此类推
+
+```python
+# O(n^2) time | O(n) space - where n is the length of the array
+def right_smaller_than1(array):
+    right_smaller_counts = []
+    for i in range(len(array)):
+        # 记录右侧小于当前值的数量
+        right_smaller_count = 0
+        # 搜索右边的数据
+        for j in range(i + 1, len(array)):
+            if array[j] < array[i]:
+                # 如果满足小于当前值则累加数量
+                right_smaller_count += 1
+        # 记录数量
+        right_smaller_counts.append(right_smaller_count)
+    return right_smaller_counts
+
+
+class SpecialBST:
+    def __init__(self, value, idx, num_smaller_at_insert_time):
+        self.value = value
+        # 记录数值的索引
+        self.idx = idx
+        # 记录总计的小于当前值数量
+        self.num_smaller_at_insert_time = num_smaller_at_insert_time
+        # 记录左子树的数量
+        self.left_subtree_size = 0
+        self.left = None
+        self.right = None
+
+    def insert(self, value, idx, num_smaller_at_insert_time=0):
+        if value < self.value:
+            # 如果添加的值小于当前树的值, 表示这个待添加的值应该放到左子树中, 所以左子树的数量加 1
+            self.left_subtree_size += 1
+            if self.left is None:
+                # 左子树为空则直接创建一个新的左子树
+                self.left = SpecialBST(value, idx, num_smaller_at_insert_time)
+            else:
+                # 左子树非空则递归调用
+                self.left.insert(value, idx, num_smaller_at_insert_time)
+        else:
+            # 添加的值大于等于当前树的值, 表示这个待添加的值应该放到右子树中
+            # 此时已知左子树的值是小于当前值的, 故累计小于数量加上当前树的左子树记录数量
+            num_smaller_at_insert_time += self.left_subtree_size
+            # 如果添加的值还大于当前树的值, 还需要在增加一个记录树
+            if value > self.value:
+                num_smaller_at_insert_time += 1
+            if self.right is None:
+                # 右子树为空则直接创建一个新的右子树
+                self.right = SpecialBST(value, idx, num_smaller_at_insert_time)
+            else:
+                # 右子树非空则递归调用
+                self.right.insert(value, idx, num_smaller_at_insert_time)
+
+
+# Average case: when the created BST is balanced
+# O(nlog(n)) time | O(n) space - where n is the length of the array
+# ---
+# Worst case: when the created BST is like a linked list
+# O(n^2) time | O(n) space
+def right_smaller_than2(array):
+    if len(array) == 0:
+        return []
+
+    last_idx = len(array) - 1
+    # 创建一个特殊的二叉搜索树, 可以记录小于值的数量, 初始的值为数值末尾的元素
+    # 因为已知最后一个元素是没有右侧小于它的元素的, 即小于数量为 0
+    bst = SpecialBST(array[last_idx], last_idx, 0)
+    # 逆向将所有的元素添加到特殊二叉搜索树中
+    for i in reversed(range(len(array) - 1)):
+        bst.insert(array[i], i)
+    # 创建记录数组
+    right_smaller_counts = array[:]
+    # 先序遍历特殊二叉搜索树, 将结果添加到记录数组中
+    get_right_smaller_counts(bst, right_smaller_counts)
+    return right_smaller_counts
+
+
+def get_right_smaller_counts(bst, right_smaller_counts):
+    if bst is None:
+        return
+    # 由于特殊二叉搜索树中已经记录了元素所在的索引, 这里直接通过索引保存小于值的数量
+    right_smaller_counts[bst.idx] = bst.num_smaller_at_insert_time
+    # 递归调用左子树
+    get_right_smaller_counts(bst.left, right_smaller_counts)
+    # 递归调用右子树
+    get_right_smaller_counts(bst.right, right_smaller_counts)
+
+
+class BST:
+
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+        # 记录左子树的数量
+        self.left_subtree_count = 0
+
+    def insert(self, value):
+        current_node = self
+        # 记录小于值的数量
+        count = 0
+        # 非递归的方式添加值到二叉搜索树中
+        while True:
+            if value < current_node.value:
+                # 更新左子树的数量
+                current_node.left_subtree_count += 1
+                if current_node.left is None:
+                    current_node.left = BST(value)
+                    break
+                else:
+                    current_node = current_node.left
+            else:
+                count += current_node.left_subtree_count
+                if value > current_node.value:
+                    count += 1
+                if current_node.right is None:
+                    current_node.right = BST(value)
+                    break
+                else:
+                    current_node = current_node.right
+        # 返回小于值的数量
+        return count
+
+
+# Average: O(n * log(n)) time | O(n) space - where n is the length of the array
+# Worst: O(n^2) time | O(n) space
+def right_smaller_than3(array):
+    if not len(array):
+        return []
+    right_smaller_counts = [0 for _ in array]
+    current_idx = len(array) - 1
+    tree = BST(array[current_idx])
+    while current_idx > 0:
+        current_idx -= 1
+        # 与上面的逻辑类似, 只是这里直接记录结果, 不再需要重新去遍历二叉搜索树
+        right_smaller_counts[current_idx] = tree.insert(array[current_idx])
+
+    return right_smaller_counts
+
+
+if __name__ == '__main__':
+    source = [8, 5, 11, -1, 3, 4, 2]
+    print(right_smaller_than1(source))
+    print(right_smaller_than2(source))
+    print(right_smaller_than3(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// O(n^2) time | O(n) space - where n is the length of the array
+vector<int> rightSmallerThan1(vector<int> array)
+{
+    vector<int> rightSmallerCounts = {};
+    const int arraySize = array.size();
+    for (int i = 0; i < arraySize; i++)
+    {
+        int rightSmallerCount = 0;
+        for (int j = i + 1; j < arraySize; j++)
+        {
+            if (array[j] < array[i])
+                rightSmallerCount++;
+        }
+        rightSmallerCounts.push_back(rightSmallerCount);
+    }
+    return rightSmallerCounts;
+}
+
+class SpecialBST1
+{
+public:
+    int value;
+    int idx;
+    int numSmallerAtInsertTime;
+    int leftSubtreeSize;
+    SpecialBST1 *left;
+    SpecialBST1 *right;
+
+    SpecialBST1(int value, int idx, int numSmallerAtInsertTime)
+    {
+        this->value = value;
+        this->idx = idx;
+        this->numSmallerAtInsertTime = numSmallerAtInsertTime;
+        leftSubtreeSize = 0;
+        left = nullptr;
+        right = nullptr;
+    }
+
+    void insert(int value, int idx, int numSmallerAtInsertTime = 0)
+    {
+        if (value < this->value)
+        {
+            leftSubtreeSize++;
+            if (left == nullptr)
+            {
+                left = new SpecialBST1(value, idx, numSmallerAtInsertTime);
+            }
+            else
+            {
+                left->insert(value, idx, numSmallerAtInsertTime);
+            }
+        }
+        else
+        {
+            numSmallerAtInsertTime += leftSubtreeSize;
+            if (value > this->value)
+                numSmallerAtInsertTime++;
+            if (right == nullptr)
+            {
+                right = new SpecialBST1(value, idx, numSmallerAtInsertTime);
+            }
+            else
+            {
+                right->insert(value, idx, numSmallerAtInsertTime);
+            }
+        }
+    }
+};
+
+void getRightSmallerCounts(SpecialBST1 *bst, vector<int> &rightSmallerCounts);
+
+// Average case: when the created BST is balanced
+// O(nlog(n)) time | O(n) space - where n is the length of the array
+// ---
+// Worst case: when the created BST is like a linked list
+// O(n^2) time | O(n) space
+vector<int> rightSmallerThan2(vector<int> array)
+{
+    if (array.size() == 0)
+        return {};
+
+    int lastIdx = array.size() - 1;
+    SpecialBST1 *bst = new SpecialBST1(array[lastIdx], lastIdx, 0);
+    for (int i = array.size() - 2; i >= 0; i--)
+    {
+        bst->insert(array[i], i);
+    }
+
+    vector<int> rightSmallerCounts = array;
+    getRightSmallerCounts(bst, rightSmallerCounts);
+    return rightSmallerCounts;
+}
+
+void getRightSmallerCounts(SpecialBST1 *bst, vector<int> &rightSmallerCounts)
+{
+    if (bst == nullptr)
+        return;
+    rightSmallerCounts[bst->idx] = bst->numSmallerAtInsertTime;
+    getRightSmallerCounts(bst->left, rightSmallerCounts);
+    getRightSmallerCounts(bst->right, rightSmallerCounts);
+}
+
+class SpecialBST2
+{
+public:
+    int value;
+    int leftSubtreeSize;
+    SpecialBST2 *left;
+    SpecialBST2 *right;
+
+    SpecialBST2(int value)
+    {
+        this->value = value;
+        leftSubtreeSize = 0;
+        left = nullptr;
+        right = nullptr;
+    }
+
+    void insert(int value, int idx, vector<int> &rightSmallerCounts,
+                int numSmallerAtInsertTime = 0)
+    {
+        if (value < this->value)
+        {
+            leftSubtreeSize++;
+            if (left == nullptr)
+            {
+                left = new SpecialBST2(value);
+                rightSmallerCounts[idx] = numSmallerAtInsertTime;
+            }
+            else
+            {
+                left->insert(value, idx, rightSmallerCounts, numSmallerAtInsertTime);
+            }
+        }
+        else
+        {
+            numSmallerAtInsertTime += leftSubtreeSize;
+            if (value > this->value)
+                numSmallerAtInsertTime++;
+            if (right == nullptr)
+            {
+                right = new SpecialBST2(value);
+                rightSmallerCounts[idx] = numSmallerAtInsertTime;
+            }
+            else
+            {
+                right->insert(value, idx, rightSmallerCounts, numSmallerAtInsertTime);
+            }
+        }
+    }
+};
+
+// Average case: when the created BST is balanced
+// O(nlog(n)) time | O(n) space - where n is the length of the array
+// ---
+// Worst case: when the created BST is like a linked list
+// O(n^2) time | O(n) space
+vector<int> rightSmallerThan3(vector<int> array)
+{
+    if (array.size() == 0)
+        return {};
+
+    vector<int> rightSmallerCounts = array;
+    int lastIdx = array.size() - 1;
+    SpecialBST2 *bst = new SpecialBST2(array[lastIdx]);
+    rightSmallerCounts[lastIdx] = 0;
+    for (int i = array.size() - 2; i >= 0; i--)
+    {
+        bst->insert(array[i], i, rightSmallerCounts);
+    }
+
+    return rightSmallerCounts;
+}
+
+void iteration(vector<int> array)
+{
+    for (int element : array)
+    {
+        cout << element << " ";
+    }
+    cout << endl;
+}
+
+int main()
+{
+    vector<int> source = {8, 5, 11, -1, 3, 4, 2};
+    iteration(rightSmallerThan1(source));
+    iteration(rightSmallerThan2(source));
+    iteration(rightSmallerThan3(source));
+    return 0;
+}
+```
+
+Last Modified 2022-04-09
