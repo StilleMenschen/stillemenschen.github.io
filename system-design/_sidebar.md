@@ -35,3 +35,4 @@
   - [Design: Tinder](system-design/design-tinder.md)
   - [Design: Slack](system-design/design-slack.md)
   - [Design: Airbnb](system-design/design-airbnb.md)
+  - [Design: The Twitch API](system-design/design-the-twitch-api.md)
