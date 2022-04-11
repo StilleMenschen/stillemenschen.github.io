@@ -496,7 +496,7 @@ void postOrderTraverse(BST *tree, vector<int> &array)
     }
 }
 
-void printList(vector<int> &array)
+void iteration(vector<int> &array)
 {
     for (int e : array)
     {
@@ -512,13 +512,13 @@ int main()
     for (int i = 1 ; i < source.size(); i++) root->insert(source[i]);
     vector<int> result;
     inOrderTraverse(root, result);
-    printList(result);
+    iteration(result);
     result.clear();
     preOrderTraverse(root, result);
-    printList(result);
+    iteration(result);
     result.clear();
     postOrderTraverse(root, result);
-    printList(result);
+    iteration(result);
     result.clear();
     return 0;
 }
@@ -2378,4 +2378,4 @@ int main()
 }
 ```
 
-Last Modified 2022-04-09
+Last Modified 2022-04-11

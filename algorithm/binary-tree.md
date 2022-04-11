@@ -762,7 +762,7 @@ int main()
 }
 ```
 
-## 线性前序遍历
+## 线性中序遍历
 
 ```python
 class BinaryTree:
@@ -784,28 +784,128 @@ def insert_level_order(array, tree, parent, index, length):
 
 # O(n) time | O(1) space
 def iterative_in_order_traversal(tree, callback):
-    previous_node, next_node = None, None
+    # 表示前一个节点指针
+    previous_node = None
+    # 表示当前节点指针
     current_node = tree
+    # 当前节点指针非空则继续循环
     while current_node is not None:
+        # 前一个节点指针为空或者前一个节点指针是当前节点的父节点
+        # 表明当前节点指针还在向下移动，类似树的深度优先遍历, 需要不停地向下探索
         if previous_node is None or previous_node == current_node.parent:
+            # 如果当前节点的左子树非空则继续向左子树移动
             if current_node.left is not None:
                 next_node = current_node.left
+            # 如果左子树为空, 说明最深的节点的左子树已经遍历完, 需要遍历当前节点
             else:
-                callback(current_node.value)
+                callback(current_node)
+                # 如果当前节点的右子树非空则继续移动到右子树, 否则折返回到当前节点的父节点
                 next_node = current_node.right if current_node.right is not None else current_node.parent
+        # 前一个节点指针是当前节点的左子树, 说明当前指针已经折返回其父节点
         elif previous_node == current_node.left:
-            callback(current_node.value)
+            callback(current_node)
+            # 如果当前节点的右子树非空则继续移动到右子树, 否则折返回到当前节点的父节点
             next_node = current_node.right if current_node.right is not None else current_node.parent
+        # 前一个节点指针是当前节点的右子树, 说明当前指针已经遍历了左子树, 节点本身和右子树, 这个时候已经可以折返回其父节点
         else:
             next_node = current_node.parent
+        # 前一个节点指针指向当前节点
         previous_node = current_node
+        # 当前节点指针指向上面记录的下一个节点指针
         current_node = next_node
 
 
 if __name__ == '__main__':
     source = [1, 2, 3, 4, None, 6, 7, None, 9]
     root_node = insert_level_order(source, None, None, 0, len(source))
-    iterative_in_order_traversal(root_node, lambda e: print(e, end=' '))
+    iterative_in_order_traversal(root_node, lambda e: print(e.value, end=' '))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class BinaryTree
+{
+public:
+    int value;
+    BinaryTree *left;
+    BinaryTree *right;
+    BinaryTree *parent;
+
+    BinaryTree(int value, BinaryTree *parent)
+    {
+        this->value = value;
+        this->left = nullptr;
+        this->right = nullptr;
+        this->parent = parent;
+    }
+    void insert(vector<int> values, int i = 0);
+};
+
+BinaryTree *insertLevelOrder(vector<int> &array, BinaryTree *tree, BinaryTree *parent, int index, int length)
+{
+    if (index < length && array[index] != INT_MIN)
+    {
+        tree = new BinaryTree(array[index], parent);
+        tree->left = insertLevelOrder(array, tree->left, tree, 2 * index + 1, length);
+        tree->right = insertLevelOrder(array, tree->right, tree, 2 * index + 2, length);
+    }
+    return tree;
+}
+
+// O(n) time | O(1) space
+void iterativeInOrderTraversal(BinaryTree *tree,
+                               void (*callback)(BinaryTree *tree))
+{
+    BinaryTree *previousNode = nullptr;
+    BinaryTree *currentNode = tree;
+    while (currentNode != nullptr)
+    {
+        BinaryTree *nextNode;
+        if (previousNode == nullptr || previousNode == currentNode->parent)
+        {
+            if (currentNode->left != nullptr)
+            {
+                nextNode = currentNode->left;
+            }
+            else
+            {
+                (*callback)(currentNode);
+                nextNode = currentNode->right != nullptr ? currentNode->right
+                                                         : currentNode->parent;
+            }
+        }
+        else if (previousNode == currentNode->left)
+        {
+            (*callback)(currentNode);
+            nextNode = currentNode->right != nullptr ? currentNode->right
+                                                     : currentNode->parent;
+        }
+        else
+        {
+            nextNode = currentNode->parent;
+        }
+        previousNode = currentNode;
+        currentNode = nextNode;
+    }
+}
+
+void callback(BinaryTree *tree)
+{
+    cout << tree->value << " ";
+}
+
+int main()
+{
+    vector<int> source = {1, 2, 3, 4, INT_MIN, 6, 7, INT_MIN, 9};
+    BinaryTree *rootNode = insertLevelOrder(source, nullptr, nullptr, 0, source.size());
+    typedef void (*cb)(BinaryTree * tree);
+    cb c = callback;
+    iterativeInOrderTraversal(rootNode, c);
+    return 0;
+}
 ```
 
 ## 展平二叉树
@@ -1629,4 +1729,4 @@ int main()
 }
 ```
 
-Last Modified 2022-03-12
+Last Modified 2022-04-11
