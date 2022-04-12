@@ -910,6 +910,18 @@ int main()
 
 ## 展平二叉树
 
+给定一颗二叉树，将二叉树以类似中序遍历的顺序展平，如以下的树可以展平为`4 <-> 2 <-> 7 <-> 5 <-> 8 <-> 1 <-> 6 <-> 3`
+
+```
+        1
+     /     \
+    2       3
+  /   \    /
+ 4     5  6
+      / \
+     7   8
+```
+
 ```python
 class BinaryTree:
 
@@ -927,7 +939,23 @@ def insert_level_order(array, tree, index, length):
     return tree
 
 
+# O(n) time | O(n) space - where n is the number of nodes in the Binary Tree
+def flatten_binary_tree1(root):
+    # 获取中序遍历结果
+    in_order_nodes = get_nodes_in_order(root, [])
+    # 根据中序遍历的结果顺序地将每个节点连接起来, 形成一个类似双链表的结构
+    for i in range(0, len(in_order_nodes) - 1):
+        left_node = in_order_nodes[i]
+        right_node = in_order_nodes[i + 1]
+        # 前一个节点的右节点指向下一个节点
+        left_node.right = right_node
+        # 下一个节点的左节点指向前一个节点
+        right_node.left = left_node
+    return in_order_nodes[0]
+
+
 def get_nodes_in_order(tree, array):
+    # 中序遍历, 先访问左子树, 然后访问父节点, 最后访问右子树
     if tree is not None:
         get_nodes_in_order(tree.left, array)
         array.append(tree)
@@ -935,52 +963,188 @@ def get_nodes_in_order(tree, array):
     return array
 
 
-def connect_nodes(left, right):
-    left.right = right
-    right.left = left
-
-
-def flatten_tree(node):
-    if node.left is None:
-        left_most = node
-    else:
-        left_subtree_left_most, left_subtree_right_most = flatten_tree(node.left)
-        connect_nodes(left_subtree_right_most, node)
-        left_most = left_subtree_left_most
-
-    if node.right is None:
-        right_most = node
-    else:
-        right_subtree_left_most, right_subtree_right_most = flatten_tree(node.right)
-        connect_nodes(node, right_subtree_left_most)
-        right_most = right_subtree_right_most
-
-    return left_most, right_most
-
-
-# O(n) time | O(n) space
-def flatten_binary_tree1(root):
-    in_order_nodes = get_nodes_in_order(root, list())
-    for i in range(len(in_order_nodes) - 1):
-        left_node = in_order_nodes[i]
-        right_node = in_order_nodes[i + 1]
-        left_node.right = right_node
-        right_node.left = left_node
-    return in_order_nodes[0]
-
-
-# O(n) time | O(d) space
+# O(n) time | O(d) space - where n is the number of nodes in the Binary Tree
+# and d is the depth (height) of the Binary Tree
 def flatten_binary_tree2(root):
     left_most, _ = flatten_tree(root)
     return left_most
 
 
-if __name__ == '__main__':
+def flatten_tree(node):
+    # 左子树为空说明到达了左侧的叶子节点
+    if node.left is None:
+        left_most = node
+    else:
+        # 左子树非空则继续深度搜索, 获取子树的最左侧和最右侧叶子节点
+        left_subtree_left_most, left_subtree_right_most = flatten_tree(node.left)
+        # 将当前节点与子树的最右侧节点相连
+        connect_nodes(left_subtree_right_most, node)
+        # 当前树的最左侧节点是子树的最左侧叶子节点
+        left_most = left_subtree_left_most
+
+    # 右子树为空说明到达了右侧的叶子节点
+    if node.right is None:
+        right_most = node
+    else:
+        # 右子树非空则继续深度搜索, 获取子树的最左侧和最右侧叶子节点
+        right_subtree_left_most, right_subtree_right_most = flatten_tree(node.right)
+        # 将当前节点与子树的最左侧节点相连
+        connect_nodes(node, right_subtree_left_most)
+        # 当前树的最右侧节点是子树的最右侧叶子节点
+        right_most = right_subtree_right_most
+
+    return left_most, right_most
+
+
+def connect_nodes(left, right):
+    # 将两个节点的左右子树相互连接, 类似双链表的结构
+    left.right = right
+    right.left = left
+
+
+def right_traverse(tree):
+    while tree is not None:
+        print(tree.value, end=' ')
+        tree = tree.right
+    print()
+
+
+def get_tree():
     source = [1, 2, 3, 4, 5, 6, None, None, None, 7, 8]
-    root_node = insert_level_order(source, None, 0, len(source))
-    flatten_binary_tree1(root_node)
-    root_node = insert_level_order(source, None, 0, len(source))
-    flatten_binary_tree2(root_node)
+    return insert_level_order(source, None, 0, len(source))
+
+
+if __name__ == '__main__':
+    right_traverse(flatten_binary_tree1(get_tree()))
+    right_traverse(flatten_binary_tree2(get_tree()))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class BinaryTree
+{
+public:
+    int value;
+    BinaryTree *left = nullptr;
+    BinaryTree *right = nullptr;
+
+    BinaryTree(int value)
+    {
+        this->value = value;
+    }
+};
+
+BinaryTree *insertLevelOrder(vector<int> &array, BinaryTree *tree, int index, int length)
+{
+    if (index < length && array[index] != INT_MIN)
+    {
+        tree = new BinaryTree(array[index]);
+        tree->left = insertLevelOrder(array, tree->left, 2 * index + 1, length);
+        tree->right = insertLevelOrder(array, tree->right, 2 * index + 2, length);
+    }
+    return tree;
+}
+
+vector<BinaryTree *> getNodesInOrder(BinaryTree *tree, vector<BinaryTree *> *array);
+
+// O(n) time | O(n) space - where n is the number of nodes in the Binary Tree
+BinaryTree *flattenBinaryTree1(BinaryTree *root)
+{
+    vector<BinaryTree *> inOrderNodes = getNodesInOrder(root, new vector<BinaryTree *>{});
+    for (size_t i = 0; i < inOrderNodes.size() - 1; i++)
+    {
+        BinaryTree *leftNode = inOrderNodes[i];
+        BinaryTree *rightNode = inOrderNodes[i + 1];
+        leftNode->right = rightNode;
+        rightNode->left = leftNode;
+    }
+    return inOrderNodes[0];
+}
+
+vector<BinaryTree *> getNodesInOrder(BinaryTree *tree, vector<BinaryTree *> *array)
+{
+    if (tree != nullptr)
+    {
+        getNodesInOrder(tree->left, array);
+        array->push_back(tree);
+        getNodesInOrder(tree->right, array);
+    }
+    return *array;
+}
+
+vector<BinaryTree *> flattenTree(BinaryTree *node);
+void connectNodes(BinaryTree *one, BinaryTree *two);
+
+// O(n) time | O(d) space - where n is the number of nodes in the Binary Tree
+// and d is the depth (height) of the Binary Tree
+BinaryTree *flattenBinaryTree2(BinaryTree *root)
+{
+    BinaryTree *leftMost = flattenTree(root)[0];
+    return leftMost;
+}
+
+vector<BinaryTree *> flattenTree(BinaryTree *node)
+{
+    BinaryTree *leftMost;
+    BinaryTree *rightMost;
+
+    if (node->left == nullptr)
+    {
+        leftMost = node;
+    }
+    else
+    {
+        vector<BinaryTree *> leftAndRightMostNodes = flattenTree(node->left);
+        connectNodes(leftAndRightMostNodes[1], node);
+        leftMost = leftAndRightMostNodes[0];
+    }
+
+    if (node->right == nullptr)
+    {
+        rightMost = node;
+    }
+    else
+    {
+        vector<BinaryTree *> leftAndRightMostNodes = flattenTree(node->right);
+        connectNodes(node, leftAndRightMostNodes[0]);
+        rightMost = leftAndRightMostNodes[1];
+    }
+
+    return {leftMost, rightMost};
+}
+
+void connectNodes(BinaryTree *left, BinaryTree *right)
+{
+    left->right = right;
+    right->left = left;
+}
+
+BinaryTree *getTree()
+{
+    vector<int> source = {1, 2, 3, 4, 5, 6, INT_MIN, INT_MIN, INT_MIN, 7, 8};
+    BinaryTree *rootNode = insertLevelOrder(source, nullptr, 0, source.size());
+    return rootNode;
+}
+
+void rightTraverse(BinaryTree *tree)
+{
+    while (tree != nullptr)
+    {
+        cout << tree->value << " ";
+        tree = tree->right;
+    }
+    cout << endl;
+}
+
+int main()
+{
+    rightTraverse(flattenBinaryTree1(getTree()));
+    rightTraverse(flattenBinaryTree2(getTree()));
+    return 0;
+}
 ```
 
 ## 右兄弟树
@@ -1729,4 +1893,4 @@ int main()
 }
 ```
 
-Last Modified 2022-04-11
+Last Modified 2022-04-12
