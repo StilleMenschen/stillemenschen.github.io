@@ -1149,8 +1149,34 @@ int main()
 
 ## 右兄弟树
 
+给定一棵二叉树，将所有的树节点的右子树都指向其右侧的兄弟节点，如下二叉树的转换
+
+```
+           1
+      /         \
+     2           3
+   /   \       /   \
+  4     5     6     7
+ / \     \   /     / \
+8   9    10 11    12 13
+           /
+          14
+```
+
+```
+        1 // 值为 1 的根节点
+      /
+     2 --------- 3
+   /           /
+  4 --- 5 --- 6 --- 7
+ /           /     /
+8 - 9  10 - 11   12 - 13 // 值为 10 的节点不再有指向它的节点
+           /
+          14
+```
+
 ```python
-class BinaryTree:
+class Binary_tree:
 
     def __init__(self, value):
         self.value = value
@@ -1160,50 +1186,150 @@ class BinaryTree:
 
 def insert_level_order(array, tree, index, length):
     if index < length and array[index] is not None:
-        tree = BinaryTree(array[index])
+        tree = Binary_tree(array[index])
         tree.left = insert_level_order(array, tree.left, 2 * index + 1, length)
         tree.right = insert_level_order(array, tree.right, 2 * index + 2, length)
     return tree
 
 
-def in_order_traverse(root, array):
-    if root is not None:
-        array = in_order_traverse(root.left, array)
-        array.append(root.value)
-        array = in_order_traverse(root.right, array)
-    return array
+# O(n) time | O(d) space - where n is the number of nodes in the Binary Tree
+# and d is the depth (height) of the Binary Tree
+def right_sibling_tree(root):
+    # 递归处理
+    mutate(root, None, None)
+    return root
 
 
 def mutate(node, parent, is_left_child):
+    # 如果当前树为空则忽略
     if node is None:
         return False
+    # 取得左右子树
     left, right = node.left, node.right
+    # 递归处理左子树, 是否左子树设置为 true
     mutate(left, node, True)
+    # 如果父节点为空, 则仅需要修改当前节点的右子树为空
     if parent is None:
         node.right = None
+    # 如果为左子树
     elif is_left_child:
+        # 左子树的右子树指向父节点的右子树
         node.right = parent.right
     else:
+        # 如果为右子树但父节点的右子树为空
         if parent.right is None:
+            # 仅修改当前节点的右子树为空
             node.right = None
+        # 如果为右子树且父节点的右子树不为空
         else:
+            # 修改当前节点的右子树为父节点的右子树的左子树
             node.right = parent.right.left
+    # 递归处理右子树, 是否左子树设置为 false
     mutate(right, node, False)
 
 
-# O(n) time | O(d) space
-def right_sibling_tree(root):
-    mutate(root, None, None)
-    return root
+def in_order_traverse(tree):
+    if tree is not None:
+        in_order_traverse(tree.left)
+        print(tree.value, end=' ')
+        in_order_traverse(tree.right)
 
 
 if __name__ == '__main__':
     source = [1, 2, 3, 4, 5, 6, 7, 8, 9, None, 10, 11, None, 12, 13,
               None, None, None, None, None, None, None, None, 14]
     root_node = insert_level_order(source, None, 0, len(source))
-    print(in_order_traverse(root_node, list()))
-    root_node = right_sibling_tree(root_node)
-    print(in_order_traverse(root_node, list()))
+    in_order_traverse(right_sibling_tree(root_node))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class BinaryTree
+{
+public:
+    int value;
+    BinaryTree *left = nullptr;
+    BinaryTree *right = nullptr;
+
+    BinaryTree(int value)
+    {
+        this->value = value;
+    }
+};
+
+BinaryTree *insertLevelOrder(vector<int> &array, BinaryTree *tree, int index, int length)
+{
+    if (index < length && array[index] != INT_MIN)
+    {
+        tree = new BinaryTree(array[index]);
+        tree->left = insertLevelOrder(array, tree->left, 2 * index + 1, length);
+        tree->right = insertLevelOrder(array, tree->right, 2 * index + 2, length);
+    }
+    return tree;
+}
+
+void mutate(BinaryTree *node, BinaryTree *parent, bool isLeftChild);
+
+// O(n) time | O(d) space - where n is the number of nodes in the Binary Tree
+// and d is the depth (height) of the Binary Tree
+BinaryTree *rightSiblingTree(BinaryTree *root)
+{
+    mutate(root, nullptr, false);
+    return root;
+}
+
+void mutate(BinaryTree *node, BinaryTree *parent, bool isLeftChild)
+{
+    if (node == nullptr)
+        return;
+
+    auto left = node->left;
+    auto right = node->right;
+    mutate(left, node, true);
+    if (parent == nullptr)
+    {
+        node->right = nullptr;
+    }
+    else if (isLeftChild)
+    {
+        node->right = parent->right;
+    }
+    else
+    {
+        if (parent->right == nullptr)
+        {
+            node->right = nullptr;
+        }
+        else
+        {
+            node->right = parent->right->left;
+        }
+    }
+    mutate(right, node, false);
+}
+
+void inOrderTraverse(BinaryTree *tree)
+{
+    if (tree != nullptr)
+    {
+        inOrderTraverse(tree->left);
+        cout << tree->value << " ";
+        inOrderTraverse(tree->right);
+    }
+}
+
+int main()
+{
+    vector<int> source = {1, 2, 3, 4, 5, 6, 7, 8, 9, INT_MIN, 10, 11, INT_MIN, 12, 13,
+                          INT_MIN, INT_MIN, INT_MIN, INT_MIN, INT_MIN, INT_MIN, INT_MIN, INT_MIN, 14};
+    BinaryTree *rootNode = insertLevelOrder(source, nullptr, 0, source.size());
+    rightSiblingTree(rootNode);
+    inOrderTraverse(rootNode);
+    return 0;
+}
 ```
 
 ## 所有节点深度
@@ -1893,4 +2019,4 @@ int main()
 }
 ```
 
-Last Modified 2022-04-12
+Last Modified 2022-04-13
