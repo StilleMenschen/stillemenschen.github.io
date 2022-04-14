@@ -1332,7 +1332,26 @@ int main()
 }
 ```
 
-## 所有节点深度
+## 节点深度总和
+
+求出一棵二叉树的每一个有子节点的节点深度总和，深度总和是通过计算父节点到达每一个子节点的深度的累加和，如一个父节点下有三个子节点，则需要分别计算这三个子节点的深度，然后再累加每个子节点的深度求出总和，如下二叉树的深度总和为 26
+
+- 节点 1 的深度和为 16 = 3 + 3 + 2 + 2 + 1 + 2 + 2 + 1
+- 节点 2 的深度和为 6 = 2 + 2 + 1 + 1
+- 节点 3 的深度和为 2 = 1 + 1
+- 节点 4 的深度和为 2 = 1 + 1
+
+深度总和为 26 = 16 + 6 + 2 + 2
+
+```
+          1
+       /     \
+      2       3
+    /   \   /   \
+   4     5 6     7
+ /   \
+8     9
+```
 
 ```python
 class BinaryTree:
@@ -1343,13 +1362,6 @@ class BinaryTree:
         self.right = None
 
 
-class TreeInfo:
-    def __init__(self, num_nodes_in_tree, sum_of_depths, sum_of_all_depths):
-        self.num_nodes_in_tree = num_nodes_in_tree
-        self.sum_of_depths = sum_of_depths
-        self.sum_of_all_depths = sum_of_all_depths
-
-
 def insert_level_order(array, tree, index, length):
     if index < length and array[index] is not None:
         tree = BinaryTree(array[index])
@@ -1358,89 +1370,388 @@ def insert_level_order(array, tree, index, length):
     return tree
 
 
-def get_node_depths(node, depth=0):
-    if node is None:
-        return 0
-    return depth + get_node_depths(node.left, depth + 1) + get_node_depths(node.right, depth + 1)
-
-
-def sum_all_node_depths(node, node_depth):
-    if node is None:
-        return 0
-    return node_depth[node] + sum_all_node_depths(node.left, node_depth) + sum_all_node_depths(node.right, node_depth)
-
-
-def add_node_depths(node, node_depths, node_counts):
-    node_depths[node] = 0
-    if node.left is not None:
-        add_node_depths(node.left, node_depths, node_counts)
-        node_depths[node] += node_depths[node.left] + node_counts[node.left]
-    if node.right is not None:
-        add_node_depths(node.right, node_depths, node_counts)
-        node_depths[node] += node_depths[node.right] + node_counts[node.right]
-
-
-def add_node_counts(node, node_counts):
-    node_counts[node] = 1
-    if node.left is not None:
-        add_node_counts(node.left, node_counts)
-        node_counts[node] += node_counts[node.left]
-    if node.right is not None:
-        add_node_counts(node.right, node_counts)
-        node_counts[node] += node_counts[node.right]
-
-
-def get_tree_info(tree):
-    if tree is None:
-        return TreeInfo(0, 0, 0)
-    left_tree_info = get_tree_info(tree.left)
-    right_tree_info = get_tree_info(tree.right)
-
-    sum_of_left_depth = left_tree_info.sum_of_depths + left_tree_info.num_nodes_in_tree
-    sum_of_right_depth = right_tree_info.sum_of_depths + right_tree_info.num_nodes_in_tree
-
-    num_nodes_in_tree = 1 + left_tree_info.num_nodes_in_tree + right_tree_info.num_nodes_in_tree
-    sum_of_depth = sum_of_left_depth + sum_of_right_depth
-    sum_of_all_depths = sum_of_depth + left_tree_info.sum_of_all_depths + right_tree_info.sum_of_all_depths
-
-    return TreeInfo(num_nodes_in_tree, sum_of_depth, sum_of_all_depths)
-
-
-# O(n * log(n)) time | O(h) space
-# h is tree height
+# Average case: when the tree is balanced
+# O(nlog(n)) time | O(h) space - where n is the number of nodes in
+# the Binary Tree and h is the height of the Binary Tree
 def all_kinds_of_node_depths1(root):
     sum_of_all_depths = 0
     stack = [root]
+    # 线性深度遍历计算每个节点的深度值并累加
     while len(stack) > 0:
         node = stack.pop()
         if node is None:
             continue
-        sum_of_all_depths += get_node_depths(node)
+        sum_of_all_depths += node_depths(node)
         stack.append(node.left)
         stack.append(node.right)
     return sum_of_all_depths
 
 
-# O(n) time | O(n) space
+def node_depths(node, depth=0):
+    # 初始深度为 0, 空节点深度为 0
+    if node is None:
+        return 0
+    # 累加计算深度, 每增加一级则深度加 1
+    return depth + node_depths(node.left, depth + 1) + node_depths(node.right, depth + 1)
+
+
+# Average case: when the tree is balanced
+# O(nlog(n)) time | O(h) space - where n is the number of nodes in
+# the Binary Tree and h is the height of the Binary Tree
 def all_kinds_of_node_depths2(root):
-    node_counts = dict()
+    if root is None:
+        return 0
+    # 方法 1 的递归实现
+    return all_kinds_of_node_depths2(root.left) + all_kinds_of_node_depths2(root.right) + node_depths(root)
+
+
+# Average case: when the tree is balanced
+# O(n) time | O(n) space - where n is the number of nodes in the Binary Tree
+# 当前节点深度 = 左子树节点深度总和 + 左子树节点数量总和 + 右子树节点深度总和 + 右子树节点数量总和
+def all_kinds_of_node_depths3(root):
+    # 记录节点数量
+    node_counts = {}
     add_node_counts(root, node_counts)
-    node_depths = dict()
+    # 记录节点深度
+    node_depths = {}
     add_node_depths(root, node_depths, node_counts)
+    # 最后汇总计算每个节点的深度总和
     return sum_all_node_depths(root, node_depths)
 
 
-# O(n) time | O(n) space
-def all_kinds_of_node_depths3(root):
+def sum_all_node_depths(node, node_depths):
+    if node is None:
+        return 0
+    return (
+            sum_all_node_depths(node.left, node_depths)
+            + sum_all_node_depths(node.right, node_depths)
+            + node_depths[node]
+    )
+
+
+def add_node_depths(node, node_depths, node_counts):
+    # 初始节点深度为 0
+    node_depths[node] = 0
+    if node.left is not None:
+        add_node_depths(node.left, node_depths, node_counts)
+        # 累加左子树的节点深度和节点数量
+        node_depths[node] += node_depths[node.left] + node_counts[node.left]
+    if node.right is not None:
+        add_node_depths(node.right, node_depths, node_counts)
+        # 累加右子树的节点深度和节点数量
+        node_depths[node] += node_depths[node.right] + node_counts[node.right]
+
+
+def add_node_counts(node, node_counts):
+    # 当前节点数量为 1
+    node_counts[node] = 1
+    if node.left is not None:
+        add_node_counts(node.left, node_counts)
+        # 累加左子树的节点数
+        node_counts[node] += node_counts[node.left]
+    if node.right is not None:
+        add_node_counts(node.right, node_counts)
+        # 累加右子树的节点数
+        node_counts[node] += node_counts[node.right]
+
+
+# Average case: when the tree is balanced
+# O(n) time | O(h) space - where n is the number of nodes in
+# the Binary Tree and h is the height of the Binary Tree
+def all_kinds_of_node_depths4(root):
+    # 方法 3 的优化, 降低空间复杂度
     return get_tree_info(root).sum_of_all_depths
 
 
+def get_tree_info(tree):
+    if tree is None:
+        return TreeInfo(0, 0, 0)
+
+    left_tree_info = get_tree_info(tree.left)
+    right_tree_info = get_tree_info(tree.right)
+    # 累加左右子树的深度
+    sum_of_left_depths = left_tree_info.sum_of_depths + left_tree_info.num_nodes_in_tree
+    sum_of_right_depths = right_tree_info.sum_of_depths + right_tree_info.num_nodes_in_tree
+    # 累加节点总数
+    num_nodes_in_tree = 1 + left_tree_info.num_nodes_in_tree + right_tree_info.num_nodes_in_tree
+    # 累加当前节点深度
+    sum_of_depths = sum_of_left_depths + sum_of_right_depths
+    # 累加当前节点的总深度
+    sum_of_all_depths = sum_of_depths + left_tree_info.sum_of_all_depths + right_tree_info.sum_of_all_depths
+
+    return TreeInfo(num_nodes_in_tree, sum_of_depths, sum_of_all_depths)
+
+
+class TreeInfo:
+    def __init__(self, num_nodes_in_tree, sum_of_depths, sum_of_all_depths):
+        self.num_nodes_in_tree = num_nodes_in_tree
+        self.sum_of_depths = sum_of_depths
+        self.sum_of_all_depths = sum_of_all_depths
+
+
+# Average case: when the tree is balanced
+# O(n) time | O(h) space - where n is the number of nodes in
+# the Binary Tree and h is the height of the Binary Tree
+def all_kinds_of_node_depths5(root, depth_sum=0, depth=0):
+    if root is None:
+        return 0
+
+    depth_sum += depth
+    return (
+            depth_sum
+            + all_kinds_of_node_depths5(root.left, depth_sum, depth + 1)
+            + all_kinds_of_node_depths5(root.right, depth_sum, depth + 1)
+    )
+
+
+# Average case: when the tree is balanced
+# O(n) time | O(h) space - where n is the number of nodes in
+# the Binary Tree and h is the height of the Binary Tree
+def all_kinds_of_node_depths6(root, depth=0):
+    if root is None:
+        return 0
+
+    # 计算公式 1 + 2 + 3 + ... + depth - 1 + depth
+    depth_sum = (depth * (depth + 1)) / 2
+    return (
+            depth_sum
+            + all_kinds_of_node_depths6(root.left, depth + 1)
+            + all_kinds_of_node_depths6(root.right, depth + 1)
+    )
+
+
 if __name__ == '__main__':
-    source = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-    root_node = insert_level_order(source, None, 0, len(source))
+    root_node = insert_level_order([1, 2, 3, 4, 5, 6, 7, 8, 9], None, 0, 9)
     print(all_kinds_of_node_depths1(root_node))
     print(all_kinds_of_node_depths2(root_node))
     print(all_kinds_of_node_depths3(root_node))
+    print(all_kinds_of_node_depths4(root_node))
+    print(all_kinds_of_node_depths5(root_node))
+    print(all_kinds_of_node_depths6(root_node))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+using namespace std;
+
+class BinaryTree
+{
+public:
+    int value;
+    BinaryTree *left = nullptr;
+    BinaryTree *right = nullptr;
+
+    BinaryTree(int value)
+    {
+        this->value = value;
+    }
+};
+
+BinaryTree *insertLevelOrder(vector<int> &array, BinaryTree *tree, int index, int length)
+{
+    if (index < length && array[index] != INT_MIN)
+    {
+        tree = new BinaryTree(array[index]);
+        tree->left = insertLevelOrder(array, tree->left, 2 * index + 1, length);
+        tree->right = insertLevelOrder(array, tree->right, 2 * index + 2, length);
+    }
+    return tree;
+}
+
+int nodeDepths(BinaryTree *node, int depth = 0);
+
+// Average case: when the tree is balanced
+// O(nlog(n)) time | O(h) space - where n is the number of nodes in
+// the Binary Tree and h is the height of the Binary Tree
+int allKindsOfNodeDepths1(BinaryTree *root)
+{
+    int sumOfAllDepths = 0;
+    vector<BinaryTree *> stack = {root};
+    while (stack.size() > 0)
+    {
+        BinaryTree *node = stack.back();
+        stack.pop_back();
+        if (node == nullptr)
+            continue;
+        sumOfAllDepths += nodeDepths(node);
+        stack.push_back(node->left);
+        stack.push_back(node->right);
+    }
+    return sumOfAllDepths;
+}
+
+int nodeDepths(BinaryTree *node, int depth)
+{
+    if (node == nullptr)
+        return 0;
+    return depth + nodeDepths(node->left, depth + 1) +
+           nodeDepths(node->right, depth + 1);
+}
+
+// Average case: when the tree is balanced
+// O(nlog(n)) time | O(h) space - where n is the number of nodes in
+// the Binary Tree and h is the height of the Binary Tree
+int allKindsOfNodeDepths2(BinaryTree *root)
+{
+    if (root == nullptr)
+        return 0;
+    return allKindsOfNodeDepths2(root->left) + allKindsOfNodeDepths2(root->right) + nodeDepths(root);
+}
+
+int sumAllNodeDepths(BinaryTree *node, unordered_map<BinaryTree *, int> &nodeDepths);
+void addNodeDepths(BinaryTree *node,
+                   unordered_map<BinaryTree *, int> &nodeDepths,
+                   unordered_map<BinaryTree *, int> &nodeCounts);
+void addNodeCounts(BinaryTree *node, unordered_map<BinaryTree *, int> &nodeCounts);
+
+// Average case: when the tree is balanced
+// O(n) time | O(n) space - where n is the number of nodes in the Binary Tree
+int allKindsOfNodeDepths3(BinaryTree *root)
+{
+    unordered_map<BinaryTree *, int> nodeCounts = {};
+    addNodeCounts(root, nodeCounts);
+    unordered_map<BinaryTree *, int> nodeDepths = {};
+    addNodeDepths(root, nodeDepths, nodeCounts);
+    return sumAllNodeDepths(root, nodeDepths);
+}
+
+int sumAllNodeDepths(BinaryTree *node, unordered_map<BinaryTree *, int> &nodeDepths)
+{
+    if (node == nullptr)
+        return 0;
+    return sumAllNodeDepths(node->left, nodeDepths) +
+           sumAllNodeDepths(node->right, nodeDepths) + nodeDepths[node];
+}
+
+void addNodeDepths(BinaryTree *node,
+                   unordered_map<BinaryTree *, int> &nodeDepths,
+                   unordered_map<BinaryTree *, int> &nodeCounts)
+{
+    nodeDepths.insert({node, 0});
+    if (node->left != nullptr)
+    {
+        addNodeDepths(node->left, nodeDepths, nodeCounts);
+        nodeDepths[node] += nodeDepths[node->left] + nodeCounts[node->left];
+    }
+    if (node->right != nullptr)
+    {
+        addNodeDepths(node->right, nodeDepths, nodeCounts);
+        nodeDepths[node] += nodeDepths[node->right] + nodeCounts[node->right];
+    }
+}
+
+void addNodeCounts(BinaryTree *node, unordered_map<BinaryTree *, int> &nodeCounts)
+{
+    nodeCounts.insert({node, 1});
+    if (node->left != nullptr)
+    {
+        addNodeCounts(node->left, nodeCounts);
+        nodeCounts[node] += nodeCounts[node->left];
+    }
+    if (node->right != nullptr)
+    {
+        addNodeCounts(node->right, nodeCounts);
+        nodeCounts[node] += nodeCounts[node->right];
+    }
+}
+
+struct TreeInfo
+{
+    int numNodesInTree;
+    int sumOfDepths;
+    int sumOfAllDepths;
+};
+
+TreeInfo getTreeInfo(BinaryTree *tree);
+
+// Average case: when the tree is balanced
+// O(n) time | O(h) space - where n is the number of nodes in
+// the Binary Tree and h is the height of the Binary Tree
+int allKindsOfNodeDepths4(BinaryTree *root)
+{
+    return getTreeInfo(root).sumOfAllDepths;
+}
+
+TreeInfo getTreeInfo(BinaryTree *tree)
+{
+    if (tree == nullptr)
+    {
+        return TreeInfo{0, 0, 0};
+    }
+
+    TreeInfo leftTreeInfo = getTreeInfo(tree->left);
+    TreeInfo rightTreeInfo = getTreeInfo(tree->right);
+
+    int sumOfLeftDepths = leftTreeInfo.sumOfDepths + leftTreeInfo.numNodesInTree;
+    int sumOfRightDepths = rightTreeInfo.sumOfDepths + rightTreeInfo.numNodesInTree;
+
+    int numNodesInTree = 1 + leftTreeInfo.numNodesInTree + rightTreeInfo.numNodesInTree;
+    int sumOfDepths = sumOfLeftDepths + sumOfRightDepths;
+    int sumOfAllDepths = sumOfDepths + leftTreeInfo.sumOfAllDepths + rightTreeInfo.sumOfAllDepths;
+
+    return TreeInfo{
+        numNodesInTree,
+        sumOfDepths,
+        sumOfAllDepths,
+    };
+}
+
+int allKindsOfNodeDepthsHelper1(BinaryTree *root, int depthSum, int depth);
+
+// Average case: when the tree is balanced
+// O(n) time | O(h) space - where n is the number of nodes in
+// the Binary Tree and h is the height of the Binary Tree
+int allKindsOfNodeDepths5(BinaryTree *root)
+{
+    return allKindsOfNodeDepthsHelper1(root, 0, 0);
+}
+
+int allKindsOfNodeDepthsHelper1(BinaryTree *root, int depthSum, int depth)
+{
+    if (root == nullptr)
+        return 0;
+
+    depthSum += depth;
+    return depthSum +
+           allKindsOfNodeDepthsHelper1(root->left, depthSum, depth + 1) +
+           allKindsOfNodeDepthsHelper1(root->right, depthSum, depth + 1);
+}
+
+int allKindsOfNodeDepthsHelper2(BinaryTree *root, int depth);
+
+// Average case: when the tree is balanced
+// O(n) time | O(h) space - where n is the number of nodes in
+// the Binary Tree and h is the height of the Binary Tree
+int allKindsOfNodeDepths6(BinaryTree *root)
+{
+    return allKindsOfNodeDepthsHelper2(root, 0);
+}
+
+int allKindsOfNodeDepthsHelper2(BinaryTree *root, int depth)
+{
+    if (root == nullptr)
+        return 0;
+
+    // Formula to calculate 1 + 2 + 3 + ... + depth - 1 + depth
+    auto depthSum = (depth * (depth + 1)) / 2;
+    return depthSum + allKindsOfNodeDepthsHelper2(root->left, depth + 1) +
+           allKindsOfNodeDepthsHelper2(root->right, depth + 1);
+}
+
+int main()
+{
+    vector<int> source = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    BinaryTree *rootNode = insertLevelOrder(source, nullptr, 0, source.size());
+    cout << allKindsOfNodeDepths1(rootNode) << endl;
+    cout << allKindsOfNodeDepths2(rootNode) << endl;
+    cout << allKindsOfNodeDepths3(rootNode) << endl;
+    cout << allKindsOfNodeDepths4(rootNode) << endl;
+    cout << allKindsOfNodeDepths5(rootNode) << endl;
+    cout << allKindsOfNodeDepths6(rootNode) << endl;
+    return 0;
+}
 ```
 
 ## 寻找后继节点
@@ -2019,4 +2330,4 @@ int main()
 }
 ```
 
-Last Modified 2022-04-13
+Last Modified 2022-04-15
