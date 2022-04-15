@@ -2330,4 +2330,263 @@ int main()
 }
 ```
 
+## 相同的叶子节点
+
+给定两棵二叉树，以先序遍历（父节点-左子树-右子树）的方式访问两棵二叉树，判断两棵二叉树的叶子节点是否相等（访问顺序和节点的值）
+
+```python
+class BinaryTree:
+
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+
+def insert_level_order(array, tree, index, length):
+    if index < length and array[index] is not None:
+        tree = BinaryTree(array[index])
+        tree.left = insert_level_order(array, tree.left, 2 * index + 1, length)
+        tree.right = insert_level_order(array, tree.right, 2 * index + 2, length)
+    return tree
+
+
+# O(n + m) time | O(h1 + h2) space - where n is the number of nodes in the first
+# Binary Tree, m is the number in the second, h1 is the height of the first Binary
+# Tree, and h2 is the height of the second
+def compare_leaf_traversal1(tree1, tree2):
+    # 创建一个栈, 用来先序遍历二叉树
+    tree1_traversal_stack = [tree1]
+    tree2_traversal_stack = [tree2]
+
+    while len(tree1_traversal_stack) > 0 and len(tree2_traversal_stack) > 0:
+        # 通过先序遍历获取两个二叉树的下一个叶子节点
+        tree1_leaf = get_next_leaf_node(tree1_traversal_stack)
+        tree2_leaf = get_next_leaf_node(tree2_traversal_stack)
+        # 如果叶子节点不相等则返回否
+        if tree1_leaf.value != tree2_leaf.value:
+            return False
+    # 如果两个栈的容量不是全为 0, 表示还有一个二叉树未遍历完, 即两棵二叉树的叶子节点并不相等
+    return len(tree1_traversal_stack) == 0 and len(tree2_traversal_stack) == 0
+
+
+def get_next_leaf_node(traversal_stack):
+    # 从栈中取出一个二叉树节点
+    current_node = traversal_stack.pop()
+    # 判断节点是否叶子节点, 不是叶子节点则继续循环
+    while not is_leaf_node(current_node):
+        # 栈的特点是先进后出, 而先序遍历是 父节点 -> 左子树 -> 右子树
+        # 所以先放入右子树再放入左子树, 这样左子树会优先出栈
+        if current_node.right is not None:
+            traversal_stack.append(current_node.right)
+        if current_node.left is not None:
+            traversal_stack.append(current_node.left)
+
+        current_node = traversal_stack.pop()
+
+    return current_node
+
+
+def is_leaf_node(node):
+    # 左右子树都为空表示是一个叶子节点
+    return node.left is None and node.right is None
+
+
+# O(n + m) time | O(max(h1, h2)) space - where n is the number of nodes in the first
+# Binary Tree, m is the number in the second, h1 is the height of the first Binary
+# Tree, and h2 is the height of the second
+def compare_leaf_traversal2(tree1, tree2):
+    # 将两棵二叉树的叶子节点以链表的方式连接起来, 叶子节点的右子树相当于链表的下一个节点指针
+    tree1_leaf_nodes_linked_list, _ = connect_leaf_nodes(tree1)
+    tree2_leaf_nodes_linked_list, _ = connect_leaf_nodes(tree2)
+
+    list1_current_node = tree1_leaf_nodes_linked_list
+    list2_current_node = tree2_leaf_nodes_linked_list
+    # 同时顺序遍历两棵二叉树的叶子节点链表, 存在不相等的节点则返回否
+    while list1_current_node is not None and list2_current_node is not None:
+        if list1_current_node.value != list2_current_node.value:
+            return False
+
+        list1_current_node = list1_current_node.right
+        list2_current_node = list2_current_node.right
+    # 如果还有一个叶子节点链表没有遍历完则表示两棵树的叶子节点不相同
+    return list1_current_node is None and list2_current_node is None
+
+
+def connect_leaf_nodes(current_node, head=None, previous_node=None):
+    # 递归终点, 到达了空的节点
+    if current_node is None:
+        # 直接返回链表头指针和前一个指针
+        return head, previous_node
+    # 判断是否为叶子节点
+    if is_leaf_node(current_node):
+        # 判断前一个指针是否为空
+        if previous_node is None:
+            # 创建链表的头指针
+            head = current_node
+        else:
+            # 将前一个节点的指针指向当前节点
+            previous_node.right = current_node
+        # 将当前节点改为前一个节点
+        previous_node = current_node
+    # 按先序遍历二叉树的顺序, 上面已经处理了父节点, 接着是处理左子树, 最后处理右子树
+    left_head, left_previous_node = connect_leaf_nodes(current_node.left, head, previous_node)
+    # 遍历右子树取的头节点和前一个节点是遍历左子树结束后获得的
+    return connect_leaf_nodes(current_node.right, left_head, left_previous_node)
+
+
+if __name__ == '__main__':
+    root_node1 = insert_level_order([1, 2, 3, 4, 5, None, 6, None, None, 7, 8], None, 0, 11)
+    root_node2 = insert_level_order([1, 2, 3, 4, 7, None, 5, None, None, None, None, None, None, 8, 6], None, 0, 15)
+    print(compare_leaf_traversal1(root_node1, root_node2))
+    print(compare_leaf_traversal2(root_node1, root_node2))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <utility>
+#include <tuple>
+using namespace std;
+
+class BinaryTree
+{
+public:
+    int value;
+    BinaryTree *left = nullptr;
+    BinaryTree *right = nullptr;
+
+    BinaryTree(int value)
+    {
+        this->value = value;
+    }
+};
+
+BinaryTree *insertLevelOrder(vector<int> &array, BinaryTree *tree, int index, int length)
+{
+    if (index < length && array[index] != INT_MIN)
+    {
+        tree = new BinaryTree(array[index]);
+        tree->left = insertLevelOrder(array, tree->left, 2 * index + 1, length);
+        tree->right = insertLevelOrder(array, tree->right, 2 * index + 2, length);
+    }
+    return tree;
+}
+
+BinaryTree *getNextLeafNode(vector<BinaryTree *> &traversalStack);
+bool isLeafNode(const BinaryTree *node);
+
+// O(n + m) time | O(h1 + h2) space - where n is the number of nodes in the
+// first Binary Tree, m is the number in the second, h1 is the height of the
+// first Binary Tree, and h2 is the height of the second
+bool compareLeafTraversal1(BinaryTree *tree1, BinaryTree *tree2)
+{
+    vector<BinaryTree *> tree1TraversalStack = {tree1};
+    vector<BinaryTree *> tree2TraversalStack = {tree2};
+
+    while (tree1TraversalStack.size() > 0 && tree2TraversalStack.size() > 0)
+    {
+        BinaryTree *tree1Leaf = getNextLeafNode(tree1TraversalStack);
+        BinaryTree *tree2Leaf = getNextLeafNode(tree2TraversalStack);
+
+        if (tree1Leaf->value != tree2Leaf->value)
+            return false;
+    }
+
+    return tree1TraversalStack.size() == 0 && tree2TraversalStack.size() == 0;
+}
+
+BinaryTree *getNextLeafNode(vector<BinaryTree *> &traversalStack)
+{
+    BinaryTree *currentNode = traversalStack.back();
+    traversalStack.pop_back();
+
+    while (!isLeafNode(currentNode))
+    {
+        if (currentNode->right != nullptr)
+            traversalStack.push_back(currentNode->right);
+
+        // We purposely add the left node to the stack after the
+        // right node so that it gets popped off the stack first.
+        if (currentNode->left != nullptr)
+            traversalStack.push_back(currentNode->left);
+
+        currentNode = traversalStack.back();
+        traversalStack.pop_back();
+    }
+
+    return currentNode;
+}
+
+bool isLeafNode(const BinaryTree *node)
+{
+    return node->left == nullptr && node->right == nullptr;
+}
+
+pair<BinaryTree *, BinaryTree *>
+connectLeafNodes(BinaryTree *currentNode, BinaryTree *head = nullptr,
+                 BinaryTree *previousNode = nullptr);
+
+// O(n + m) time | O(max(h1, h2)) space - where n is the number of nodes in the
+// first Binary Tree, m is the number in the second, h1 is the height of the
+// first Binary Tree, and h2 is the height of the second
+bool compareLeafTraversal2(BinaryTree *tree1, BinaryTree *tree2)
+{
+    BinaryTree *tree1LeafNodesLinkedList = connectLeafNodes(tree1).first;
+    BinaryTree *tree2LeafNodesLinkedList = connectLeafNodes(tree2).first;
+
+    BinaryTree *list1CurrentNode = tree1LeafNodesLinkedList;
+    BinaryTree *list2CurrentNode = tree2LeafNodesLinkedList;
+    while (list1CurrentNode != nullptr && list2CurrentNode != nullptr)
+    {
+        if (list1CurrentNode->value != list2CurrentNode->value)
+            return false;
+
+        list1CurrentNode = list1CurrentNode->right;
+        list2CurrentNode = list2CurrentNode->right;
+    }
+
+    return list1CurrentNode == nullptr && list2CurrentNode == nullptr;
+}
+
+pair<BinaryTree *, BinaryTree *> connectLeafNodes(BinaryTree *currentNode,
+                                                  BinaryTree *head,
+                                                  BinaryTree *previousNode)
+{
+    if (currentNode == nullptr)
+        return make_pair(head, previousNode);
+
+    if (isLeafNode(currentNode))
+    {
+        if (previousNode == nullptr)
+        {
+            head = currentNode;
+        }
+        else
+        {
+            previousNode->right = currentNode;
+        }
+
+        previousNode = currentNode;
+    }
+
+    BinaryTree *leftHead;
+    BinaryTree *leftPreviousNode;
+    tie(leftHead, leftPreviousNode) =
+        connectLeafNodes(currentNode->left, head, previousNode);
+    return connectLeafNodes(currentNode->right, leftHead, leftPreviousNode);
+}
+
+int main()
+{
+    vector<int> source1 = {1, 2, 3, 4, 5, INT_MIN, 6, INT_MIN, INT_MIN, 7, 8};
+    BinaryTree *rootNode1 = insertLevelOrder(source1, nullptr, 0, source1.size());
+    vector<int> source2 = {1, 2, 3, 4, 7, INT_MIN, 5, INT_MIN, INT_MIN, INT_MIN, INT_MIN, INT_MIN, INT_MIN, 8, 6};
+    BinaryTree *rootNode2 = insertLevelOrder(source2, nullptr, 0, source2.size());
+    cout << compareLeafTraversal1(rootNode1, rootNode2) << endl;
+    cout << compareLeafTraversal2(rootNode1, rootNode2) << endl;
+    return 0;
+}
+```
+
 Last Modified 2022-04-15
