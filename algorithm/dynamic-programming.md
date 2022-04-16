@@ -1533,20 +1533,31 @@ int main()
 }
 ```
 
-## 第 K 次投资最大利润
+## 第 K 次交易最大利润
+
+给定一个数组，表示每天股票交易的资金，给定一个交易次数 K ，计算出在 K 次交易中可以获得的最大利润。
+
+> 单笔交易包括一次买入和一次卖出，利润 = 卖出获得资金 - 买入消费的资金
 
 ```python
 # O(nk) time | O(nk) space
 def max_profit_with_k_transactions1(prices, k):
     if not len(prices):
         return 0
+    # 创建一个二维数组来缓存每一次计算的结果, 计算 K 次交易
     profits = [[0 for _ in prices] for _ in range(k + 1)]
+    # 第一行的默认全部为 0, 因为下面的逻辑需要取前一次的计算缓存
+    # 所以才需要多一行防止数组访问越界
     for t in range(1, k + 1):
-        max_thus_far = float('-inf')
+        # 设置最大值为负无穷, 方便后面的比较逻辑
+        max_thus_far = float("-inf")
+        # 从第二个位置(第二天)开始, 因为第一天只能操作买入无法同时卖出
         for d in range(1, len(prices)):
-            max_thus_far = max(max_thus_far,
-                               profits[t - 1][d - 1] - prices[d - 1])
+            # 判断前一次交易的前一天计算的利润是否与大于当前交易的计算利润
+            max_thus_far = max(max_thus_far, profits[t - 1][d - 1] - prices[d - 1])
+            # 判断当前交易的当前天计算的利润和当前交易的前一天利润最大值
             profits[t][d] = max(profits[t][d - 1], max_thus_far + prices[d])
+    # 返回最后一次交易最后一天的计算利润, 为 K 次交易的最大利润
     return profits[-1][-1]
 
 
@@ -1554,27 +1565,100 @@ def max_profit_with_k_transactions1(prices, k):
 def max_profit_with_k_transactions2(prices, k):
     if not len(prices):
         return 0
+    # 相较于方法 1 仅使用两个数组来缓存计算结果
     even_profits = [0 for _ in prices]
     odd_profits = [0 for _ in prices]
     for t in range(1, k + 1):
-        max_thus_far = float('-inf')
-        if t & 1 == 1:
+        max_thus_far = float("-inf")
+        # 通过判断奇偶性复用缓存数组
+        if (t & 1) == 1:
             current_profits = odd_profits
             previous_profits = even_profits
         else:
             current_profits = even_profits
             previous_profits = odd_profits
         for d in range(1, len(prices)):
-            max_thus_far = max(max_thus_far,
-                               previous_profits[d - 1] - prices[d - 1])
-            current_profits[d] = max(current_profits[d - 1],
-                                     max_thus_far + prices[d])
-    return even_profits[-1] if k & 1 == 0 else odd_profits[-1]
+            max_thus_far = max(max_thus_far, previous_profits[d - 1] - prices[d - 1])
+            current_profits[d] = max(current_profits[d - 1], max_thus_far + prices[d])
+    # 判断交易次数返回计算结果
+    return even_profits[-1] if (k & 1) == 0 else odd_profits[-1]
 
 
 if __name__ == '__main__':
-    print(max_profit_with_k_transactions1([5, 11, 3, 50, 60, 90], 2))
-    print(max_profit_with_k_transactions2([5, 11, 3, 50, 60, 90], 2))
+    source = [5, 11, 3, 50, 60, 90]
+    print(max_profit_with_k_transactions1(source, 2))
+    print(max_profit_with_k_transactions2(source, 2))
+```
+```cpp
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+// O(nk) time | O(nk) space
+int maxProfitWithKTransactions1(vector<int> prices, int k)
+{
+    const int pricesSize = prices.size();
+    if (pricesSize == 0)
+    {
+        return 0;
+    }
+    vector<vector<int>> profits(k + 1, vector<int>(pricesSize, 0));
+    for (int t = 1; t < k + 1; t++)
+    {
+        int maxThusFar = INT_MIN;
+        for (int d = 1; d < pricesSize; d++)
+        {
+            maxThusFar = max(maxThusFar, profits[t - 1][d - 1] - prices[d - 1]);
+            profits[t][d] = max(profits[t][d - 1], maxThusFar + prices[d]);
+        }
+    }
+    return profits[k][pricesSize - 1];
+}
+
+// O(nk) time | O(n) space
+int maxProfitWithKTransactions2(vector<int> prices, int k)
+{
+    const int pricesSize = prices.size();
+    if (pricesSize == 0)
+    {
+        return 0;
+    }
+    vector<int> evenProfits(pricesSize);
+    vector<int> oddProfits(pricesSize);
+    for (int t = 1; t < k + 1; t++)
+    {
+        int maxThusFar = INT_MIN;
+        vector<int> *currentProfits;
+        vector<int> *previousProfits;
+        if (t % 2 == 1)
+        {
+            currentProfits = &oddProfits;
+            previousProfits = &evenProfits;
+        }
+        else
+        {
+            currentProfits = &evenProfits;
+            previousProfits = &oddProfits;
+        }
+        for (int d = 1; d < pricesSize; d++)
+        {
+            maxThusFar = max(maxThusFar, previousProfits->at(d - 1) - prices[d - 1]);
+            currentProfits->at(d) =
+                max(currentProfits->at(d - 1), maxThusFar + prices[d]);
+        }
+    }
+    return k % 2 == 0 ? evenProfits[pricesSize - 1]
+                      : oddProfits[pricesSize - 1];
+}
+
+int main()
+{
+    vector<int> source = {5, 11, 3, 50, 60, 90};
+    cout << maxProfitWithKTransactions1(source, 2) << endl;
+    cout << maxProfitWithKTransactions2(source, 2) << endl;
+    return 0;
+}
 ```
 
 ## 回文字符串最小分割次数
@@ -2432,4 +2516,4 @@ int main()
 }
 ```
 
-Last Modified 2022-03-23
+Last Modified 2022-04-16
