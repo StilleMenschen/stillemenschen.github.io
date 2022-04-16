@@ -8,10 +8,10 @@
 - [Docker](docker/)包含构建、运行以及查看镜像和容器的命令
 - [Jenkins](jenkins/)只简述了部署运行，使用相关的还没有具体编写的计划
 - [Nginx](nginx/)仅提供了一个 docker 部署和配置文件的范例参考
-- [配置文件](config/)是平时经常使用的，仅供参考
+- [配置文件](config/)是平时经常使用的工具配置，供参考
 - [Docker Compose](docker-compose/)文档仅包含启动和停止的命令以及配置文件参考
 - [Python](python/)包含了个人常用模块的参考
-- [Git](vcs/)的基本使用已经完成
+- [Git](vcs/)中包含基本的使用参考
 - [交谈中的要点](talk/)
 
 **补充**
