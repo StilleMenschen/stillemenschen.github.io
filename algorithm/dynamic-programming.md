@@ -1663,43 +1663,29 @@ int main()
 
 ## 回文字符串最小分割次数
 
+给定一个字符串，字符串中可能包含有回文的字符串（回文字符串为两端相等的字符串，如`abccba`或`abcba`），找出按每个回文字符串子串分隔的最小次数，注意单个字符也算是回文字符串
+
 ```python
 # O(n^3) time | O(n^2) space
 def palindrome_partitioning_min_cuts1(string):
+    # 定义一个二维数组缓存计算回文字符串的结果, 通过二维数组的行列索引
+    # 来表示字符串中两个字符位置直接的子字符串是否为回文字符串
     palindromes = [[False for _ in string] for _ in string]
     for i in range(len(string)):
         for j in range(i, len(string)):
-            palindromes[i][j] = is_palindrome(string[i:j + 1])
+            palindromes[i][j] = is_palindrome(string[i: j + 1])
+    # 记录最小的切割次数, 初始值为无穷大, 便于后面判断
     cuts = [float("inf") for _ in string]
     for i in range(len(string)):
+        # 单个字符构成的字符串必定是回文字符串
         if palindromes[0][i]:
+            # 最小分割数为 0
             cuts[i] = 0
         else:
+            # 先取前面的分隔记录次数加 1
             cuts[i] = cuts[i - 1] + 1
-            for j in range(1, i):
-                if palindromes[j][i] and cuts[j - 1] + 1 < cuts[i]:
-                    cuts[i] = cuts[j - 1] + 1
-    return cuts[-1]
-
-
-# O(n^2) time | O(n^2) space
-def palindrome_partitioning_min_cuts2(string):
-    palindromes = [[False for _ in string] for _ in string]
-    for i in range(len(string)):
-        palindromes[i][i] = True
-    for length in range(2, len(string) + 1):
-        for i in range(0, len(string) - length + 1):
-            j = i + length - 1
-            if length == 2:
-                palindromes[i][j] = string[i] == string[j]
-            else:
-                palindromes[i][j] = string[i] == string[j] and palindromes[i + 1][j - 1]
-    cuts = [float("inf") for _ in string]
-    for i in range(len(string)):
-        if palindromes[0][i]:
-            cuts[i] = 0
-        else:
-            cuts[i] = cuts[i - 1] + 1
+            # 然后从前面第二个位置开始判断是否有回文字符串
+            # 如果有回文字符串且最小分隔次数比当前的小则取其值
             for j in range(1, i):
                 if palindromes[j][i] and cuts[j - 1] + 1 < cuts[i]:
                     cuts[i] = cuts[j - 1] + 1
@@ -1717,63 +1703,156 @@ def is_palindrome(string):
     return True
 
 
+# O(n^2) time | O(n^2) space
+def palindrome_partitioning_min_cuts2(string):
+    # 定义一个二维数组缓存计算回文字符串的结果, 通过二维数组的行列索引
+    # 来表示字符串中两个字符位置直接的子字符串是否为回文字符串
+    palindromes = [[False for _ in string] for _ in string]
+    for i in range(len(string)):
+        # 单个字符构成的字符串必定是回文字符串
+        palindromes[i][i] = True
+    # 从两个字符长度开始判断, 前面已经处理了单个字符的情况
+    for length in range(2, len(string) + 1):
+        # 每次都只判断固定长度的子字符串
+        for i in range(0, len(string) - length + 1):
+            j = i + length - 1
+            # 长度为 2 只需要判断两个字符是否相等
+            if length == 2:
+                palindromes[i][j] = string[i] == string[j]
+            # 长度大于 2 则从外向里判断每两个字符是否相等, 如以索引表示字符串的字符则为
+            # 1. 0 == 4
+            # 2. 0 == 4 and 1 == 3
+            # 3. 0 == 4 and 1 == 3 and 2 == 2
+            # 4. ...
+            else:
+                palindromes[i][j] = string[i] == string[j] and palindromes[i + 1][j - 1]
+    cuts = [float("inf") for _ in string]
+    for i in range(len(string)):
+        if palindromes[0][i]:
+            cuts[i] = 0
+        else:
+            cuts[i] = cuts[i - 1] + 1
+            for j in range(1, i):
+                if palindromes[j][i] and cuts[j - 1] + 1 < cuts[i]:
+                    cuts[i] = cuts[j - 1] + 1
+    return cuts[-1]
+
+
 if __name__ == '__main__':
-    print(palindrome_partitioning_min_cuts1('noonabbad'))
-    print(palindrome_partitioning_min_cuts2('noonabbad'))
+    print(palindrome_partitioning_min_cuts1('abbbacecffgbgffab'))
+    print(palindrome_partitioning_min_cuts2('abbbacecffgbgffab'))
 ```
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <climits>
+using namespace std;
 
-int getStringLength(char* string)
-{
-    char *p = string;
-    int length = 0;
-    while ( *p++ ) length++;
-    return length;
-}
+bool isPalindrome(string s);
 
-int isPalindorme(char string[], int i, int j)
+// O(n^3) time | O(n^2) space
+int palindromePartitioningMinCuts1(string s)
 {
-    for ( ; i < j; i++, j--)
-        if ( string[i] != string[j] )
-            return 0;
-    return 1;
-}
-
-/* O(n^3) time | O(1) space */
-int palindromePartitioningMinCuts(char string[])
-{
-    int length = getStringLength(string);
-    int i = 0, j, countOfCuts = 0, leftIdx = 0, rightIdx = 0;
-    for ( ; i<length; i++)
+    const int stringLength = s.length();
+    vector<vector<bool>> palindromes(stringLength, vector<bool>(stringLength, false));
+    for (int i = 0; i < stringLength; i++)
     {
-        for ( j=i+1; j<length; j++)
+        for (int j = i; j < stringLength; j++)
         {
-            if ( isPalindorme(string, i, j) )
+            palindromes[i][j] = isPalindrome(s.substr(i, j + 1 - i));
+        }
+    }
+    vector<int> cuts(stringLength, INT_MAX);
+    for (int i = 0; i < stringLength; i++)
+    {
+        if (palindromes[0][i])
+        {
+            cuts[i] = 0;
+        }
+        else
+        {
+            cuts[i] = cuts[i - 1] + 1;
+            for (int j = 1; j < i; j++)
             {
-                if ( i >= leftIdx && j <= rightIdx )
+                if (palindromes[j][i] && cuts[j - 1] + 1 < cuts[i])
                 {
-                    continue;
+                    cuts[i] = cuts[j - 1] + 1;
                 }
-                leftIdx = i;
-                rightIdx = j;
-                if ( i > leftIdx && i < rightIdx && rightIdx - leftIdx <= j - i )
-                {
-                    continue;
-                }
-                countOfCuts++;
             }
         }
     }
-    return countOfCuts;
+    return cuts[stringLength - 1];
+}
+
+bool isPalindrome(string s)
+{
+    int leftIdx = 0;
+    int rightIdx = s.length() - 1;
+    while (leftIdx < rightIdx)
+    {
+        if (s[leftIdx] != s[rightIdx])
+        {
+            return false;
+        }
+        leftIdx++;
+        rightIdx--;
+    }
+    return true;
+}
+
+// O(n^2) time | O(n^2) space
+int palindromePartitioningMinCuts2(string s)
+{
+    const int stringLength = s.length();
+    vector<vector<bool>> palindromes(stringLength, vector<bool>(stringLength, false));
+    for (int i = 0; i < stringLength; i++)
+    {
+        palindromes[i][i] = true;
+    }
+    for (int length = 2; length < stringLength + 1; length++)
+    {
+        for (int i = 0; i < stringLength - length + 1; i++)
+        {
+            int j = i + length - 1;
+            if (length == 2)
+            {
+                palindromes[i][j] = (s[i] == s[j]);
+            }
+            else
+            {
+                palindromes[i][j] = (s[i] == s[j] && palindromes[i + 1][j - 1]);
+            }
+        }
+    }
+    vector<int> cuts(stringLength, INT_MAX);
+    for (int i = 0; i < stringLength; i++)
+    {
+        if (palindromes[0][i])
+        {
+            cuts[i] = 0;
+        }
+        else
+        {
+            cuts[i] = cuts[i - 1] + 1;
+            for (int j = 1; j < i; j++)
+            {
+                if (palindromes[j][i] && cuts[j - 1] + 1 < cuts[i])
+                {
+                    cuts[i] = cuts[j - 1] + 1;
+                }
+            }
+        }
+    }
+    return cuts[stringLength - 1];
 }
 
 int main()
 {
-    char string[] = "noonaddab";
-    printf("%d", palindromePartitioningMinCuts(string));
+    string source = "abbbacecffgbgffab";
+    cout << palindromePartitioningMinCuts1(source) << endl;
+    cout << palindromePartitioningMinCuts2(source) << endl;
     return 0;
 }
 ```
