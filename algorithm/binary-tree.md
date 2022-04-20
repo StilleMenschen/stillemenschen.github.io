@@ -692,6 +692,7 @@ if __name__ == '__main__':
 ```cpp
 #include <iostream>
 #include <vector>
+#include <climits>
 using namespace std;
 
 class BinaryTree
@@ -824,6 +825,7 @@ if __name__ == '__main__':
 ```cpp
 #include <iostream>
 #include <vector>
+#include <climits>
 using namespace std;
 
 class BinaryTree
@@ -1022,6 +1024,7 @@ if __name__ == '__main__':
 ```cpp
 #include <iostream>
 #include <vector>
+#include <climits>
 using namespace std;
 
 class BinaryTree
@@ -1245,6 +1248,7 @@ if __name__ == '__main__':
 ```cpp
 #include <iostream>
 #include <vector>
+#include <climits>
 using namespace std;
 
 class BinaryTree
@@ -1534,6 +1538,7 @@ if __name__ == '__main__':
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <climits>
 using namespace std;
 
 class BinaryTree
@@ -2447,6 +2452,7 @@ if __name__ == '__main__':
 #include <vector>
 #include <utility>
 #include <tuple>
+#include <climits>
 using namespace std;
 
 class BinaryTree

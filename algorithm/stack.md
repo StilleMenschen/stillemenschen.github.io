@@ -548,6 +548,7 @@ if __name__ == '__main__':
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <climits>
 using namespace std;
 
 // O(n) time | O(n) space - where n is the length of the input array
