@@ -1859,33 +1859,62 @@ int main()
 
 ## 最长递增子序列
 
+给定一个数组，找出数组中最长的递增子序列（从小到大），如`[5, 7, -24, 12, 10, 2, 3, 12, 5, 6, 35]`中的最长递增子序列为`[-24, 2, 3, 5, 6, 35]`
+
 ```python
 # O(n^2) time | O(n) space
 def longest_increasing_subsequence1(array):
-    sequences = [None for _ in array]
+    # 用来记录构成递增子序列的前一个值的索引, 后面用来生成递增子序列, 即结果
+    sequences = [-1 for _ in array]
+    # 用来记录走到某个位置时最大的递增子序列长度
     lengths = [1 for _ in array]
+    # 记录最后一个可以构成最大递增子序列的索引, 后面需要用来生成最终结果
     max_length_idx = 0
     for i in range(len(array)):
         current_num = array[i]
+        # 搜索前面的值
         for j in range(0, i):
             other_num = array[j]
+            # 判断前面的值是否比当前值要小且前面的值对应位置记录的最大递增子序列长度加 1 后比当前的记录值要大
             if other_num < current_num and lengths[j] + 1 >= lengths[i]:
+                # 更新当前位置的最大递增子序列长度
                 lengths[i] = lengths[j] + 1
+                # 记录构成递增子序列的前一个值的索引
                 sequences[i] = j
+        # 更新最后一个可以构成最大递增子序列的索引
         if lengths[i] >= lengths[max_length_idx]:
             max_length_idx = i
     return build_sequence(array, sequences, max_length_idx)
 
 
+def build_sequence(array, sequences, current_idx):
+    sequence = []
+    while current_idx != -1:
+        sequence.append(array[current_idx])
+        current_idx = sequences[current_idx]
+    return list(reversed(sequence))
+
+
 # O(n * log(n)) time | O(n) space
 def longest_increasing_subsequence2(array):
-    sequences = [None for _ in array]
-    indices = [None for _ in range(len(array) + 1)]
+    # 用来记录索引, 后面用来生成递增子序列
+    sequences = [-1 for _ in array]
+    # 记录递增子序列指定长度的最后一个最小的元素索引, 本身的索引用来表示递增子序列的长度,
+    # 因为仅一个元素的数组可以直接判断为最长递增子序列, 所以这里不会用到第一个值,
+    # 增加一个值是因为最大的递增子序列可能刚好等于输入数组的长度
+    indices = [-1 for _ in range(len(array) + 1)]
+    # 表示最大的递增子序列长度
     length = 0
     for i, num in enumerate(array):
+        # 从长度 1 开始搜索, 因为最小的递增子序列至少为 1
         new_length = binary_search(1, length, indices, array, num)
+        # 记录前一个小于当前值的元素索引
         sequences[i] = indices[new_length - 1]
+        # 满足条件的长度位置设置为当前索引
+        # 指定长度的递增子序列可能存在很多满足条件的值, 每次更新都可以保证记录更小的值
+        # 较小的长度保存的值越小, 后面可以搜索到更多满足条件(构成递增序列)的元素就越多
         indices[new_length] = i
+        # 更新最大的递增子序列长度
         length = max(length, new_length)
     return build_sequence(array, sequences, indices[length])
 
@@ -1893,7 +1922,10 @@ def longest_increasing_subsequence2(array):
 def binary_search(start_idx, end_idx, indices, array, num):
     if start_idx > end_idx:
         return start_idx
+    # 折半搜索当前递增子序列长度中比传入的 num 更小的值
     middle_idx = (start_idx + end_idx) // 2
+    # 索引数组中总是会记录指定递增子序列长度中最后一个最小的值
+    # 相对于子序列前面的值是较大的值, 但相对于后面将要搜索到的值来说是较小的值
     if array[indices[middle_idx]] < num:
         start_idx = middle_idx + 1
     else:
@@ -1901,17 +1933,114 @@ def binary_search(start_idx, end_idx, indices, array, num):
     return binary_search(start_idx, end_idx, indices, array, num)
 
 
-def build_sequence(array, sequences, current_idx):
-    sequence = list()
-    while current_idx is not None:
-        sequence.append(array[current_idx])
-        current_idx = sequences[current_idx]
-    return list(reversed(sequence))
-
-
 if __name__ == '__main__':
-    print(longest_increasing_subsequence1([5, 7, -24, 12, 10, 2, 3, 12, 5, 6, 35]))
-    print(longest_increasing_subsequence2([5, 7, -24, 12, 10, 2, 3, 12, 5, 6, 35]))
+    source = [5, 7, -24, 12, 10, 2, 3, 12, 5, 6, 35]
+    print(longest_increasing_subsequence1(source))
+    print(longest_increasing_subsequence2(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+vector<int> buildSequence(vector<int> array, vector<int> sequences, int currentIdx);
+
+// O(n^2) time | O(n) space
+vector<int> longestIncreasingSubsequence1(vector<int> array)
+{
+    const int arraySize = array.size();
+    vector<int> sequences(arraySize, INT_MIN);
+    vector<int> lengths(arraySize, 1);
+    int maxLengthIdx = 0;
+    for (int i = 0; i < arraySize; i++)
+    {
+        int currentNum = array[i];
+        for (int j = 0; j < i; j++)
+        {
+            int otherNum = array[j];
+            if (otherNum < currentNum && lengths[j] + 1 >= lengths[i])
+            {
+                lengths[i] = lengths[j] + 1;
+                sequences[i] = j;
+            }
+        }
+        if (lengths[i] >= lengths[maxLengthIdx])
+        {
+            maxLengthIdx = i;
+        }
+    }
+    return buildSequence(array, sequences, maxLengthIdx);
+}
+
+vector<int> buildSequence(vector<int> array, vector<int> sequences, int currentIdx)
+{
+    vector<int> sequence;
+    while (currentIdx != INT_MIN)
+    {
+        sequence.insert(sequence.begin(), array[currentIdx]);
+        currentIdx = sequences[currentIdx];
+    }
+    return sequence;
+}
+
+int binarySearch(int startIdx, int endIdx, vector<int> &indices,
+                 vector<int> &array, int num);
+
+// O(nlogn) time | O(n) space
+vector<int> longestIncreasingSubsequence2(vector<int> array)
+{
+    const int arraySize = array.size();
+    vector<int> sequences(arraySize, 0);
+    vector<int> indices(arraySize + 1, INT_MIN);
+    int length = 0;
+    for (int i = 0; i < arraySize; i++)
+    {
+        int num = array[i];
+        int newLength = binarySearch(1, length, indices, array, num);
+        sequences[i] = indices[newLength - 1];
+        indices[newLength] = i;
+        length = max(length, newLength);
+    }
+    return buildSequence(array, sequences, indices[length]);
+}
+
+int binarySearch(int startIdx, int endIdx, vector<int> &indices,
+                 vector<int> &array, int num)
+{
+    if (startIdx > endIdx)
+    {
+        return startIdx;
+    }
+    int middleIdx = (startIdx + endIdx) / 2;
+    if (array[indices[middleIdx]] < num)
+    {
+        startIdx = middleIdx + 1;
+    }
+    else
+    {
+        endIdx = middleIdx - 1;
+    }
+    return binarySearch(startIdx, endIdx, indices, array, num);
+}
+
+void iteration(vector<int> array)
+{
+    for (const int e : array)
+    {
+        cout << e << " ";
+    }
+    cout << endl;
+}
+
+int main()
+{
+    vector<int> source = {5, 7, -24, 12, 10, 2, 3, 12, 5, 6, 35};
+    iteration(longestIncreasingSubsequence1(source));
+    iteration(longestIncreasingSubsequence2(source));
+    return 0;
+}
 ```
 
 ## 最长字符串链
