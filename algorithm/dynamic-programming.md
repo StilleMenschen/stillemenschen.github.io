@@ -2046,55 +2046,57 @@ int main()
 
 ## 最长字符串链
 
-给定一组字符串，这组字符串中的每个字符串剪切掉某些字符后可以组成这组字符串中的其它的字符串（单个字符不可以，需要忽略），找出可以组成最多其它字符串的字符串，并给出组成字符串的结果；如`["abde", "abc", "abd", "abcde", "ade", "ae", "labde", "abcdeg"]`中可以组成最多其它字符串的是`abcdeg`，组成结果为`['abcdeg', 'abcde', 'abde', 'ade', 'ae']`
+给定一组字符串，这组字符串中的每个字符串剪切掉某些字符后可以组成这组字符串中的其它的字符串（单个字符不可以，需要忽略），找出可以组成最多其它字符串的字符串，并给出组成字符串的结果（字符串的数量至少要为 2）；
+如`["abde", "abc", "abd", "abcde", "ade", "ae", "labde", "abcdeg"]`中可以组成最多其它字符串的是`abcdeg`，组成结果为`['abcdeg', 'abcde', 'abde', 'ade', 'ae']`
 
 ```python
 # O(n * m^2 + n * log(n)) time | O(nm) space - where n is the number of strings
 # and m is the length of the longest string
 def longest_string_chain(strings):
-    # For every string, imagine the longest string chain that starts with it.
-    # Set up every string to point to the next string in its respective longest
-    # string chain. Also keep track of the lengths of these longest string chains.
+    # 创建一个哈希表缓存每一个字符串, 用来跟踪每个字符串可以构成的子字符串
     string_chains = {}
     for string in strings:
+        # 记录下一个可以构成的子字符串和可以构成的子字符串数量, 数量默认为 1
         string_chains[string] = {"next_string": "", "max_chain_length": 1}
 
-    # Sort the strings based on their length so that whenever we visit a
-    # string (as we iterate through them from left to right), we can
-    # already have computed the longest string chains of any smaller strings.
+    # 将字符串数组按其长度排序, 优先访问长度较小的字符串
     sorted_strings = sorted(strings, key=len)
     for string in sorted_strings:
+        # 逐个搜索字符串
         find_longest_string_chain(string, string_chains)
 
     return build_longest_string_chain(strings, string_chains)
 
 
 def find_longest_string_chain(string, string_chains):
-    # Try removing every letter of the current string to see if the
-    # remaining strings form a string chain.
+    # 尝试对每一个字符做剪切
     for i in range(len(string)):
         smaller_string = get_smaller_string(string, i)
+        # 不包含在缓存中的忽略
         if smaller_string not in string_chains:
             continue
+        # 包含在缓存中的尝试做更新操作, 记录可以构成的字符串链的最大长度
         try_update_longest_string_chain(string, smaller_string, string_chains)
 
 
 def get_smaller_string(string, index):
-    return string[0:index] + string[index + 1:]
+    # 拼接字符串但忽略掉指定索引处的字符
+    return string[:index] + string[index + 1:]
 
 
 def try_update_longest_string_chain(current_string, smaller_string, string_chains):
+    # 子字符串长度
     smaller_string_chain_length = string_chains[smaller_string]["max_chain_length"]
+    # 当前字符串记录的长度
     current_string_chain_length = string_chains[current_string]["max_chain_length"]
-    # Update the string chain of the current string only if the smaller string leads
-    # to a longer string chain.
+    # 比较两个长度, 如果当前记录的长度小于 子字符串长度加 1, 则更新子字符串和构成字符串链的最大长度
     if smaller_string_chain_length + 1 > current_string_chain_length:
         string_chains[current_string]["max_chain_length"] = smaller_string_chain_length + 1
         string_chains[current_string]["next_string"] = smaller_string
 
 
 def build_longest_string_chain(strings, string_chains):
-    # Find the string that starts the longest string chain.
+    # 找到可以构成字符串链最大长度的字符串
     max_chain_length = 0
     chain_starting_string = ""
     for string in strings:
@@ -2102,11 +2104,13 @@ def build_longest_string_chain(strings, string_chains):
             max_chain_length = string_chains[string]["max_chain_length"]
             chain_starting_string = string
 
-    # Starting at the string found above, build the longest string chain.
+    # 由于已经通过哈希表记录了每个字符串的关联, 可直接从最长的字符串开始构建最终结果
     our_longest_string_chain = []
     current_string = chain_starting_string
-    while current_string != "":
+    while len(current_string):
+        # 添加当前的字符串
         our_longest_string_chain.append(current_string)
+        # 读取缓存中下一个子字符串
         current_string = string_chains[current_string]["next_string"]
 
     return [] if len(our_longest_string_chain) == 1 else our_longest_string_chain
@@ -2868,4 +2872,4 @@ int main()
 }
 ```
 
-Last Modified 2022-04-16
+Last Modified 2022-04-28
