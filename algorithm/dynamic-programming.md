@@ -1589,6 +1589,7 @@ if __name__ == '__main__':
     print(max_profit_with_k_transactions1(source, 2))
     print(max_profit_with_k_transactions2(source, 2))
 ```
+
 ```cpp
 #include <iostream>
 #include <vector>
@@ -2045,62 +2046,205 @@ int main()
 
 ## 最长字符串链
 
+给定一组字符串，这组字符串中的每个字符串剪切掉某些字符后可以组成这组字符串中的其它的字符串（单个字符不可以，需要忽略），找出可以组成最多其它字符串的字符串，并给出组成字符串的结果；如`["abde", "abc", "abd", "abcde", "ade", "ae", "labde", "abcdeg"]`中可以组成最多其它字符串的是`abcdeg`，组成结果为`['abcdeg', 'abcde', 'abde', 'ade', 'ae']`
+
 ```python
+# O(n * m^2 + n * log(n)) time | O(nm) space - where n is the number of strings
+# and m is the length of the longest string
+def longest_string_chain(strings):
+    # For every string, imagine the longest string chain that starts with it.
+    # Set up every string to point to the next string in its respective longest
+    # string chain. Also keep track of the lengths of these longest string chains.
+    string_chains = {}
+    for string in strings:
+        string_chains[string] = {"next_string": "", "max_chain_length": 1}
+
+    # Sort the strings based on their length so that whenever we visit a
+    # string (as we iterate through them from left to right), we can
+    # already have computed the longest string chains of any smaller strings.
+    sorted_strings = sorted(strings, key=len)
+    for string in sorted_strings:
+        find_longest_string_chain(string, string_chains)
+
+    return build_longest_string_chain(strings, string_chains)
+
+
+def find_longest_string_chain(string, string_chains):
+    # Try removing every letter of the current string to see if the
+    # remaining strings form a string chain.
+    for i in range(len(string)):
+        smaller_string = get_smaller_string(string, i)
+        if smaller_string not in string_chains:
+            continue
+        try_update_longest_string_chain(string, smaller_string, string_chains)
+
+
 def get_smaller_string(string, index):
     return string[0:index] + string[index + 1:]
 
 
-def try_update_longest_string_chain(current_string, smaller_string, string_chain):
-    smaller_string_chain_length = string_chain[smaller_string]["maxChainLength"]
-    current_string_chain_length = string_chain[current_string]["maxChainLength"]
+def try_update_longest_string_chain(current_string, smaller_string, string_chains):
+    smaller_string_chain_length = string_chains[smaller_string]["max_chain_length"]
+    current_string_chain_length = string_chains[current_string]["max_chain_length"]
+    # Update the string chain of the current string only if the smaller string leads
+    # to a longer string chain.
     if smaller_string_chain_length + 1 > current_string_chain_length:
-        string_chain[current_string]["maxChainLength"] = smaller_string_chain_length + 1
-        string_chain[current_string]["nextString"] = smaller_string
+        string_chains[current_string]["max_chain_length"] = smaller_string_chain_length + 1
+        string_chains[current_string]["next_string"] = smaller_string
 
 
-def find_longest_string_chain(string, string_chain):
-    for i in range(len(string)):
-        smaller_string = get_smaller_string(string, i)
-        if smaller_string not in string_chain:
-            continue
-        try_update_longest_string_chain(string, smaller_string, string_chain)
-
-
-def build_longest_string_chain(strings, string_chain):
+def build_longest_string_chain(strings, string_chains):
+    # Find the string that starts the longest string chain.
     max_chain_length = 0
     chain_starting_string = ""
     for string in strings:
-        if string_chain[string]["maxChainLength"] > max_chain_length:
-            max_chain_length = string_chain[string]["maxChainLength"]
+        if string_chains[string]["max_chain_length"] > max_chain_length:
+            max_chain_length = string_chains[string]["max_chain_length"]
             chain_starting_string = string
 
-    our_longest_string_chain = list()
+    # Starting at the string found above, build the longest string chain.
+    our_longest_string_chain = []
     current_string = chain_starting_string
     while current_string != "":
         our_longest_string_chain.append(current_string)
-        current_string = string_chain[current_string]["nextString"]
+        current_string = string_chains[current_string]["next_string"]
 
-    return list() if len(our_longest_string_chain) == 1 else our_longest_string_chain
-
-
-# O(n * m^2 + n * log(n)) time | O(nm) space
-# n is the number of elements in strings
-# m is the element length of strings
-def longest_string_chain(strings):
-    string_chain = {}
-    for string in strings:
-        string_chain[string] = {"nextString": "", "maxChainLength": 1}
-
-    sorted_string = sorted(strings, key=len)
-    for string in sorted_string:
-        find_longest_string_chain(string, string_chain)
-
-    return build_longest_string_chain(strings, string_chain)
+    return [] if len(our_longest_string_chain) == 1 else our_longest_string_chain
 
 
 if __name__ == '__main__':
-    strings = ["abde", "abc", "abd", "abcde", "ade", "ae", "labde", "abcdeg"]
-    print(longest_string_chain(strings))
+    source = ["abde", "abc", "abd", "abcde", "ade", "ae", "labde", "abcdeg"]
+    print(longest_string_chain(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <unordered_map>
+
+using namespace std;
+
+struct stringChain
+{
+    string nextString;
+    int maxChainLength;
+};
+
+void findLongestStringChain(string str,
+                            unordered_map<string, stringChain> &stringChains);
+string getSmallerString(string str, int index);
+void tryUpdateLongestStringChain(
+    string currentString, string smallerString,
+    unordered_map<string, stringChain> &stringChains);
+vector<string>
+buildLongestStringChain(vector<string> strings,
+                        unordered_map<string, stringChain> stringChains);
+
+// O(n * m^2 + nlog(n)) time | O(nm) space - where n is the number of strings
+// and m is the length of the longest string
+vector<string> longestStringChain(vector<string> strings)
+{
+    // For every string, imagine the longest string chain that starts with it.
+    // Set up every string to point to the next string in its respective longest
+    // string chain. Also keep track of the lengths of these longest string
+    // chains.
+    unordered_map<string, stringChain> stringChains = {};
+    for (auto string : strings)
+    {
+        stringChains[string] = {"", 1};
+    }
+
+    // Sort the strings based on their length so that whenever we visit a
+    // string (as we iterate through them from left to right), we can
+    // already have computed the longest string chains of any smaller strings.
+    vector<string> sortedStrings = strings;
+    sort(sortedStrings.begin(), sortedStrings.end(),
+         [](string a, string b) -> bool
+         { return a.size() < b.size(); });
+
+    for (auto string : sortedStrings)
+    {
+        findLongestStringChain(string, stringChains);
+    }
+
+    return buildLongestStringChain(strings, stringChains);
+}
+
+void findLongestStringChain(string str,
+                            unordered_map<string, stringChain> &stringChains)
+{
+    // Try removing every letter of the current string to see if the
+    // remaining strings form a string chain.
+    const int strSize = str.size();
+    for (int i = 0; i < strSize; i++)
+    {
+        string smallerString = getSmallerString(str, i);
+        if (stringChains.find(smallerString) == stringChains.end())
+            continue;
+        tryUpdateLongestStringChain(str, smallerString, stringChains);
+    }
+}
+
+string getSmallerString(string str, int index)
+{
+    return str.substr(0, index) + str.substr(index + 1);
+}
+
+void tryUpdateLongestStringChain(
+    string currentString, string smallerString,
+    unordered_map<string, stringChain> &stringChains)
+{
+    int smallerStringChainLength = stringChains[smallerString].maxChainLength;
+    int currentStringChainLength = stringChains[currentString].maxChainLength;
+    // Update the string chain of the current string only if the smaller string
+    // leads to a longer string chain.
+    if (smallerStringChainLength + 1 > currentStringChainLength)
+    {
+        stringChains[currentString].maxChainLength = smallerStringChainLength + 1;
+        stringChains[currentString].nextString = smallerString;
+    }
+}
+
+vector<string>
+buildLongestStringChain(vector<string> strings,
+                        unordered_map<string, stringChain> stringChains)
+{
+    // Find the string that starts the longest string chain.
+    int maxChainLength = 0;
+    string chainStartingString = "";
+    for (auto string : strings)
+    {
+        if (stringChains[string].maxChainLength > maxChainLength)
+        {
+            maxChainLength = stringChains[string].maxChainLength;
+            chainStartingString = string;
+        }
+    }
+
+    // Starting at the string found above, build the longest string chain.
+    vector<string> ourLongestStringChain;
+    string currentString = chainStartingString;
+    while (currentString != "")
+    {
+        ourLongestStringChain.push_back(currentString);
+        currentString = stringChains[currentString].nextString;
+    }
+
+    return ourLongestStringChain.size() == 1 ? vector<string>{}
+                                             : ourLongestStringChain;
+}
+
+int main()
+{
+    vector<string> source = {"abde", "abc", "abd", "abcde", "ade", "ae", "labde", "abcdeg"};
+    vector<string> result = longestStringChain(source);
+    for (string element : result)
+    {
+        cout << element << " ";
+    }
+    return 0;
+}
 ```
 
 ## 方形的零
