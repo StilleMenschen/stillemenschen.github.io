@@ -950,78 +950,87 @@ int main()
 
 ## 找出最小子字符串
 
+给出两个字符串，一个字符串较大（长度更长）一个字符串较小，在较大的字符串中找出可以构成小字符串的子字符串，这个子字符串的字符顺序可以和小字符串不一样，但是字符数量（包括重复的字符）必须一致，如大字符串`abcd$ef$axbdc$`中查找小字符串`d$abf`，可以在大字符串搜索到的匹配子字符串为`f$axbd`
+
+
 ```python
-# O(b + s) time | O(b + s) space
+# O(b + s) time | O(b + s) space - where b is the length of the big
+# input string and s is the length of the small input string
 def smallest_substring_containing(big_string, small_string):
+    # 将小字符串存入哈希表中, key 为字符, value 为字符出现的次数
     target_char_counts = get_char_counts(small_string)
+    # 搜索最小出现的字符串区间
     substring_bounds = get_substring_bounds(big_string, target_char_counts)
+    # 根据查找到的字符串区间计算出结果
     return get_string_from_bounds(big_string, substring_bounds)
 
 
+def get_char_counts(string):
+    char_counts = {}
+    for char in string:
+        # 记录并累加计算字符出现的次数
+        increase_char_count(char, char_counts)
+    return char_counts
+
+
 def get_substring_bounds(string, target_char_counts):
-    # 初始最小范围为无限大
-    substring_bounds = (0, float('inf'),)
-    substring_char_counts = dict()
-    # 计算待查找的字符数
+    # 预设切割区间为 0 到无穷大, 如果没有找到合适的结果可以根据无穷大来判断
+    substring_bounds = [0, float("inf")]
+    # 记录在大字符串中找到的目标字符出现次数
+    substring_char_counts = {}
+    # 小字符串中非重复字符数量
     num_unique_chars = len(target_char_counts.keys())
+    # 记录在大字符串中找到的对应小字符串非重复字符数量
     num_unique_chars_done = 0
-    # 创建左右指针不停地缩小范围查找
+    # 创建两个指针来查找
     left_idx = 0
     right_idx = 0
-    string_length = len(string)
-    while right_idx < string_length:
-        # 移动右指针递增找到的字符数
+    while right_idx < len(string):
         right_char = string[right_idx]
+        # 大字符串中的字符与小字符串中的字符不匹配则移动右指针
         if right_char not in target_char_counts:
-            # 不存在于待查找字符串的字符直接跳过
             right_idx += 1
             continue
-        # 递增待查找字符数
+        # 有相同的字符, 递增字符数量
         increase_char_count(right_char, substring_char_counts)
+        # 当前缓存的非重复字符数量与目标字符数量相等则递增总计数量
         if substring_char_counts[right_char] == target_char_counts[right_char]:
-            # 如果找到了符合条件的字符则待查找字符总计数加1
             num_unique_chars_done += 1
-        # 移动左指针缩小字符串范围
+        # 如果总计非重复字符数量与待查找的字符数量相等时, 重新计算最小的字符切割区间
         while num_unique_chars_done == num_unique_chars and left_idx <= right_idx:
+            # 重新计算最小的字符切割区间
             substring_bounds = get_closer_bounds(left_idx, right_idx, substring_bounds[0], substring_bounds[1])
             left_char = string[left_idx]
+            # 如果切割区间的最左侧字符不在目标字符记录中则移动左指针
             if left_char not in target_char_counts:
-                # 不存在于待查找字符串的字符直接跳过
                 left_idx += 1
                 continue
+            # 如果当前缓存中左指针指向的字符在目标字符中且非重复字符计数相等, 则递减总计非重复字符数
             if substring_char_counts[left_char] == target_char_counts[left_char]:
-                # 如果找到了符合条件的字符则待查找字符总计数减1 (停止移动左指针)
                 num_unique_chars_done -= 1
-            # 递减待查找字符数
+            # 递减查找缓存中对应字符的计算数量
             decrease_char_count(left_char, substring_char_counts)
+            # 移动左指针
             left_idx += 1
+        # 前面已经重新计算了分割区间, 继续移动右指针
         right_idx += 1
     return substring_bounds
 
 
-def get_closer_bounds(first_idx1, first_idx2, second_idx1, second_idx2):
-    """求出范围最小的字符串"""
-    if first_idx2 - first_idx1 < second_idx2 - second_idx1:
-        return first_idx1, first_idx2
+def get_closer_bounds(first_left_idx, first_right_idx, second_left_idx, second_right_idx):
+    # 对比两个切割区间大小返回更小的切割区间
+    if first_right_idx - first_left_idx < second_right_idx - second_left_idx:
+        return [first_left_idx, first_right_idx]
     else:
-        return second_idx1, second_idx2
+        return [second_left_idx, second_right_idx]
 
 
-def get_string_from_bounds(string, substring_bounds):
-    """返回找到的子字符串"""
-    start, end = substring_bounds
-    if end == float('inf'):
-        # 如果最大值仍然是无限大则表示没有找到
+def get_string_from_bounds(string, bounds):
+    start, end = bounds
+    # 如果结束区间仍然是无穷大, 则表示没有找到合适的结果, 返回空的字符串
+    if end == float("inf"):
         return ""
-    return string[start:end + 1]
-
-
-def get_char_counts(string):
-    """统计待查找子字符串的字符个数"""
-    char_counts = dict()
-    for char in string:
-        increase_char_count(char, char_counts)
-    return char_counts
+    return string[start: end + 1]
 
 
 def increase_char_count(char, char_counts):
@@ -1035,7 +1044,131 @@ def decrease_char_count(char, char_counts):
 
 
 if __name__ == '__main__':
-    print(smallest_substring_containing('abcd#ef#axb#c#', '##abf'))
+    print(smallest_substring_containing('abcd$ef$axbdc$', 'd$abf'))
+```
+
+```cpp
+#include <iostream>
+#include <climits>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+using namespace std;
+
+string smallestSubstringContaining(string bigString, string smallString);
+unordered_map<char, int> getCharCounts(string str);
+vector<int> getSubstringBounds(string str, unordered_map<char, int> targetCharCounts);
+vector<int> getCloserBounds(int idx1, int idx2, int idx3, int idx4);
+string getStringFromBounds(string str, vector<int> bounds);
+void increaseCharCount(char c, unordered_map<char, int> &charCounts);
+void decreaseCharCount(char c, unordered_map<char, int> &charCounts);
+
+// O(b + s) time | O(b + s) space - where b is the length of the big
+// input string and s is the length of the small input string
+string smallestSubstringContaining(string bigString, string smallString)
+{
+    unordered_map<char, int> targetCharCounts = getCharCounts(smallString);
+    vector<int> substringBounds = getSubstringBounds(bigString, targetCharCounts);
+    return getStringFromBounds(bigString, substringBounds);
+}
+
+unordered_map<char, int> getCharCounts(string str)
+{
+    unordered_map<char, int> charCounts;
+    for (auto c : str)
+    {
+        increaseCharCount(c, charCounts);
+    }
+    return charCounts;
+}
+
+vector<int> getSubstringBounds(string str, unordered_map<char, int> targetCharCounts)
+{
+    vector<int> substringBounds = {0, INT_MAX};
+    unordered_map<char, int> substringCharCounts;
+    int numUniqueChars = targetCharCounts.size();
+    int numUniqueCharsDone = 0;
+    int leftIdx = 0;
+    int rightIdx = 0;
+    // Move the rightIdx to the right in the string until you've counted
+    // all of the target characters enough times.
+    const int strSize = str.size();
+    while (rightIdx < strSize)
+    {
+        char rightChar = str[rightIdx];
+        if (targetCharCounts.find(rightChar) == targetCharCounts.end())
+        {
+            rightIdx++;
+            continue;
+        }
+        increaseCharCount(rightChar, substringCharCounts);
+        if (substringCharCounts[rightChar] == targetCharCounts[rightChar])
+        {
+            numUniqueCharsDone++;
+        }
+        // Move the leftIdx to the right in the string until you no longer
+        // have enough of the target characters in between the leftIdx and
+        // the rightIdx. Update the substringBounds accordingly.
+        while (numUniqueCharsDone == numUniqueChars && leftIdx <= rightIdx)
+        {
+            substringBounds = getCloserBounds(leftIdx, rightIdx, substringBounds[0],
+                                              substringBounds[1]);
+            char leftChar = str[leftIdx];
+            if (targetCharCounts.find(leftChar) == targetCharCounts.end())
+            {
+                leftIdx++;
+                continue;
+            }
+            if (substringCharCounts[leftChar] == targetCharCounts[leftChar])
+            {
+                numUniqueCharsDone--;
+            }
+            decreaseCharCount(leftChar, substringCharCounts);
+            leftIdx++;
+        }
+        rightIdx++;
+    }
+    return substringBounds;
+}
+
+vector<int> getCloserBounds(int idx1, int idx2, int idx3, int idx4)
+{
+    return idx2 - idx1 < idx4 - idx3 ? vector<int>{idx1, idx2}
+                                     : vector<int>{idx3, idx4};
+}
+
+string getStringFromBounds(string str, vector<int> bounds)
+{
+    int start = bounds[0];
+    int end = bounds[1];
+    if (end == INT_MAX)
+        return "";
+    return str.substr(start, end - start + 1);
+}
+
+void increaseCharCount(char c, unordered_map<char, int> &charCounts)
+{
+    if (charCounts.find(c) == charCounts.end())
+    {
+        charCounts[c] = 1;
+    }
+    else
+    {
+        charCounts[c]++;
+    }
+}
+
+void decreaseCharCount(char c, unordered_map<char, int> &charCounts)
+{
+    charCounts[c]--;
+}
+
+int main()
+{
+    cout << smallestSubstringContaining("abcd$ef$axbdc$", "d$abf");
+    return 0;
+}
 ```
 
 ## 最长匹配括号数
@@ -2116,4 +2249,4 @@ int main()
 }
 ```
 
-Last Modified 2022-04-03
+Last Modified 2022-05-07
