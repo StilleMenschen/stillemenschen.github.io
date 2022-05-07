@@ -2253,111 +2253,178 @@ int main()
 
 ## 方形的零
 
+给定一个矩形，矩形中只会包含`0`和`1`两个值，判断矩形中是否存在由`0`构成的一个小矩形（假设输入的矩形只会存在一个由`0`组成的小矩形）
+
+```
+[                                [
+  [1, 1, 1, 0, 1, 0],              [ ,  ,  ,  ,  ,  ],
+  [0, 0, 0, 0, 0, 1],              [0, 0, 0, 0, 0,  ],
+  [0, 1, 1, 1, 0, 1],     >>>      [0,  ,  ,  , 0,  ],
+  [0, 0, 0, 1, 0, 1],              [0,  ,  ,  , 0,  ],
+  [0, 1, 1, 1, 0, 1],              [0,  ,  ,  , 0,  ],
+  [0, 0, 0, 0, 0, 1],              [0, 0, 0, 0, 0,  ],
+]                                ]
+```
+
 ```python
+# O(n^4) time | O(n^3) space - where n is the height and width of the matrix
+def square_of_zeroes1(matrix):
+    last_idx = len(matrix) - 1
+    # 从最大的矩形开始, 即输入矩形的四个角
+    return has_square_of_zeroes1(matrix, 0, 0, last_idx, last_idx, {})
+
+
+# r1 is the top row, c1 is the left column
+# r2 is the bottom row, c2 is the right column
+def has_square_of_zeroes1(matrix, r1, c1, r2, c2, cache):
+    # 防止索引越界, 递归的终点
+    if r1 >= r2 or c1 >= c2:
+        return False
+    # 记录缓存
+    key = str(r1) + "-" + str(c1) + "-" + str(r2) + "-" + str(c2)
+    if key in cache:
+        # 如果缓存中已经存在则直接返回
+        return cache[key]
+    # 没有缓存则记录
+    cache[key] = (
+            # 判断当前的小矩形四条边是否为一个方形的零
+            is_square_of_zeroes1(matrix, r1, c1, r2, c2)
+            # 同时缩小四个角
+            or has_square_of_zeroes1(matrix, r1 + 1, c1 + 1, r2 - 1, c2 - 1, cache)
+            # 向右上缩小一个位置判断
+            or has_square_of_zeroes1(matrix, r1, c1 + 1, r2 - 1, c2, cache)
+            # 向左下缩小一个位置判断
+            or has_square_of_zeroes1(matrix, r1 + 1, c1, r2, c2 - 1, cache)
+            # 向右下缩小一个位置判断
+            or has_square_of_zeroes1(matrix, r1 + 1, c1 + 1, r2, c2, cache)
+            # 向左上缩小一个位置判断
+            or has_square_of_zeroes1(matrix, r1, c1, r2 - 1, c2 - 1, cache)
+    )
+    # 返回缓存记录的值
+    return cache[key]
+
+
+# r1 is the top row, c1 is the left column
+# r2 is the bottom row, c2 is the right column
 def is_square_of_zeroes1(matrix, r1, c1, r2, c2):
+    # 逐行判断固定的列是否为零
     for row in range(r1, r2 + 1):
         if matrix[row][c1] != 0 or matrix[row][c2] != 0:
             return False
+    # 逐列判断固定的行是否为零
     for col in range(c1, c2 + 1):
         if matrix[r1][col] != 0 or matrix[r2][col] != 0:
             return False
     return True
 
 
-def is_square_of_zeroes2(info_matrix, r1, c1, r2, c2):
-    square_length = c2 - c1 + 1
-    has_top_border = info_matrix[r1][c1]['numZeroesRight'] >= square_length
-    has_left_border = info_matrix[r1][c1]['numZeroesBelow'] >= square_length
-    has_bottom_border = info_matrix[r2][c1]['numZeroesRight'] >= square_length
-    has_right_border = info_matrix[r1][c2]['numZeroesBelow'] >= square_length
-    return all((has_top_border, has_left_border, has_bottom_border, has_right_border,))
-
-
-def has_square_of_zeroes1(matrix, r1, c1, r2, c2, cache):
-    if r1 >= r2 or c1 >= c2:
-        return False
-    key = f'{r1}-{c1}-{r2}-{c2}'
-    if key in cache:
-        return cache[key]
-    return any(
-        (is_square_of_zeroes1(matrix, r1, c1, r2, c2),
-         has_square_of_zeroes1(matrix, r1 + 1, c1 + 1, r2 - 1, c2 - 1, cache),
-         has_square_of_zeroes1(matrix, r1, c1 + 1, r2 - 1, c2, cache),
-         has_square_of_zeroes1(matrix, r1 + 1, c1, r2, c2 - 1, cache),
-         has_square_of_zeroes1(matrix, r1 + 1, c1 + 1, r2, c2, cache),
-         has_square_of_zeroes1(matrix, r1, c1, r2 - 1, c2 - 1, cache),)
-    )
-
-
-def has_square_of_zeroes2(info_matrix, r1, c1, r2, c2, cache):
-    if r1 >= r2 or c1 >= c2:
-        return False
-    key = f'{r1}-{c1}-{r2}-{c2}'
-    if key in cache:
-        return cache[key]
-    return any(
-        (is_square_of_zeroes2(info_matrix, r1, c1, r2, c2),
-         has_square_of_zeroes2(info_matrix, r1 + 1, c1 + 1, r2 - 1, c2 - 1, cache),
-         has_square_of_zeroes2(info_matrix, r1, c1 + 1, r2 - 1, c2, cache),
-         has_square_of_zeroes2(info_matrix, r1 + 1, c1, r2, c2 - 1, cache),
-         has_square_of_zeroes2(info_matrix, r1 + 1, c1 + 1, r2, c2, cache),
-         has_square_of_zeroes2(info_matrix, r1, c1, r2 - 1, c2 - 1, cache),)
-    )
-
-
-# O(n^4) time | O(n^3) space
-def square_of_zeroes1(matrix):
-    last_idx = len(matrix) - 1
-    return has_square_of_zeroes1(matrix, 0, 0, last_idx, last_idx, dict())
-
-
-# O(n^4) time | O(1) space
+# O(n^4) time | O(1) space - where n is the height and width of the matrix
 def square_of_zeroes2(matrix):
     n = len(matrix)
+    # 两个循环表示矩形坐标点的左上角相对位置
     for top_row in range(n):
         for left_col in range(n):
+            # 矩形至少为四个角故行和列的长度至少为 2
             square_length = 2
+            # 1. 小矩形的宽小于最大列数减去最后一列的长度
+            # 2. 小矩形的长小于最大行数减去最后一行的长度
+            # 满足条件则继续循环
             while square_length <= n - left_col and square_length <= n - top_row:
+                # 根据长度计算出左下位置行索引
                 bottom_row = top_row + square_length - 1
+                # 根据长度计算出右上位置列索引
                 right_col = left_col + square_length - 1
+                # 判断当前的小矩形是否由零构成
                 if is_square_of_zeroes1(matrix, top_row, left_col, bottom_row, right_col):
                     return True
+                # 递增计算长度
                 square_length += 1
     return False
 
 
+# O(n^3) time | O(n^3) space - where n is the height and width of the matrix
+def square_of_zeroes3(matrix):
+    # 优先计算出每个位置相对于下方和右边的零的数量
+    info_matrix = pre_compute_num_of_zeroes(matrix)
+    last_idx = len(matrix) - 1
+    # 从最大的矩形开始, 即输入矩形的四个角
+    return has_square_of_zeroes2(info_matrix, 0, 0, last_idx, last_idx, {})
+
+
+# r1 is the top row, c1 is the left column
+# r2 is the bottom row, c2 is the right column
+def has_square_of_zeroes2(info_matrix, r1, c1, r2, c2, cache):
+    if r1 >= r2 or c1 >= c2:
+        return False
+
+    key = str(r1) + "-" + str(c1) + "-" + str(r2) + "-" + str(c2)
+    if key in cache:
+        return cache[key]
+
+    cache[key] = (
+            is_square_of_zeroes2(info_matrix, r1, c1, r2, c2)
+            or has_square_of_zeroes2(info_matrix, r1 + 1, c1 + 1, r2 - 1, c2 - 1, cache)
+            or has_square_of_zeroes2(info_matrix, r1, c1 + 1, r2 - 1, c2, cache)
+            or has_square_of_zeroes2(info_matrix, r1 + 1, c1, r2, c2 - 1, cache)
+            or has_square_of_zeroes2(info_matrix, r1 + 1, c1 + 1, r2, c2, cache)
+            or has_square_of_zeroes2(info_matrix, r1, c1, r2 - 1, c2 - 1, cache)
+    )
+
+    return cache[key]
+
+
+# r1 is the top row, c1 is the left column
+# r2 is the bottom row, c2 is the right column
+def is_square_of_zeroes2(info_matrix, r1, c1, r2, c2):
+    # 计算出矩形的边长
+    square_length = c2 - c1 + 1
+    # 判断上面的边零的数量大于等于要求的小矩形边长
+    has_top_border = info_matrix[r1][c1]["num_zeroes_right"] >= square_length
+    # 判断左面的边零的数量大于等于要求的小矩形边长
+    has_left_border = info_matrix[r1][c1]["num_zeroes_below"] >= square_length
+    # 判断下面的边零的数量大于等于要求的小矩形边长
+    has_bottom_border = info_matrix[r2][c1]["num_zeroes_right"] >= square_length
+    # 判断右面的边零的数量大于等于要求的小矩形边长
+    has_right_border = info_matrix[r1][c2]["num_zeroes_below"] >= square_length
+    return has_top_border and has_left_border and has_bottom_border and has_right_border
+
+
 def pre_compute_num_of_zeroes(matrix):
-    info_matrix = [[dict() for _ in row] for row in matrix]
+    info_matrix = [[x for x in row] for row in matrix]
+
     n = len(matrix)
+    # 第一次循环, 从矩形的左上角开始不停向右向下
     for row in range(n):
         for col in range(n):
+            # 判断当前位置是否为零
             num_zeroes = 1 if matrix[row][col] == 0 else 0
             info_matrix[row][col] = {
-                "numZeroesBelow": num_zeroes,
-                "numZeroesRight": num_zeroes
+                # 为零则表示当前位置向下有一个零
+                "num_zeroes_below": num_zeroes,
+                # 为零则表示当前位置向右有一个零
+                "num_zeroes_right": num_zeroes,
             }
 
     last_idx = len(matrix) - 1
+    # 第二次循环, 从矩形的右下角开始不停向左向上处理
     for row in reversed(range(n)):
         for col in reversed(range(n)):
+            # 如果不是零则跳过
             if matrix[row][col] == 1:
                 continue
+            # 行索引不越界的情况下
             if row < last_idx:
-                info_matrix[row][col]['numZeroesBelow'] += info_matrix[row + 1][col]['numZeroesBelow']
+                # 累加下方记录的零数量
+                info_matrix[row][col]["num_zeroes_below"] += info_matrix[row + 1][col]["num_zeroes_below"]
+            # 列索引不越界的情况下
             if col < last_idx:
-                info_matrix[row][col]['numZeroesRight'] += info_matrix[row][col + 1]['numZeroesRight']
+                # 累加右边记录的零数量
+                info_matrix[row][col]["num_zeroes_right"] += info_matrix[row][col + 1]["num_zeroes_right"]
 
     return info_matrix
 
 
-# O(n^3) time | O(n^3) space
-def square_of_zeroes3(matrix):
-    info_matrix = pre_compute_num_of_zeroes(matrix)
-    last_idx = len(matrix) - 1
-    return has_square_of_zeroes2(info_matrix, 0, 0, last_idx, last_idx, dict())
-
-
-# O(n^3) time | O(n^2) space
+# O(n^3) time | O(n^2) space - where n is the height and width of the matrix
 def square_of_zeroes4(matrix):
     info_matrix = pre_compute_num_of_zeroes(matrix)
     n = len(matrix)
@@ -2374,19 +2441,239 @@ def square_of_zeroes4(matrix):
 
 
 if __name__ == '__main__':
-    matrix1 = [
-        (1, 1, 1, 0, 1, 0,),
-        (0, 0, 0, 0, 0, 1,),
-        (0, 1, 1, 1, 0, 1,),
-        (0, 0, 0, 1, 0, 1,),
-        (0, 1, 1, 1, 0, 1,),
-        (0, 0, 0, 0, 0, 1,),
-    ]
-    # (1, 0) (1, 4) (5, 0) (5, 4)
-    print(square_of_zeroes1(matrix1))
-    print(square_of_zeroes2(matrix1))
-    print(square_of_zeroes3(matrix1))
-    print(square_of_zeroes4(matrix1))
+    source = [[1, 1, 1, 0, 1, 0],
+              [0, 0, 0, 0, 0, 1],
+              [0, 1, 1, 1, 0, 1],
+              [0, 0, 0, 1, 0, 1],
+              [0, 1, 1, 1, 0, 1],
+              [0, 0, 0, 0, 0, 1]]
+    print(square_of_zeroes1(source))
+    print(square_of_zeroes2(source))
+    print(square_of_zeroes3(source))
+    print(square_of_zeroes4(source))
+```
+
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+#include <unordered_map>
+
+using namespace std;
+
+bool hasSquareOfZeroes1(vector<vector<int>> &matrix, int r1, int c1, int r2,
+                        int c2, unordered_map<string, bool> &cache);
+bool isSquareOfZeroes1(vector<vector<int>> &matrix, int r1, int c1, int r2,
+                       int c2);
+
+// O(n^4) time | O(n^3) space - where n is the height and width of the matrix
+bool squareOfZeroes1(vector<vector<int>> matrix)
+{
+    const int lastIdx = matrix.size() - 1;
+    unordered_map<string, bool> cache;
+    return hasSquareOfZeroes1(matrix, 0, 0, lastIdx, lastIdx, cache);
+}
+
+// r1 is the top row, c1 is the left column
+// r2 is the bottom row, c2 is the right column
+bool hasSquareOfZeroes1(vector<vector<int>> &matrix, int r1, int c1, int r2,
+                        int c2, unordered_map<string, bool> &cache)
+{
+    if (r1 >= r2 || c1 >= c2)
+        return false;
+
+    string key = to_string(r1) + '-' + to_string(c1) + '-' + to_string(r2) + '-' +
+                 to_string(c2);
+    if (cache.find(key) != cache.end())
+        return cache[key];
+
+    cache[key] =
+        isSquareOfZeroes1(matrix, r1, c1, r2, c2) ||
+        hasSquareOfZeroes1(matrix, r1 + 1, c1 + 1, r2 - 1, c2 - 1, cache) ||
+        hasSquareOfZeroes1(matrix, r1, c1 + 1, r2 - 1, c2, cache) ||
+        hasSquareOfZeroes1(matrix, r1 + 1, c1, r2, c2 - 1, cache) ||
+        hasSquareOfZeroes1(matrix, r1 + 1, c1 + 1, r2, c2, cache) ||
+        hasSquareOfZeroes1(matrix, r1, c1, r2 - 1, c2 - 1, cache);
+
+    return cache[key];
+}
+
+// r1 is the top row, c1 is the left column
+// r2 is the bottom row, c2 is the right column
+bool isSquareOfZeroes1(vector<vector<int>> &matrix, int r1, int c1, int r2,
+                       int c2)
+{
+    for (int row = r1; row < r2 + 1; row++)
+    {
+        if (matrix[row][c1] != 0 || matrix[row][c2] != 0)
+            return false;
+    }
+    for (int col = c1; col < c2 + 1; col++)
+    {
+        if (matrix[r1][col] != 0 || matrix[r2][col] != 0)
+            return false;
+    }
+    return true;
+}
+
+// O(n^4) time | O(1) space - where n is the height and width of the matrix
+bool squareOfZeroes2(vector<vector<int>> matrix)
+{
+    const int n = matrix.size();
+    for (int topRow = 0; topRow < n; topRow++)
+    {
+        for (int leftCol = 0; leftCol < n; leftCol++)
+        {
+            int squareLength = 2;
+            while (squareLength <= n - leftCol && squareLength <= n - topRow)
+            {
+                int bottomRow = topRow + squareLength - 1;
+                int rightCol = leftCol + squareLength - 1;
+                if (isSquareOfZeroes1(matrix, topRow, leftCol, bottomRow, rightCol))
+                    return true;
+                squareLength++;
+            }
+        }
+    }
+    return false;
+}
+
+struct InfoMatrixItem
+{
+    int numZeroesBelow;
+    int numZeroesRight;
+};
+
+bool hasSquareOfZeroes2(vector<vector<InfoMatrixItem>> &infoMatrix, int r1,
+                        int c1, int r2, int c2,
+                        unordered_map<string, bool> &cache);
+bool isSquareOfZeroes2(vector<vector<InfoMatrixItem>> &infoMatrix, int r1,
+                       int c1, int r2, int c2);
+vector<vector<InfoMatrixItem>> preComputedNumOfZeroes(vector<vector<int>> matrix);
+
+// O(n^3) time | O(n^3) space - where n is the height and width of the matrix
+bool squareOfZeroes3(vector<vector<int>> matrix)
+{
+    vector<vector<InfoMatrixItem>> infoMatrix = preComputedNumOfZeroes(matrix);
+    int lastIdx = matrix.size() - 1;
+    unordered_map<string, bool> cache;
+    return hasSquareOfZeroes2(infoMatrix, 0, 0, lastIdx, lastIdx, cache);
+}
+
+// r1 is the top row, c1 is the left column
+// r2 is the bottom row, c2 is the right column
+bool hasSquareOfZeroes2(vector<vector<InfoMatrixItem>> &infoMatrix, int r1,
+                        int c1, int r2, int c2,
+                        unordered_map<string, bool> &cache)
+{
+    if (r1 >= r2 || c1 >= c2)
+        return false;
+
+    string key = to_string(r1) + '-' + to_string(c1) + '-' + to_string(r2) + '-' +
+                 to_string(c2);
+    if (cache.find(key) != cache.end())
+        return cache[key];
+
+    cache[key] =
+        isSquareOfZeroes2(infoMatrix, r1, c1, r2, c2) ||
+        hasSquareOfZeroes2(infoMatrix, r1 + 1, c1 + 1, r2 - 1, c2 - 1, cache) ||
+        hasSquareOfZeroes2(infoMatrix, r1, c1 + 1, r2 - 1, c2, cache) ||
+        hasSquareOfZeroes2(infoMatrix, r1 + 1, c1, r2, c2 - 1, cache) ||
+        hasSquareOfZeroes2(infoMatrix, r1 + 1, c1 + 1, r2, c2, cache) ||
+        hasSquareOfZeroes2(infoMatrix, r1, c1, r2 - 1, c2 - 1, cache);
+
+    return cache[key];
+}
+
+// r1 is the top row, c1 is the left column
+// r2 is the bottom row, c2 is the right column
+bool isSquareOfZeroes2(vector<vector<InfoMatrixItem>> &infoMatrix, int r1,
+                       int c1, int r2, int c2)
+{
+    int squareLength = c2 - c1 + 1;
+    bool hasTopBorder = infoMatrix[r1][c1].numZeroesRight >= squareLength;
+    bool hasLeftBorder = infoMatrix[r1][c1].numZeroesBelow >= squareLength;
+    bool hasBottomBorder = infoMatrix[r2][c1].numZeroesRight >= squareLength;
+    bool hasRightBorder = infoMatrix[r1][c2].numZeroesBelow >= squareLength;
+    return hasTopBorder && hasLeftBorder && hasBottomBorder && hasRightBorder;
+}
+
+vector<vector<InfoMatrixItem>> preComputedNumOfZeroes(vector<vector<int>> matrix)
+{
+    vector<vector<InfoMatrixItem>> infoMatrix;
+    const int matrixSize = matrix.size();
+    for (int i = 0; i < matrixSize; i++)
+    {
+        vector<InfoMatrixItem> inner;
+        const int subMatrixSize = matrix[i].size();
+        for (int j = 0; j < subMatrixSize; j++)
+        {
+            int numZeroes = matrix[i][j] == 0 ? 1 : 0;
+            inner.push_back(InfoMatrixItem{numZeroes, numZeroes});
+        }
+        infoMatrix.push_back(inner);
+    }
+
+    int lastIdx = matrixSize - 1;
+    for (int row = lastIdx; row >= 0; row--)
+    {
+        for (int col = lastIdx; col >= 0; col--)
+        {
+            if (matrix[row][col] == 1)
+                continue;
+            if (row < lastIdx)
+            {
+                infoMatrix[row][col].numZeroesBelow +=
+                    infoMatrix[row + 1][col].numZeroesBelow;
+            }
+            if (col < lastIdx)
+            {
+                infoMatrix[row][col].numZeroesRight +=
+                    infoMatrix[row][col + 1].numZeroesRight;
+            }
+        }
+    }
+
+    return infoMatrix;
+}
+
+// O(n^3) time | O(n^2) space - where n is the height and width of the matrix
+bool squareOfZeroes4(vector<vector<int>> matrix)
+{
+    vector<vector<InfoMatrixItem>> infoMatrix = preComputedNumOfZeroes(matrix);
+    int n = matrix.size();
+    for (int topRow = 0; topRow < n; topRow++)
+    {
+        for (int leftCol = 0; leftCol < n; leftCol++)
+        {
+            int squareLength = 2;
+            while (squareLength <= n - leftCol && squareLength <= n - topRow)
+            {
+                int bottomRow = topRow + squareLength - 1;
+                int rightCol = leftCol + squareLength - 1;
+                if (isSquareOfZeroes2(infoMatrix, topRow, leftCol, bottomRow, rightCol))
+                    return true;
+                squareLength++;
+            }
+        }
+    }
+    return false;
+}
+
+int main()
+{
+    vector<vector<int>> source = {{1, 1, 1, 0, 1, 0},
+                                  {0, 0, 0, 0, 0, 1},
+                                  {0, 1, 1, 1, 0, 1},
+                                  {0, 0, 0, 1, 0, 1},
+                                  {0, 1, 1, 1, 0, 1},
+                                  {0, 0, 0, 0, 0, 1}};
+    cout << squareOfZeroes1(source) << endl;
+    cout << squareOfZeroes2(source) << endl;
+    cout << squareOfZeroes3(source) << endl;
+    cout << squareOfZeroes4(source) << endl;
+    return 0;
+}
 ```
 
 ## 遍历图的路线数
@@ -2872,4 +3159,4 @@ int main()
 }
 ```
 
-Last Modified 2022-04-28
+Last Modified 2022-05-02
