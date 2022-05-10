@@ -1173,61 +1173,192 @@ int main()
 
 ## 最长匹配括号数
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
+给定一个只包括左括号`(`和右括号`)`的字符串，找出字符串中最长的匹配括号，如`())(()))(`中最长的匹配括号是索引`3`到索引`6`，即`(())`，数量为`4`
 
-typedef struct Node
-{
-    struct Node *next;
-    int value;
-} Node, *pNode;
+```python
+# O(n^3) time | O(n) space - where n is the length of the input string
+def longest_balanced_substring1(string):
+    # 最长平衡括号数
+    max_length = 0
+    # 穷举法, 遍历所有的子字符串
+    for i in range(len(string)):
+        # 因为括号至少需要两个才是成对的, 这里的起始值和步长都是 2
+        for j in range(i + 2, len(string) + 1, 2):
+            if is_balanced(string[i:j]):
+                current_length = j - i
+                max_length = max(max_length, current_length)
 
-int getStringLength(char* string)
-{
-    char *p = string;
-    int length = 0;
-    while ( *p++ ) length++;
-    return length;
-}
+    return max_length
 
-int max(int one, int two)
-{
-    if ( one > two )
-        return one;
-    return two;
-}
 
-/* O(n) time | O(n) space */
-int longestBalancedSubstring1(char string[])
+def is_balanced(string):
+    open_parens_stack = []
+
+    for char in string:
+        # 左括号入栈
+        if char == "(":
+            open_parens_stack.append("(")
+        # 栈非空则出栈
+        elif len(open_parens_stack) > 0:
+            open_parens_stack.pop()
+        # 栈为空表示存在不平衡的括号
+        else:
+            return False
+    # 遍历结束后栈非空也表示存在平衡的括号
+    return len(open_parens_stack) == 0
+
+
+# O(n) time | O(n) space - where n is the length of the input string
+def longest_balanced_substring2(string):
+    # 最长平衡括号数
+    max_length = 0
+    # 栈, 记录字符所在的索引位置
+    idx_stack = [-1]
+
+    for i in range(len(string)):
+        # 遇到左括号入栈
+        if string[i] == "(":
+            idx_stack.append(i)
+        else:
+            # 遇到右括号出栈
+            idx_stack.pop()
+            # 如果栈为空则入栈
+            if len(idx_stack) == 0:
+                idx_stack.append(i)
+            # 如果栈非空, 表明有成对的括号出现
+            else:
+                # 对应上一次记录的左括号出现的索引位置, 也就是栈顶的记录索引
+                balanced_substring_start_idx = idx_stack[len(idx_stack) - 1]
+                # 计算括号数量 (成对括号的数量总会是偶数)
+                current_length = i - balanced_substring_start_idx
+                # 更新最大的记录长度
+                max_length = max(max_length, current_length)
+
+    return max_length
+
+
+# O(n) time | O(1) space - where n is the length of the input string
+def longest_balanced_substring3(string):
+    # 最长平衡括号数
+    max_length = 0
+    # 记录左括号数量
+    opening_count = 0
+    # 记录右括号数量
+    closing_count = 0
+
+    for char in string:
+        # 分别递增记录左右括号数量
+        if char == "(":
+            opening_count += 1
+        else:
+            closing_count += 1
+        # 判断左右括号数量是否相等, 相等则说明存在左右平衡的括号
+        if opening_count == closing_count:
+            # 左右括号是成对出现的, 且左括号与右括号数量相等, 直接乘于 2 计算括号数量
+            # 并更新最长平衡括号数
+            max_length = max(max_length, closing_count * 2)
+        # 右括号数量大于记录的左括号数量, 说明存在无法构成平衡的括号
+        # 重置左右括号的记录数量
+        elif closing_count > opening_count:
+            opening_count = 0
+            closing_count = 0
+
+    opening_count = 0
+    closing_count = 0
+    # 方形相反从后向前判断
+    for i in reversed(range(len(string))):
+        char = string[i]
+
+        if char == "(":
+            opening_count += 1
+        else:
+            closing_count += 1
+
+        if opening_count == closing_count:
+            max_length = max(max_length, opening_count * 2)
+        # 左括号数量大于记录的右括号数量, 说明存在无法构成平衡的括号
+        # 重置左右括号的记录数量 (这里的方向相反所以判断也是相反)
+        elif opening_count > closing_count:
+            opening_count = 0
+            closing_count = 0
+
+    return max_length
+
+
+# O(n) time | O(1) space - where n is the length of the input string
+def longest_balanced_substring4(string):
+    # 方法 3 的优化版本, 遍历计算括号数量作为一个公共方法, 传入遍历的方向以计算最长平衡括号数量
+    return max(
+        get_longest_balanced_in_direction(string, True),
+        get_longest_balanced_in_direction(string, False),
+    )
+
+
+def get_longest_balanced_in_direction(string, left_to_right):
+    # 根据遍历方向来初始化
+    # 初始化括号记录数的判断条件, 从左向右为左括号, 否则为右括号
+    opening_parens = "(" if left_to_right else ")"
+    # 开始位置
+    start_idx = 0 if left_to_right else len(string) - 1
+    # 步长, 负数表示反向遍历
+    step = 1 if left_to_right else -1
+
+    max_length = 0
+
+    opening_count = 0
+    closing_count = 0
+
+    idx = start_idx
+    # 因为不知道具体的遍历方向, 所以这里判断索引在数组的范围内则持续循环
+    while 0 <= idx < len(string):
+        char = string[idx]
+        # 分别累加计算左右括号数量
+        if char == opening_parens:
+            opening_count += 1
+        else:
+            closing_count += 1
+        # 左右括号相等则计算并更新最长平衡括号数
+        if opening_count == closing_count:
+            max_length = max(max_length, closing_count * 2)
+        # 存在括号不平衡的情况则重置记录数
+        elif closing_count > opening_count:
+            opening_count = 0
+            closing_count = 0
+        # 根据步长递增或递减
+        idx += step
+
+    return max_length
+
+
+if __name__ == '__main__':
+    source = '())(()))('
+    print(longest_balanced_substring1(source))
+    print(longest_balanced_substring2(source))
+    print(longest_balanced_substring3(source))
+    print(longest_balanced_substring4(source))
+```
+
+```cpp
+#include <iostream>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+bool isBalanced(string str);
+
+// O(n^3) time | O(n) space - where n is the length of the input string
+int longestBalancedSubstring1(string str)
 {
-    int i, maxLength = 0;
-    const int length = getStringLength(string);
-    pNode idxStack = (Node*)malloc(sizeof(Node));
-    idxStack->value = -1;
-    idxStack->next = NULL;
-    for ( i=0; i<length; i++)
+    int maxLength = 0;
+    const int strLength = str.length();
+    for (int i = 0; i < strLength; i++)
     {
-        if ( string[i] == '(' )
+        for (int j = i + 2; j < strLength + 1; j++)
         {
-            pNode node = (Node*)malloc(sizeof(Node));
-            node->value = i;
-            node->next = idxStack;
-            idxStack = node;
-        }
-        else
-        {
-            idxStack = idxStack->next;
-            if ( idxStack == NULL )
+            if (isBalanced(str.substr(i, j - i)))
             {
-                idxStack = (Node*)malloc(sizeof(Node));
-                idxStack->value = i;
-                idxStack->next = NULL;
-            }
-            else
-            {
-                const int balancedSubstringStartIdx = idxStack->value;
-                const int currentLength = i - balancedSubstringStartIdx;
+                int currentLength = j - i;
                 maxLength = max(maxLength, currentLength);
             }
         }
@@ -1235,73 +1366,177 @@ int longestBalancedSubstring1(char string[])
     return maxLength;
 }
 
-/* O(n) time | O(1) space */
-int longestBalancedSubstring2(char string[])
+bool isBalanced(string str)
 {
-    int i, maxLength = 0;
-    const int length = getStringLength(string);
-    int openingCount = 0, closingCount = 0;
-    for ( i=0; i<length; i++)
+    vector<char> openParensStack;
+
+    for (char c : str)
     {
-        if ( string[i] == '(' )
-            openingCount++;
+        if (c == '(')
+        {
+            openParensStack.push_back('(');
+        }
+        else if (openParensStack.size() > 0)
+        {
+            openParensStack.pop_back();
+        }
         else
-            closingCount++;
-        if ( openingCount == closingCount )
-            maxLength = max(maxLength, openingCount + closingCount);
-        else if ( closingCount > openingCount )
-            openingCount = closingCount = 0;
+        {
+            return false;
+        }
     }
-    openingCount = closingCount = 0;
-    for ( i=length-1; i>=0; i--)
-    {
-        if ( string[i] == '(' )
-            openingCount++;
-        else
-            closingCount++;
-        if ( openingCount == closingCount )
-            maxLength = max(maxLength, openingCount + closingCount);
-        else if ( openingCount > closingCount )
-            openingCount = closingCount = 0;
-    }
-    return maxLength;
+
+    return openParensStack.size() == 0;
 }
 
-int getLongestBalancedInRange(char string[], int start, int stop, int step)
+// O(n) time | O(n) space - where n is the length of the input string
+int longestBalancedSubstring2(string str)
 {
-    const char openingParens = step > 0 ? '(' : ')';
     int maxLength = 0;
-    int openingCount = 0, closingCount = 0;
-    for ( ; start <= stop; start+=step )
+    vector<int> idxStack = {-1};
+    const int strLength = str.length();
+    for (int i = 0; i < strLength; i++)
     {
-        if ( string[start] == openingParens )
-            openingCount++;
+        if (str[i] == '(')
+        {
+            idxStack.push_back(i);
+        }
         else
-            closingCount++;
-        if ( openingCount == closingCount )
-            maxLength = max(maxLength, openingCount + closingCount);
-        else if ( closingCount > openingCount )
-            openingCount = closingCount = 0;
+        {
+            idxStack.pop_back();
+            if (idxStack.size() == 0)
+            {
+                idxStack.push_back(i);
+            }
+            else
+            {
+                int balancedSubstringStartIdx = idxStack[idxStack.size() - 1];
+                int currentLength = i - balancedSubstringStartIdx;
+                maxLength = max(maxLength, currentLength);
+            }
+        }
     }
     return maxLength;
 }
 
-/* O(n) time | O(1) space */
-int longestBalancedSubstring3(char string[])
+// O(n) time | O(1) space - where n is the length of the input string
+int longestBalancedSubstring3(string str)
 {
-    const int length = getStringLength(string);
-    return max(
-               getLongestBalancedInRange(string, 0, length - 1, 1),
-               getLongestBalancedInRange(string, length - 1, 0, -1)
-           );
+    int maxLength = 0;
+
+    int openingCount = 0;
+    int closingCount = 0;
+
+    for (char c : str)
+    {
+        if (c == '(')
+        {
+            openingCount++;
+        }
+        else
+        {
+            closingCount++;
+        }
+
+        if (openingCount == closingCount)
+        {
+            maxLength = max(maxLength, closingCount * 2);
+        }
+        else if (closingCount > openingCount)
+        {
+            openingCount = 0;
+            closingCount = 0;
+        }
+    }
+
+    openingCount = 0;
+    closingCount = 0;
+    const int strLength = str.length();
+    for (int i = strLength - 1; i >= 0; i--)
+    {
+        char c = str[i];
+
+        if (c == '(')
+        {
+            openingCount++;
+        }
+        else
+        {
+            closingCount++;
+        }
+
+        if (openingCount == closingCount)
+        {
+            maxLength = max(maxLength, openingCount * 2);
+        }
+        else if (openingCount > closingCount)
+        {
+            openingCount = 0;
+            closingCount = 0;
+        }
+    }
+
+    return maxLength;
 }
 
-int main(void)
+int getLongestBalancedInDirection(string str, bool leftToRight);
+
+// O(n) time | O(1) space - where n is the length of the input string
+int longestBalancedSubstring4(string str)
 {
-    char string[] = ")((()))()";
-    printf("%d ", longestBalancedSubstring1(string));
-    printf("%d ", longestBalancedSubstring2(string));
-    printf("%d ", longestBalancedSubstring3(string));
+    return max(getLongestBalancedInDirection(str, true),
+               getLongestBalancedInDirection(str, false));
+}
+
+int getLongestBalancedInDirection(string str, bool leftToRight)
+{
+    const int strLength = str.length();
+    char openingParens = leftToRight ? '(' : ')';
+    int startIdx = leftToRight ? 0 : strLength - 1;
+    int step = leftToRight ? 1 : -1;
+
+    int maxLength = 0;
+
+    int openingCount = 0;
+    int closingCount = 0;
+
+    int idx = startIdx;
+    while (idx >= 0 && idx < strLength)
+    {
+        char c = str[idx];
+
+        if (c == openingParens)
+        {
+            openingCount++;
+        }
+        else
+        {
+            closingCount++;
+        }
+
+        if (openingCount == closingCount)
+        {
+            maxLength = max(maxLength, closingCount * 2);
+        }
+        else if (closingCount > openingCount)
+        {
+            openingCount = 0;
+            closingCount = 0;
+        }
+
+        idx += step;
+    }
+
+    return maxLength;
+}
+
+int main()
+{
+    string source = "())(()))(";
+    cout << longestBalancedSubstring1(source) << endl;
+    cout << longestBalancedSubstring2(source) << endl;
+    cout << longestBalancedSubstring3(source) << endl;
+    cout << longestBalancedSubstring4(source) << endl;
     return 0;
 }
 ```
