@@ -10,3 +10,4 @@
   - [Decorator](python/decorator.md)
   - [DateTime](python/datetime.md)
   - [cProfile](python/cprofile.md)
+  - [Special Methods](python/object-special-methods.md)
