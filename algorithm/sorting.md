@@ -690,20 +690,30 @@ int main()
 先拆分为较小的子序列，然后对子序列排序，再慢慢将每个子序列按大小对比后合并到主序列中
 
 ```python
-# O(n * log(n)) time | O(n * log(n)) space
+# Best: O(n * log(n)) time | O(n * log(n)) space
+# Average: O(n * log(n)) time | O(n * log(n)) space
+# Worst: O(n * log(n)) time | O(n * log(n)) space
 def merge_sort1(array):
-    if len(array) == 1:
+    # 数组元素数量小于 1 直接返回, 递归的结束
+    if len(array) <= 1:
         return array
+    # 求出中间位置的索引
     middle_idx = len(array) // 2
+    # 分割左右一半的数组
     left_half = array[:middle_idx]
     right_half = array[middle_idx:]
+    # 递归执行, 先将数组拆分到最小的数量再按值的大小排序后合并到一起
     return merge_sorted_arrays(merge_sort1(left_half), merge_sort1(right_half))
 
 
 def merge_sorted_arrays(left_half, right_half):
+    # 创建一个包含了两个数组长度想加的新数组, 记录排序好的元素
     sorted_array = [None] * (len(left_half) + len(right_half))
-    i = j = k = 0
-    while i < len(left_half) and j < len(right_half):
+    k = i = j = 0
+    left_half_length = len(left_half)
+    right_half_length = len(right_half)
+    # 同时遍历两个数组, 根据值的大小放到新创建的数组中
+    while i < left_half_length and j < right_half_length:
         if left_half[i] <= right_half[j]:
             sorted_array[k] = left_half[i]
             i += 1
@@ -711,32 +721,45 @@ def merge_sorted_arrays(left_half, right_half):
             sorted_array[k] = right_half[j]
             j += 1
         k += 1
-    while i < len(left_half):
+    # 上面的循环可能存在只将其中一个数组的元素处理完,
+    # 所以这里需要将剩余的元素处理完
+    while i < left_half_length:
         sorted_array[k] = left_half[i]
         i += 1
         k += 1
-    while j < len(right_half):
+    while j < right_half_length:
         sorted_array[k] = right_half[j]
         j += 1
         k += 1
+    # 返回排序好的数组
     return sorted_array
 
 
-# O(n * log(n)) time | O(n) space
+# Best: O(n * log(n)) time | O(n) space
+# Average: O(n * log(n)) time | O(n) space
+# Worst: O(n * log(n)) time | O(n) space
 def merge_sort2(array):
+    # 数组元素数量小于 1 直接返回
     if len(array) <= 1:
         return array
+    # 拷贝一份数组作为临时的记录
     auxiliary_array = array[:]
+    # 通过索引来访问临时数组, 与上面的方法类似, 但减少了空间
     merge_sort_helper(array, 0, len(array) - 1, auxiliary_array)
     return array
 
 
 def merge_sort_helper(main_array, start_idx, end_idx, auxiliary_array):
+    # 开始索引等于结束索引直接返回, 递归的结束
     if start_idx == end_idx:
-        return False
+        return
+    # 求出中间位置的索引
     middle_idx = (start_idx + end_idx) // 2
+    # 递归执行处理左半部分的数组
     merge_sort_helper(auxiliary_array, start_idx, middle_idx, main_array)
+    # 递归执行处理右半部分的数组
     merge_sort_helper(auxiliary_array, middle_idx + 1, end_idx, main_array)
+    # 合并两部分排序好的数组
     do_merge(main_array, start_idx, middle_idx, end_idx, auxiliary_array)
 
 
@@ -744,6 +767,7 @@ def do_merge(main_array, start_idx, middle_idx, end_idx, auxiliary_array):
     k = start_idx
     i = start_idx
     j = middle_idx + 1
+    # 同时遍历两个数组, 根据值的大小放到原始的数组中
     while i <= middle_idx and j <= end_idx:
         if auxiliary_array[i] <= auxiliary_array[j]:
             main_array[k] = auxiliary_array[i]
@@ -752,6 +776,8 @@ def do_merge(main_array, start_idx, middle_idx, end_idx, auxiliary_array):
             main_array[k] = auxiliary_array[j]
             j += 1
         k += 1
+    # 上面的循环可能存在只将其中一个数组的元素处理完,
+    # 所以这里需要将剩余的元素处理完
     while i <= middle_idx:
         main_array[k] = auxiliary_array[i]
         i += 1
@@ -763,10 +789,141 @@ def do_merge(main_array, start_idx, middle_idx, end_idx, auxiliary_array):
 
 
 if __name__ == '__main__':
-    a = [8, 5, 2, 9, 5, 6, 3]
-    print(merge_sort1(a))
-    print(merge_sort2(a))
+    source = [45, 9, -34, 203, -63, -2, 17]
+    print(merge_sort1(source))
+    print(merge_sort2(source))
 ```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<int> mergeSortedArrays(vector<int> leftHalf, vector<int> rightHalf);
+
+// Best: O(nlog(n)) time | O(nlog(n)) space
+// Average: O(nlog(n)) time | O(nlog(n)) space
+// Worst: O(nlog(n)) time | O(nlog(n)) space
+vector<int> mergeSort1(vector<int> array)
+{
+    if (array.size() <= 1)
+    {
+        return array;
+    }
+    int middleIdx = array.size() / 2;
+    vector<int> leftHalf(array.begin(), array.begin() + middleIdx);
+    vector<int> rightHalf(array.begin() + middleIdx, array.end());
+    return mergeSortedArrays(mergeSort1(leftHalf), mergeSort1(rightHalf));
+}
+
+vector<int> mergeSortedArrays(vector<int> leftHalf, vector<int> rightHalf)
+{
+    const int leftHafSize = leftHalf.size();
+    const int rightHafSize = rightHalf.size();
+    vector<int> sortedArray(leftHafSize + rightHafSize, 0);
+    int k = 0;
+    int i = 0;
+    int j = 0;
+    while (i < leftHafSize && j < rightHafSize)
+    {
+        if (leftHalf[i] <= rightHalf[j])
+        {
+            sortedArray[k++] = leftHalf[i++];
+        }
+        else
+        {
+            sortedArray[k++] = rightHalf[j++];
+        }
+    }
+    while (i < leftHafSize)
+    {
+        sortedArray[k++] = leftHalf[i++];
+    }
+    while (j < rightHafSize)
+    {
+        sortedArray[k++] = rightHalf[j++];
+    }
+    return sortedArray;
+}
+
+void mergeSortHelper(vector<int> *mainArray, int startIdx, int endIdx,
+                     vector<int> *auxiliaryArray);
+void doMerge(vector<int> *mainArray, int startIdx, int middleIdx, int endIdx,
+             vector<int> *auxiliaryArray);
+
+// Best: O(nlog(n)) time | O(n) space
+// Average: O(nlog(n)) time | O(n) space
+// Worst: O(nlog(n)) time | O(n) space
+vector<int> mergeSort2(vector<int> array)
+{
+    if (array.size() <= 1)
+    {
+        return array;
+    }
+    vector<int> auxiliaryArray = array;
+    mergeSortHelper(&array, 0, array.size() - 1, &auxiliaryArray);
+    return array;
+}
+
+void mergeSortHelper(vector<int> *mainArray, int startIdx, int endIdx,
+                     vector<int> *auxiliaryArray)
+{
+    if (startIdx == endIdx)
+    {
+        return;
+    }
+    int middleIdx = (startIdx + endIdx) / 2;
+    mergeSortHelper(auxiliaryArray, startIdx, middleIdx, mainArray);
+    mergeSortHelper(auxiliaryArray, middleIdx + 1, endIdx, mainArray);
+    doMerge(mainArray, startIdx, middleIdx, endIdx, auxiliaryArray);
+}
+
+void doMerge(vector<int> *mainArray, int startIdx, int middleIdx, int endIdx,
+             vector<int> *auxiliaryArray)
+{
+    int k = startIdx;
+    int i = startIdx;
+    int j = middleIdx + 1;
+    while (i <= middleIdx && j <= endIdx)
+    {
+        if (auxiliaryArray->at(i) <= auxiliaryArray->at(j))
+        {
+            mainArray->at(k++) = auxiliaryArray->at(i++);
+        }
+        else
+        {
+            mainArray->at(k++) = auxiliaryArray->at(j++);
+        }
+    }
+    while (i <= middleIdx)
+    {
+        mainArray->at(k++) = auxiliaryArray->at(i++);
+    }
+    while (j <= endIdx)
+    {
+        mainArray->at(k++) = auxiliaryArray->at(j++);
+    }
+}
+
+void iteration(vector<int> array)
+{
+    for (int e : array)
+    {
+        cout << e << " ";
+    }
+    cout << endl;
+}
+
+int main()
+{
+    vector<int> source = {45, 9, -34, 203, -63, -2, 17};
+    iteration(mergeSort1(source));
+    iteration(mergeSort2(source));
+    return 0;
+}
+```
+
+> 归并排序是稳定的
 
 ## 基数排序
 
@@ -913,4 +1070,4 @@ int main()
 }
 ```
 
-Last Modified 2022-04-03
+Last Modified 2022-05-19
