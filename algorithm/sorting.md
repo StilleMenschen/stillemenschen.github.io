@@ -679,7 +679,7 @@ int main()
 }
 ```
 
-> 堆排序是不稳定的排序算法，堆的结构是节点 i 的孩子为 2 * i 和 2 * i + 1 节点，大顶堆要求父节点大于等于其 2 个子节点，
+> 堆排序是不稳定的排序算法，堆的结构是节点 i 的孩子为 2 _ i 和 2 _ i + 1 节点，大顶堆要求父节点大于等于其 2 个子节点，
 > 小顶堆要求父节点小于等于其 2 个子节点。在一个长为 n 的序列，堆排序的过程是从第 n / 2 开始和其子节点共 3 个值选择最大(大顶堆)或者最小(小顶堆),
 > 这 3 个元素之间的选择当然不会破坏稳定性。但当为 n / 2 - 1, n / 2 - 2, … 1 这些个父节点选择元素时，
 > 就会破坏稳定性。有可能第 n / 2 个父节点交换把后面一个元素交换过去了，而第 n / 2 - 1 个父节点把后面一个相同的元素没有交换，
@@ -1070,4 +1070,142 @@ int main()
 }
 ```
 
-Last Modified 2022-05-19
+## 计数倒置
+
+接收一个数组，判断数组中满足以下两个条件的元素索引配对数量
+
+1. 左边的元素数值必须大于右边的元素
+2. 左边的元素索引小于右边的元素
+
+如数组`[2, 3, 3, 1, 9, 5, 6]`中有`(0, 3)`、`(1, 3)`、`(2, 3)`、`(4, 5)`、`(4, 6)`这 5 个匹配是满足条件的
+
+```python
+# O(n * log(n)) time | O(n) space - where n is the length of the array
+def count_inversions(array):
+    return count_sub_array_inversions(array, 0, len(array))
+
+
+def count_sub_array_inversions(array, start, end):
+    # 结束索引与开始索引距离小于 1 则返回, 递归结束
+    if end - start <= 1:
+        return 0
+    # 获得中间位置的索引
+    # middle = start + (end - start) // 2
+    middle = (start + end) // 2
+    # 递归调用, 获得左子数组的统计数量
+    left_inversions = count_sub_array_inversions(array, start, middle)
+    # 递归调用, 获得右子数组的统计数量
+    right_inversions = count_sub_array_inversions(array, middle, end)
+    # 合并两个子数组并计算满足倒置的数量
+    merged_array_inversions = merge_sort_and_count_inversions(array, start, middle, end)
+    # 返回三个数量计算的和
+    return left_inversions + right_inversions + merged_array_inversions
+
+
+def merge_sort_and_count_inversions(array, start, middle, end):
+    sorted_array = []
+    left = start
+    right = middle
+    inversions = 0
+    # 同时处理两个子数组, 将较小的元素放在前面, 逻辑与归并排序类似
+    while left < middle and right < end:
+        if array[left] <= array[right]:
+            sorted_array.append(array[left])
+            left += 1
+        else:
+            # 递增倒置的统计数量, 如果存在左子数组的当前值比右子数组的当前值大,
+            # 那么左子数组剩余的元素也会比右子数组当前值要大,
+            # 所以这里计算累加的是从左子数组结束位置到当前位置的元素数量
+            inversions += middle - left
+            sorted_array.append(array[right])
+            right += 1
+    # 拼接上剩余未处理完的数组元素
+    sorted_array += array[left:middle] + array[right:end]
+    # 将排序好的元素回写到源数组
+    for idx, num in enumerate(sorted_array):
+        array[start + idx] = num
+    # 返回计算的倒置数量
+    return inversions
+
+
+if __name__ == '__main__':
+    print(count_inversions([2, 3, 3, 1, 9, 5, 6]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int countSubArrayInversions(vector<int> &array, int start, int end);
+int mergeSortAndCountInversions(vector<int> &array, int start, int middle, int end);
+
+// O(n * log(n)) time | O(n) space - where n is the length of the array
+int countInversions(vector<int> array)
+{
+    return countSubArrayInversions(array, 0, array.size());
+}
+
+int countSubArrayInversions(vector<int> &array, int start, int end)
+{
+    if (end - start <= 1)
+        return 0;
+
+    int middle = start + ((end - start) / 2);
+    int leftInversions = countSubArrayInversions(array, start, middle);
+    int rightInversions = countSubArrayInversions(array, middle, end);
+    int mergedArrayInversions =
+        mergeSortAndCountInversions(array, start, middle, end);
+    return leftInversions + rightInversions + mergedArrayInversions;
+}
+
+int mergeSortAndCountInversions(vector<int> &array, int start, int middle, int end)
+{
+    vector<int> sortedArray;
+    int left = start;
+    int right = middle;
+    int inversions = 0;
+
+    while (left < middle && right < end)
+    {
+        if (array[left] <= array[right])
+        {
+            sortedArray.push_back(array[left]);
+            left++;
+        }
+        else
+        {
+            inversions += middle - left;
+            sortedArray.push_back(array[right]);
+            right++;
+        }
+    }
+
+    for (int idx = left; idx < middle; idx++)
+    {
+        sortedArray.push_back(array[idx]);
+    }
+
+    for (int idx = right; idx < end; idx++)
+    {
+        sortedArray.push_back(array[idx]);
+    }
+
+    const int sortedArraySize = sortedArray.size();
+    for (int idx = 0; idx < sortedArraySize; idx++)
+    {
+        int num = sortedArray[idx];
+        array[start + idx] = num;
+    }
+
+    return inversions;
+}
+
+int main()
+{
+    cout << countInversions({2, 3, 3, 1, 9, 5, 6});
+    return 0;
+}
+```
+
+Last Modified 2022-05-23
