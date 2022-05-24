@@ -11,3 +11,4 @@
   - [DateTime](python/datetime.md)
   - [cProfile](python/cprofile.md)
   - [Special Methods](python/object-special-methods.md)
+  - [Sequence](python/sequence.md)

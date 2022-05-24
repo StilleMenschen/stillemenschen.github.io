@@ -26,11 +26,11 @@ class FrenchDeck:
         return rank_value * len(self.suits_values) + self.suits_values[card.suit]
 
 
-if __name__ == '__main__':
-    deck = FrenchDeck()
-    print(random.choice(deck))
-    sorted_deck = sorted(deck, key=deck.spades_high)
-    print(sorted_deck[:10])
+deck = FrenchDeck()
+print(random.choice(deck))
+sorted_deck = sorted(deck, key=deck.spades_high)
+print(sorted_deck[:10])
+print(sorted_deck[12:13])
 ```
 
 ```python
@@ -62,12 +62,11 @@ class Vector:
         return Vector(self.x * scalar, self.y * scalar)
 
 
-if __name__ == '__main__':
-    v1 = Vector(3, 4)
-    v2 = Vector(7, 9)
-    print(v1 + v2)
-    print(v1 * 3)
-    print(abs(v1))
+v1 = Vector(3, 4)
+v2 = Vector(7, 9)
+print(v1 + v2)
+print(v1 * 3)
+print(abs(v1))
 ```
 
-Last Modified 2022-05-11
+Last Modified 2022-05-24
