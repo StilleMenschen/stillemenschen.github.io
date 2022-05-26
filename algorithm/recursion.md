@@ -1435,4 +1435,149 @@ int main()
 }
 ```
 
-Last Modified 2022-04-03
+## 计算可生成树的数量
+
+给定一个非负整数，表示可以使用的二叉树节点数量，计算出使用这些节点能够构成多少个不同结构的二叉树的数量（比如左右子树的数量不同、只有左子树、只有右子树等等）
+
+```python
+# Upper Bound: O((n*(2n)!)/(n!(n+1)!)) time | O(n) space
+def number_of_binary_tree_topologies1(n):
+    if n == 0:
+        return 1
+    # 记录可生成的不同树的数量
+    number_of_trees = 0
+    # 假定左子树的数量从 0 开始到 n
+    for left_tree_size in range(n):
+        # 右子树通过总的树数量减去父级的 1 和左子树的数量得到
+        right_tree_size = n - 1 - left_tree_size
+        # 递归计算左右子树的数量
+        number_of_left_trees = number_of_binary_tree_topologies1(left_tree_size)
+        number_of_right_trees = number_of_binary_tree_topologies1(right_tree_size)
+        # B(n - 1) = x
+        # T0, T1, T2 ... T(n - 1)
+        # B(n - 1) = y
+        # T0, T1, T2 ... T(n - 1)
+        # 左右子树都会遍历完所有可能的数量所以累加计算需要将左右子树的数量相乘
+        number_of_trees += number_of_left_trees * number_of_right_trees
+    return number_of_trees
+
+
+# O(n^2) time | O(n) space
+# def number_of_binary_tree_topologies2(n, cache=[1]):
+def number_of_binary_tree_topologies2(n, cache={0: 1}):
+    # 相对于第一种方法使用了计算结果缓存
+    # if n < len(cache):
+    if n in cache:
+        return cache[n]
+    number_of_trees = 0
+    for left_tree_size in range(n):
+        right_tree_size = n - 1 - left_tree_size
+        number_of_left_trees = number_of_binary_tree_topologies2(left_tree_size, cache)
+        number_of_right_trees = number_of_binary_tree_topologies2(right_tree_size, cache)
+        number_of_trees += number_of_left_trees * number_of_right_trees
+    # cache.append(number_of_trees)
+    cache[n] = number_of_trees
+    return number_of_trees
+
+
+# O(n^2) time | O(n) space
+def number_of_binary_tree_topologies3(n):
+    # 相对于第二种递归的方法, 使用了线性迭代的方式实现
+    cache = [1]
+    for m in range(1, n + 1):
+        number_of_trees = 0
+        for left_tree_size in range(m):
+            right_tree_size = m - 1 - left_tree_size
+            number_of_left_trees = cache[left_tree_size]
+            number_of_right_trees = cache[right_tree_size]
+            number_of_trees += number_of_left_trees * number_of_right_trees
+        cache.append(number_of_trees)
+    return cache[n]
+
+
+if __name__ == '__main__':
+    print(number_of_binary_tree_topologies1(5))
+    print(number_of_binary_tree_topologies2(5))
+    print(number_of_binary_tree_topologies3(5))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+using namespace std;
+
+// Upper Bound: O((n*(2n)!)/(n!(n+1)!)) time | O(n) space
+int numberOfBinaryTreeTopologies1(int n)
+{
+    if (n == 0)
+    {
+        return 1;
+    }
+    int numberOfTrees = 0;
+    for (int leftTreeSize = 0; leftTreeSize < n; leftTreeSize++)
+    {
+        int rightTreeSize = n - 1 - leftTreeSize;
+        int numberOfLeftTrees = numberOfBinaryTreeTopologies1(leftTreeSize);
+        int numberOfRightTrees = numberOfBinaryTreeTopologies1(rightTreeSize);
+        numberOfTrees += numberOfLeftTrees * numberOfRightTrees;
+    }
+    return numberOfTrees;
+}
+
+int helper(int n, unordered_map<int, int> *cache);
+
+// O(n^2) time | O(n) space
+int numberOfBinaryTreeTopologies2(int n)
+{
+    unordered_map<int, int> cache{{0, 1}};
+    return helper(n, &cache);
+}
+
+int helper(int n, unordered_map<int, int> *cache)
+{
+    if (cache->find(n) != cache->end())
+    {
+        return cache->at(n);
+    }
+    int numberOfTrees = 0;
+    for (int leftTreeSize = 0; leftTreeSize < n; leftTreeSize++)
+    {
+        int rightTreeSize = n - 1 - leftTreeSize;
+        int numberOfLeftTrees = helper(leftTreeSize, cache);
+        int numberOfRightTrees = helper(rightTreeSize, cache);
+        numberOfTrees += numberOfLeftTrees * numberOfRightTrees;
+    }
+    cache->insert({n, numberOfTrees});
+    return numberOfTrees;
+}
+
+// O(n^2) time | O(n) space
+int numberOfBinaryTreeTopologies3(int n)
+{
+    vector<int> cache{1};
+    for (int m = 1; m < n + 1; m++)
+    {
+        int numberOfTrees = 0;
+        for (int leftTreeSize = 0; leftTreeSize < m; leftTreeSize++)
+        {
+            int rightTreeSize = m - 1 - leftTreeSize;
+            int numberOfLeftTrees = cache[leftTreeSize];
+            int numberOfRightTrees = cache[rightTreeSize];
+            numberOfTrees += numberOfLeftTrees * numberOfRightTrees;
+        }
+        cache.push_back(numberOfTrees);
+    }
+    return cache[n];
+}
+
+int main()
+{
+    cout << numberOfBinaryTreeTopologies1(5) << endl;
+    cout << numberOfBinaryTreeTopologies2(5) << endl;
+    cout << numberOfBinaryTreeTopologies3(5) << endl;
+    return 0;
+}
+```
+
+Last Modified 2022-05-26
