@@ -173,7 +173,7 @@ MapReduce 可以在这里为我们提供帮助。我们可以将日志存储在 
   ("userId2", ["videoId1", "videoId2", ..., "videoId3"])
   ```
 
-## 9 架构图
+## 9 系统架构图
 
 ![架构图](images/netflix-system-diagram.svg)
 

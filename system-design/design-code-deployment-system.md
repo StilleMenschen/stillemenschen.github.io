@@ -157,7 +157,7 @@ UPDATE jobs_table SET status = 'QUEUED' WHERE
 
 集群/区域中的机器将轮询相关的区域 Key-Value 存储，并且当 build_version 更改时，它们将尝试从 P2P 网络中获取该构建数据并运行二进制文件。
 
-## 14 架构图
+## 14 系统架构图
 
 ![14 架构图](images/code-deployment-system-diagram.svg)
 

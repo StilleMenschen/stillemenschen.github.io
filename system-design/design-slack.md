@@ -177,7 +177,7 @@ Pub/Sub 消息将如下所示：
 
 由于每个 Pub/Sub 消息都带有时间戳，并且由于读取通道和发送 Slack 消息涉及写入我们的持久存储，因此 Pub/Sub 消息将有效地是幂等操作。
 
-## 7 架构图
+## 7 系统架构图
 
 ![架构图](images/slack-system-diagram.svg)
 
