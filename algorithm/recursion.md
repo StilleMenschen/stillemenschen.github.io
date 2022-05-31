@@ -1580,4 +1580,267 @@ int main()
 }
 ```
 
-Last Modified 2022-05-26
+## 非攻击皇后
+
+在国际象棋中，皇后棋子可以向横向、纵向、左对角线、右对角线上移动，给定一个非负整数值`n`表示棋盘的大小为`n * n`，
+找出棋盘中可以放置非攻击皇后棋子的有效放置的`x`种方式（一般在`n * n`的棋盘中可以放置非攻击皇后棋子的数量也是`n`）
+
+```python
+# Lower Bound: O(n!) time | O(n) space - where n is the input number
+def non_attacking_queens1(n):
+    # 记录每一行放置棋子的列位置
+    column_placements = [0] * n
+    # 递归放置棋子, 找出复核非攻击皇后的位置
+    return get_number_of_non_attacking_queen_placements1(0, column_placements, n)
+
+
+def get_number_of_non_attacking_queen_placements1(row, column_placements, board_size):
+    # 行数等于棋盘大小则直接返回, 表明所有的棋子都已经正确的放置了, 递归的结束点
+    if row == board_size:
+        return 1
+    # 记录有效放置的数量
+    valid_placements = 0
+    # 遍历每一列
+    for col in range(board_size):
+        # 判断当前行的每一列是否符合条件放置棋子
+        if is_non_attacking_placement1(row, col, column_placements):
+            # 如果当前行能放置棋子, 记录到缓存中
+            column_placements[row] = col
+            # 继续验证下一行是否可以放置棋子
+            valid_placements += get_number_of_non_attacking_queen_placements1(row + 1, column_placements, board_size)
+    # 返回有效放置的数量
+    return valid_placements
+
+
+# As `row` tends to `n`, this becomes an O(n)-time operation.
+def is_non_attacking_placement1(row, col, column_placements):
+    # 非攻击皇后要求棋子的横向, 纵向, 左对角线, 右对角线上都不能有其它的皇后棋子
+    # 就是皇后棋子可移动的线路内不能攻击到其它的皇后棋子
+
+    # 遍历前面行对应放置棋子的列
+    for previous_row in range(row):
+        # 从缓存中取出行缓存的列位置
+        column_to_check = column_placements[previous_row]
+        # 判断是否在前一行的纵向位置中
+        same_column = column_to_check == col
+        # 判断是否在前一行的对角线位置中, 这里计算的使用了绝对值, 可以兼容计算左右对角线
+        on_diagonal = abs(column_to_check - col) == row - previous_row
+        if same_column or on_diagonal:
+            return False
+
+    return True
+
+
+# Upper Bound: O(n!) time | O(n) space - where n is the input number
+def non_attacking_queens2(n):
+    # 针对上面的方法做了优化, 使用哈希列表
+    # 每次计算都缓存前一行对角线, 当前行纵向位置, 后一行对角线不可放置棋子的位置
+    # 也就是符合皇后棋子可以移动位置的路线不能放置棋子
+    blocked_columns = set()
+    blocked_up_diagonals = set()
+    blocked_down_diagonals = set()
+    return get_number_of_non_attacking_queen_placements2(0, blocked_columns, blocked_up_diagonals,
+                                                         blocked_down_diagonals, n)
+
+
+def get_number_of_non_attacking_queen_placements2(row, blocked_columns, blocked_up_diagonals, blocked_down_diagonals,
+                                                  board_size):
+    if row == board_size:
+        return 1
+
+    valid_placements = 0
+    for col in range(board_size):
+        if is_non_attacking_placement2(row, col, blocked_columns, blocked_up_diagonals, blocked_down_diagonals):
+            # 每次计算前先记录好不可放置的位置
+            place_queen(row, col, blocked_columns, blocked_up_diagonals, blocked_down_diagonals)
+            # 递归判断下一行可以放置棋子的位置有效数量
+            valid_placements += get_number_of_non_attacking_queen_placements2(
+                row + 1, blocked_columns, blocked_up_diagonals, blocked_down_diagonals, board_size
+            )
+            # 每次计算完成后清除记录的位置
+            remove_queen(row, col, blocked_columns, blocked_up_diagonals, blocked_down_diagonals)
+
+    return valid_placements
+
+
+# This is always an O(1)-time operation.
+def is_non_attacking_placement2(row, col, blocked_columns, blocked_up_diagonals, blocked_down_diagonals):
+    # 由于是哈希列表, 可以瞬间完成判断, 降低了时间复杂度
+    if col in blocked_columns:
+        return False
+    if row + col in blocked_up_diagonals:
+        return False
+    if row - col in blocked_down_diagonals:
+        return False
+
+    return True
+
+
+def place_queen(row, col, blocked_columns, blocked_up_diagonals, blocked_down_diagonals):
+    blocked_columns.add(col)
+    blocked_up_diagonals.add(row + col)
+    blocked_down_diagonals.add(row - col)
+
+
+def remove_queen(row, col, blocked_columns, blocked_up_diagonals, blocked_down_diagonals):
+    blocked_columns.remove(col)
+    blocked_up_diagonals.remove(row + col)
+    blocked_down_diagonals.remove(row - col)
+
+
+if __name__ == '__main__':
+    print(non_attacking_queens1(4))
+    print(non_attacking_queens2(4))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <unordered_set>
+using namespace std;
+
+int getNumberOfNonAttackingQueenPlacements1(int row, vector<int> &columnPlacements,
+                                            int boardSize);
+bool isNonAttackingPlacement1(int row, int col, vector<int> columnPlacements);
+
+// Lower Bound: O(n!) time | O(n) space - where n is the input number
+int nonAttackingQueens1(int n)
+{
+    // Each index of `columnPlacements` represents a row of the chessboard,
+    // and the value at each index is the column (on the relevant row) where
+    // a queen is currently placed.
+    vector<int> columnPlacements(n, 0);
+    return getNumberOfNonAttackingQueenPlacements1(0, columnPlacements, n);
+}
+
+int getNumberOfNonAttackingQueenPlacements1(int row, vector<int> &columnPlacements,
+                                            int boardSize)
+{
+    if (row == boardSize)
+        return 1;
+
+    int validPlacements = 0;
+    for (int col = 0; col < boardSize; col++)
+    {
+        if (isNonAttackingPlacement1(row, col, columnPlacements))
+        {
+            columnPlacements[row] = col;
+            validPlacements += getNumberOfNonAttackingQueenPlacements1(
+                row + 1, columnPlacements, boardSize);
+        }
+    }
+
+    return validPlacements;
+}
+
+// As `row` tends to `n`, this becomes an O(n)-time operation.
+bool isNonAttackingPlacement1(int row, int col, vector<int> columnPlacements)
+{
+    for (int previousRow = 0; previousRow < row; previousRow++)
+    {
+        int columnToCheck = columnPlacements[previousRow];
+        bool sameColumn = columnToCheck == col;
+        bool onDiagonal = abs(columnToCheck - col) == row - previousRow;
+        if (sameColumn || onDiagonal)
+            return false;
+    }
+
+    return true;
+}
+
+int getNumberOfNonAttackingQueenPlacements2(
+    int row, unordered_set<int> &blockedColumns,
+    unordered_set<int> &blockedUpDiagonals,
+    unordered_set<int> &blockedDownDiagonals, int boardSize);
+bool isNonAttackingPlacement2(int row, int col,
+                              unordered_set<int> &blockedColumns,
+                              unordered_set<int> &blockedUpDiagonals,
+                              unordered_set<int> &blockedDownDiagonals);
+void placeQueen(int row, int col, unordered_set<int> &blockedColumns,
+                unordered_set<int> &blockedUpDiagonals,
+                unordered_set<int> &blockedDownDiagonals);
+void removeQueen(int row, int col, unordered_set<int> &blockedColumns,
+                 unordered_set<int> &blockedUpDiagonals,
+                 unordered_set<int> &blockedDownDiagonals);
+
+// Upper Bound: O(n!) time | O(n) space - where n is the input number
+int nonAttackingQueens2(int n)
+{
+    unordered_set<int> blockedColumns;
+    unordered_set<int> blockedUpDiagonals;
+    unordered_set<int> blockedDownDiagonals;
+    return getNumberOfNonAttackingQueenPlacements2(
+        0, blockedColumns, blockedUpDiagonals, blockedDownDiagonals, n);
+}
+
+int getNumberOfNonAttackingQueenPlacements2(
+    int row, unordered_set<int> &blockedColumns,
+    unordered_set<int> &blockedUpDiagonals,
+    unordered_set<int> &blockedDownDiagonals, int boardSize)
+{
+    if (row == boardSize)
+        return 1;
+
+    int validPlacements = 0;
+    for (int col = 0; col < boardSize; col++)
+    {
+        if (isNonAttackingPlacement2(row, col, blockedColumns, blockedUpDiagonals,
+                                     blockedDownDiagonals))
+        {
+            placeQueen(row, col, blockedColumns, blockedUpDiagonals,
+                       blockedDownDiagonals);
+            validPlacements += getNumberOfNonAttackingQueenPlacements2(
+                row + 1, blockedColumns, blockedUpDiagonals, blockedDownDiagonals,
+                boardSize);
+            removeQueen(row, col, blockedColumns, blockedUpDiagonals,
+                        blockedDownDiagonals);
+        }
+    }
+
+    return validPlacements;
+}
+
+// This is always an O(1)-time operation.
+bool isNonAttackingPlacement2(int row, int col,
+                              unordered_set<int> &blockedColumns,
+                              unordered_set<int> &blockedUpDiagonals,
+                              unordered_set<int> &blockedDownDiagonals)
+{
+    if (blockedColumns.find(col) != blockedColumns.end())
+        return false;
+    if (blockedUpDiagonals.find(row + col) != blockedUpDiagonals.end())
+        return false;
+    if (blockedDownDiagonals.find(row - col) != blockedDownDiagonals.end())
+        return false;
+
+    return true;
+}
+
+void placeQueen(int row, int col, unordered_set<int> &blockedColumns,
+                unordered_set<int> &blockedUpDiagonals,
+                unordered_set<int> &blockedDownDiagonals)
+{
+    blockedColumns.insert(col);
+    blockedUpDiagonals.insert(row + col);
+    blockedDownDiagonals.insert(row - col);
+}
+
+void removeQueen(int row, int col, unordered_set<int> &blockedColumns,
+                 unordered_set<int> &blockedUpDiagonals,
+                 unordered_set<int> &blockedDownDiagonals)
+{
+    blockedColumns.erase(col);
+    blockedUpDiagonals.erase(row + col);
+    blockedDownDiagonals.erase(row - col);
+}
+
+int main()
+{
+    cout << nonAttackingQueens1(4) << endl;
+    cout << nonAttackingQueens2(4) << endl;
+    return 0;
+}
+```
+
+Last Modified 2022-05-31
