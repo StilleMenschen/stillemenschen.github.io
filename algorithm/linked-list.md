@@ -1402,132 +1402,223 @@ int main()
 
 给定链表中的某个元素值，根据元素值重新排布链表，小于该值的节点在前，等于该值的节点在中间，大于该值的节点在后
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
-#define GET_ARRAY_LEN(array, len) { len = sizeof(array)/sizeof(array[0]); }
+```python
+class LinkedList:
+    def __init__(self, value):
+        self.value = value
+        self.next = None
 
-typedef struct Node
+
+# O(n) time | O(1) space - where n is the number of nodes in the Linked List
+def rearrange_linked_list(head, k):
+    # 记录小于 K 的链表节点
+    smaller_list_head = None
+    smaller_list_tail = None
+    # 记录等于 K 的链表节点
+    equal_list_head = None
+    equal_list_tail = None
+    # 记录大于 K 的链表节点
+    greater_list_head = None
+    greater_list_tail = None
+
+    node = head
+    while node is not None:
+        # 根据节点的值与 K 的对比大小来添加到对应的记录列表中
+        if node.value < k:
+            smaller_list_head, smaller_list_tail = grow_linked_list(smaller_list_head, smaller_list_tail, node)
+        elif node.value > k:
+            greater_list_head, greater_list_tail = grow_linked_list(greater_list_head, greater_list_tail, node)
+        else:
+            equal_list_head, equal_list_tail = grow_linked_list(equal_list_head, equal_list_tail, node)
+        # 为了不影响后面拼接三个链表的逻辑, 处理完当前节点后需要将下一个节点指针置空
+        prev_node = node
+        node = node.next
+        prev_node.next = None
+    # 首先连接小于和等于 K 值的节点
+    first_head, first_tail = connect_linked_lists(smaller_list_head, smaller_list_tail, equal_list_head,
+                                                  equal_list_tail)
+    # 然后连接等于和大于 K 值的节点
+    final_head, _ = connect_linked_lists(first_head, first_tail, greater_list_head, greater_list_tail)
+    return final_head
+
+
+def grow_linked_list(head, tail, node):
+    new_head = head
+    new_tail = node
+    # 首次处理 head 可能为空
+    if new_head is None:
+        new_head = node
+    # 尾节点非空则链接上节点
+    if tail is not None:
+        tail.next = node
+    # 返回新的头尾节点
+    return new_head, new_tail
+
+
+def connect_linked_lists(head_one, tail_one, head_two, tail_two):
+    # 优先取第一个作为头节点, 如果第一个头节点为空则取第二个头节点
+    new_head = head_two if head_one is None else head_one
+    # 优先取第一个作为尾节点, 如果第一个尾节点为空则取第二个尾节点
+    new_tail = tail_one if tail_two is None else tail_two
+    # 第一个尾节点非空则链接上第二个头节点 (无需关心第二个头节点是否为空)
+    if tail_one is not None:
+        tail_one.next = head_two
+
+    return new_head, new_tail
+
+
+def initialize_linked_list(array):
+    head = LinkedList(array[0])
+    node = head
+    for idx in range(1, len(array)):
+        node.next = LinkedList(array[idx])
+        node = node.next
+    return head
+
+
+def iter_linked_list(ll):
+    while ll is not None:
+        print(ll.value, end=' ')
+        ll = ll.next
+    print()
+
+
+if __name__ == '__main__':
+    source = initialize_linked_list([3, 0, 5, 2, 1, 4])
+    result = rearrange_linked_list(source, 3)
+    iter_linked_list(result)
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class LinkedList
 {
-    struct Node *prev, *next;
+public:
     int value;
-} Node;
+    LinkedList *next;
 
-typedef struct LinkedList
-{
-    Node *head, *tail;
-    int size;
-} LinkedList, *pLinkedList;
-
-void initLinkedList(pLinkedList* list, const int array[], const int n)
-{
-    Node *head, *tail, *node;
-    head = (Node*)malloc(sizeof(Node));
-    head->value = array[0];
-    tail = head;
-    int i = 0;
-    while ( ++i < n )
+    LinkedList(int value)
     {
-        node = (Node*)malloc(sizeof(Node));
-        node->value = array[i];
-        tail->next = node;
-        tail = node;
+        this->value = value;
+        next = nullptr;
     }
-    tail->next = NULL;
-    (*list)->head = head;
-    (*list)->tail = tail;
-    (*list)->size = i;
-}
+};
 
-void printLinkedLists(Node* node)
+struct LinkedListPair
 {
-    while ( node != NULL )
+    LinkedList *head;
+    LinkedList *tail;
+};
+
+LinkedListPair growLinkedList(LinkedList *head, LinkedList *tail,
+                              LinkedList *node);
+LinkedListPair connectLinkedLists(LinkedList *headOne, LinkedList *tailOne,
+                                  LinkedList *headTwo, LinkedList *tailTwo);
+
+// O(n) time | O(1) space - where n is the number of nodes in the Linked List
+LinkedList *rearrangeLinkedList(LinkedList *head, int k)
+{
+    LinkedList *smallerListHead = nullptr;
+    LinkedList *smallerListTail = nullptr;
+    LinkedList *equalListHead = nullptr;
+    LinkedList *equalListTail = nullptr;
+    LinkedList *greaterListHead = nullptr;
+    LinkedList *greaterListTail = nullptr;
+
+    LinkedList *node = head;
+    while (node != nullptr)
     {
-        printf("%d ", node->value);
-        node = node->next;
-    }
-    printf("\n");
-}
-
-
-LinkedList* growLinkedList(Node* head, Node* tail, Node* node)
-{
-    LinkedList* list = (LinkedList*)malloc(sizeof(LinkedList));
-    Node *newHead = head;
-    Node *newTail = node;
-
-    if ( newHead == NULL )
-        newHead = node;
-    if ( tail != NULL )
-        tail->next = node;
-
-    list->head = newHead;
-    list->tail = newTail;
-
-    return list;
-}
-
-LinkedList* connectLinkedLists(Node* head1, Node* tail1, Node* head2, Node* tail2)
-{
-    LinkedList* list = (LinkedList*)malloc(sizeof(LinkedList));
-    list->head = head1 == NULL ? head2 : head1;
-    list->tail = tail2 == NULL ? tail1 : tail2;
-
-    if ( tail1 != NULL )
-        tail1->next = head2;
-
-    return list;
-}
-
-/* O(n) time | O(1) space */
-Node* rearrangeLinkedList(Node* head, const int k)
-{
-    LinkedList *smallerList = (LinkedList*)malloc(sizeof(LinkedList));
-    smallerList->head = NULL;
-    smallerList->tail = NULL;
-    LinkedList *equalList = (LinkedList*)malloc(sizeof(LinkedList));
-    equalList->head = NULL;
-    equalList->tail = NULL;
-    LinkedList *greaterList = (LinkedList*)malloc(sizeof(LinkedList));
-    greaterList->head = NULL;
-    greaterList->tail = NULL;
-
-    Node *node = head;
-
-    while ( node != NULL )
-    {
-        if ( node->value < k )
+        if (node->value < k)
         {
-            smallerList = growLinkedList(smallerList->head, smallerList->tail, node);
+            LinkedListPair smallerList =
+                growLinkedList(smallerListHead, smallerListTail, node);
+            smallerListHead = smallerList.head;
+            smallerListTail = smallerList.tail;
         }
-        else if ( node->value > k )
+        else if (node->value > k)
         {
-            greaterList = growLinkedList(greaterList->head, greaterList->tail, node);
+            LinkedListPair greaterList =
+                growLinkedList(greaterListHead, greaterListTail, node);
+            greaterListHead = greaterList.head;
+            greaterListTail = greaterList.tail;
         }
         else
         {
-            equalList = growLinkedList(equalList->head, equalList->tail, node);
+            LinkedListPair equalList =
+                growLinkedList(equalListHead, equalListTail, node);
+            equalListHead = equalList.head;
+            equalListTail = equalList.tail;
         }
-        Node *prevNode = node;
+
+        LinkedList *prevNode = node;
         node = node->next;
-        prevNode->next = NULL;
+        prevNode->next = nullptr;
     }
 
-    LinkedList *firstList = connectLinkedLists(smallerList->head, smallerList->tail, equalList->head, equalList->tail);
-    LinkedList *finalList = connectLinkedLists(firstList->head, firstList->tail, greaterList->head, greaterList->tail);
-    return finalList->head;
+    LinkedListPair first = connectLinkedLists(smallerListHead, smallerListTail,
+                                              equalListHead, equalListTail);
+    LinkedListPair final = connectLinkedLists(first.head, first.tail,
+                                              greaterListHead, greaterListTail);
+    return final.head;
+}
+
+LinkedListPair growLinkedList(LinkedList *head, LinkedList *tail,
+                              LinkedList *node)
+{
+    LinkedList *newHead = head;
+    LinkedList *newTail = node;
+
+    if (newHead == nullptr)
+        newHead = node;
+    if (tail != nullptr)
+        tail->next = node;
+
+    return LinkedListPair{newHead, newTail};
+}
+
+LinkedListPair connectLinkedLists(LinkedList *headOne, LinkedList *tailOne,
+                                  LinkedList *headTwo, LinkedList *tailTwo)
+{
+    LinkedList *newHead = headOne == nullptr ? headTwo : headOne;
+    LinkedList *newTail = tailTwo == nullptr ? tailOne : tailTwo;
+
+    if (tailOne != nullptr)
+        tailOne->next = headTwo;
+
+    return LinkedListPair{newHead, newTail};
+}
+
+LinkedList *initializeLinkedList(vector<int> array)
+{
+    LinkedList *head = new LinkedList(array[0]);
+    LinkedList *node = head;
+    int idx = 1, size = array.size();
+    for (; idx < size; idx++)
+    {
+        node->next = new LinkedList(array[idx]);
+        node = node->next;
+    }
+    return head;
+}
+
+void iterLinkedList(LinkedList *head)
+{
+    while (head != nullptr)
+    {
+        cout << head->value << " ";
+        head = head->next;
+    }
+    cout << endl;
 }
 
 int main()
 {
-    const int arr[] = {3, 0, 5, 2, 1, 4};
-    unsigned int len;
-    GET_ARRAY_LEN(arr, len);
-    LinkedList* list = (LinkedList*)malloc(sizeof(LinkedList));
-    initLinkedList(&list, arr, len);
-    printLinkedLists(list->head);
-    Node *node = rearrangeLinkedList(list->head, 3);
-    printLinkedLists(node);
+    LinkedList *source = initializeLinkedList({3, 0, 5, 2, 1, 4});
+    LinkedList *result = rearrangeLinkedList(source, 3);
+    iterLinkedList(result);
     return 0;
 }
 ```
@@ -1813,4 +1904,4 @@ int main()
 }
 ```
 
-Last Modified 2022-01-30
+Last Modified 2022-06-04
