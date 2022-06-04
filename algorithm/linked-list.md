@@ -925,111 +925,331 @@ int main()
 
 ## 最近最少使用 (LRU)
 
+最近最少使用缓存，添加值时根据`KEY`判断是新增还是更新，访问和添加指定`KEY`时都会更新为最近使用，
+可以获取到最近使用的`KEY`，超出缓存容量后会自动删除最少使用的`KEY`对应的值，添加和访问都要求`O(1)`的复杂度
+
+```python
+class DoublyLinkedList:
+    def __init__(self):
+        self.head = None
+        self.tail = None
+
+    def set_head_to(self, node):
+        if self.head == node:
+            return
+        elif self.head is None:
+            self.head = node
+            self.tail = node
+        elif self.head == self.tail:
+            self.tail.prev = node
+            self.head = node
+            self.head.next = self.tail
+        else:
+            if self.tail == node:
+                self.remove_tail()
+            node.remove_bindings()
+            self.head.prev = node
+            node.next = self.head
+            self.head = node
+
+    def remove_tail(self):
+        if self.tail is None:
+            return
+        if self.tail == self.head:
+            self.head = None
+            self.tail = None
+            return
+        self.tail = self.tail.prev
+        self.tail.next = None
+
+
+class DoublyLinkedListNode:
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+        self.prev = None
+        self.next = None
+
+    def remove_bindings(self):
+        if self.prev is not None:
+            self.prev.next = self.next
+        if self.next is not None:
+            self.next.prev = self.prev
+        self.prev = None
+        self.next = None
+
+
+class LRUCache:
+    def __init__(self, max_size):
+        # 哈希表, 缓存每一个 KEY, 保证访问速度为常量时间
+        self.cache = {}
+        # 最大容量
+        self.max_size = max_size or 1
+        # 当前容量
+        self.current_size = 0
+        # 双链表, 存储实际的数据, 链表头部表示最近使用, 链表尾部表示最少使用
+        self.list_of_most_recent = DoublyLinkedList()
+
+    # O(1) time | O(1) space
+    def insert_key_value_pair(self, key, value):
+        # 判断 KEY 是否已经存在
+        if key not in self.cache:
+            # 判断是否超出容量
+            if self.current_size == self.max_size:
+                # 移除最后一个最少使用的元素
+                self.evict_least_recent()
+            else:
+                # 递增当前容量
+                self.current_size += 1
+            # 创建新的元素
+            self.cache[key] = DoublyLinkedListNode(key, value)
+        else:
+            # 如果 KEY 已经存在则更新值
+            self.replace_key(key, value)
+        # 更新最近使用的记录顺序
+        self.update_most_recent(self.cache[key])
+
+    # O(1) time | O(1) space
+    def get_value_from_key(self, key):
+        # KEY 不存在直接返回空
+        if key not in self.cache:
+            return None
+        # 更新最近使用的记录顺序
+        self.update_most_recent(self.cache[key])
+        # 返回 KEY 对应的值
+        return self.cache[key].value
+
+    # O(1) time | O(1) space
+    def get_most_recent_key(self):
+        # 如果双链表中没有记录元素则返回空
+        if self.list_of_most_recent.head is None:
+            return None
+        # 返回最近使用的 KEY
+        return self.list_of_most_recent.head.key
+
+    def evict_least_recent(self):
+        # 先获得要删除的 KEY
+        key_to_remove = self.list_of_most_recent.tail.key
+        # 从双链表中删除链表尾部(最少使用的)
+        self.list_of_most_recent.remove_tail()
+        # 从哈希表中删除记录
+        del self.cache[key_to_remove]
+
+    def update_most_recent(self, node):
+        # 更新最近使用只需要重新设置双链表的头部
+        self.list_of_most_recent.set_head_to(node)
+
+    def replace_key(self, key, value):
+        # 考虑异常的情况, KEY 未在哈希表中
+        if key not in self.cache:
+            raise Exception("The provided key isn't in the cache!")
+        # 替换对应 KEY 的值
+        self.cache[key].value = value
+
+
+if __name__ == '__main__':
+    lru = LRUCache(3)
+    lru.insert_key_value_pair("b", 2)
+    lru.insert_key_value_pair("a", 1)
+    lru.insert_key_value_pair("c", 3)
+    print(lru.get_most_recent_key())
+    print(lru.get_value_from_key("a"))
+    print(lru.get_most_recent_key())
+    lru.insert_key_value_pair("d", 4)
+    print(lru.get_value_from_key("b"))
+    lru.insert_key_value_pair("a", 5)
+    print(lru.get_value_from_key("a"))
+```
+
 ```cpp
 #include <iostream>
-#include <list>
-#include <map>
-
+#include <vector>
+#include <unordered_map>
 using namespace std;
 
-typedef struct Node
+class DoublyLinkedListNode
 {
-    char key;
-    int value;
-} Node;
-
-class LeastRecentlyUsed
-{
-private:
-    int MAX_SIZE = -1;
-    int currentSize = 0;
-    map<char, Node> cache;
-    list<Node> listOfMostRecent;
-    bool containesKeyInCache(char key)
-    {
-        const auto search = this->cache.find(key);
-        return search != this->cache.end();
-    }
 public:
-    LeastRecentlyUsed(int maxSize)
+    string key;
+    int value;
+    DoublyLinkedListNode *prev;
+    DoublyLinkedListNode *next;
+
+    DoublyLinkedListNode(string key, int value)
     {
-        if ( maxSize < 0 )
-            this->MAX_SIZE = 1;
-        else
-            this->MAX_SIZE = maxSize;
+        this->key = key;
+        this->value = value;
+        this->prev = nullptr;
+        this->next = nullptr;
     }
 
-    // O(1) time | O(1) space
-    void insertKeyValuePair(char key, int value)
+    void removeBindings()
     {
-
-        if (this->containesKeyInCache(key))
+        if (this->prev != nullptr)
         {
-            this->replaceKey(key,value);
+            this->prev->next = this->next;
         }
-        else
+        if (this->next != nullptr)
         {
-            if ( this->currentSize >= this->MAX_SIZE )
-                this->evictLeastRecent();
-            else
-                this->currentSize++;
-            Node node = { key, value };
-            this->cache[key] = node;
+            this->next->prev = this->prev;
         }
-        this->updateMostRecent(this->cache[key]);
-    }
-
-    // O(1) time | O(1) space
-    int getValueFromKey(char key)
-    {
-        if ( ! this->containesKeyInCache(key) )
-            return -1;
-        this->updateMostRecent(this->cache[key]);
-        const int value = this->cache[key].value;
-        return value;
-    }
-
-    // O(1) time | O(1) space
-    char getMostRecentKey(void)
-    {
-        const Node node = this->listOfMostRecent.front();
-        return node.key;
-    }
-    void replaceKey(char key, int value)
-    {
-        if ( ! this->containesKeyInCache(key) )
-            throw "The provide key isn't in the cache!";
-        this->cache[key].value = value;
-    }
-    void evictLeastRecent(void)
-    {
-        const Node nodeToRemove = this->listOfMostRecent.back();
-        this->listOfMostRecent.pop_back();
-        this->cache.erase(nodeToRemove.key);
-    }
-    void updateMostRecent(Node node)
-    {
-        this->listOfMostRecent.push_front(node);
+        this->prev = nullptr;
+        this->next = nullptr;
     }
 };
 
-int main(void)
+class DoublyLinkedList
 {
-    LeastRecentlyUsed lru(3);
-    lru.insertKeyValuePair('a', 1);
-    lru.insertKeyValuePair('b', 2);
-    lru.insertKeyValuePair('c', 3);
-    lru.insertKeyValuePair('d', 4);
-    cout << "Add multiple data { { a: 1 }, { b: 2 }, { c: 3 }, { d: 4 } }" << endl;
-    cout << "The key 'c' value is " << lru.getValueFromKey('c') << endl;
-    cout << "The key 'c' value is " << lru.getValueFromKey('c') << endl;
-    cout << "Most recently key is " << lru.getMostRecentKey() << endl;
-    cout << "Update { d: 40 }" << endl;
-    lru.insertKeyValuePair('d', 40);
-    cout << "Update { d: 41 }" << endl;
-    lru.insertKeyValuePair('d', 41);
-    cout << "Most recently key is " << lru.getMostRecentKey() << endl;
-    cout << "The key 'd' value is " << lru.getValueFromKey('d') << endl;
+public:
+    DoublyLinkedListNode *head;
+    DoublyLinkedListNode *tail;
+
+    DoublyLinkedList()
+    {
+        this->head = nullptr;
+        this->tail = nullptr;
+    }
+
+    void setHeadTo(DoublyLinkedListNode *node)
+    {
+        if (this->head == node)
+        {
+            return;
+        }
+        else if (this->head == nullptr)
+        {
+            this->head = node;
+            this->tail = node;
+        }
+        else if (this->head == this->tail)
+        {
+            this->tail->prev = node;
+            this->head = node;
+            this->head->next = this->tail;
+        }
+        else
+        {
+            if (this->tail == node)
+            {
+                this->removeTail();
+            }
+            node->removeBindings();
+            this->head->prev = node;
+            node->next = this->head;
+            this->head = node;
+        }
+    }
+
+    void removeTail()
+    {
+        if (this->tail == nullptr)
+        {
+            return;
+        }
+        if (this->tail == this->head)
+        {
+            this->head = nullptr;
+            this->tail = nullptr;
+            return;
+        }
+        this->tail = this->tail->prev;
+        this->tail->next = nullptr;
+    }
+};
+
+class LRUCache
+{
+public:
+    unordered_map<string, DoublyLinkedListNode *> cache;
+    int maxSize;
+    int currentSize;
+    DoublyLinkedList listOfMostRecent;
+
+    LRUCache(int maxSize)
+    {
+        this->maxSize = maxSize > 1 ? maxSize : 1;
+        this->currentSize = 0;
+        this->listOfMostRecent = DoublyLinkedList();
+    }
+
+    // O(1) time | O(1) space
+    void insertKeyValuePair(string key, int value)
+    {
+        if (this->cache.find(key) == this->cache.end())
+        {
+            if (this->currentSize == this->maxSize)
+            {
+                this->evictLeastRecent();
+            }
+            else
+            {
+                this->currentSize++;
+            }
+            this->cache[key] = new DoublyLinkedListNode(key, value);
+        }
+        else
+        {
+            this->replaceKey(key, value);
+        }
+        this->updateMostRecent(this->cache[key]);
+    }
+
+    // O(1) time | O(1) space
+    int *getValueFromKey(string key)
+    {
+        if (this->cache.find(key) == this->cache.end())
+        {
+            return nullptr;
+        }
+        this->updateMostRecent(this->cache[key]);
+        return &this->cache[key]->value;
+    }
+
+    // O(1) time | O(1) space
+    string getMostRecentKey()
+    {
+        if (this->listOfMostRecent.head == nullptr)
+        {
+            return "";
+        }
+        return this->listOfMostRecent.head->key;
+    }
+
+    void evictLeastRecent()
+    {
+        string keyToRemove = this->listOfMostRecent.tail->key;
+        this->listOfMostRecent.removeTail();
+        this->cache.erase(keyToRemove);
+    }
+
+    void updateMostRecent(DoublyLinkedListNode *node)
+    {
+        this->listOfMostRecent.setHeadTo(node);
+    }
+
+    void replaceKey(string key, int value)
+    {
+        if (this->cache.find(key) == this->cache.end())
+        {
+            return;
+        }
+        this->cache[key]->value = value;
+    }
+};
+
+int main()
+{
+    LRUCache lru(3);
+    lru.insertKeyValuePair("b", 2);
+    lru.insertKeyValuePair("a", 1);
+    lru.insertKeyValuePair("c", 3);
+    cout << lru.getMostRecentKey() << endl;
+    cout << *lru.getValueFromKey("a") << endl;
+    cout << lru.getMostRecentKey() << endl;
+    lru.insertKeyValuePair("d", 4);
+    cout << lru.getValueFromKey("b") << endl;
+    lru.insertKeyValuePair("a", 5);
+    cout << *lru.getValueFromKey("a") << endl;
     return 0;
 }
 ```
