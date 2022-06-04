@@ -1623,92 +1623,190 @@ int main()
 }
 ```
 
-## 链表回文
+## 判断链表回文
 
-```c
-#include <stdio.h>
-#include <stdlib.h>
-#define GET_ARRAY_LEN(array, len) { len = sizeof(array)/sizeof(array[0]); }
+判断链表的值是否为回文，类似于回文字符串，如字符串`abcdcba`无论从后向前还是从前向后阅读都是一样的顺序
 
-typedef struct Node
+```python
+class LinkedList:
+    def __init__(self, value):
+        self.value = value
+        self.next = None
+
+
+# O(n) time | O(n) space - where n is the number of nodes in the Linked List
+def linked_list_palindrome1(head):
+    # 通过递归的调用栈来判断回文
+    is_palindrome_results = is_palindrome(head, head)
+    return is_palindrome_results.outer_nodes_are_equal
+
+
+def is_palindrome(left_node, right_node):
+    # 递归的终点
+    if right_node is None:
+        # 返回开头的节点, 比较的结果默认为真
+        return LinkedListInfo(True, left_node)
+    # 递归调用, 一直走到末尾的节点
+    recursive_call_results = is_palindrome(left_node, right_node.next)
+    # 获得比较信息
+    left_node_to_compare = recursive_call_results.left_node_to_compare
+    outer_nodes_are_equal = recursive_call_results.outer_nodes_are_equal
+    # 先检查调用栈中的比较结果, 然后比较当前的节点和开头的节点值一致性
+    recursive_is_equal = outer_nodes_are_equal and left_node_to_compare.value == right_node.value
+    # 移动左侧的节点到下一个, 与不断折返(递归)的右侧节点调用栈的值做比较
+    next_left_node_to_compare = left_node_to_compare.next
+    # 返回比较信息
+    return LinkedListInfo(recursive_is_equal, next_left_node_to_compare)
+
+
+class LinkedListInfo:
+    def __init__(self, outer_nodes_are_equal, left_node_to_compare):
+        # 记录当前比较结果
+        self.outer_nodes_are_equal = outer_nodes_are_equal
+        # 记录下一个需要比较的节点
+        self.left_node_to_compare = left_node_to_compare
+
+
+# O(n) time | O(1) space - where n is the number of nodes in the Linked List
+def linked_list_palindrome2(head):
+    # 创建两个指针
+    slow_node = head
+    fast_node = head
+    # 通过不同的移动步长来找到单链表中间位置的节点
+    while fast_node is not None and fast_node.next is not None:
+        slow_node = slow_node.next
+        fast_node = fast_node.next.next
+    # 将单链表中间位置节点之后的节点反转过来
+    reversed_second_half_node = reverse_linked_list(slow_node)
+    first_half_node = head
+    # 从当前的头节点开始, 逐个比较反转的节点和当前节点的值是否相同
+    while reversed_second_half_node is not None:
+        if reversed_second_half_node.value != first_half_node.value:
+            return False
+        reversed_second_half_node = reversed_second_half_node.next
+        first_half_node = first_half_node.next
+
+    return True
+
+
+def reverse_linked_list(head):
+    previous_node, current_node = None, head
+    # 不停循环一直到链表末尾
+    while current_node is not None:
+        # 获得当前节点下一个指针, 作为缓存
+        next_node = current_node.next
+        # 反转当前节点的指针执行前一个节点
+        current_node.next = previous_node
+        # 移动前一个节点的指针到当前节点
+        previous_node = current_node
+        # 当前节点则移动到上面缓存下一个节点
+        current_node = next_node
+    # 走到末尾后当前节点已经是空的指针, 返回前一个节点指针
+    return previous_node
+
+
+def initialize_linked_list(array):
+    head = LinkedList(array[0])
+    node = head
+    for idx in range(1, len(array)):
+        node.next = LinkedList(array[idx])
+        node = node.next
+    return head
+
+
+if __name__ == '__main__':
+    source = [0, 1, 2, 3, 2, 1, 0]
+    print(linked_list_palindrome1(initialize_linked_list(source)))
+    print(linked_list_palindrome2(initialize_linked_list(source)))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class LinkedList
 {
-    struct Node *prev, *next;
+public:
     int value;
-} Node, *pNode;
+    LinkedList *next;
 
-typedef struct LinkedList
-{
-    Node *head, *tail;
-    int size;
-} LinkedList, *pLinkedList;
-
-typedef struct LinkedListInfo
-{
-    int outerNodesAreEqual;
-    Node *leftNodeToCompare;
-} LinkedListInfo, *pLinkedListInfo;
-
-void initLinkedList(pLinkedList* list, const int array[], const int n)
-{
-    pNode head, tail, node;
-    head = (Node*)malloc(sizeof(Node));
-    head->value = array[0];
-    tail = head;
-    int i = 0;
-    while ( ++i < n )
+    LinkedList(int value)
     {
-        node = (Node*)malloc(sizeof(Node));
-        node->value = array[i];
-        tail->next = node;
-        node->prev = tail;
-        tail = node;
+        this->value = value;
+        this->next = nullptr;
     }
-    tail->next = NULL;
-    (*list)->head = head;
-    (*list)->tail = tail;
-    (*list)->size = i;
+};
+
+struct LinkedListInfo
+{
+    bool outerNodesAreEqual;
+    LinkedList *leftNodeToCompare;
+};
+
+LinkedListInfo isPalindrome(LinkedList *leftNode, LinkedList *rightNode);
+
+// O(n) time | O(n) space - where n is the number of nodes in the Linked List
+bool linkedListPalindrome1(LinkedList *head)
+{
+    LinkedListInfo isPalindromeResults = isPalindrome(head, head);
+    return isPalindromeResults.outerNodesAreEqual;
 }
 
-void printLinkedLists(pNode node)
+LinkedListInfo isPalindrome(LinkedList *leftNode, LinkedList *rightNode)
 {
-    while ( node != NULL )
+    if (rightNode == nullptr)
     {
-        printf("%d ", node->value);
-        node = node->next;
+        return LinkedListInfo{true, leftNode};
     }
-    printf("\n");
+
+    LinkedListInfo recursiveCallResults = isPalindrome(leftNode, rightNode->next);
+    LinkedList *leftNodeToCompare = recursiveCallResults.leftNodeToCompare;
+    bool outerNodesAreEqual = recursiveCallResults.outerNodesAreEqual;
+
+    bool recursiveIsEqual =
+        outerNodesAreEqual && leftNodeToCompare->value == rightNode->value;
+    LinkedList *nextLeftNodeToCompare = leftNodeToCompare->next;
+
+    return LinkedListInfo{recursiveIsEqual, nextLeftNodeToCompare};
 }
 
-pLinkedListInfo isPalindrome(pNode leftNode, pNode rightNode)
+LinkedList *reverseLinkedList(LinkedList *head);
+
+// O(n) time | O(1) space - where n is the number of nodes in the Linked List
+bool linkedListPalindrome2(LinkedList *head)
 {
-    pLinkedListInfo info;
-    if ( rightNode == NULL )
+    LinkedList *slowNode = head;
+    LinkedList *fastNode = head;
+    while (fastNode != nullptr && fastNode->next != nullptr)
     {
-        info = (LinkedListInfo*)malloc(sizeof(LinkedListInfo));
-        info->outerNodesAreEqual = 1;
-        info->leftNodeToCompare = leftNode;
-        return info;
+        slowNode = slowNode->next;
+        fastNode = fastNode->next->next;
     }
-    info = isPalindrome(leftNode, rightNode->next);
-    pNode leftNodeToCompare = info->leftNodeToCompare;
-    int outerNodesAreEqual = info->outerNodesAreEqual;
 
-    int recursiveIsEqual = outerNodesAreEqual && leftNodeToCompare->value == rightNode->value;
-    pNode nextMatchingLeftNode = leftNodeToCompare->next;
+    LinkedList *reversedSecondHalfNode = reverseLinkedList(slowNode);
+    LinkedList *firstHalfNode = head;
 
-    info->outerNodesAreEqual = recursiveIsEqual;
-    info->leftNodeToCompare = nextMatchingLeftNode;
-    return info;
+    while (reversedSecondHalfNode != nullptr)
+    {
+        if (reversedSecondHalfNode->value != firstHalfNode->value)
+        {
+            return false;
+        }
+        reversedSecondHalfNode = reversedSecondHalfNode->next;
+        firstHalfNode = firstHalfNode->next;
+    }
+
+    return true;
 }
 
-pNode reverseLinkedList(pNode head)
+LinkedList *reverseLinkedList(LinkedList *head)
 {
-    pNode previousNode, currentNode, nextNode;
-    previousNode = NULL;
-    currentNode = head;
-    while ( currentNode != NULL )
+    LinkedList *previousNode = nullptr;
+    LinkedList *currentNode = head;
+    while (currentNode != nullptr)
     {
-        nextNode = currentNode->next;
+        LinkedList *nextNode = currentNode->next;
         currentNode->next = previousNode;
         previousNode = currentNode;
         currentNode = nextNode;
@@ -1716,50 +1814,24 @@ pNode reverseLinkedList(pNode head)
     return previousNode;
 }
 
-/* O(n) time | O(n) space */
-int linkedListPalindrome1(pNode head)
+LinkedList *initializeLinkedList(vector<int> array)
 {
-    pLinkedListInfo isPalindromeResult = isPalindrome(head, head);
-    return isPalindromeResult->outerNodesAreEqual;
-}
-
-/* O(n) time | O(1) space */
-int linkedListPalindrome2(pNode head)
-{
-    pNode slowNode, fastNode;
-    slowNode = fastNode = head;
-    while ( fastNode != NULL && fastNode->next != NULL )
+    LinkedList *head = new LinkedList(array[0]);
+    LinkedList *node = head;
+    int idx = 1, size = array.size();
+    for (; idx < size; idx++)
     {
-        slowNode = slowNode->next;
-        fastNode = fastNode->next->next;
+        node->next = new LinkedList(array[idx]);
+        node = node->next;
     }
-
-    pNode reverseSecondHalfNode = reverseLinkedList(slowNode);
-    pNode firstHalfNode = head;
-
-    while ( reverseSecondHalfNode != NULL )
-    {
-        if ( reverseSecondHalfNode->value != firstHalfNode->value )
-            return 0;
-        reverseSecondHalfNode = reverseSecondHalfNode->next;
-        firstHalfNode = firstHalfNode->next;
-    }
-
-    return 1;
+    return head;
 }
 
 int main()
 {
-    const int arr[] = {1, 3, 5, 5, 3, 1};
-    unsigned int len, isPalindrome;
-    GET_ARRAY_LEN(arr, len);
-    pLinkedList list = (LinkedList*)malloc(sizeof(LinkedList));
-    initLinkedList(&list, arr, len);
-    printLinkedLists(list->head);
-    isPalindrome = linkedListPalindrome1(list->head);
-    printf("isPalindrome One = %d\n", isPalindrome);
-    isPalindrome = linkedListPalindrome2(list->head);
-    printf("isPalindrome Two = %d\n", isPalindrome);
+    vector<int> source = {0, 1, 2, 3, 2, 1, 0};
+    cout << linkedListPalindrome1(initializeLinkedList(source)) << endl;
+    cout << linkedListPalindrome2(initializeLinkedList(source)) << endl;
     return 0;
 }
 ```
