@@ -2177,4 +2177,163 @@ int main()
 }
 ```
 
+## 交换链表节点
+
+将输入链表的`2n`位置和`2n + 1`位置的节点交换`(n >= 0)`
+
+```python
+class LinkedList:
+    def __init__(self, value):
+        self.value = value
+        self.next = None
+
+
+# O(n) time | O(n) space - where n is the number of nodes in the Linked List
+def node_swap1(head):
+    # 递归终点
+    if head is None or head.next is None:
+        return head
+    # 先缓存当前节点的下一个节点
+    next_node = head.next
+    # 将当前节点的下一个节点指向递归返回的节点
+    head.next = node_swap1(head.next.next)
+    # 下一个节点的下一个节点指向当前节点(交换位置)
+    next_node.next = head
+    # 返回缓存的下一个节点
+    return next_node
+
+
+# O(n) time | O(1) space - where n is the number of nodes in the Linked List
+def node_swap2(head):
+    # 创建一个临时的节点
+    temp_node = LinkedList(0)
+    # 临时的节点指向输入链表的头节点
+    temp_node.next = head
+    # 利用三个节点指针实现交换节点
+    prev_node = temp_node
+    while prev_node.next is not None and prev_node.next.next is not None:
+        first_node = prev_node.next
+        second_node = prev_node.next.next
+        # prev_node -> first_node -> second_node -> x
+        # 将第一个节点的下一个节点指向第二个节点的下一个节点
+        first_node.next = second_node.next
+        # 调转指针, 将第二个节点的下一个节点指向第一个节点
+        second_node.next = first_node
+        # 纠正前一个节点的下一个节点指针, 指向已经交换好的第二个节点
+        prev_node.next = second_node
+        # prev_node -> second_node -> first_node -> x
+        # 前置节点指针指向第一个节点, 向前移动两步
+        prev_node = first_node
+    # 返回临时节点的下一个指针
+    return temp_node.next
+
+
+def initialize_linked_list(array):
+    head = LinkedList(array[0])
+    node = head
+    for idx in range(1, len(array)):
+        node.next = LinkedList(array[idx])
+        node = node.next
+    return head
+
+
+def iter_linked_list(ll):
+    while ll is not None:
+        print(ll.value, end=' ')
+        ll = ll.next
+    print()
+
+
+if __name__ == '__main__':
+    source = [1, 2, 3, 4, 5, 6]
+    iter_linked_list(node_swap1(initialize_linked_list(source)))
+    iter_linked_list(node_swap2(initialize_linked_list(source)))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class LinkedList
+{
+public:
+    int value;
+    LinkedList *next = nullptr;
+
+    LinkedList(int value) { this->value = value; }
+};
+
+// O(n) time | O(n) space - where n is the number of nodes in the Linked List
+LinkedList *nodeSwap1(LinkedList *head)
+{
+    if (head == nullptr || head->next == nullptr)
+    {
+        return head;
+    }
+
+    LinkedList *nextNode = head->next;
+    head->next = nodeSwap1(head->next->next);
+    nextNode->next = head;
+    return nextNode;
+}
+
+// O(n) time | O(1) space - where n is the number of nodes in the Linked List
+LinkedList *nodeSwap2(LinkedList *head)
+{
+    LinkedList *tempNode = new LinkedList(0);
+    tempNode->next = head;
+
+    LinkedList *prevNode = tempNode;
+    while (prevNode->next != nullptr && prevNode->next->next != nullptr)
+    {
+        LinkedList *firstNode = prevNode->next;
+        LinkedList *secondNode = prevNode->next->next;
+        // prevNode -> firstNode -> secondNode -> x
+
+        firstNode->next = secondNode->next;
+        secondNode->next = firstNode;
+        prevNode->next = secondNode;
+        // prevNode -> secondNode -> firstNode -> x
+
+        prevNode = firstNode;
+    }
+
+    return tempNode->next;
+}
+
+LinkedList *initializeLinkedList(vector<int> array)
+{
+    LinkedList *head = new LinkedList(array[0]);
+    LinkedList *node = head;
+    int idx = 1, size = array.size();
+    for (; idx < size; idx++)
+    {
+        node->next = new LinkedList(array[idx]);
+        node = node->next;
+    }
+    return head;
+}
+
+void iterLinkedList(LinkedList *head)
+{
+    while (head != nullptr)
+    {
+        cout << head->value << " ";
+        head = head->next;
+    }
+    cout << endl;
+}
+
+int main()
+{
+    vector<int> source = {1, 2, 3, 4, 5, 6};
+    LinkedList *head = initializeLinkedList(source);
+    iterLinkedList(nodeSwap1(head));
+    head = initializeLinkedList(source);
+    iterLinkedList(nodeSwap2(head));
+    return 0;
+}
+```
+
 Last Modified 2022-06-05
