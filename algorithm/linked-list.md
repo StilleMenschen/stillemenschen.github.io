@@ -1976,4 +1976,205 @@ int main()
 }
 ```
 
-Last Modified 2022-06-04
+## ZIP 链表
+
+```python
+class LinkedList:
+    def __init__(self, value):
+        self.value = value
+        self.next = None
+
+
+# O(n) time | O(1) space - where n is the length of the Linked List
+def zip_linked_list(linked_list):
+    # 只有两个节点的链表可以直接返回
+    if linked_list.next is None or linked_list.next.next is None:
+        return linked_list
+
+    first_half_head = linked_list
+    # 拆分链表为两部分
+    second_half_head = split_linked_list(linked_list)
+    # 反转第二部分链表
+    reversed_second_half_head = reverse_linked_list(second_half_head)
+    # 重新拼接两个链表
+    return interweave_linked_lists(first_half_head, reversed_second_half_head)
+
+
+def split_linked_list(linked_list):
+    # 创建两个指向链表的指针
+    slow_iterator = linked_list
+    fast_iterator = linked_list
+    # 通过不同的移动步长来找到链表的中间位置
+    while fast_iterator is not None and fast_iterator.next is not None:
+        slow_iterator = slow_iterator.next
+        fast_iterator = fast_iterator.next.next
+    # 获得中间位置的下一个节点, 因为做 ZIP 处理可以从 n/2 + 1 的位置开始
+    second_half_head = slow_iterator.next
+    # 断开两个链表的连接
+    slow_iterator.next = None
+    return second_half_head
+
+
+def interweave_linked_lists(linked_list1, linked_list2):
+    # 创建两个指向链表的指针
+    linked_list1_iterator = linked_list1
+    linked_list2_iterator = linked_list2
+    while linked_list1_iterator is not None and linked_list2_iterator is not None:
+        # 先分别缓存两个指针指向的下一个链表节点
+        linked_list1_iterator_next = linked_list1_iterator.next
+        linked_list2_iterator_next = linked_list2_iterator.next
+        # 变更两个链表指针指向的下一个节点, 相当于在第一个链表的 2n (n > 0) 位置将第二个链表拼接上去
+        linked_list1_iterator.next = linked_list2_iterator
+        linked_list2_iterator.next = linked_list1_iterator_next
+        # 通过上面的缓存, 继续移动到下一个位置
+        linked_list1_iterator = linked_list1_iterator_next
+        linked_list2_iterator = linked_list2_iterator_next
+
+    return linked_list1
+
+
+def reverse_linked_list(linked_list):
+    previous_node, current_node = None, linked_list
+    while current_node is not None:
+        next_node = current_node.next
+        current_node.next = previous_node
+        previous_node = current_node
+        current_node = next_node
+    return previous_node
+
+
+def initialize_linked_list(array):
+    head = LinkedList(array[0])
+    node = head
+    for idx in range(1, len(array)):
+        node.next = LinkedList(array[idx])
+        node = node.next
+    return head
+
+
+def iter_linked_list(ll):
+    while ll is not None:
+        print(ll.value, end=' ')
+        ll = ll.next
+    print()
+
+
+if __name__ == '__main__':
+    source = [1, 2, 3, 4, 5, 6]
+    iter_linked_list(zip_linked_list(initialize_linked_list(source)))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class LinkedList
+{
+public:
+    int value;
+    LinkedList *next = nullptr;
+
+    LinkedList(int value) { this->value = value; }
+};
+
+LinkedList *splitLinkedList(LinkedList *linkedList);
+LinkedList *interweaveLinkedLists(LinkedList *linkedList1,
+                                  LinkedList *linkedList2);
+LinkedList *reverseLinkedList(LinkedList *head);
+
+// O(n) time | O(1) space - where n is the length of the Linked List
+LinkedList *zipLinkedList(LinkedList *linkedList)
+{
+    if (linkedList->next == nullptr || linkedList->next->next == nullptr)
+        return linkedList;
+
+    LinkedList *firstHalfHead = linkedList;
+    LinkedList *secondHalfHead = splitLinkedList(linkedList);
+
+    LinkedList *reversedSecondHalfHead = reverseLinkedList(secondHalfHead);
+
+    return interweaveLinkedLists(firstHalfHead, reversedSecondHalfHead);
+}
+
+LinkedList *splitLinkedList(LinkedList *linkedList)
+{
+    LinkedList *slowIterator = linkedList;
+    LinkedList *fastIterator = linkedList;
+    while (fastIterator != nullptr && fastIterator->next != nullptr)
+    {
+        slowIterator = slowIterator->next;
+        fastIterator = fastIterator->next->next;
+    }
+
+    LinkedList *secondHalfHead = slowIterator->next;
+    slowIterator->next = nullptr;
+    return secondHalfHead;
+}
+
+LinkedList *interweaveLinkedLists(LinkedList *linkedList1,
+                                  LinkedList *linkedList2)
+{
+    LinkedList *linkedList1Iterator = linkedList1;
+    LinkedList *linkedList2Iterator = linkedList2;
+    while (linkedList1Iterator != nullptr && linkedList2Iterator != nullptr)
+    {
+        LinkedList *linkedList1IteratorNext = linkedList1Iterator->next;
+        LinkedList *linkedList2IteratorNext = linkedList2Iterator->next;
+
+        linkedList1Iterator->next = linkedList2Iterator;
+        linkedList2Iterator->next = linkedList1IteratorNext;
+
+        linkedList1Iterator = linkedList1IteratorNext;
+        linkedList2Iterator = linkedList2IteratorNext;
+    }
+
+    return linkedList1;
+}
+
+LinkedList *reverseLinkedList(LinkedList *head)
+{
+    LinkedList *previousNode = nullptr;
+    LinkedList *currentNode = head;
+    while (currentNode != nullptr)
+    {
+        LinkedList *nextNode = currentNode->next;
+        currentNode->next = previousNode;
+        previousNode = currentNode;
+        currentNode = nextNode;
+    }
+    return previousNode;
+}
+
+LinkedList *initializeLinkedList(vector<int> array)
+{
+    LinkedList *head = new LinkedList(array[0]);
+    LinkedList *node = head;
+    int idx = 1, size = array.size();
+    for (; idx < size; idx++)
+    {
+        node->next = new LinkedList(array[idx]);
+        node = node->next;
+    }
+    return head;
+}
+
+void iterLinkedList(LinkedList *head)
+{
+    while (head != nullptr)
+    {
+        cout << head->value << " ";
+        head = head->next;
+    }
+    cout << endl;
+}
+
+int main()
+{
+    LinkedList *source = initializeLinkedList({1, 2, 3, 4, 5, 6});
+    iterLinkedList(zipLinkedList(source));
+    return 0;
+}
+```
+
+Last Modified 2022-06-05
