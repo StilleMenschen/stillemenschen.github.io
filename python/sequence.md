@@ -87,4 +87,26 @@ finally:
 
 > 不要将可变对象放在元组中；增量赋值操作不是一个原子操作
 
-Last Modified 2022-05-24
+```python
+import bisect
+import random
+
+
+def grade(score, breakpoints=(60, 70, 80, 90,), grades='FDCBA'):
+    i = bisect.bisect(breakpoints, score)
+    return grades[i]
+
+
+for v in [33, 89, 100, 63, 75]:
+    print(f'{v} is {grade(v)}')
+
+random.seed(42)
+SIZE = 10
+arr = []
+for _ in range(SIZE):
+    value = random.randrange(SIZE * 2)
+    bisect.insort(arr, value)
+    print(f'{value:2d} -> {arr}')
+```
+
+Last Modified 2022-06-06
