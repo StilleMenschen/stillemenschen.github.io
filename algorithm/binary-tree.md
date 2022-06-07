@@ -1375,7 +1375,7 @@ def insert_level_order(array, tree, index, length):
 
 
 # Average case: when the tree is balanced
-# O(nlog(n)) time | O(h) space - where n is the number of nodes in
+# O(n * log(n)) time | O(h) space - where n is the number of nodes in
 # the Binary Tree and h is the height of the Binary Tree
 def all_kinds_of_node_depths1(root):
     sum_of_all_depths = 0
@@ -1400,7 +1400,7 @@ def node_depths(node, depth=0):
 
 
 # Average case: when the tree is balanced
-# O(nlog(n)) time | O(h) space - where n is the number of nodes in
+# O(n * log(n)) time | O(h) space - where n is the number of nodes in
 # the Binary Tree and h is the height of the Binary Tree
 def all_kinds_of_node_depths2(root):
     if root is None:
@@ -1568,7 +1568,7 @@ BinaryTree *insertLevelOrder(vector<int> &array, BinaryTree *tree, int index, in
 int nodeDepths(BinaryTree *node, int depth = 0);
 
 // Average case: when the tree is balanced
-// O(nlog(n)) time | O(h) space - where n is the number of nodes in
+// O(n * log(n)) time | O(h) space - where n is the number of nodes in
 // the Binary Tree and h is the height of the Binary Tree
 int allKindsOfNodeDepths1(BinaryTree *root)
 {
@@ -1596,7 +1596,7 @@ int nodeDepths(BinaryTree *node, int depth)
 }
 
 // Average case: when the tree is balanced
-// O(nlog(n)) time | O(h) space - where n is the number of nodes in
+// O(n * log(n)) time | O(h) space - where n is the number of nodes in
 // the Binary Tree and h is the height of the Binary Tree
 int allKindsOfNodeDepths2(BinaryTree *root)
 {
@@ -2595,4 +2595,4 @@ int main()
 }
 ```
 
-Last Modified 2022-04-15
+Last Modified 2022-06-07

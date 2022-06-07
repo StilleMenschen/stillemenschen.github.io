@@ -2089,7 +2089,7 @@ class SpecialBST:
 
 
 # Average case: when the created BST is balanced
-# O(nlog(n)) time | O(n) space - where n is the length of the array
+# O(n * log(n)) time | O(n) space - where n is the length of the array
 # ---
 # Worst case: when the created BST is like a linked list
 # O(n^2) time | O(n) space
@@ -2258,7 +2258,7 @@ public:
 void getRightSmallerCounts(SpecialBST1 *bst, vector<int> &rightSmallerCounts);
 
 // Average case: when the created BST is balanced
-// O(nlog(n)) time | O(n) space - where n is the length of the array
+// O(n * log(n)) time | O(n) space - where n is the length of the array
 // ---
 // Worst case: when the created BST is like a linked list
 // O(n^2) time | O(n) space
@@ -2339,7 +2339,7 @@ public:
 };
 
 // Average case: when the created BST is balanced
-// O(nlog(n)) time | O(n) space - where n is the length of the array
+// O(n * log(n)) time | O(n) space - where n is the length of the array
 // ---
 // Worst case: when the created BST is like a linked list
 // O(n^2) time | O(n) space
@@ -2379,4 +2379,4 @@ int main()
 }
 ```
 
-Last Modified 2022-04-11
+Last Modified 2022-06-07

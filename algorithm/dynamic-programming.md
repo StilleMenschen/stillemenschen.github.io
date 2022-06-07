@@ -2145,7 +2145,7 @@ vector<string>
 buildLongestStringChain(vector<string> strings,
                         unordered_map<string, stringChain> stringChains);
 
-// O(n * m^2 + nlog(n)) time | O(nm) space - where n is the number of strings
+// O(n * m^2 + n * log(n)) time | O(nm) space - where n is the number of strings
 // and m is the length of the longest string
 vector<string> longestStringChain(vector<string> strings)
 {
@@ -3159,4 +3159,4 @@ int main()
 }
 ```
 
-Last Modified 2022-05-02
+Last Modified 2022-06-07

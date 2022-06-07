@@ -1076,7 +1076,7 @@ def get_min_value(items):
     # return min(items, key=lambda x: x["num"])
 
 
-# O(nlog(k) + k) time | O(n + k) space - where n is the total
+# O(n * log(k) + k) time | O(n + k) space - where n is the total
 # number of array elements and k is the number of arrays
 def merge_sorted_arrays2(arrays):
     sorted_list = []
@@ -1299,7 +1299,7 @@ public:
     }
 };
 
-// O(nlog(k) + k) time | O(n + k) space - where n is the total
+// O(n * log(k) + k) time | O(n + k) space - where n is the total
 // number of array elements and k is the number of arrays
 vector<int> mergeSortedArrays2(vector<vector<int>> arrays)
 {

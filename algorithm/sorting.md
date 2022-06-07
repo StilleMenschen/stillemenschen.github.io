@@ -801,9 +801,9 @@ using namespace std;
 
 vector<int> mergeSortedArrays(vector<int> leftHalf, vector<int> rightHalf);
 
-// Best: O(nlog(n)) time | O(nlog(n)) space
-// Average: O(nlog(n)) time | O(nlog(n)) space
-// Worst: O(nlog(n)) time | O(nlog(n)) space
+// Best: O(n * log(n)) time | O(n * log(n)) space
+// Average: O(n * log(n)) time | O(n * log(n)) space
+// Worst: O(n * log(n)) time | O(n * log(n)) space
 vector<int> mergeSort1(vector<int> array)
 {
     if (array.size() <= 1)
@@ -851,9 +851,9 @@ void mergeSortHelper(vector<int> *mainArray, int startIdx, int endIdx,
 void doMerge(vector<int> *mainArray, int startIdx, int middleIdx, int endIdx,
              vector<int> *auxiliaryArray);
 
-// Best: O(nlog(n)) time | O(n) space
-// Average: O(nlog(n)) time | O(n) space
-// Worst: O(nlog(n)) time | O(n) space
+// Best: O(n * log(n)) time | O(n) space
+// Average: O(n * log(n)) time | O(n) space
+// Worst: O(n * log(n)) time | O(n) space
 vector<int> mergeSort2(vector<int> array)
 {
     if (array.size() <= 1)
@@ -1208,4 +1208,4 @@ int main()
 }
 ```
 
-Last Modified 2022-05-23
+Last Modified 2022-06-07
