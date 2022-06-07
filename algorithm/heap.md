@@ -1024,6 +1024,7 @@ int laptopRentals2(vector<vector<int>> times)
 
     return usedLaptops;
 }
+
 int main()
 {
     vector<vector<int>> source = {{0, 2}, {1, 4}, {4, 6}, {0, 4}, {7, 8}, {9, 11}, {3, 10}};
