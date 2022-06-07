@@ -1033,4 +1033,326 @@ int main()
 }
 ```
 
-Last Modified 2022-04-03
+## 合并排序数组
+
+给定一个二维数组，二维数组中的每个一维数组都是已经排序好的，需要将二维数组中的所有元素展平为一个一维的且排序好的数组
+
+```python
+# O(nk) time | O(n + k) space - where n is the total
+# number of array elements and k is the number of arrays
+def merge_sorted_arrays1(arrays):
+    sorted_list = []
+    # 记录每个子数组的索引位置
+    element_ids = [0 for _ in arrays]
+    # 因为每个子数组都是排序过的, 所以
+    # 从每个子数组的第一个元素开始处理
+    while True:
+        # 缓存获取的最小值
+        smallest_items = []
+        for array_idx in range(len(arrays)):
+            relevant_array = arrays[array_idx]
+            element_idx = element_ids[array_idx]
+            # 如果其中一个子数组的索引记录越界则跳过
+            if element_idx == len(relevant_array):
+                continue
+            # 记录到缓存中, 包含所在子数组的索引和对应的值
+            smallest_items.append({"array_idx": array_idx, "num": relevant_array[element_idx]})
+        if len(smallest_items) == 0:
+            break
+        # 从缓存中取出最小的值添加到结果数组中
+        next_item = get_min_value(smallest_items)
+        sorted_list.append(next_item["num"])
+        # 累加索引
+        element_ids[next_item["array_idx"]] += 1
+    return sorted_list
+
+
+def get_min_value(items):
+    min_value_idx = 0
+    for i in range(1, len(items)):
+        if items[i]["num"] < items[min_value_idx]["num"]:
+            min_value_idx = i
+    return items[min_value_idx]
+    # return min(items, key=lambda x: x["num"])
+
+
+# O(nlog(k) + k) time | O(n + k) space - where n is the total
+# number of array elements and k is the number of arrays
+def merge_sorted_arrays2(arrays):
+    sorted_list = []
+    # 与上面的方法类似, 但使用最小堆来记录每个子数组的最小值, 减低了时间复杂度
+    smallest_items = []
+    # 先将每个子数组的第一个元素添加到最小堆中作为初始值
+    for array_idx in range(len(arrays)):
+        # 记录中需要增加一个所在子数组的索引
+        smallest_items.append({"array_idx": array_idx, "element_idx": 0, "num": arrays[array_idx][0]})
+    min_heap = MinHeap(smallest_items)
+    # 最小堆剩余有元素时则继续循环处理
+    while min_heap.is_not_empty():
+        smallest_item = min_heap.remove()
+        array_idx, element_idx, num = smallest_item["array_idx"], smallest_item["element_idx"], smallest_item["num"]
+        sorted_list.append(num)
+        if element_idx == len(arrays[array_idx]) - 1:
+            continue
+        # 添加到最小堆中, 递增所在子数组的索引, 更新为对应索引的值
+        min_heap.insert({"array_idx": array_idx,
+                         "element_idx": element_idx + 1,
+                         "num": arrays[array_idx][element_idx + 1]})
+    return sorted_list
+
+
+class MinHeap:
+    def __init__(self, array):
+        self.heap = self.build_heap(array)
+
+    def is_not_empty(self):
+        return len(self.heap) > 0
+
+    def build_heap(self, array):
+        first_parent_idx = (len(array) - 2) // 2
+        for current_idx in reversed(range(first_parent_idx + 1)):
+            self.sift_down(current_idx, len(array) - 1, array)
+        return array
+
+    def sift_down(self, current_idx, end_idx, heap):
+        child_one_idx = current_idx * 2 + 1
+        while child_one_idx <= end_idx:
+            child_two_idx = current_idx * 2 + 2 if current_idx * 2 + 2 <= end_idx else -1
+            if child_two_idx != -1 and heap[child_two_idx]["num"] < heap[child_one_idx]["num"]:
+                idx_to_swap = child_two_idx
+            else:
+                idx_to_swap = child_one_idx
+            if heap[idx_to_swap]["num"] < heap[current_idx]["num"]:
+                self.swap(current_idx, idx_to_swap, heap)
+                current_idx = idx_to_swap
+                child_one_idx = current_idx * 2 + 1
+            else:
+                return
+
+    def sift_up(self, current_idx, heap):
+        parent_idx = (current_idx - 1) // 2
+        while current_idx > 0 and heap[current_idx]["num"] < heap[parent_idx]["num"]:
+            self.swap(current_idx, parent_idx, heap)
+            current_idx = parent_idx
+            parent_idx = (current_idx - 1) // 2
+
+    def remove(self):
+        self.swap(0, len(self.heap) - 1, self.heap)
+        value_to_remove = self.heap.pop()
+        self.sift_down(0, len(self.heap) - 1, self.heap)
+        return value_to_remove
+
+    def insert(self, value):
+        self.heap.append(value)
+        self.sift_up(len(self.heap) - 1, self.heap)
+
+    @staticmethod
+    def swap(i, j, heap):
+        heap[i], heap[j] = heap[j], heap[i]
+
+
+if __name__ == '__main__':
+    source = [
+        [1, 5, 9, 21],
+        [-1, 0],
+        [-124, 81, 121],
+        [3, 6, 12, 20, 150]
+    ]
+    print(merge_sorted_arrays1(source))
+    print(merge_sorted_arrays2(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+struct Item
+{
+    int arrayIdx;
+    int num;
+};
+
+Item getMinValue(vector<Item> items);
+
+// O(nk) time | O(n + k) space - where n is the total
+// number of array elements and k is the number of arrays
+vector<int> mergeSortedArrays1(vector<vector<int>> arrays)
+{
+    const int arraysSize = arrays.size();
+    vector<int> sortedList;
+    vector<int> elementIdxs(arraysSize, 0);
+
+    while (true)
+    {
+        vector<Item> smallestItems;
+        for (int arrayIdx = 0; arrayIdx < arraysSize; arrayIdx++)
+        {
+            vector<int> relevantArray = arrays[arrayIdx];
+            int elementIdx = elementIdxs[arrayIdx];
+            if (elementIdx == relevantArray.size())
+                continue;
+            smallestItems.push_back(Item{arrayIdx, relevantArray[elementIdx]});
+        }
+        if (smallestItems.size() == 0)
+            break;
+        Item nextItem = getMinValue(smallestItems);
+        sortedList.push_back(nextItem.num);
+        elementIdxs[nextItem.arrayIdx]++;
+    }
+
+    return sortedList;
+}
+
+Item getMinValue(vector<Item> items)
+{
+    int minValueIdx = 0;
+    const int itemsSize = items.size();
+    for (int i = 1; i < itemsSize; i++)
+    {
+        if (items[i].num < items[minValueIdx].num)
+            minValueIdx = i;
+    }
+    return items[minValueIdx];
+}
+
+struct Element
+{
+    int arrayIdx;
+    int elementIdx;
+    int num;
+};
+
+class MinHeap
+{
+public:
+    vector<Element> heap;
+
+    MinHeap(vector<Element> array) { heap = buildHeap(array); }
+
+    bool isEmpty() { return heap.size() == 0; }
+
+    vector<Element> buildHeap(vector<Element> array)
+    {
+        const int arraySize = array.size();
+        int firstParentIdx = (arraySize - 2) / 2;
+        for (int currentIdx = firstParentIdx; currentIdx >= 0; currentIdx--)
+        {
+            siftDown(currentIdx, arraySize - 1, array);
+        }
+        return array;
+    }
+
+    void siftDown(int currentIdx, int endIdx, vector<Element> &heap)
+    {
+        int childOneIdx = currentIdx * 2 + 1;
+        while (childOneIdx <= endIdx)
+        {
+            int childTwoIdx = currentIdx * 2 + 2 <= endIdx ? currentIdx * 2 + 2 : -1;
+            int idxToSwap;
+            if (childTwoIdx != -1 && heap[childTwoIdx].num < heap[childOneIdx].num)
+            {
+                idxToSwap = childTwoIdx;
+            }
+            else
+            {
+                idxToSwap = childOneIdx;
+            }
+            if (heap[idxToSwap].num < heap[currentIdx].num)
+            {
+                swap(heap[currentIdx], heap[idxToSwap]);
+                currentIdx = idxToSwap;
+                childOneIdx = currentIdx * 2 + 1;
+            }
+            else
+            {
+                return;
+            }
+        }
+    }
+
+    void siftUp(int currentIdx, vector<Element> &heap)
+    {
+        int parentIdx = (currentIdx - 1) / 2;
+        while (currentIdx > 0 && heap[currentIdx].num < heap[parentIdx].num)
+        {
+            swap(heap[currentIdx], heap[parentIdx]);
+            currentIdx = parentIdx;
+            parentIdx = (currentIdx - 1) / 2;
+        }
+    }
+
+    Element remove()
+    {
+        swap(heap[0], heap[heap.size() - 1]);
+        Element valueToRemove = heap.back();
+        heap.pop_back();
+        siftDown(0, heap.size() - 1, heap);
+        return valueToRemove;
+    }
+
+    void insert(Element value)
+    {
+        heap.push_back(value);
+        siftUp(heap.size() - 1, heap);
+    }
+};
+
+// O(nlog(k) + k) time | O(n + k) space - where n is the total
+// number of array elements and k is the number of arrays
+vector<int> mergeSortedArrays2(vector<vector<int>> arrays)
+{
+    const int arraysSize = arrays.size();
+    vector<int> sortedList;
+    vector<Element> smallestElements;
+
+    for (int arrayIdx = 0; arrayIdx < arraysSize; arrayIdx++)
+    {
+        smallestElements.push_back(Element{
+            arrayIdx,
+            0,
+            arrays[arrayIdx][0],
+        });
+    }
+
+    MinHeap minHeap(smallestElements);
+    while (!minHeap.isEmpty())
+    {
+        Element smallestElement = minHeap.remove();
+        sortedList.push_back(smallestElement.num);
+        if (smallestElement.elementIdx == arrays[smallestElement.arrayIdx].size() - 1)
+            continue;
+        minHeap.insert(Element{
+            smallestElement.arrayIdx,
+            smallestElement.elementIdx + 1,
+            arrays[smallestElement.arrayIdx][smallestElement.elementIdx + 1],
+        });
+    }
+
+    return sortedList;
+}
+
+void iterArray(vector<int> array)
+{
+    for (int element : array)
+    {
+        cout << element << " ";
+    }
+    cout << endl;
+}
+
+int main()
+{
+    vector<vector<int>> source = {
+        {1, 5, 9, 21},
+        {-1, 0},
+        {-124, 81, 121},
+        {3, 6, 12, 20, 150}};
+    iterArray(mergeSortedArrays1(source));
+    iterArray(mergeSortedArrays2(source));
+    return 0;
+}
+```
+
+Last Modified 2022-06-07
