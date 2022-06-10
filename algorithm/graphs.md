@@ -2570,4 +2570,526 @@ int main()
 }
 ```
 
-Last Modified 2022-03-29
+## 坐标构成矩形数
+
+给定一个平面中的多个坐标点，计算出通过这些坐标点可以构成的矩形数量（矩形的边需要与 X 和 Y 轴平行）
+
+```python
+# O(n^2) time | O(n^2) space - where n is the number of coordinates
+def rectangle_mania1(coordinates):
+    # 通过坐标点生成缓存, 记录每个坐标点的上下左右方向的相邻坐标点
+    coordinates_table = get_coordinates_table1(coordinates)
+    return get_rectangle_count1(coordinates, coordinates_table)
+
+
+def get_coordinates_table1(coordinates):
+    coordinates_table = {}
+    # 通过两个循环来找出每一个坐标点在上下左右方向上
+    # 相邻的其它坐标点
+    for coord1 in coordinates:
+        coord1_directions = {UP: [], RIGHT: [], DOWN: [], LEFT: []}
+        for coord2 in coordinates:
+            # 根据两个坐标点获取其相对的方向
+            coord2_direction = get_coord_direction(coord1, coord2)
+            # 如果得出的方向在上下左右方向上则记录到缓存中
+            if coord2_direction in coord1_directions:
+                coord1_directions[coord2_direction].append(coord2)
+        coord1_string = coord_to_string(coord1)
+        coordinates_table[coord1_string] = coord1_directions
+    return coordinates_table
+
+
+def get_coord_direction(coord1, coord2):
+    # 取出两个坐标点的 X 轴和 Y 轴
+    x1, y1 = coord1
+    x2, y2 = coord2
+    # 纵坐标相等
+    if y2 == y1:
+        # 第二个横坐标大于第一个横坐标
+        if x2 > x1:
+            return RIGHT
+        # 第二个横坐标小于第一个横坐标
+        elif x2 < x1:
+            return LEFT
+    # 横坐标相等
+    elif x2 == x1:
+        # 第二个纵坐标大于第一个纵坐标
+        if y2 > y1:
+            return UP
+        # 第二个纵坐标小于第一个纵坐标
+        elif y2 < y1:
+            return DOWN
+    # 不满足条件的返回空, 不记录到缓存
+    return ""
+
+
+def get_rectangle_count1(coordinates, coordinates_table):
+    rectangle_count = 0
+    # 统计每个坐标点是否可以构成矩形(矩形的两条边是和XY轴平行的)
+    for coord in coordinates:
+        # 递归执行, 判断按顺序从 上-右-下-左 的方向来走一个矩形区域路径,
+        # 看看是否在路径上刚好都有相应的坐标点对应, 默认从 上 开始
+        rectangle_count += clockwise_count_rectangles1(coord, coordinates_table, UP, coord)
+    return rectangle_count
+
+
+def clockwise_count_rectangles1(coord, coordinates_table, direction, origin):
+    coord_string = coord_to_string(coord)
+    # 最后一次是向左方向, 递归的结束点
+    if direction == LEFT:
+        # 如果能走完 上-右-下-左 四条边, 说明有四个坐标点可以构成一个矩形
+        rectangle_found = origin in coordinates_table[coord_string][LEFT]
+        return 1 if rectangle_found else 0
+    else:
+        rectangle_count = 0
+        next_direction = get_next_clockwise_direction(direction)
+        for next_coord in coordinates_table[coord_string][direction]:
+            rectangle_count += clockwise_count_rectangles1(next_coord, coordinates_table, next_direction, origin)
+        return rectangle_count
+
+
+def get_next_clockwise_direction(direction):
+    # 按 上-右-下-左 的方向走
+    if direction == UP:
+        return RIGHT
+    if direction == RIGHT:
+        return DOWN
+    if direction == DOWN:
+        return LEFT
+    return ""
+
+
+def coord_to_string(coord):
+    # 将坐标点转为字符串, 方便存储到哈希表中
+    x, y = coord
+    return str(x) + "-" + str(y)
+
+
+UP = "up"
+RIGHT = "right"
+DOWN = "down"
+LEFT = "left"
+
+
+# O(n^2) time | O(n) space - where n is the number of coordinates
+def rectangle_mania2(coordinates):
+    # 相较于方法1, 这里将每个坐标点的 X 轴和 Y 轴分开缓存
+    coordinates_table = get_coordinates_table2(coordinates)
+    return get_rectangle_count2(coordinates, coordinates_table)
+
+
+def get_coordinates_table2(coordinates):
+    # 分开缓存坐标点的 X 轴和 Y 轴
+    coordinates_table = {"x": {}, "y": {}}
+    for coord in coordinates:
+        x, y = coord
+        if x not in coordinates_table["x"]:
+            coordinates_table["x"][x] = []
+        coordinates_table["x"][x].append(coord)
+        if y not in coordinates_table["y"]:
+            coordinates_table["y"][y] = []
+        coordinates_table["y"][y].append(coord)
+    return coordinates_table
+
+
+def get_rectangle_count2(coordinates, coordinates_table):
+    rectangle_count = 0
+    for coord in coordinates:
+        # 获得当前坐标点的 Y 轴
+        lower_left_y = coord[1]
+        # 按顺序从 上-右-下 判断矩形
+        rectangle_count += clockwise_count_rectangles2(coord, coordinates_table, UP, lower_left_y)
+    return rectangle_count
+
+
+def clockwise_count_rectangles2(coord1, coordinates_table, direction, lower_left_y):
+    x1, y1 = coord1
+    # 最后一次的方向是向下(不需要再向左, 因为判断的是坐标点的其中一个坐标值)
+    if direction == DOWN:
+        # 取出与当前坐标相同 X 轴上的所有坐标点
+        relevant_coordinates = coordinates_table["x"][x1]
+        for coord2 in relevant_coordinates:
+            lower_right_y = coord2[1]
+            # 判断是否存在第四个坐标点(矩形的右下角)的 Y 轴与起始的坐标点有相同的 Y 轴
+            if lower_right_y == lower_left_y:
+                # 存在则说明找到了一个矩形
+                return 1
+        return 0
+    else:
+        rectangle_count = 0
+        if direction == UP:
+            # 取出与当前坐标相同 X 轴上的所有坐标点
+            relevant_coordinates = coordinates_table["x"][x1]
+            for coord2 in relevant_coordinates:
+                y2 = coord2[1]
+                # 通过判断 Y 轴大大小确定是否坐标位于当前坐标的上方
+                is_above = y2 > y1
+                if is_above:
+                    # 如果满足则继续递归, 向右走, 这里传递的第一个参数是找到的坐标点
+                    rectangle_count += clockwise_count_rectangles2(coord2, coordinates_table, RIGHT, lower_left_y)
+        elif direction == RIGHT:
+            # 取出与当前坐标相同 Y 轴上的所有坐标点
+            relevant_coordinates = coordinates_table["y"][y1]
+            for coord2 in relevant_coordinates:
+                x2 = coord2[0]
+                # 通过判断 X 轴大大小确定是否坐标位于当前坐标的右侧
+                is_right = x2 > x1
+                if is_right:
+                    # 如果满足则继续递归, 向下走, 这里传递的第一个参数是找到的坐标点
+                    rectangle_count += clockwise_count_rectangles2(coord2, coordinates_table, DOWN, lower_left_y)
+        return rectangle_count
+
+
+# O(n^2) time | O(n) space - where n is the number of coordinates
+def rectangle_mania3(coordinates):
+    # 相比上面的两个方法, 此方法较简单, 只简单缓存每个坐标点到哈希表中
+    coordinates_table = get_coordinates_table3(coordinates)
+    return get_rectangle_count3(coordinates, coordinates_table)
+
+
+def get_coordinates_table3(coordinates):
+    coordinates_table = {}
+    for coord in coordinates:
+        coord_string = coord_to_string(coord)
+        coordinates_table[coord_string] = True
+    return coordinates_table
+
+
+def get_rectangle_count3(coordinates, coordinates_table):
+    rectangle_count = 0
+    # 这里的逻辑是找每个坐标点的右上位置是否有一个形成对角线的坐标点
+    for x1, y1 in coordinates:
+        for x2, y2 in coordinates:
+            if not is_in_upper_right([x1, y1], [x2, y2]):
+                continue
+            # 如果存在这样一个对角线, 则判断是否在左上位置和右下位置存在坐标点
+            # 注意这里取的坐标点其实是两个对角线坐标点的 X 轴和 Y 轴
+            # 这样就可以保证矩形的边长是相等的(矩形不一定是正方形)
+            upper_coord_string = coord_to_string([x1, y2])
+            right_coord_string = coord_to_string([x2, y1])
+            if upper_coord_string in coordinates_table and right_coord_string in coordinates_table:
+                # 如果存在这四个坐标点则说明找到了一个矩形
+                rectangle_count += 1
+    return rectangle_count
+
+
+def is_in_upper_right(coord1, coord2):
+    x1, y1 = coord1
+    x2, y2 = coord2
+    return x2 > x1 and y2 > y1
+
+
+if __name__ == '__main__':
+    source = [
+        [0, 0], [0, 1], [1, 1], [1, 0],
+        [2, 1], [2, 0], [3, 1], [3, 0]
+    ]
+    print(rectangle_mania1(source))
+    print(rectangle_mania2(source))
+    print(rectangle_mania3(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
+using namespace std;
+
+string UP = "up";
+string RIGHT = "right";
+string DOWN = "down";
+string LEFT = "left";
+
+unordered_map<string, unordered_map<string, vector<vector<int>>>>
+getCoordsTable1(vector<vector<int>> coords);
+string getCoordDirection(vector<int> coord1, vector<int> coord2);
+int getRectangleCount1(
+    vector<vector<int>> coords,
+    unordered_map<string, unordered_map<string, vector<vector<int>>>> coordsTable);
+int clockwiseCountRectangles1(
+    vector<int> coord,
+    unordered_map<string, unordered_map<string, vector<vector<int>>>> coordsTable,
+    string direction, vector<int> origin);
+string getNextClockwiseDirection(string direction);
+string coordToString(vector<int> coord);
+
+// O(n^2) time | O(n^2) space - where n is the number of coordinates
+int rectangleMania1(vector<vector<int>> coords)
+{
+    unordered_map<string, unordered_map<string, vector<vector<int>>>> coordsTable =
+        getCoordsTable1(coords);
+    return getRectangleCount1(coords, coordsTable);
+}
+
+unordered_map<string, unordered_map<string, vector<vector<int>>>>
+getCoordsTable1(vector<vector<int>> coords)
+{
+    unordered_map<string, unordered_map<string, vector<vector<int>>>> coordsTable;
+    for (vector<int> coord1 : coords)
+    {
+        unordered_map<string, vector<vector<int>>> coord1Directions({
+            {UP, vector<vector<int>>{}},
+            {RIGHT, vector<vector<int>>{}},
+            {DOWN, vector<vector<int>>{}},
+            {LEFT, vector<vector<int>>{}},
+        });
+        for (vector<int> coord2 : coords)
+        {
+            string coord2Direction = getCoordDirection(coord1, coord2);
+            if (coord1Directions.find(coord2Direction) != coord1Directions.end())
+            {
+                coord1Directions[coord2Direction].push_back(coord2);
+            }
+        }
+        string coord1String = coordToString(coord1);
+        coordsTable.insert({coord1String, coord1Directions});
+    }
+    return coordsTable;
+}
+
+string getCoordDirection(vector<int> coord1, vector<int> coord2)
+{
+    int x1 = coord1[0];
+    int y1 = coord1[1];
+    int x2 = coord2[0];
+    int y2 = coord2[1];
+
+    if (y2 == y1)
+    {
+        if (x2 > x1)
+        {
+            return RIGHT;
+        }
+        else if (x2 < x1)
+        {
+            return LEFT;
+        }
+    }
+    else if (x2 == x1)
+    {
+        if (y2 > y1)
+        {
+            return UP;
+        }
+        else if (y2 < y1)
+        {
+            return DOWN;
+        }
+    }
+    return "";
+}
+
+int getRectangleCount1(
+    vector<vector<int>> coords,
+    unordered_map<string, unordered_map<string, vector<vector<int>>>> coordsTable)
+{
+    int rectangleCount = 0;
+    for (vector<int> coord : coords)
+    {
+        rectangleCount += clockwiseCountRectangles1(coord, coordsTable, UP, coord);
+    }
+    return rectangleCount;
+}
+
+int clockwiseCountRectangles1(
+    vector<int> coord,
+    unordered_map<string, unordered_map<string, vector<vector<int>>>> coordsTable,
+    string direction, vector<int> origin)
+{
+    string coordString = coordToString(coord);
+    if (direction == LEFT)
+    {
+        bool rectangleFound = find(coordsTable[coordString][LEFT].begin(),
+                                   coordsTable[coordString][LEFT].end(),
+                                   origin) != coordsTable[coordString][LEFT].end();
+        return rectangleFound ? 1 : 0;
+    }
+    else
+    {
+        int rectangleCount = 0;
+        string nextDirection = getNextClockwiseDirection(direction);
+        for (vector<int> nextCoord : coordsTable[coordString][direction])
+        {
+            rectangleCount += clockwiseCountRectangles1(nextCoord, coordsTable,
+                                                        nextDirection, origin);
+        }
+        return rectangleCount;
+    }
+}
+
+string getNextClockwiseDirection(string direction)
+{
+    if (direction == UP)
+        return RIGHT;
+    if (direction == RIGHT)
+        return DOWN;
+    if (direction == DOWN)
+        return LEFT;
+    return "";
+}
+
+string coordToString(vector<int> coord)
+{
+    return to_string(coord[0]) + "-" + to_string(coord[1]);
+}
+
+unordered_map<string, unordered_map<int, vector<vector<int>>>>
+getCoordsTable2(vector<vector<int>> coords);
+int getRectangleCount2(
+    vector<vector<int>> coords,
+    unordered_map<string, unordered_map<int, vector<vector<int>>>> coordsTable);
+int clockwiseCountRectangles2(
+    vector<int> coord1,
+    unordered_map<string, unordered_map<int, vector<vector<int>>>> coordsTable,
+    string direction, int lowerLeftY);
+
+// O(n^2) time | O(n) space - where n is the number of coordinates
+int rectangleMania2(vector<vector<int>> coords)
+{
+    unordered_map<string, unordered_map<int, vector<vector<int>>>> coordsTable =
+        getCoordsTable2(coords);
+    return getRectangleCount2(coords, coordsTable);
+}
+
+unordered_map<string, unordered_map<int, vector<vector<int>>>>
+getCoordsTable2(vector<vector<int>> coords)
+{
+    unordered_map<string, unordered_map<int, vector<vector<int>>>> coordsTable;
+    coordsTable.insert({"x", unordered_map<int, vector<vector<int>>>{}});
+    coordsTable.insert({"y", unordered_map<int, vector<vector<int>>>{}});
+    for (vector<int> coord : coords)
+    {
+        if (coordsTable["x"].find(coord[0]) == coordsTable["x"].end())
+        {
+            coordsTable["x"].insert({coord[0], vector<vector<int>>{}});
+        }
+        if (coordsTable["y"].find(coord[1]) == coordsTable["y"].end())
+        {
+            coordsTable["y"].insert({coord[1], vector<vector<int>>{}});
+        }
+        coordsTable["x"][coord[0]].push_back(coord);
+        coordsTable["y"][coord[1]].push_back(coord);
+    }
+    return coordsTable;
+}
+
+int getRectangleCount2(
+    vector<vector<int>> coords,
+    unordered_map<string, unordered_map<int, vector<vector<int>>>> coordsTable)
+{
+    int rectangleCount = 0;
+    for (vector<int> coord : coords)
+    {
+        int lowerLeftY = coord[1];
+        rectangleCount +=
+            clockwiseCountRectangles2(coord, coordsTable, UP, lowerLeftY);
+    }
+    return rectangleCount;
+}
+
+int clockwiseCountRectangles2(
+    vector<int> coord1,
+    unordered_map<string, unordered_map<int, vector<vector<int>>>> coordsTable,
+    string direction, int lowerLeftY)
+{
+    if (direction == DOWN)
+    {
+        vector<vector<int>> relevantCoords = coordsTable["x"][coord1[0]];
+        for (vector<int> coord2 : relevantCoords)
+        {
+            int lowerRightY = coord2[1];
+            if (lowerRightY == lowerLeftY)
+                return 1;
+        }
+        return 0;
+    }
+    else
+    {
+        int rectangleCount = 0;
+        if (direction == UP)
+        {
+            vector<vector<int>> relevantCoords = coordsTable["x"][coord1[0]];
+            for (vector<int> coord2 : relevantCoords)
+            {
+                bool isAbove = coord2[1] > coord1[1];
+                if (isAbove)
+                    rectangleCount +=
+                        clockwiseCountRectangles2(coord2, coordsTable, RIGHT, lowerLeftY);
+            }
+        }
+        else if (direction == RIGHT)
+        {
+            vector<vector<int>> relevantCoords = coordsTable["y"][coord1[1]];
+            for (vector<int> coord2 : relevantCoords)
+            {
+                bool isRight = coord2[0] > coord1[0];
+                if (isRight)
+                    rectangleCount +=
+                        clockwiseCountRectangles2(coord2, coordsTable, DOWN, lowerLeftY);
+            }
+        }
+        return rectangleCount;
+    }
+}
+
+unordered_map<string, bool> getCoordsTable3(vector<vector<int>> coords);
+int getRectangleCount3(vector<vector<int>> coords,
+                       unordered_map<string, bool> coordsTable);
+bool isInUpperRight(vector<int> coord1, vector<int> coord2);
+
+// O(n^2) time | O(n) space - where n is the number of coordinates
+int rectangleMania3(vector<vector<int>> coords)
+{
+    unordered_map<string, bool> coordsTable = getCoordsTable3(coords);
+    return getRectangleCount3(coords, coordsTable);
+}
+
+unordered_map<string, bool> getCoordsTable3(vector<vector<int>> coords)
+{
+    unordered_map<string, bool> coordsTable;
+    for (vector<int> coord : coords)
+    {
+        string coordString = coordToString(coord);
+        coordsTable.insert({coordString, true});
+    }
+    return coordsTable;
+}
+
+int getRectangleCount3(vector<vector<int>> coords,
+                       unordered_map<string, bool> coordsTable)
+{
+    int rectangleCount = 0;
+    for (vector<int> coord1 : coords)
+    {
+        for (vector<int> coord2 : coords)
+        {
+            if (!isInUpperRight(coord1, coord2))
+                continue;
+            string upperCoordString = coordToString(vector<int>({coord1[0], coord2[1]}));
+            string rightCoordString = coordToString(vector<int>({coord2[0], coord1[1]}));
+            if (coordsTable.find(upperCoordString) != coordsTable.end() &&
+                coordsTable.find(rightCoordString) != coordsTable.end())
+                rectangleCount++;
+        }
+    }
+    return rectangleCount;
+}
+
+bool isInUpperRight(vector<int> coord1, vector<int> coord2)
+{
+    return coord2[0] > coord1[0] && coord2[1] > coord1[1];
+}
+
+int main()
+{
+    vector<vector<int>> source = {
+        {0, 0}, {0, 1}, {1, 1}, {1, 0}, {2, 1}, {2, 0}, {3, 1}, {3, 0}};
+    cout << rectangleMania1(source) << endl;
+    cout << rectangleMania2(source) << endl;
+    cout << rectangleMania3(source) << endl;
+    return 0;
+}
+```
+
+Last Modified 2022-06-11
