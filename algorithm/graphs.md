@@ -3092,4 +3092,180 @@ int main()
 }
 ```
 
+## 汇率套利
+
+给定一个二维数组表示的汇率表，数组中的值表示每个货币可以兑换其它货币的汇率，判断通过这个汇率表是否可以实现套取利润
+
+```
+         0:USD    1:CAD   2:GBP
+  0:USD [   1.0, 0.8631, 0.5903]
+  1:CAD [1.1586,    1.0, 0.6849]
+  2:GBP [1.6939,   1.46,    1.0]
+```
+
+通过上面的汇率表，使用一个 USD，按`USD -> CAD -> GBP -> USD`的顺序兑换回来可以得到`0.8631 * 0.6849 * 1.6939 = 1.0013272861409999`
+
+```python
+import math
+
+
+# O(n^3) time | O(n^2) space - where n is the number of currencies
+def detect_arbitrage(exchange_rates):
+    # 要将汇率作为边的权重, 必须能够计算加法
+    # 由于 log(a*b) = log(a) + log(b), 可以将汇率转换为
+    # -log10(rate) 来用作图的边的权重
+    log_exchange_rates = convert_to_log_matrix(exchange_rates)
+
+    # 负的循环边权重表示可以套取利润, 从第一个位置开始
+    return found_negative_weight_cycle(log_exchange_rates, 0)
+
+
+# 运行 贝尔曼-福特 (Bellman-Ford) 算法以检测任何负权重循环
+def found_negative_weight_cycle(graph, start):
+    # 记录每个顶点的权重, 默认设置为无穷大
+    distances_from_start = [float("inf") for _ in range(len(graph))]
+    # 开始顶点的权重初始化为 0
+    distances_from_start[start] = 0
+
+    for _ in range(len(graph) - 1):
+        # 如果没有更新, 意味着没有负循环
+        if not relax_edges_and_update_distances(graph, distances_from_start):
+            return False
+
+    return relax_edges_and_update_distances(graph, distances_from_start)
+
+
+def relax_edges_and_update_distances(graph, distances):
+    updated = False
+    # 二维数组中的每个一维数组表示顶点的边, 通过边可以到达其它的顶点
+    for source_idx, edges in enumerate(graph):
+        # 遍历每条边的权重
+        for destination_idx, edge_weight in enumerate(edges):
+            # 将当前顶点的权重与边的权重相加
+            new_distance_to_destination = distances[source_idx] + edge_weight
+            # 检查累加后的权重是否要比到达的顶点的权重小, 满足则表示可以找到更短的路径
+            if new_distance_to_destination < distances[destination_idx]:
+                print((source_idx, destination_idx,))
+                # 标记找到了一个负循环, 即更短的访问路径
+                updated = True
+                # 更新目标顶点的权重
+                distances[destination_idx] = new_distance_to_destination
+
+    return updated
+
+
+def convert_to_log_matrix(matrix):
+    new_matrix = []
+    for row, rates in enumerate(matrix):
+        new_matrix.append([])
+        for rate in rates:
+            # 将汇率转为以 10 为底的对数的相反数
+            new_matrix[row].append(-math.log10(rate))
+    print(new_matrix)
+    return new_matrix
+
+
+if __name__ == '__main__':
+    print(detect_arbitrage([[1.0, 1.27, 0.718],
+                            [0.74, 1.0, 0.5678],
+                            [1.39, 1.77, 1.0]]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <limits>
+#include <cmath>
+using namespace std;
+
+bool foundNegativeWeightCycle(vector<vector<double>> graph, int start);
+bool relaxEdgesAndUpdateDistances(vector<vector<double>> &graph,
+                                  vector<double> &distances);
+vector<vector<double>> convertToLogMatrix(vector<vector<double>> matrix);
+
+// O(n^3) time | O(n^2) space - where n is the number of currencies
+bool detectArbitrage(vector<vector<double>> exchangeRates)
+{
+    // To use exchange rates as edge weights, we must be able to add them.
+    // Since log(a*b) = log(a) + log(b), we can convert all rates to
+    // -log10(rate) to use them as edge weights.
+    vector<vector<double>> logExchangeRates = convertToLogMatrix(exchangeRates);
+
+    // A negative weight cycle indicates an arbitrage.
+    return foundNegativeWeightCycle(logExchangeRates, 0);
+}
+
+// Runs the Bellman–Ford Algorithm to detect any negative-weight cycles.
+bool foundNegativeWeightCycle(vector<vector<double>> graph, int start)
+{
+    const int graphSize = graph.size();
+    vector<double> distancesFromStart(graphSize,
+                                      numeric_limits<double>::max());
+    distancesFromStart[start] = 0;
+
+    for (int unused = 0; unused < graphSize; unused++)
+    {
+        // If no update occurs, that means there's no negative cycle.
+        if (!relaxEdgesAndUpdateDistances(graph, distancesFromStart))
+        {
+            return false;
+        }
+    }
+
+    return relaxEdgesAndUpdateDistances(graph, distancesFromStart);
+}
+
+// Returns `true` if any distance was updated
+bool relaxEdgesAndUpdateDistances(vector<vector<double>> &graph,
+                                  vector<double> &distances)
+{
+    bool updated = false;
+    const int graphSize = graph.size();
+
+    for (int sourceIdx = 0; sourceIdx < graphSize; sourceIdx++)
+    {
+        vector<double> edges = graph[sourceIdx];
+        const int edgesSize = edges.size();
+        for (int destinationIdx = 0; destinationIdx < edgesSize;
+             destinationIdx++)
+        {
+            double edgeWeight = edges[destinationIdx];
+            double newDistanceToDestination = distances[sourceIdx] + edgeWeight;
+            if (newDistanceToDestination < distances[destinationIdx])
+            {
+                updated = true;
+                distances[destinationIdx] = newDistanceToDestination;
+            }
+        }
+    }
+
+    return updated;
+}
+
+vector<vector<double>> convertToLogMatrix(vector<vector<double>> matrix)
+{
+    vector<vector<double>> newMatrix;
+    const int matrixSize = matrix.size();
+    for (int row = 0; row < matrixSize; row++)
+    {
+        vector<double> rates = matrix[row];
+        newMatrix.push_back(vector<double>{});
+        for (auto rate : rates)
+        {
+            newMatrix[row].push_back(-log10(rate));
+        }
+    }
+
+    return newMatrix;
+}
+
+int main()
+{
+    cout << detectArbitrage({{1, 106.6, 0.83},
+                             {0.0093, 1, 0.0078},
+                             {1.21, 128.69, 1}});
+    return 0;
+}
+```
+
 Last Modified 2022-06-11
