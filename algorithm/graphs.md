@@ -3433,4 +3433,319 @@ int main()
 }
 ```
 
+## 机场航线
+
+给定三个数据，第一个参数`airports`为一维数组表示机场的名称，第二个参数`routes`为二维数组表示机场之间的航线（二维数组中的每个一维数组的第一个值表示始发地点，第二个值表示到达地点），第三个参数表示要建立航线的起始机场；找出至少要建立多少条航线才可以保证从给定的起始机场出发能到达第一个参数中指定的所有机场
+
+```python
+# O(a * (a + r) + a + r + alog(a)) time | O(a + r) space
+# where a is the number of airports and r is the number of routes
+def airport_connections(airports, routes, starting_airport):
+    # 创建一个有向图记录机场相关的信息
+    airport_graph = create_airport_graph(airports, routes)
+    # 深度优先遍历图, 找到从指定的机场 starting_airport 出发不可到达的所有其它机场
+    unreachable_airport_nodes = get_unreachable_airport_nodes(airport_graph, airports, starting_airport)
+    # 标记所有从指定机场不可到达的机场, 其实是累计每个机场可以到达的机场数量, 找出最合适的机场与指定的机场建立航线
+    mark_unreachable_connections(airport_graph, unreachable_airport_nodes)
+    return get_min_number_of_new_connections(airport_graph, unreachable_airport_nodes)
+
+
+# O(a + r) time | O(a + r) space
+def create_airport_graph(airports, routes):
+    airport_graph = {}
+    for airport in airports:
+        airport_graph[airport] = AirportNode(airport)
+    # 根据机场的线路安排, 逐个记录机场可以到达的其它机场
+    for route in routes:
+        airport, connection = route
+        airport_graph[airport].connections.append(connection)
+    return airport_graph
+
+
+# O(a + r) time | O(a) space
+def get_unreachable_airport_nodes(airport_graph, airports, starting_airport):
+    # 记录已经被访问过的机场
+    visited_airports = {}
+    # 深度优先遍历由机场和线路组成的有向图 (机场表示图中的每个顶点, 机场线路表示图中每个顶点相连的边)
+    depth_first_traverse_airports(airport_graph, starting_airport, visited_airports)
+    # 记录从指定的机场 starting_airport 出发不可到达的机场
+    unreachable_airport_nodes = []
+    for airport in airports:
+        if airport in visited_airports:
+            continue
+        # 如果在深度优先遍历中没有到达过此机场
+        airport_node = airport_graph[airport]
+        # 记录为不可到达的机场
+        airport_node.is_reachable = False
+        # 记录到列表中
+        unreachable_airport_nodes.append(airport_node)
+    return unreachable_airport_nodes
+
+
+def depth_first_traverse_airports(airport_graph, airport, visited_airports):
+    # 忽略被访问过的顶点
+    if airport in visited_airports:
+        return
+    # 标记为已经被访问
+    visited_airports[airport] = True
+    connections = airport_graph[airport].connections
+    for connection in connections:
+        # 递归执行深度优先遍历
+        depth_first_traverse_airports(airport_graph, connection, visited_airports)
+
+
+# O(a * (a + r)) time | O(a) space
+def mark_unreachable_connections(airport_graph, unreachable_airport_nodes):
+    for airport_node in unreachable_airport_nodes:
+        airport = airport_node.airport
+        # 记录所有不可到达的机场
+        unreachable_connections = []
+        # 对机场进行深度优先遍历, 再走一次机场的航线, 记录所有不可到达的机场
+        depth_first_add_unreachable_connections(airport_graph, airport, unreachable_connections, {})
+        airport_node.unreachable_connections = unreachable_connections
+
+
+def depth_first_add_unreachable_connections(airport_graph, airport, unreachable_connections, visited_airports):
+    # 如果机场从指定的机场可以到达则忽略
+    if airport_graph[airport].is_reachable:
+        return
+    # 忽略被访问过的顶点
+    if airport in visited_airports:
+        return
+    # 标记为已经被访问
+    visited_airports[airport] = True
+    # 添加到不可到达的机场记录中
+    unreachable_connections.append(airport)
+    connections = airport_graph[airport].connections
+    for connection in connections:
+        # 递归执行深度优先遍历
+        depth_first_add_unreachable_connections(airport_graph, connection, unreachable_connections, visited_airports)
+
+
+# O(alog(a) + a + r) time | O(1) space
+def get_min_number_of_new_connections(airport_graph, unreachable_airport_nodes):
+    # 对指定机场不可到达的所有机场按其可达到的机场数量降序排序, 为了减少成本,
+    # 必须优先让指定的机场与那些有最多可到达机场的机场建立航线
+    unreachable_airport_nodes.sort(key=lambda airport: len(airport.unreachable_connections), reverse=True)
+    # 统计与指定机场 starting_airport 建立的机场航线数量
+    number_of_new_connections = 0
+    for airport_node in unreachable_airport_nodes:
+        # 忽略可以到达的机场
+        if airport_node.is_reachable:
+            continue
+        # 累加数量, 也同时表示将指定机场 starting_airport 与当前这个机场建立一条航线
+        number_of_new_connections += 1
+        # 将此机场可到达的其它机场标记为可到达, 避免再次建立航线而增加成本
+        for connection in airport_node.unreachable_connections:
+            airport_graph[connection].is_reachable = True
+    return number_of_new_connections
+
+
+class AirportNode:
+    def __init__(self, airport):
+        # 机场名称
+        self.airport = airport
+        # 从此机场可到达的其它机场
+        self.connections = []
+        # 标记是否可达到
+        self.is_reachable = True
+        # 不可到达的机场
+        self.unreachable_connections = []
+
+
+if __name__ == '__main__':
+    source_airports = ["BGI", "CDG", "DEL", "DOH", "DSM", "EWR", "EYW", "HND", "ICN", "JFK", "LGA", "LHR", "ORD", "SAN",
+                       "SFO", "SIN", "TLV", "BUD"]
+    source_routes = [
+        ["DSM", "ORD"], ["ORD", "BGI"], ["BGI", "LGA"], ["SIN", "CDG"], ["CDG", "SIN"], ["CDG", "BUD"], ["DEL", "DOH"],
+        ["DEL", "CDG"], ["TLV", "DEL"], ["EWR", "HND"], ["HND", "ICN"], ["HND", "JFK"], ["ICN", "JFK"], ["JFK", "LGA"],
+        ["EYW", "LHR"], ["LHR", "SFO"], ["SFO", "SAN"], ["SFO", "DSM"], ["SAN", "EYW"]
+    ]
+    print(airport_connections(source_airports, source_routes, "LGA"))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <unordered_map>
+#include <algorithm>
+using namespace std;
+
+class AirportNode
+{
+public:
+    string airport;
+    vector<string> connections;
+    bool isReachable;
+    vector<string> unreachableConnections;
+
+    AirportNode(string airport)
+    {
+        this->airport = airport;
+        connections = {};
+        isReachable = true;
+        unreachableConnections = {};
+    }
+};
+
+unordered_map<string, AirportNode *>
+createAirportGraph(vector<string> airports, vector<vector<string>> routes);
+vector<AirportNode *>
+getUnreachableAirportNodes(unordered_map<string, AirportNode *> airportGraph,
+                           vector<string> airports, string startingAirport);
+void depthFirstTraverseAirports(
+    unordered_map<string, AirportNode *> airportGraph, string airport,
+    unordered_map<string, bool> *visitedAirports);
+void markUnreachableConnections(
+    unordered_map<string, AirportNode *> airportGraph,
+    vector<AirportNode *> unreachableAirportNodes);
+void depthFirstAddUnreachableConnections(
+    unordered_map<string, AirportNode *> airportGraph, string airport,
+    vector<string> *unreachableConnections,
+    unordered_map<string, bool> *visitedAirports);
+int getMinNumberOfNewConnections(
+    unordered_map<string, AirportNode *> airportGraph,
+    vector<AirportNode *> unreachableAirportNodes);
+
+// O(a * (a + r) + a + r + alog(a)) time | O(a + r) space - where a is the
+// number of airports and r is the number of routes
+int airportConnections(vector<string> airports, vector<vector<string>> routes,
+                       string startingAirport)
+{
+    unordered_map<string, AirportNode *> airportGraph =
+        createAirportGraph(airports, routes);
+    vector<AirportNode *> unreachableAirportNodes =
+        getUnreachableAirportNodes(airportGraph, airports, startingAirport);
+    markUnreachableConnections(airportGraph, unreachableAirportNodes);
+    return getMinNumberOfNewConnections(airportGraph, unreachableAirportNodes);
+}
+
+// O(a + r) time | O(a + r) space
+unordered_map<string, AirportNode *>
+createAirportGraph(vector<string> airports, vector<vector<string>> routes)
+{
+    unordered_map<string, AirportNode *> airportGraph = {};
+    for (string airport : airports)
+    {
+        airportGraph[airport] = new AirportNode(airport);
+    }
+    for (vector<string> route : routes)
+    {
+        string airport = route[0];
+        string connection = route[1];
+        airportGraph[airport]->connections.push_back(connection);
+    }
+    return airportGraph;
+}
+
+// O(a + r) time | O(a) space
+vector<AirportNode *>
+getUnreachableAirportNodes(unordered_map<string, AirportNode *> airportGraph,
+                           vector<string> airports, string startingAirport)
+{
+    unordered_map<string, bool> visitedAirports = {};
+    depthFirstTraverseAirports(airportGraph, startingAirport, &visitedAirports);
+
+    vector<AirportNode *> unreachableAirportNodes = {};
+    for (string airport : airports)
+    {
+        if (visitedAirports.find(airport) != visitedAirports.end())
+            continue;
+        AirportNode *airportNode = airportGraph[airport];
+        airportNode->isReachable = false;
+        unreachableAirportNodes.push_back(airportNode);
+    }
+    return unreachableAirportNodes;
+}
+
+void depthFirstTraverseAirports(
+    unordered_map<string, AirportNode *> airportGraph, string airport,
+    unordered_map<string, bool> *visitedAirports)
+{
+    if (visitedAirports->find(airport) != visitedAirports->end())
+        return;
+    visitedAirports->insert({airport, true});
+    vector<string> connections = airportGraph[airport]->connections;
+    for (string connection : connections)
+    {
+        depthFirstTraverseAirports(airportGraph, connection, visitedAirports);
+    }
+}
+
+// O(a * (a + r)) time | O(a) space
+void markUnreachableConnections(
+    unordered_map<string, AirportNode *> airportGraph,
+    vector<AirportNode *> unreachableAirportNodes)
+{
+    for (AirportNode *airportNode : unreachableAirportNodes)
+    {
+        string airport = airportNode->airport;
+        vector<string> unreachableConnections = {};
+        unordered_map<string, bool> visitedAirports = {};
+        depthFirstAddUnreachableConnections(
+            airportGraph, airport, &unreachableConnections, &visitedAirports);
+        airportNode->unreachableConnections = unreachableConnections;
+    }
+}
+
+void depthFirstAddUnreachableConnections(
+    unordered_map<string, AirportNode *> airportGraph, string airport,
+    vector<string> *unreachableConnections,
+    unordered_map<string, bool> *visitedAirports)
+{
+    if (airportGraph[airport]->isReachable)
+        return;
+    if (visitedAirports->find(airport) != visitedAirports->end())
+        return;
+    visitedAirports->insert({airport, true});
+    unreachableConnections->push_back(airport);
+    vector<string> connections = airportGraph[airport]->connections;
+    for (string connection : connections)
+    {
+        depthFirstAddUnreachableConnections(
+            airportGraph, connection, unreachableConnections, visitedAirports);
+    }
+}
+
+// O(alog(a) + a + r) time | O(1) space
+int getMinNumberOfNewConnections(
+    unordered_map<string, AirportNode *> airportGraph,
+    vector<AirportNode *> unreachableAirportNodes)
+{
+    sort(unreachableAirportNodes.begin(), unreachableAirportNodes.end(),
+         [](AirportNode *a1, AirportNode *a2) -> bool
+         {
+             return a2->unreachableConnections.size() <
+                    a1->unreachableConnections.size();
+         });
+
+    int numberOfNewConnections = 0;
+    for (AirportNode *airportNode : unreachableAirportNodes)
+    {
+        if (airportNode->isReachable)
+            continue;
+        numberOfNewConnections++;
+        for (string connection : airportNode->unreachableConnections)
+        {
+            airportGraph[connection]->isReachable = true;
+        }
+    }
+    return numberOfNewConnections;
+}
+
+int main()
+{
+    vector<string> airports = {"BGI", "CDG", "DEL", "DOH", "DSM", "EWR", "EYW", "HND", "ICN", "JFK", "LGA", "LHR",
+                               "ORD", "SAN", "SFO", "SIN", "TLV", "BUD"};
+    vector<vector<string>> routes = {{"DSM", "ORD"}, {"ORD", "BGI"}, {"BGI", "LGA"}, {"SIN", "CDG"}, {"CDG", "SIN"},
+                                     {"CDG", "BUD"}, {"DEL", "DOH"}, {"DEL", "CDG"}, {"TLV", "DEL"}, {"EWR", "HND"},
+                                     {"HND", "ICN"}, {"HND", "JFK"}, {"ICN", "JFK"}, {"JFK", "LGA"}, {"EYW", "LHR"},
+                                     {"LHR", "SFO"}, {"SFO", "SAN"}, {"SFO", "DSM"}, {"SAN", "EYW"}};
+    string startingAirport = "LGA";
+    cout << airportConnections(airports, routes, startingAirport);
+    return 0;
+}
+```
+
 Last Modified 2022-06-12
