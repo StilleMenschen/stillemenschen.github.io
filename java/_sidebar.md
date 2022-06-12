@@ -11,3 +11,4 @@
   - [Thread Closure](java/thread-closure.md)
   - [Lock](java/lock.md)
   - [Thread Pool](java/thread-pool.md)
+  - [Runtime Data Area](java/runtime-data-area.md)
