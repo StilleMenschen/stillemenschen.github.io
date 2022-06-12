@@ -3268,4 +3268,169 @@ int main()
 }
 ```
 
-Last Modified 2022-06-11
+## 两边相连的图
+
+给定一个二维数组表示一个无向图的邻接表，判断该无向图是否为两边相连的图，如下面的示例
+
+```
+  1 -- 5         1 -- 5
+ /    /  \      /    /  \
+0 -- 2    4    0    2    4
+      \  /           \  /
+        3              3
+    (A)            (B)
+```
+
+图(A)中断开任意一条边后，从任意顶点出发仍然可以访问到其它的顶点，而图(B)中如果断开了`1-5`这一条边，那么就存在不可到达的顶点`1`和`0`
+
+```python
+# O(v + e) time | O(v) space - where v is the number of
+# vertices and e is the number of edges in the graph
+def two_edge_connected_graph(edges):
+    if len(edges) == 0:
+        return True
+    # 记录到达顶点的时间(计数), 初始值为 -1 表示顶点还未被访问过
+    arrival_times = [-1] * len(edges)
+    # 从第一个顶点开始
+    start_vertex = 0
+    # 深度优先遍历, 找出是否存在从起始顶点出发只能以一个路径到达的其它顶点
+    # 传递起始顶点, 父级顶点为 -1 (这里的父级顶点表示访问当前节点的前一个节点), 起始计数值为 0
+    if get_minimum_arrival_time_of_ancestors(start_vertex, -1, 0, arrival_times, edges) == -1:
+        return False
+    # 最后再检查一次是否存在未被访问的顶点
+    return are_all_vertices_visited(arrival_times)
+
+
+def are_all_vertices_visited(arrival_times):
+    for time in arrival_times:
+        if time == -1:
+            return False
+
+    return True
+
+
+def get_minimum_arrival_time_of_ancestors(current_vertex, parent, current_time, arrival_times, edges):
+    # 记录当前顶点的访问计数
+    arrival_times[current_vertex] = current_time
+    # 记录当前计数为最小访问计数
+    minimum_arrival_time = current_time
+    # 遍历当前顶点的边, 走向其它顶点
+    for destination in edges[current_vertex]:
+        # 如果此顶点未被访问过则访问该顶点
+        if arrival_times[destination] == -1:
+            # 继续深度遍历, 传递当前顶点为父级, 累加访问计数
+            # 并根据返回的访问计数更新最小访问计数值
+            minimum_arrival_time = min(
+                minimum_arrival_time,
+                get_minimum_arrival_time_of_ancestors(destination, current_vertex, current_time + 1, arrival_times,
+                                                      edges),
+            )
+        # 如果此顶点已经被访问过且不为父级顶点
+        elif destination != parent:
+            # 参考目标顶点的访问计数, 更新当前顶点的最小访问计数值
+            minimum_arrival_time = min(minimum_arrival_time, arrival_times[destination])
+
+    # 如果最小访问计数没有被更新过, 且不是起始的父级顶点, 则表示存在一条断开后就不能再次访问的唯一性路径
+    if minimum_arrival_time == current_time and parent != -1:
+        return -1
+    # 返回当前顶点的最小访问计数值
+    return minimum_arrival_time
+
+
+if __name__ == '__main__':
+    print(two_edge_connected_graph([
+        [1, 2, 3],
+        [0, 2],
+        [0, 1],
+        [0, 4, 5],
+        [3, 5],
+        [3, 4]
+    ]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+bool areAllVerticesVisited(const vector<int> &arrivalTimes);
+int getMinimumArrivalTimeOfAncestors(int currentVertex, int parent,
+                                     int currentTime, vector<int> &arrivalTimes,
+                                     const vector<vector<int>> &edges);
+
+// O(v + e) time | O(v) space - where v is the number of
+// vertices and e is the number of edges in the graph
+bool twoEdgeConnectedGraph(vector<vector<int>> edges)
+{
+    if (edges.size() == 0)
+        return true;
+
+    vector<int> arrivalTimes(edges.size(), -1);
+    int startVertex = 0;
+
+    if (getMinimumArrivalTimeOfAncestors(startVertex, -1, 0, arrivalTimes,
+                                         edges) == -1)
+    {
+        return false;
+    }
+
+    return areAllVerticesVisited(arrivalTimes);
+}
+
+bool areAllVerticesVisited(const vector<int> &arrivalTimes)
+{
+    for (const auto &time : arrivalTimes)
+    {
+        if (time == -1)
+            return false;
+    }
+
+    return true;
+}
+
+int getMinimumArrivalTimeOfAncestors(int currentVertex, int parent,
+                                     int currentTime, vector<int> &arrivalTimes,
+                                     const vector<vector<int>> &edges)
+{
+    arrivalTimes[currentVertex] = currentTime;
+
+    int minimumArrivalTime = currentTime;
+
+    for (const auto &destination : edges[currentVertex])
+    {
+        if (arrivalTimes[destination] == -1)
+        {
+            minimumArrivalTime =
+                min(minimumArrivalTime, getMinimumArrivalTimeOfAncestors(
+                                            destination, currentVertex,
+                                            currentTime + 1, arrivalTimes, edges));
+        }
+        else if (destination != parent)
+        {
+            minimumArrivalTime = min(minimumArrivalTime, arrivalTimes[destination]);
+        }
+    }
+
+    // A bridge was detected, which means the graph isn't two-edge-connected.
+    if (minimumArrivalTime == currentTime && parent != -1)
+        return -1;
+
+    return minimumArrivalTime;
+}
+
+int main()
+{
+    cout << twoEdgeConnectedGraph({
+        {1, 2, 5},
+        {0, 2},
+        {0, 1, 3},
+        {2, 4, 5},
+        {3, 5},
+        {0, 3, 4},
+    });
+    return 0;
+}
+```
+
+Last Modified 2022-06-12
