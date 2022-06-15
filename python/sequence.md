@@ -109,4 +109,42 @@ for _ in range(SIZE):
     print(f'{value:2d} -> {arr}')
 ```
 
-Last Modified 2022-06-06
+```python
+import os
+from array import array
+from random import uniform
+import numpy
+
+floats = array('d', (uniform(0, 1000) for _ in range(10 ** 3)))
+f = open('floats.bin', 'wb')
+print(floats[-10:])
+floats.tofile(f)
+f.close()
+
+fp = open('floats.bin', 'rb')
+floats2 = array('d')
+floats2.fromfile(fp, 10 ** 3)
+fp.close()
+print(floats2[-10:])
+
+print(floats2 == floats)
+
+os.remove('floats.bin')
+
+numbers = array('h', [-2, -1, 0, 1, 2])
+memv = memoryview(numbers)
+memv_oct = memv.cast('B')
+print(memv_oct.tolist())
+memv_oct[5] = 4
+print(numbers)
+
+np_array = numpy.arange(12)
+print(type(np_array))
+print(np_array.shape)
+np_array.shape = 3, 4
+print(np_array)
+print(np_array[:, 1])
+print(np_array.transpose())
+```
+
+Last Modified 2022-06-15
