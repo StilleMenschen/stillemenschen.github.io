@@ -11,8 +11,7 @@ settings.json
     "emmet.triggerExpansionOnTab": true,
     "python.formatting.provider": "yapf",
     "python.linting.pylintPath": "pylint",
-    "php.validate.executablePath": "C:\\Programs Files\\php\\php.exe",
-    "php.executablePath": "C:\\Programs Files\\php\\php.exe",
+    "php.validate.executablePath": "D:\\Programs\\php\\php.exe",
     "prettier.printWidth": 120,
     "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
     "typescript.format.insertSpaceBeforeFunctionParenthesis": true,
@@ -74,9 +73,6 @@ settings.json
     "editor.codeActionsOnSave": {
         "source.fixAll": true
     },
-    "workbench.editorAssociations": {
-        "*.ipynb": "jupyter.notebook.ipynb"
-    },
     "editor.wordBasedSuggestionsMode": "allDocuments",
     "path-intellisense.mappings": {
         "@": "${workspaceRoot}/src"
@@ -85,7 +81,7 @@ settings.json
     "git.autofetch": "all",
     "terminal.integrated.profiles.windows": {
         "Git-Bash": {
-            "path": "C:\\Programs Files\\Git\\bin\\bash.exe",
+            "path": "D:\\Programs\\Git\\bin\\bash.exe",
             "args": [
                 "--login"
             ],
@@ -93,10 +89,10 @@ settings.json
         },
     },
     "python.autoComplete.extraPaths": [
-        "C:\\Programs Files\\Python3\\Lib\\site-packages"
+        "D:\\Programs\\Python310\\Lib\\site-packages"
     ],
     "python.analysis.extraPaths": [
-        "C:\\Programs Files\\Python3\\Lib\\site-packages"
+        "D:\\Programs\\Python310\\Lib\\site-packages"
     ],
     "terminal.integrated.defaultProfile.windows": "PowerShell",
     "security.workspace.trust.enabled": false,
@@ -112,11 +108,9 @@ settings.json
     "gitlens.views.contributors.avatars": false,
     "gitlens.views.searchAndCompare.avatars": false,
     "gitlens.blame.avatars": false,
-    "bracket-pair-colorizer-2.depreciation-notice": false,
     "diffEditor.ignoreTrimWhitespace": false,
     "gitlens.views.searchAndCompare.files.layout": "tree",
-    "local-history.daysLimit": 7
 }
 ```
 
-Last Modified 2022-03-30
+Last Modified 2022-06-18
