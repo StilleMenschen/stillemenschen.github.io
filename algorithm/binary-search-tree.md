@@ -496,7 +496,7 @@ void postOrderTraverse(BST *tree, vector<int> &array)
     }
 }
 
-void iteration(vector<int> &array)
+void iteration(vector<int> array)
 {
     for (int e : array)
     {

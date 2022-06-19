@@ -3748,4 +3748,528 @@ int main()
 }
 ```
 
-Last Modified 2022-06-12
+## 最短路径搜索
+
+给出一个矩阵表示的图，给出一个开始位置和结束位置的行列索引，找出从开始位置到达结束位置的最短路径，矩阵中`1`表示障碍物不可通过，相对的`0`表示可以通过，路径只能是上下左右方向，不能是对角线
+
+```python
+class Node:
+    def __init__(self, row, col, value):
+        # 便于记录和查找最小堆中的节点
+        self.id = str(row) + "-" + str(col)
+        self.row = row
+        self.col = col
+        self.value = value
+        # 距离起始位置的相对距离
+        self.distance_from_start = float("inf")
+        # 距离结束位置的相对距离
+        self.estimated_distance_to_end = float("inf")
+        # 是否可以折返到前一个节点, 此处直接记录前一个节点
+        self.came_from = None
+
+
+# O(w * h * log(w * h)) time | O(w * h) space - where
+# w is the width of the graph and h is the height
+def a_star_algorithm(start_row, start_col, end_row, end_col, graph):
+    # 将图中的所有节点转化为带有信息的节点
+    nodes = initialize_nodes(graph)
+    # 定位到开始和结束位置
+    start_node = nodes[start_row][start_col]
+    end_node = nodes[end_row][end_col]
+    # 起始节点对于起始位置的距离为 0
+    start_node.distance_from_start = 0
+    # 计算起始节点对于结束位置的距离(分值)
+    start_node.estimated_distance_to_end = calculate_manhattan_distance(start_node, end_node)
+    # 将起始节点放入最小堆中, 最小堆根据节点相对于结束位置的距离(分值)来构建
+    nodes_to_visit = MinHeap([start_node])
+    # 最小堆非空则持续循环
+    while nodes_to_visit.is_not_empty():
+        # 取出距离结束位置最近的节点
+        current_min_distance_node = nodes_to_visit.remove()
+        # 如果已经到达结束位置则结束
+        if current_min_distance_node == end_node:
+            break
+        # 获取当前节点的周围节点(上下左右)
+        neighbors = get_neighboring_nodes(current_min_distance_node, nodes)
+        # 遍历周围的节点
+        for neighbor in neighbors:
+            # 如果是障碍物则忽略
+            if neighbor.value == 1:
+                continue
+            # 记录起始节点的暂定距离
+            tentative_distance_to_neighbor = current_min_distance_node.distance_from_start + 1
+            # 如果计算的距离比节点存储的距离大则忽略
+            if tentative_distance_to_neighbor >= neighbor.distance_from_start:
+                continue
+            # 记录节点可以折返的节点
+            neighbor.came_from = current_min_distance_node
+            # 更新到达起始节点的距离
+            neighbor.distance_from_start = tentative_distance_to_neighbor
+            # 更新到达结束节点的距离(分值), 由当前节点到达起始位置的距离加上当前节点到达结束位置的距离
+            neighbor.estimated_distance_to_end = tentative_distance_to_neighbor + calculate_manhattan_distance(
+                neighbor, end_node
+            )
+            if not nodes_to_visit.contains_node(neighbor):
+                # 如果不存在于最小堆中则添加到最小堆中
+                nodes_to_visit.insert(neighbor)
+            else:
+                # 更新最小堆中的节点
+                nodes_to_visit.update(neighbor)
+
+    return reconstruct_path(end_node)
+
+
+def initialize_nodes(graph):
+    nodes = []
+
+    for i, row in enumerate(graph):
+        nodes.append([])
+        for j, value in enumerate(row):
+            nodes[i].append(Node(i, j, value))
+
+    return nodes
+
+
+def calculate_manhattan_distance(current_node, end_node):
+    current_row = current_node.row
+    current_col = current_node.col
+    end_row = end_node.row
+    end_col = end_node.col
+    # 计算两个位置的距离, 取行和列相减的绝对值
+    return abs(current_row - end_row) + abs(current_col - end_col)
+
+
+def get_neighboring_nodes(node, nodes):
+    neighbors = []
+
+    num_rows = len(nodes)
+    num_cols = len(nodes[0])
+
+    row = node.row
+    col = node.col
+
+    if row < num_rows - 1:  # DOWN
+        neighbors.append(nodes[row + 1][col])
+
+    if row > 0:  # UP
+        neighbors.append(nodes[row - 1][col])
+
+    if col < num_cols - 1:  # RIGHT
+        neighbors.append(nodes[row][col + 1])
+
+    if col > 0:  # LEFT
+        neighbors.append(nodes[row][col - 1])
+
+    return neighbors
+
+
+def reconstruct_path(end_node):
+    if not end_node.came_from:
+        return []
+
+    current_node = end_node
+    path = []
+
+    while current_node is not None:
+        path.append([current_node.row, current_node.col])
+        current_node = current_node.came_from
+
+    return path[::-1]  # reverse path so it goes from start to end
+
+
+class MinHeap:
+    def __init__(self, array):
+        # 追踪节点在最小堆中的索引位置
+        self.node_positions_in_heap = {node.id: idx for idx, node in enumerate(array)}
+        self.heap = self.build_heap(array)
+
+    def is_not_empty(self):
+        return len(self.heap)
+
+    def is_empty(self):
+        return len(self.heap) == 0
+
+    # O(n) time | O(1) space
+    def build_heap(self, array):
+        first_parent_idx = (len(array) - 2) // 2
+        for current_idx in reversed(range(first_parent_idx + 1)):
+            self.sift_down(current_idx, len(array) - 1, array)
+        return array
+
+    # O(log(n)) time | O(1) space
+    def sift_down(self, current_idx, end_idx, heap):
+        child_one_idx = current_idx * 2 + 1
+        while child_one_idx <= end_idx:
+            child_two_idx = current_idx * 2 + 2 if current_idx * 2 + 2 <= end_idx else -1
+            if (
+                    child_two_idx != -1
+                    and heap[child_two_idx].estimated_distance_to_end < heap[child_one_idx].estimated_distance_to_end
+            ):
+                idx_to_swap = child_two_idx
+            else:
+                idx_to_swap = child_one_idx
+            if heap[idx_to_swap].estimated_distance_to_end < heap[current_idx].estimated_distance_to_end:
+                self.swap(current_idx, idx_to_swap, heap)
+                current_idx = idx_to_swap
+                child_one_idx = current_idx * 2 + 1
+            else:
+                return
+
+    # O(log(n)) time | O(1) space
+    def sift_up(self, current_idx, heap):
+        parent_idx = (current_idx - 1) // 2
+        while current_idx > 0 and heap[current_idx].estimated_distance_to_end < heap[
+            parent_idx].estimated_distance_to_end:
+            self.swap(current_idx, parent_idx, heap)
+        current_idx = parent_idx
+        parent_idx = (current_idx - 1) // 2
+
+    # O(log(n)) time | O(1) space
+    def remove(self):
+        if self.is_empty():
+            return
+
+        self.swap(0, len(self.heap) - 1, self.heap)
+        node = self.heap.pop()
+        del self.node_positions_in_heap[node.id]
+        self.sift_down(0, len(self.heap) - 1, self.heap)
+        return node
+
+    # O(log(n)) time | O(1) space
+    def insert(self, node):
+        self.heap.append(node)
+        self.node_positions_in_heap[node.id] = len(self.heap) - 1
+        self.sift_up(len(self.heap) - 1, self.heap)
+
+    def swap(self, i, j, heap):
+        self.node_positions_in_heap[heap[i].id] = j
+        self.node_positions_in_heap[heap[j].id] = i
+        heap[i], heap[j] = heap[j], heap[i]
+
+    def contains_node(self, node):
+        return node.id in self.node_positions_in_heap
+
+    def update(self, node):
+        self.sift_up(self.node_positions_in_heap[node.id], self.heap)
+
+
+if __name__ == '__main__':
+    print(a_star_algorithm(0, 1, 4, 3, [
+        [0, 0, 0, 0, 0],
+        [0, 1, 1, 1, 0],
+        [0, 0, 0, 0, 0],
+        [1, 0, 1, 1, 1],
+        [0, 0, 0, 0, 0]
+    ]))
+```
+
+```cpp
+#include <iostream>
+#include <limits>
+#include <unordered_map>
+#include <vector>
+#include <cmath>
+#include <algorithm>
+#include <string>
+
+using namespace std;
+
+class Node
+{
+public:
+    string id;
+    int row;
+    int col;
+    int value;
+    int distanceFromStart;
+    int estimatedDistanceToEnd;
+    Node *cameFrom;
+
+    Node(int row, int col, int value)
+    {
+        this->id = to_string(row) + '-' + to_string(col);
+        this->row = row;
+        this->col = col;
+        this->value = value;
+        this->distanceFromStart = numeric_limits<int>::max();
+        this->estimatedDistanceToEnd = numeric_limits<int>::max();
+        this->cameFrom = nullptr;
+    }
+};
+
+class MinHeap
+{
+public:
+    vector<Node *> heap;
+    unordered_map<string, int> nodePositionsInHeap;
+
+    MinHeap(vector<Node *> array)
+    {
+        const int arraySize = array.size();
+        for (int i = 0; i < arraySize; i++)
+        {
+            auto node = array[i];
+            nodePositionsInHeap[node->id] = i;
+        }
+        heap = buildHeap(array);
+    }
+
+    // O(n) time | O(1) space
+    vector<Node *> buildHeap(vector<Node *> &array)
+    {
+        int firstParentIdx = (array.size() - 2) / 2;
+        for (int currentIdx = firstParentIdx + 1; currentIdx >= 0; currentIdx--)
+        {
+            siftDown(currentIdx, array.size() - 1, array);
+        }
+        return array;
+    }
+
+    bool isEmpty() { return heap.size() == 0; }
+
+    // O(log(n)) time | O(1) space
+    void siftDown(int currentIdx, int endIdx, vector<Node *> &array)
+    {
+        int childOneIdx = currentIdx * 2 + 1;
+        while (childOneIdx <= endIdx)
+        {
+            int childTwoIdx = currentIdx * 2 + 2 <= endIdx ? currentIdx * 2 + 2 : -1;
+            int idxToSwap;
+            if (childTwoIdx != -1 && array[childTwoIdx]->estimatedDistanceToEnd <
+                                         heap[childOneIdx]->estimatedDistanceToEnd)
+            {
+                idxToSwap = childTwoIdx;
+            }
+            else
+            {
+                idxToSwap = childOneIdx;
+            }
+            if (array[idxToSwap]->estimatedDistanceToEnd <
+                array[currentIdx]->estimatedDistanceToEnd)
+            {
+                swap(currentIdx, idxToSwap);
+                currentIdx = idxToSwap;
+                childOneIdx = currentIdx * 2 + 1;
+            }
+            else
+            {
+                return;
+            }
+        }
+    }
+
+    // O(log(n)) time | O(1) space
+    void siftUp(int currentIdx)
+    {
+        int parentIdx = (currentIdx - 1) / 2;
+        while (currentIdx > 0 && heap[currentIdx]->estimatedDistanceToEnd <
+                                     heap[parentIdx]->estimatedDistanceToEnd)
+        {
+            swap(currentIdx, parentIdx);
+            currentIdx = parentIdx;
+            parentIdx = (currentIdx - 1) / 2;
+        }
+    }
+
+    Node *remove()
+    {
+        if (isEmpty())
+        {
+            return nullptr;
+        }
+
+        swap(0, heap.size() - 1);
+        auto node = heap.back();
+        heap.pop_back();
+        nodePositionsInHeap.erase(node->id);
+        siftDown(0, heap.size() - 1, heap);
+        return node;
+    }
+
+    void insert(Node *node)
+    {
+        heap.push_back(node);
+        nodePositionsInHeap[node->id] = heap.size() - 1;
+        siftUp(heap.size() - 1);
+    }
+
+    void swap(int i, int j)
+    {
+        nodePositionsInHeap[heap[i]->id] = j;
+        nodePositionsInHeap[heap[j]->id] = i;
+        auto temp = heap[i];
+        heap[i] = heap[j];
+        heap[j] = temp;
+    }
+
+    bool containsNode(Node *node)
+    {
+        return nodePositionsInHeap.find(node->id) != nodePositionsInHeap.end();
+    }
+
+    void update(Node *node) { siftUp(nodePositionsInHeap[node->id]); }
+};
+
+vector<vector<int>> reconstructPath(Node *endNode);
+vector<Node *> getNeightboringNodes(Node *node, vector<vector<Node *>> &nodes);
+int calculateManhattanDistance(Node *currentNode, Node *endNode);
+vector<vector<Node *>> initializeNodes(vector<vector<int>> graph);
+
+// O(w * h * log(w * h)) time | O(w * h) space - where
+// w is the width of the graph and h is the height
+vector<vector<int>> aStarAlgorithm(int startRow, int startCol, int endRow,
+                                   int endCol, vector<vector<int>> graph)
+{
+    auto nodes = initializeNodes(graph);
+    auto startNode = nodes[startRow][startCol];
+    auto endNode = nodes[endRow][endCol];
+
+    startNode->distanceFromStart = 0;
+    startNode->estimatedDistanceToEnd =
+        calculateManhattanDistance(startNode, endNode);
+
+    MinHeap nodesToVisit(vector<Node *>{startNode});
+
+    while (!nodesToVisit.isEmpty())
+    {
+        auto currentMinDistanceNode = nodesToVisit.remove();
+
+        if (currentMinDistanceNode == endNode)
+        {
+            break;
+        }
+
+        auto neighbors = getNeightboringNodes(currentMinDistanceNode, nodes);
+
+        for (auto neighbor : neighbors)
+        {
+            if (neighbor->value == 1)
+            {
+                continue;
+            }
+
+            int tentativeDistanceToNeighbor =
+                currentMinDistanceNode->distanceFromStart + 1;
+
+            if (tentativeDistanceToNeighbor >= neighbor->distanceFromStart)
+            {
+                continue;
+            }
+
+            neighbor->cameFrom = currentMinDistanceNode;
+            neighbor->distanceFromStart = tentativeDistanceToNeighbor;
+            neighbor->estimatedDistanceToEnd =
+                tentativeDistanceToNeighbor +
+                calculateManhattanDistance(neighbor, endNode);
+
+            if (!nodesToVisit.containsNode(neighbor))
+            {
+                nodesToVisit.insert(neighbor);
+            }
+            else
+            {
+                nodesToVisit.update(neighbor);
+            }
+        }
+    }
+
+    return reconstructPath(endNode);
+}
+
+vector<vector<Node *>> initializeNodes(vector<vector<int>> graph)
+{
+    vector<vector<Node *>> nodes;
+    const int graphSize = graph.size();
+    for (int i = 0; i < graphSize; i++)
+    {
+        nodes.push_back(vector<Node *>{});
+        const int graphISize = graph[i].size();
+        for (int j = 0; j < graphISize; j++)
+        {
+            nodes[i].push_back(new Node(i, j, graph[i][j]));
+        }
+    }
+
+    return nodes;
+}
+
+int calculateManhattanDistance(Node *currentNode, Node *endNode)
+{
+    int currentRow = currentNode->row;
+    int currentCol = currentNode->col;
+    int endRow = endNode->row;
+    int endCol = endNode->col;
+
+    return abs(currentRow - endRow) + abs(currentCol - endCol);
+}
+
+vector<Node *> getNeightboringNodes(Node *node, vector<vector<Node *>> &nodes)
+{
+    vector<Node *> neighbors;
+
+    int numRows = nodes.size();
+    int numCols = nodes[0].size();
+
+    int row = node->row;
+    int col = node->col;
+
+    if (row < numRows - 1)
+    { // DOWN
+        neighbors.push_back(nodes[row + 1][col]);
+    }
+
+    if (row > 0)
+    { // UP
+        neighbors.push_back(nodes[row - 1][col]);
+    }
+
+    if (col < numCols - 1)
+    { // RIGHT
+        neighbors.push_back(nodes[row][col + 1]);
+    }
+
+    if (col > 0)
+    { // LEFT
+        neighbors.push_back(nodes[row][col - 1]);
+    }
+
+    return neighbors;
+}
+
+vector<vector<int>> reconstructPath(Node *endNode)
+{
+    if (endNode->cameFrom == nullptr)
+    {
+        return vector<vector<int>>{};
+    }
+
+    Node *currentNode = endNode;
+    vector<vector<int>> path;
+
+    while (currentNode != nullptr)
+    {
+        path.push_back(vector<int>{currentNode->row, currentNode->col});
+        currentNode = currentNode->cameFrom;
+    }
+
+    reverse(path.begin(), path.end());
+    return path;
+}
+
+void iteration(vector<vector<int>> arrays)
+{
+    for (vector<int> array : arrays)
+    {
+        cout << "[ " << array[0] << ", " << array[1] << " ]" << endl;
+    }
+    cout << endl;
+}
+
+int main()
+{
+    iteration(aStarAlgorithm(0, 1, 4, 3, {{0, 0, 0, 0, 0}, {0, 1, 1, 1, 0}, {0, 0, 0, 0, 0}, {1, 0, 1, 1, 1}, {0, 0, 0, 0, 0}}));
+    return 0;
+}
+```
+
+Last Modified 2022-06-20

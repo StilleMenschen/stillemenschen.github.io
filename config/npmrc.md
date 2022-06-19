@@ -11,4 +11,12 @@ cache=/opt/nodejs/cache
 registry=https://registry.npm.taobao.org/
 ```
 
-Last Modified 2021-04-12
+yarn 的配置命令
+
+```
+yarn config set prefix "D:\software\Yarn\Data"
+yarn config set global-folder "D:\software\Yarn\Data\global"
+yarn config set cache-folder "D:\software\Yarn\Cache"
+```
+
+Last Modified 2022-06-20
