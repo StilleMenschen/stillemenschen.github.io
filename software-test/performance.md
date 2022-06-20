@@ -67,4 +67,25 @@
 5.2 问题总结
 ```
 
-Last Modified 2022-02-14
+## Jmeter 插件
+
+- jpgc - Standard Set
+  - jpgc-dummy
+  - jpgc-fifo
+  - jpgc-graphs-basic 可以绘制每秒事务和响应延迟图表
+  - jpgc-perfmon
+  - jpgc-tst
+  - jpgc-functions
+  - jpgc-casutg 可以自定义梯度加压的线程组
+  - jpgc-ffw
+- 5 Additional Graphs
+  - jmeter-plugins-graphs-additional
+- plugins-manager.jar
+
+## Prometheus 监控
+
+- node_exporter 服务器基础监控
+- jmx_exporter Java 虚拟机监控
+- mysqld_exporter MySQL 数据库监控
+
+Last Modified 2022-06-20
