@@ -2937,4 +2937,85 @@ int main()
 }
 ```
 
-Last Modified 2022-04-09
+## 相邻最长连续数字一
+
+给定一个数组，数组中只包含有数组`0`和`1`，找出其中一个位置将`0`替换为`1`后可以获得最大长度的连续数字`1`
+
+```python
+# O(n) time | O(1) space - where n is the length of the input array
+def longest_streak_of_adjacent_ones(array):
+    # 记录最长的连续数字 1
+    longest_streak_length = 0
+    # 记录连续数字 1 需要替换 0 为 1 的索引
+    longest_streak_replaced_zero_idx = -1
+    # 记录当前的长度
+    current_streak_length = 0
+    # 记录当前的替换位置
+    replaced_zero_idx = -1
+
+    for idx in range(len(array)):
+        # 如果当前值为 1 则累加记录长度
+        if array[idx] == 1:
+            current_streak_length += 1
+        # 如果当前值为 0 则计算当前索引到前一次替换 0 之间的数字 1 数量
+        else:
+            current_streak_length = idx - replaced_zero_idx
+            # 记录新的替换位置
+            replaced_zero_idx = idx
+        # 根据长度和替换位置更新当前已记录的最长长度和替换位置
+        if current_streak_length > longest_streak_length:
+            longest_streak_length = current_streak_length
+            longest_streak_replaced_zero_idx = replaced_zero_idx
+
+    return longest_streak_replaced_zero_idx
+
+
+if __name__ == '__main__':
+    source = [0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1]
+    print(longest_streak_of_adjacent_ones(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// O(n) time | O(1) space - where n is the length of the input array
+int longestStreakOfAdjacentOnes(vector<int> array)
+{
+    auto longestStreakLength = 0;
+    auto longestStreakReplacedZeroIdx = -1;
+
+    auto currentStreakLength = 0;
+    auto replacedZeroIdx = -1;
+    const int arraySize = array.size();
+    for (auto i = 0; i < arraySize; i++)
+    {
+        if (array[i] == 1)
+        {
+            currentStreakLength++;
+        }
+        else
+        {
+            currentStreakLength = i - replacedZeroIdx;
+            replacedZeroIdx = i;
+        }
+
+        if (currentStreakLength > longestStreakLength)
+        {
+            longestStreakLength = currentStreakLength;
+            longestStreakReplacedZeroIdx = replacedZeroIdx;
+        }
+    }
+
+    return longestStreakReplacedZeroIdx;
+}
+
+int main()
+{
+    cout << longestStreakOfAdjacentOnes({0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1});
+    return 0;
+}
+```
+
+Last Modified 2022-06-22
