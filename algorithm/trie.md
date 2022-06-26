@@ -566,4 +566,163 @@ int main()
 }
 ```
 
-Last Modified 2022-04-03
+## 特殊字符串
+
+给出一个字符串数组，找出数组中满足条件为该字符串完全由数组中的其它字符串拼接而成
+
+```python
+# Average case: when there aren't too many strings with
+# identical prefixes that are found in another string
+# O(n * m) time | O(n * m) space - where n is the number
+# of strings and m is the length of the longest string
+def special_strings(strings):
+    # 创建一个字典树
+    trie = Trie()
+    # 将所有字符串添加到字典树中
+    for string in strings:
+        trie.insert(string)
+    # 逐个判断字符串是否由其它字符串组成, 符合判断条件则返回, 初始的匹配计数值为 0
+    return list(filter(lambda string_element: is_special(string_element, trie.root, 0, 0, trie), strings))
+
+
+def is_special(string, trie_node, idx, count, trie):
+    char = string[idx]
+    # 如果字符不包含在字典树中则返回否
+    if char not in trie_node:
+        return False
+    # 判断是否已经到达字符串的最后一个字符
+    at_end_of_string = idx == len(string) - 1
+    if at_end_of_string:
+        # 匹配字符串的计数大于 1 且在字典树中, 说明这个字符串是由其它字符串拼接组成的
+        return trie.end_symbol in trie_node[char] and count + 1 >= 2
+    # 如果达到了字典树的枝干末端
+    if trie.end_symbol in trie_node[char]:
+        # 重新从字典树的父节点开始匹配剩下未匹配的字符串, 并累加一个匹配成功的计数
+        rest_is_special = is_special(string, trie.root, idx + 1, count + 1, trie)
+        # 如果剩下的字符串也包含在字典树中, 则认为这个字符串是由其它字符串拼接组成的
+        if rest_is_special:
+            return True
+
+    return is_special(string, trie_node[char], idx + 1, count, trie)
+
+
+class Trie:
+    def __init__(self):
+        self.root = {}
+        self.end_symbol = "*"
+
+    def insert(self, string):
+        current_trie_node = self.root
+        for i in range(len(string)):
+            if string[i] not in current_trie_node:
+                current_trie_node[string[i]] = {}
+            current_trie_node = current_trie_node[string[i]]
+        current_trie_node[self.end_symbol] = string
+
+
+if __name__ == '__main__':
+    print(special_strings(["foobarbaz", "foo", "bar", "foobarfoo", "baz", "foobaz", "foofoofoo", "foobazar"]))
+```
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <vector>
+#include <string>
+using namespace std;
+
+class TrieNode
+{
+public:
+    unordered_map<char, TrieNode *> children;
+};
+
+class Trie
+{
+public:
+    TrieNode *root = new TrieNode();
+    char endSymbol = '*';
+
+    void insert(string string)
+    {
+        TrieNode *node = this->root;
+        const int stringLength = string.length();
+        for (int i = 0; i < stringLength; i++)
+        {
+            if (node->children.find(string[i]) == node->children.end())
+            {
+                TrieNode *newNode = new TrieNode();
+                node->children.insert({string[i], newNode});
+            }
+            node = node->children[string[i]];
+        }
+        node->children.insert({this->endSymbol, nullptr});
+    }
+};
+
+bool isSpecial(string string, TrieNode *trieNode, int idx, int count,
+               Trie *trie);
+
+// Average case: when there aren't too many strings with
+// identical prefixes that are found in another string
+// O(n * m) time | O(n * m) space - where n is the number
+// of strings and m is the length of the longest string
+vector<string> specialStrings(vector<string> strings)
+{
+    auto trie = new Trie();
+    for (auto string : strings)
+    {
+        trie->insert(string);
+    }
+    vector<string> result = {};
+    for (auto string : strings)
+    {
+        if (isSpecial(string, trie->root, 0, 0, trie))
+            result.push_back(string);
+    }
+    return result;
+}
+
+bool isSpecial(string string, TrieNode *trieNode, int idx, int count,
+               Trie *trie)
+{
+    auto c = string[idx];
+    if (trieNode->children.find(c) == trieNode->children.end())
+        return false;
+
+    auto nextTrieNode = trieNode->children[c];
+
+    auto atEndOfString = idx == string.length() - 1;
+    if (atEndOfString)
+        return nextTrieNode->children.find(trie->endSymbol) !=
+                   nextTrieNode->children.end() &&
+               count + 1 >= 2;
+
+    if (nextTrieNode->children.find(trie->endSymbol) !=
+        nextTrieNode->children.end())
+    {
+        auto restIsSpecial =
+            isSpecial(string, trie->root, idx + 1, count + 1, trie);
+        if (restIsSpecial)
+            return true;
+    }
+
+    return isSpecial(string, nextTrieNode, idx + 1, count, trie);
+}
+
+void iteration(vector<string> arrays)
+{
+    for (string element : arrays)
+    {
+        cout << element << " ";
+    }
+}
+
+int main()
+{
+    iteration(specialStrings({"foobarbaz", "foo", "bar", "foobarfoo", "baz", "foobaz", "foofoofoo", "foobazar"}));
+    return 0;
+}
+```
+
+Last Modified 2022-06-26
