@@ -76,6 +76,8 @@ make altinstall
 
 > 默认安装的`Python`是在`/usr/local/bin`目录下的，为了和服务器本身存在的`Python 2`区分开，执行程序一般是程序名加版本号，如`python3.10`
 
+> 如果安装过程中有报错可以先删掉`Makefile`，执行`make clean`
+
 ## 尝试安装框架
 
 ```bash
