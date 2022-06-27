@@ -69,7 +69,7 @@ OPENSSL=/usr/local/lib/openssl
 然后生成`Makefile`并安装
 
 ```bash
-./configure --with-openssl=/usr/bin/openssl
+./configure --prefix=/usr/local/lib/python3.10 --with-openssl=/usr/local/lib/openssl
 make
 make altinstall
 ```
