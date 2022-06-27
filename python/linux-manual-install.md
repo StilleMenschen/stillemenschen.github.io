@@ -74,9 +74,9 @@ make
 make altinstall
 ```
 
-> 默认安装的`Python`是在`/usr/local/bin`目录下的，为了和服务器本身存在的`Python 2`区分开，执行程序一般是程序名加版本号，如`python3.10`
-
-> 如果安装过程中有报错可以先删掉`Makefile`，执行`make clean`
+> 上面的配置没有使用到优化，官方文档里面是建议用`--enable-optimizations --with-lto`（PGO + LTO）配置 Python，以便实现最佳性能。<br>
+> 默认安装的`Python`是在`/usr/local/bin`目录下的，为了和服务器本身存在的`Python 2`区分开，执行程序一般是程序名加版本号，如`python3.10`。<br>
+> 如果安装过程中有报错可以先删掉`Makefile`，执行`make clean`或者`make distclean`，然后重新配置和安装。
 
 ## 尝试安装框架
 
@@ -103,5 +103,12 @@ np_array
 np_array[:, 1]
 np_array.transpose()
 ```
+
+## 关于卸载
+
+如果没有在配置时指定`--prefix`，可以重新使用`configure`配置一次，然后重新配置指定路径并安装，再到路径中查看类似创建和移动文件或文件夹的命令访问的操作，
+参考删除文件和文件夹
+
+或者可以执行一次安装的预览，如使用`make -n altinstall`预览安装过程会执行哪些操作，但不会实际进行安装，具体可参考`make --help`
 
 Last Modified 2021-06-27
