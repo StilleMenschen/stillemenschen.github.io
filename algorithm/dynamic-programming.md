@@ -3159,4 +3159,104 @@ int main()
 }
 ```
 
-Last Modified 2022-06-07
+## 全局匹配
+
+在操作系统的命令行中，可以使用通配符来匹配文件或文件夹路径，最简单的是`*`和`?`这两个符号，`*`表示匹配任意数量的任意字符，而`?`表示匹配任意单个字符
+
+```python
+# O(n * m) time | O(n * m) space - where n is the length
+# of the file_name and m is the length of the pattern.
+def glob_matching(file_name, pattern):
+    match_table = initialize_match_table(file_name, pattern)
+    for i in range(1, len(file_name) + 1):
+        for j in range(1, len(pattern) + 1):
+            # 星号与任意数量字符匹配
+            if pattern[j - 1] == "*":
+                # 取前一次循环的匹配结果或者前一个字符的匹配结果
+                match_table[i][j] = match_table[i][j - 1] or match_table[i - 1][j]
+            # 问号与任意单个字符匹配, 如果不是问号则直接判断模板与字符串的字符是否相等
+            elif pattern[j - 1] == "?" or pattern[j - 1] == file_name[i - 1]:
+                match_table[i][j] = match_table[i - 1][j - 1]
+    return match_table[-1][-1]
+
+
+def initialize_match_table(file_name, pattern):
+    match_table = [[False for _ in range(len(pattern) + 1)] for _ in range(len(file_name) + 1)]
+
+    match_table[0][0] = True
+    for j in range(1, len(pattern) + 1):
+        # 星号与任意数量字符匹配, 初始第一行如果遇到星号则表示匹配
+        if pattern[j - 1] == "*":
+            match_table[0][j] = match_table[0][j - 1]
+
+    return match_table
+
+
+if __name__ == '__main__':
+    print(glob_matching('abcdef', 'a*d?f'))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+vector<vector<bool>> initializeMatchTable(string fileName, string pattern);
+// O(n * m) time | O(n * m) space - where n is the length
+// of the fileName and m is the length of the pattern.
+bool globMatching(string fileName, string pattern)
+{
+    auto matchTable = initializeMatchTable(fileName, pattern);
+    const int fileNameLength = fileName.length();
+    const int patternLength = pattern.length();
+    for (auto i = 1; i <= fileNameLength; i++)
+    {
+        for (auto j = 1; j <= patternLength; j++)
+        {
+            if (pattern[j - 1] == '*')
+            {
+                matchTable[i][j] = matchTable[i][j - 1] || matchTable[i - 1][j];
+            }
+            else if (pattern[j - 1] == '?' || pattern[j - 1] == fileName[i - 1])
+            {
+                matchTable[i][j] = matchTable[i - 1][j - 1];
+            }
+        }
+    }
+    return matchTable[fileNameLength][patternLength];
+}
+
+vector<vector<bool>> initializeMatchTable(string fileName, string pattern)
+{
+    vector<vector<bool>> matchTable = {};
+    const int fileNameLength = fileName.length();
+    const int patternLength = pattern.length();
+    for (auto i = 0; i <= fileNameLength; i++)
+    {
+        vector<bool> row = {};
+        for (auto j = 0; j <= patternLength; j++)
+        {
+            row.push_back(false);
+        }
+        matchTable.push_back(row);
+    }
+
+    matchTable[0][0] = true;
+    for (auto j = 1; j <= patternLength; j++)
+    {
+        if (pattern[j - 1] == '*')
+            matchTable[0][j] = matchTable[0][j - 1];
+    }
+
+    return matchTable;
+}
+
+int main()
+{
+    cout << globMatching("abcdef", "*d?f");
+    return 0;
+}
+```
+
+Last Modified 2022-06-28
