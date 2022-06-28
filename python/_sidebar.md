@@ -12,4 +12,5 @@
   - [cProfile](python/cprofile.md)
   - [Special Methods](python/object-special-methods.md)
   - [Sequence](python/sequence.md)
+  - [Dictionaries & Collections](python/dictionaries-and-collections.md)
   - [Linux Manual Install](python/linux-manual-install.md)
