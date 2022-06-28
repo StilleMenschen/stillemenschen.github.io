@@ -1,5 +1,7 @@
 # 序列
 
+## 命名元组
+
 ```python
 from collections import namedtuple
 
@@ -20,6 +22,8 @@ for metro in metro_areas:
     print(c)
     print(c._asdict())
 ```
+
+## 切片
 
 ```python
 invoice = """
@@ -51,6 +55,8 @@ print(numbers)
 numbers[2:5] = [100]
 print(numbers)
 ```
+
+## 加乘运算
 
 ```python
 numbers = [1, 2, 3]
@@ -87,6 +93,8 @@ finally:
 
 > 不要将可变对象放在元组中；增量赋值操作不是一个原子操作
 
+## 保持顺序添加
+
 ```python
 import bisect
 import random
@@ -108,6 +116,8 @@ for _ in range(SIZE):
     bisect.insort(arr, value)
     print(f'{value:2d} -> {arr}')
 ```
+
+## 数值数组
 
 ```python
 import os
@@ -146,6 +156,8 @@ print(np_array)
 print(np_array[:, 1])
 print(np_array.transpose())
 ```
+
+## 双向队列
 
 ```python
 from collections import deque
