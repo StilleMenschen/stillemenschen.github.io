@@ -2336,4 +2336,238 @@ int main()
 }
 ```
 
-Last Modified 2022-06-05
+## 倒转二等分节点
+
+给定一个链表，将链表的前一半和后一半反转（如果链表的长度为奇数则中间位置的节点保留原始的位置不变化）
+
+```python
+# This is the class of the input Linked List.
+class LinkedList:
+    def __init__(self, value):
+        self.value = value
+        self.next = None
+
+
+# O(n) time | O(1) space - where n is the number of nodes in the Linked List
+def inverted_bisection(head):
+    # 测量链表的长度
+    length = get_linked_list_length(head)
+    # 节点数量小于等于 3 的链表不需要处理
+    if length <= 3:
+        return head
+    # 通过链表长度获得链表中间位置的节点
+    first_half_tail = get_middle_node(head, length)
+    # 中间位置的节点
+    middle_node = None
+    # 中间位置后一个节点
+    second_half_head = None
+    # 如果链表长度为偶数择只设置中间位置的下一个节点
+    if length % 2 == 0:
+        second_half_head = first_half_tail.next
+    # 如果链表长度为奇数择则设置中间位置和其下一个节点
+    else:
+        middle_node = first_half_tail.next
+        second_half_head = first_half_tail.next.next
+    # 让链表从中间位置断开连接
+    first_half_tail.next = None
+    # 反转前半部分链表
+    reverse_linked_list(head)
+    # 反转后半部分链表
+    reversed_second_half_head = reverse_linked_list(second_half_head)
+    # 根据上面的逻辑将链表拼接起来
+    # 如果中间位置节点非空(链表长度为偶数)
+    if middle_node is None:
+        # 将前半部分和后半部分的链表链接起来, 这里的 head 节点因为已经被反转
+        # 其实已经为末尾的节点
+        head.next = reversed_second_half_head
+    # 如果中间位置节点为空(链表长度为奇数)
+    else:
+        # 前半部分链表链接上中间位置的节点
+        head.next = middle_node
+        # 中间位置的节点链接上后半部分的链表
+        middle_node.next = reversed_second_half_head
+
+    return first_half_tail
+
+
+def get_linked_list_length(head):
+    length = 0
+    current_node = head
+    while current_node is not None:
+        current_node = current_node.next
+        length += 1
+    return length
+
+
+def get_middle_node(head, length):
+    # 中间位置, 如果是奇数则向下取整
+    half_length = length // 2
+    current_position = 1
+    current_node = head
+    while current_position != half_length:
+        current_node = current_node.next
+        current_position += 1
+    return current_node
+
+
+def reverse_linked_list(head):
+    previous_node, current_node = None, head
+    while current_node is not None:
+        next_node = current_node.next
+        current_node.next = previous_node
+        previous_node = current_node
+        current_node = next_node
+    return previous_node
+
+
+def initialize_linked_list(array):
+    head = LinkedList(array[0])
+    node = head
+    for idx in range(1, len(array)):
+        node.next = LinkedList(array[idx])
+        node = node.next
+    return head
+
+
+def iter_linked_list(ll):
+    while ll is not None:
+        print(ll.value, end=' ')
+        ll = ll.next
+    print()
+
+
+if __name__ == '__main__':
+    source = initialize_linked_list(list(range(9)))
+    iter_linked_list(inverted_bisection(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class LinkedList
+{
+public:
+    int value;
+    LinkedList *next;
+
+    LinkedList(int value)
+    {
+        this->value = value;
+        this->next = nullptr;
+    }
+};
+
+int getLinkedListLength(LinkedList *head);
+LinkedList *getMiddleNode(LinkedList *head, int length);
+LinkedList *reverseLinkedList(LinkedList *head);
+
+// O(n) time | O(1) space - where n is the number of nodes in the Linked List
+LinkedList *invertedBisection(LinkedList *head)
+{
+    int length = getLinkedListLength(head);
+    if (length <= 3)
+        return head;
+
+    LinkedList *firstHalfTail = getMiddleNode(head, length);
+    LinkedList *middleNode = nullptr;
+    LinkedList *secondHalfHead = nullptr;
+    if (length % 2 == 0)
+    {
+        secondHalfHead = firstHalfTail->next;
+    }
+    else
+    {
+        middleNode = firstHalfTail->next;
+        secondHalfHead = firstHalfTail->next->next;
+    }
+
+    firstHalfTail->next = nullptr;
+    reverseLinkedList(head);
+    LinkedList *reversedSecondHalfHead = reverseLinkedList(secondHalfHead);
+
+    if (middleNode == nullptr)
+    {
+        head->next = reversedSecondHalfHead;
+    }
+    else
+    {
+        head->next = middleNode;
+        middleNode->next = reversedSecondHalfHead;
+    }
+
+    return firstHalfTail;
+}
+
+int getLinkedListLength(LinkedList *head)
+{
+    int length = 0;
+    LinkedList *currentNode = head;
+    while (currentNode != nullptr)
+    {
+        currentNode = currentNode->next;
+        length++;
+    }
+    return length;
+}
+
+LinkedList *getMiddleNode(LinkedList *head, int length)
+{
+    int halfLength = length / 2;
+    int currentPosition = 1;
+    LinkedList *currentNode = head;
+    while (currentPosition != halfLength)
+    {
+        currentNode = currentNode->next;
+        currentPosition++;
+    }
+    return currentNode;
+}
+
+LinkedList *reverseLinkedList(LinkedList *head)
+{
+    LinkedList *previousNode = nullptr;
+    LinkedList *currentNode = head;
+    while (currentNode != nullptr)
+    {
+        LinkedList *nextNode = currentNode->next;
+        currentNode->next = previousNode;
+        previousNode = currentNode;
+        currentNode = nextNode;
+    }
+    return previousNode;
+}
+
+LinkedList *initializeLinkedList(vector<int> array)
+{
+    LinkedList *head = new LinkedList(array[0]);
+    LinkedList *node = head;
+    int idx = 1, size = array.size();
+    for (; idx < size; idx++)
+    {
+        node->next = new LinkedList(array[idx]);
+        node = node->next;
+    }
+    return head;
+}
+
+void iterLinkedList(LinkedList *head)
+{
+    while (head != nullptr)
+    {
+        cout << head->value << " ";
+        head = head->next;
+    }
+    cout << endl;
+}
+
+int main()
+{
+    LinkedList *source = initializeLinkedList({0, 1, 2, 3, 4, 5});
+    iterLinkedList(invertedBisection(source));
+    return 0;
+}
+```
+
+Last Modified 2022-06-28
