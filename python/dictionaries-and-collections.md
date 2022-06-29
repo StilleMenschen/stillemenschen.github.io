@@ -1,5 +1,7 @@
 # 字典与集合
 
+## 字典的默认值
+
 ```python
 import sys
 import re
@@ -46,4 +48,28 @@ print(1 in d)
 print(d[True])
 ```
 
-Last Modified 2022-06-28
+## 集
+
+```python
+from unicodedata import name
+
+a = set(range(10))
+b = set(range(5, 15))
+
+# 并集
+print(a | b)
+# 交集
+print(a & b)
+# 差集
+print(a - b)
+print(b - a)
+# 异或
+print(a ^ b)
+
+latin_1 = {chr(i) for i in range(32, 256) if 'SIGN' in name(chr(i), '')}
+print(latin_1)
+
+print(latin_1.union(a, b))
+```
+
+Last Modified 2022-06-29
