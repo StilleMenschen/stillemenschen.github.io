@@ -4272,4 +4272,222 @@ int main()
 }
 ```
 
-Last Modified 2022-06-20
+## 六度分离的人数
+
+给出一组人际关系列表，列表中每个人都有认识的人，这些认识的人也可能在列表之中，将每个人的关系连接起来可以形成一个图；给出两个人的名称，
+计算出两个人的人际关系分离度（即一个人要通过`N`个朋友的关系才能认识到另一个人，那么`N`可以称为分离度，具体可以查查资料说明，此概念来自于一项研究），
+返回两个人中大于六度分离数量较小的一个人（通过更少的人际关系可以认识更多人的），如果大于六度分离数量是一致的则返回空字符串
+
+```python
+# O(v + e) time | O(v) space - where v is the number of vertices (people) in the
+# friends graph and e is the number of edges (total friends) in the friends graph
+def degrees_of_separation(friends_lists, person_one, person_two):
+    # 分别计算两个人的对于其它所有人的分离度
+    degrees_one = get_degrees_of_separation(friends_lists, person_one)
+    degrees_two = get_degrees_of_separation(friends_lists, person_two)
+    # 然后根据两个人的分离度分析大于六度分离的人数
+    num_degrees_over_six_one = get_num_degrees_over_six(friends_lists, degrees_one)
+    num_degrees_over_six_two = get_num_degrees_over_six(friends_lists, degrees_two)
+    # 由于是要求找出大于六度分离的人数较少的人, 如果两人的数值一致则都不符合条件
+    if num_degrees_over_six_one == num_degrees_over_six_two:
+        return ""
+    # 如果人数不一样则返回六度分离人数较小的人名称
+    return person_one if num_degrees_over_six_one < num_degrees_over_six_two else person_two
+
+
+def get_degrees_of_separation(friends_lists, origin):
+    # 分离度
+    degrees = {}
+    # 记录节点是否已经访问
+    visited = {}
+    # 从输入参数指定的人开始, 分离度初始值为 0, 作为队列的初始值
+    queue = [{"person": origin, "degree": 0}]
+    # 循环队列内的所有好友, 图的深度遍历
+    while len(queue) > 0:
+        person_info = queue.pop(0)
+        person, degree = person_info["person"], person_info["degree"]
+        # 记录已经访问的人的分离度
+        degrees[person] = degree
+        # 遍历这个人的所有好友
+        for friend in friends_lists[person]:
+            # 忽略已经访问过的人
+            if friend in visited:
+                continue
+            # 标记为已经访问
+            visited[friend] = True
+            # 添加到队列中, 累加分离度
+            queue.append({"person": friend, "degree": degree + 1})
+    for person in friends_lists:
+        # 将所有未被访问到的人分离度标记为无穷大
+        # 后面需要判断六度分离, 无穷大的值可保证符合判断条件
+        if person not in visited:
+            degrees[person] = float("inf")
+    return degrees
+
+
+def get_num_degrees_over_six(friends_lists, degrees):
+    num_degrees_over_six = 0
+    for person in friends_lists:
+        # 统计当前指定的人与其它所有人超过六度分离的数量
+        if degrees[person] > 6:
+            num_degrees_over_six += 1
+    return num_degrees_over_six
+
+
+if __name__ == '__main__':
+    source = {
+        "Aaron": ["Paul"],
+        "Akshay": [],
+        "Alex": ["Antoine", "Clement", "Ryan", "Simon"],
+        "Antoine": ["Alex", "Clement", "Simon"],
+        "Ayushi": ["Lee"],
+        "Changpeng": ["Kelly", "Sandeep"],
+        "Clement": ["Alex", "Antoine", "Sandeep", "Simon"],
+        "Hannah": ["Lexi", "Paul", "Sandeep"],
+        "James": ["Paul"],
+        "Kelly": ["Changpeng", "Molly"],
+        "Lee": ["Ayushi", "Molly"],
+        "Lexi": ["Hannah"],
+        "Molly": ["Kelly", "Lee"],
+        "Paul": ["Aaron", "James", "Hannah"],
+        "Ryan": ["Alex"],
+        "Sandeep": ["Changpeng", "Clement", "Hannah"],
+        "Simon": ["Alex", "Antoine", "Clement"],
+        "aaron": ["Paul"],
+        "akshay": [],
+        "alex": ["Antoine", "Clement", "Ryan", "Simon"],
+        "antoine": ["Alex", "Clement", "Simon"],
+        "ayushi": ["Lee"],
+        "changpeng": ["Kelly", "Sandeep"],
+        "clement": ["Alex", "Antoine", "Sandeep", "Simon"],
+        "hannah": ["Lexi", "Paul", "Sandeep"],
+        "james": ["Paul"],
+        "kelly": ["Changpeng", "Molly"],
+        "lee": ["Ayushi", "Molly"],
+        "lexi": ["Hannah"],
+        "molly": ["Kelly", "Lee"],
+        "paul": ["Aaron", "James", "Hannah"],
+        "ryan": ["Alex"],
+        "sandeep": ["Changpeng", "Clement", "Hannah"],
+        "simon": ["Alex", "Antoine", "Clement"]
+    }
+    print(degrees_of_separation(source, "Clement", "Antoine"))
+```
+
+```cpp
+#include <iostream>
+#include <unordered_map>
+#include <deque>
+#include <vector>
+using namespace std;
+
+struct PersonInfo
+{
+  string person;
+  int degree;
+};
+
+unordered_map<string, int>
+getDegreesOfSeparation(unordered_map<string, vector<string>> friendsLists,
+                       string origin);
+int getNumDegreesOverSix(unordered_map<string, vector<string>> friendsList,
+                         unordered_map<string, int> degrees);
+
+// O(v + e) time | O(v) space - where v is the number of vertices (people) in
+// the friends graph and e is the number of edges (total friends) in the friends
+// graph
+string degreesOfSeparation(unordered_map<string, vector<string>> friendsLists,
+                           string personOne, string personTwo)
+{
+  auto degreesOne = getDegreesOfSeparation(friendsLists, personOne);
+  auto degreesTwo = getDegreesOfSeparation(friendsLists, personTwo);
+  auto numDegreesOverSixOne = getNumDegreesOverSix(friendsLists, degreesOne);
+  auto numDegreesOverSixTwo = getNumDegreesOverSix(friendsLists, degreesTwo);
+  if (numDegreesOverSixOne == numDegreesOverSixTwo)
+    return "";
+  return numDegreesOverSixOne < numDegreesOverSixTwo ? personOne : personTwo;
+}
+
+unordered_map<string, int>
+getDegreesOfSeparation(unordered_map<string, vector<string>> friendsLists,
+                       string origin)
+{
+  unordered_map<string, int> degrees = {};
+  unordered_map<string, bool> visited = {};
+  deque<PersonInfo> queue = {PersonInfo{origin, 0}};
+  while (queue.size() > 0)
+  {
+    auto info = queue[0];
+    queue.pop_front();
+    degrees[info.person] = info.degree;
+    for (auto friendItem : friendsLists[info.person])
+    {
+      if (visited.find(friendItem) != visited.end())
+        continue;
+      visited[friendItem] = true;
+      queue.push_back(PersonInfo{friendItem, info.degree + 1});
+    }
+  }
+  for (auto pair : friendsLists)
+  {
+    if (visited.find(pair.first) == visited.end())
+      degrees[pair.first] = INT_MAX;
+  }
+  return degrees;
+}
+
+int getNumDegreesOverSix(unordered_map<string, vector<string>> friendsLists,
+                         unordered_map<string, int> degrees)
+{
+  auto numDegreesOverSix = 0;
+  for (auto pair : friendsLists)
+  {
+    if (degrees[pair.first] > 6)
+      numDegreesOverSix++;
+  }
+  return numDegreesOverSix;
+}
+
+int main()
+{
+  unordered_map<string, vector<string>> source = {
+      {"Aaron", {"Paul"}},
+      {"Akshay", {}},
+      {"Alex", {"Antoine", "Clement", "Ryan", "Simon"}},
+      {"Antoine", {"Alex", "Clement", "Simon"}},
+      {"Ayushi", {"Lee"}},
+      {"Changpeng", {"Kelly", "Sandeep"}},
+      {"Clement", {"Alex", "Antoine", "Sandeep", "Simon"}},
+      {"Hannah", {"Lexi", "Paul", "Sandeep"}},
+      {"James", {"Paul"}},
+      {"Kelly", {"Changpeng", "Molly"}},
+      {"Lee", {"Ayushi", "Molly"}},
+      {"Lexi", {"Hannah"}},
+      {"Molly", {"Kelly", "Lee"}},
+      {"Paul", {"Aaron", "James", "Hannah"}},
+      {"Ryan", {"Alex"}},
+      {"Sandeep", {"Changpeng", "Clement", "Hannah"}},
+      {"Simon", {"Alex", "Antoine", "Clement"}},
+      {"aaron", {"Paul"}},
+      {"akshay", {}},
+      {"alex", {"Antoine", "Clement", "Ryan", "Simon"}},
+      {"antoine", {"Alex", "Clement", "Simon"}},
+      {"ayushi", {"Lee"}},
+      {"changpeng", {"Kelly", "Sandeep"}},
+      {"clement", {"Alex", "Antoine", "Sandeep", "Simon"}},
+      {"hannah", {"Lexi", "Paul", "Sandeep"}},
+      {"james", {"Paul"}},
+      {"kelly", {"Changpeng", "Molly"}},
+      {"lee", {"Ayushi", "Molly"}},
+      {"lexi", {"Hannah"}},
+      {"molly", {"Kelly", "Lee"}},
+      {"paul", {"Aaron", "James", "Hannah"}},
+      {"ryan", {"Alex"}},
+      {"sandeep", {"Changpeng", "Clement", "Hannah"}},
+      {"simon", {"Alex", "Antoine", "C}ement"}}};
+  cout << degreesOfSeparation(source, "Clement", "Antoine");
+  return 0;
+}
+```
+
+Last Modified 2022-06-29
