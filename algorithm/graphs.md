@@ -4383,12 +4383,12 @@ using namespace std;
 
 struct PersonInfo
 {
-  string person;
-  int degree;
+    string person;
+    int degree;
 };
 
 unordered_map<string, int> getDegreesOfSeparation(unordered_map<string, vector<string>> friendsLists,
-                       string origin);
+                                                  string origin);
 int getNumDegreesOverSix(unordered_map<string, vector<string>> friendsList,
                          unordered_map<string, int> degrees);
 
@@ -4398,94 +4398,94 @@ int getNumDegreesOverSix(unordered_map<string, vector<string>> friendsList,
 string degreesOfSeparation(unordered_map<string, vector<string>> friendsLists,
                            string personOne, string personTwo)
 {
-  auto degreesOne = getDegreesOfSeparation(friendsLists, personOne);
-  auto degreesTwo = getDegreesOfSeparation(friendsLists, personTwo);
-  auto numDegreesOverSixOne = getNumDegreesOverSix(friendsLists, degreesOne);
-  auto numDegreesOverSixTwo = getNumDegreesOverSix(friendsLists, degreesTwo);
-  if (numDegreesOverSixOne == numDegreesOverSixTwo)
-    return "";
-  return numDegreesOverSixOne < numDegreesOverSixTwo ? personOne : personTwo;
+    auto degreesOne = getDegreesOfSeparation(friendsLists, personOne);
+    auto degreesTwo = getDegreesOfSeparation(friendsLists, personTwo);
+    auto numDegreesOverSixOne = getNumDegreesOverSix(friendsLists, degreesOne);
+    auto numDegreesOverSixTwo = getNumDegreesOverSix(friendsLists, degreesTwo);
+    if (numDegreesOverSixOne == numDegreesOverSixTwo)
+        return "";
+    return numDegreesOverSixOne < numDegreesOverSixTwo ? personOne : personTwo;
 }
 
 unordered_map<string, int> getDegreesOfSeparation(unordered_map<string, vector<string>> friendsLists,
-                       string origin)
+                                                  string origin)
 {
-  unordered_map<string, int> degrees = {};
-  unordered_map<string, bool> visited = {};
-  deque<PersonInfo> queue = {PersonInfo{origin, 0}};
-  while (queue.size() > 0)
-  {
-    auto info = queue[0];
-    queue.pop_front();
-    degrees[info.person] = info.degree;
-    for (auto friendItem : friendsLists[info.person])
+    unordered_map<string, int> degrees = {};
+    unordered_map<string, bool> visited = {};
+    deque<PersonInfo> queue = {PersonInfo{origin, 0}};
+    while (queue.size() > 0)
     {
-      if (visited.find(friendItem) != visited.end())
-        continue;
-      visited[friendItem] = true;
-      queue.push_back(PersonInfo{friendItem, info.degree + 1});
+        auto info = queue[0];
+        queue.pop_front();
+        degrees[info.person] = info.degree;
+        for (auto friendItem : friendsLists[info.person])
+        {
+            if (visited.find(friendItem) != visited.end())
+                continue;
+            visited[friendItem] = true;
+            queue.push_back(PersonInfo{friendItem, info.degree + 1});
+        }
     }
-  }
-  for (auto pair : friendsLists)
-  {
-    if (visited.find(pair.first) == visited.end())
-      degrees[pair.first] = INT_MAX;
-  }
-  return degrees;
+    for (auto pair : friendsLists)
+    {
+        if (visited.find(pair.first) == visited.end())
+            degrees[pair.first] = INT_MAX;
+    }
+    return degrees;
 }
 
 int getNumDegreesOverSix(unordered_map<string, vector<string>> friendsLists,
                          unordered_map<string, int> degrees)
 {
-  auto numDegreesOverSix = 0;
-  for (auto pair : friendsLists)
-  {
-    if (degrees[pair.first] > 6)
-      numDegreesOverSix++;
-  }
-  return numDegreesOverSix;
+    auto numDegreesOverSix = 0;
+    for (auto pair : friendsLists)
+    {
+        if (degrees[pair.first] > 6)
+            numDegreesOverSix++;
+    }
+    return numDegreesOverSix;
 }
 
 int main()
 {
-  unordered_map<string, vector<string>> source = {
-      {"Aaron", {"Paul"}},
-      {"Akshay", {}},
-      {"Alex", {"Antoine", "Clement", "Ryan", "Simon"}},
-      {"Antoine", {"Alex", "Clement", "Simon"}},
-      {"Ayushi", {"Lee"}},
-      {"Changpeng", {"Kelly", "Sandeep"}},
-      {"Clement", {"Alex", "Antoine", "Sandeep", "Simon"}},
-      {"Hannah", {"Lexi", "Paul", "Sandeep"}},
-      {"James", {"Paul"}},
-      {"Kelly", {"Changpeng", "Molly"}},
-      {"Lee", {"Ayushi", "Molly"}},
-      {"Lexi", {"Hannah"}},
-      {"Molly", {"Kelly", "Lee"}},
-      {"Paul", {"Aaron", "James", "Hannah"}},
-      {"Ryan", {"Alex"}},
-      {"Sandeep", {"Changpeng", "Clement", "Hannah"}},
-      {"Simon", {"Alex", "Antoine", "Clement"}},
-      {"aaron", {"Paul"}},
-      {"akshay", {}},
-      {"alex", {"Antoine", "Clement", "Ryan", "Simon"}},
-      {"antoine", {"Alex", "Clement", "Simon"}},
-      {"ayushi", {"Lee"}},
-      {"changpeng", {"Kelly", "Sandeep"}},
-      {"clement", {"Alex", "Antoine", "Sandeep", "Simon"}},
-      {"hannah", {"Lexi", "Paul", "Sandeep"}},
-      {"james", {"Paul"}},
-      {"kelly", {"Changpeng", "Molly"}},
-      {"lee", {"Ayushi", "Molly"}},
-      {"lexi", {"Hannah"}},
-      {"molly", {"Kelly", "Lee"}},
-      {"paul", {"Aaron", "James", "Hannah"}},
-      {"ryan", {"Alex"}},
-      {"sandeep", {"Changpeng", "Clement", "Hannah"}},
-      {"simon", {"Alex", "Antoine", "C}ement"}}};
-  cout << degreesOfSeparation(source, "Clement", "Antoine");
-  return 0;
+    unordered_map<string, vector<string>> source = {
+        {"Aaron", {"Paul"}},
+        {"Akshay", {}},
+        {"Alex", {"Antoine", "Clement", "Ryan", "Simon"}},
+        {"Antoine", {"Alex", "Clement", "Simon"}},
+        {"Ayushi", {"Lee"}},
+        {"Changpeng", {"Kelly", "Sandeep"}},
+        {"Clement", {"Alex", "Antoine", "Sandeep", "Simon"}},
+        {"Hannah", {"Lexi", "Paul", "Sandeep"}},
+        {"James", {"Paul"}},
+        {"Kelly", {"Changpeng", "Molly"}},
+        {"Lee", {"Ayushi", "Molly"}},
+        {"Lexi", {"Hannah"}},
+        {"Molly", {"Kelly", "Lee"}},
+        {"Paul", {"Aaron", "James", "Hannah"}},
+        {"Ryan", {"Alex"}},
+        {"Sandeep", {"Changpeng", "Clement", "Hannah"}},
+        {"Simon", {"Alex", "Antoine", "Clement"}},
+        {"aaron", {"Paul"}},
+        {"akshay", {}},
+        {"alex", {"Antoine", "Clement", "Ryan", "Simon"}},
+        {"antoine", {"Alex", "Clement", "Simon"}},
+        {"ayushi", {"Lee"}},
+        {"changpeng", {"Kelly", "Sandeep"}},
+        {"clement", {"Alex", "Antoine", "Sandeep", "Simon"}},
+        {"hannah", {"Lexi", "Paul", "Sandeep"}},
+        {"james", {"Paul"}},
+        {"kelly", {"Changpeng", "Molly"}},
+        {"lee", {"Ayushi", "Molly"}},
+        {"lexi", {"Hannah"}},
+        {"molly", {"Kelly", "Lee"}},
+        {"paul", {"Aaron", "James", "Hannah"}},
+        {"ryan", {"Alex"}},
+        {"sandeep", {"Changpeng", "Clement", "Hannah"}},
+        {"simon", {"Alex", "Antoine", "C}ement"}}};
+    cout << degreesOfSeparation(source, "Clement", "Antoine");
+    return 0;
 }
 ```
 
-Last Modified 2022-06-29
+Last Modified 2022-06-30
