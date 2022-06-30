@@ -2379,4 +2379,218 @@ int main()
 }
 ```
 
-Last Modified 2022-06-07
+## 最大的二叉搜索树
+
+给出一个二叉树，找出树中拥有最大子树数量的二叉搜索树，并返回其子树的数量
+
+```python
+class TreeInfo:
+    def __init__(self, is_bst, max_value, min_value, running_largest_bst_size, tree_size):
+        # 记录是否为二叉树
+        self.is_bst = is_bst
+        # 记录子树中的最大值
+        self.max_value = max_value
+        # 记录子树中的最小值
+        self.min_value = min_value
+        # 记录二叉搜索树的子树的数量
+        self.running_largest_bst_size = running_largest_bst_size
+        # 记录子树的数量
+        self.tree_size = tree_size
+
+
+class BinaryTree:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+
+# Average case: when the tree is balanced
+# O(n) time | O(h) space - where n is the number of nodes in
+# the Binary Tree and h is the height of the Binary Tree
+def largest_bst_size(tree):
+    return get_tree_info(tree).running_largest_bst_size
+
+
+def get_tree_info(tree):
+    # 如果是叶子节点则直接返回基础的判断信息
+    if tree is None:
+        return TreeInfo(
+            True,
+            float("-inf"),
+            float("inf"),
+            0,
+            0,
+        )
+
+    left_tree_info = get_tree_info(tree.left)
+    right_tree_info = get_tree_info(tree.right)
+    # 累加基础的子树信息
+    tree_size = 1 + left_tree_info.tree_size + right_tree_info.tree_size
+    # 二叉搜索树的特点是左子树比父级小, 右子树大于等于父级
+    satisfies_bst_prop = left_tree_info.max_value < tree.value <= right_tree_info.min_value
+    # 符合二叉搜索树的条件为当前子树和左右子树都是二叉树
+    is_bst = satisfies_bst_prop and left_tree_info.is_bst and right_tree_info.is_bst
+    # 记录子树中的最小值和最大值
+    max_value = max(tree.value, max(left_tree_info.max_value, right_tree_info.max_value))
+    min_value = min(tree.value, min(left_tree_info.min_value, right_tree_info.min_value))
+
+    running_largest_bst_size = 0
+    # 如果当前树为二叉搜索树, 则更新最大二叉搜索树的子树数量
+    if is_bst:
+        running_largest_bst_size = tree_size
+    # 否则取左右子树中记录的最大二叉搜索树子树数量
+    else:
+        running_largest_bst_size = max(left_tree_info.running_largest_bst_size,
+                                       right_tree_info.running_largest_bst_size)
+    # 返回所有记录的信息
+    return TreeInfo(
+        is_bst,
+        max_value,
+        min_value,
+        running_largest_bst_size,
+        tree_size,
+    )
+
+
+def insert_level_order(array, tree, index, length):
+    if index < length and array[index] is not None:
+        tree = BinaryTree(array[index])
+        tree.left = insert_level_order(array, tree.left, 2 * index + 1, length)
+        tree.right = insert_level_order(array, tree.right, 2 * index + 2, length)
+    return tree
+
+
+def get_tree():
+    l1 = [7, 0, 8, None, None, 7, 9]
+    r1 = [10, 5, 15, 2, 5, 13, 22, 1, None, None, None, None, 14]
+    left = insert_level_order(l1, None, 0, len(l1))
+    right = insert_level_order(r1, None, 0, len(r1))
+    t = BinaryTree(20)
+    t.left = left
+    t.right = right
+    return t
+
+
+if __name__ == '__main__':
+    print(largest_bst_size(get_tree()))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+struct TreeInfo
+{
+    bool isBst;
+    int maxValue;
+    int minValue;
+    int runningLargestBstSize;
+    int treeSize;
+};
+
+class BinaryTree
+{
+public:
+    int value;
+    BinaryTree *left;
+    BinaryTree *right;
+
+    BinaryTree(int value)
+    {
+        this->value = value;
+        left = nullptr;
+        right = nullptr;
+    }
+};
+
+TreeInfo getTreeInfo(BinaryTree *tree);
+
+// Average case: when the tree is balanced
+// O(n) time | O(h) space - where n is the number of nodes in
+// the Binary Tree and h is the height of the Binary Tree
+int largestBstSize(BinaryTree *tree)
+{
+    return getTreeInfo(tree).runningLargestBstSize;
+}
+
+TreeInfo getTreeInfo(BinaryTree *tree)
+{
+    if (tree == nullptr)
+    {
+        return TreeInfo{
+            true,
+            INT_MIN,
+            INT_MAX,
+            0,
+            0,
+        };
+    }
+
+    auto leftTreeInfo = getTreeInfo(tree->left);
+    auto rightTreeInfo = getTreeInfo(tree->right);
+
+    auto treeSize = 1 + leftTreeInfo.treeSize + rightTreeInfo.treeSize;
+
+    auto satisfiesBstProp = tree->value > leftTreeInfo.maxValue &&
+                            tree->value <= rightTreeInfo.minValue;
+    auto isBst = satisfiesBstProp && leftTreeInfo.isBst && rightTreeInfo.isBst;
+
+    auto maxValue =
+        max(tree->value, max(leftTreeInfo.maxValue, rightTreeInfo.maxValue));
+    auto minValue =
+        min(tree->value, min(leftTreeInfo.minValue, rightTreeInfo.minValue));
+
+    auto runningLargestBstSize = 0;
+    if (isBst)
+    {
+        runningLargestBstSize = treeSize;
+    }
+    else
+    {
+        runningLargestBstSize = max(leftTreeInfo.runningLargestBstSize,
+                                    rightTreeInfo.runningLargestBstSize);
+    }
+
+    return TreeInfo{
+        isBst,
+        maxValue,
+        minValue,
+        runningLargestBstSize,
+        treeSize,
+    };
+}
+
+BinaryTree *insertLevelOrder(vector<int> &array, BinaryTree *tree, int index, int length)
+{
+    if (index < length && array[index] != INT_MIN)
+    {
+        tree = new BinaryTree(array[index]);
+        tree->left = insertLevelOrder(array, tree->left, 2 * index + 1, length);
+        tree->right = insertLevelOrder(array, tree->right, 2 * index + 2, length);
+    }
+    return tree;
+}
+
+BinaryTree *getTree()
+{
+    vector<int> l1 = {7, 0, 8, INT_MIN, INT_MIN, 7, 9};
+    vector<int> r1 = {10, 5, 15, 2, 5, 13, 22, 1, INT_MIN, INT_MIN, INT_MIN, INT_MIN, 14};
+    BinaryTree *left = insertLevelOrder(l1, nullptr, 0, l1.size());
+    BinaryTree *right = insertLevelOrder(r1, nullptr, 0, r1.size());
+    BinaryTree *tree = new BinaryTree(20);
+    tree->left = left;
+    tree->right = right;
+    return tree;
+}
+
+int main()
+{
+    cout << largestBstSize(getTree());
+    return 0;
+}
+```
+
+Last Modified 2022-06-30
