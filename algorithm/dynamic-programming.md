@@ -3259,4 +3259,127 @@ int main()
 }
 ```
 
-Last Modified 2022-06-28
+## 最大子序列点积
+
+给定两个表示向量的整数数组，找出使用当前两个数组可以计算出的最大点积（在数学中，两个向量的点积 a = [a1, a2, ..., an]
+和 b = [b1, b2, ..., bn] 等于 a1 * b1 + a2 * b2 + ... + an * bn.）虽然输入数组可能具有不同的长度，但根据点积的定义，
+产生最大点积的两个子序列的长度必须相等。数组的子序列是一组数字，它们在数组中不一定相邻，但与它们在数组中出现的顺序相同。
+
+```python
+# O(n * m) time | O(n * m) space - where n is the length of the
+# first input array and m is the length of the second input array
+def max_subsequence_dot_product(array_one, array_two):
+    max_dot_products = initialize_dot_products(array_one, array_two)
+    # 空元素的数组不需要计算, 所以从第二个位置开始
+    for i in range(1, len(array_one) + 1):
+        for j in range(1, len(array_two) + 1):
+            # 计算出当前的点积
+            current_product = array_one[i - 1] * array_two[j - 1]
+            # 记录最大的点积
+            max_dot_products[i][j] = max(
+                current_product,
+                # 前一次计算相对位置的前一个点积加上当前的点积
+                max_dot_products[i - 1][j - 1] + current_product,
+                # 前一次计算相对位置的前一个点积
+                max_dot_products[i - 1][j - 1],
+                # 前一次计算相同位置的点积
+                max_dot_products[i - 1][j],
+                # 当前计算前一个位置的点积
+                max_dot_products[i][j - 1],
+            )
+    return max_dot_products[-1][-1]
+
+
+def initialize_dot_products(array_one, array_two):
+    # 创建一个二维数组, 用来记录每个元素相乘的点积, 多出来的一行和一列分别表示空的元素值, 每个值初始化为无穷小
+    dot_products = [[float("-inf") for _ in range(len(array_two) + 1)] for _ in range(len(array_one) + 1)]
+    return dot_products
+
+
+if __name__ == '__main__':
+    print(max_subsequence_dot_product([4, 7, 9, -6, 6], [5, 1, -1, -3, -2, -10]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+vector<vector<int>> initializeDotProducts(vector<int> arrayOne,
+                                          vector<int> arrayTwo);
+int maxOfList(vector<int> numbers);
+int handleOverflow(int number, int toAdd);
+
+// O(n * m) time | O(n * m) space - where n is the length of the
+// first input array and m is the length of the second input array
+int maxSubsequenceDotProduct(vector<int> arrayOne, vector<int> arrayTwo)
+{
+    vector<vector<int>> maxDotProducts = initializeDotProducts(arrayOne, arrayTwo);
+    const int arrayOneSize = arrayOne.size();
+    const int arrayTwoSize = arrayTwo.size();
+    for (int i = 1; i <= arrayOneSize; i++)
+    {
+        for (int j = 1; j <= arrayTwoSize; j++)
+        {
+            int currentProduct = arrayOne[i - 1] * arrayTwo[j - 1];
+            int plusCurrent = handleOverflow(maxDotProducts[i - 1][j - 1], currentProduct);
+            maxDotProducts[i][j] = maxOfList(vector<int>{
+                currentProduct,
+                plusCurrent,
+                maxDotProducts[i - 1][j - 1], maxDotProducts[i - 1][j],
+                maxDotProducts[i][j - 1]});
+        }
+    }
+    return maxDotProducts[arrayOneSize][arrayTwoSize];
+}
+
+vector<vector<int>> initializeDotProducts(vector<int> arrayOne,
+                                          vector<int> arrayTwo)
+{
+    vector<vector<int>> dotProducts = {};
+    const int arrayOneSize = arrayOne.size();
+    const int arrayTwoSize = arrayTwo.size();
+    for (int i = 0; i <= arrayOneSize; i++)
+    {
+        vector<int> row = {};
+        for (int j = 0; j <= arrayTwoSize; j++)
+        {
+            row.push_back(INT_MIN);
+        }
+        dotProducts.push_back(row);
+    }
+    return dotProducts;
+}
+
+int maxOfList(vector<int> numbers)
+{
+    int currMax = numbers[0];
+    for (int num : numbers)
+    {
+        if (num > currMax)
+            currMax = num;
+    }
+    return currMax;
+}
+
+int handleOverflow(int number, int toAdd)
+{
+    if (toAdd > 0)
+        return number + toAdd;
+
+    bool willOverflow = toAdd < 0 && number == INT_MIN;
+    if (willOverflow)
+        return number;
+
+    return number + toAdd;
+}
+
+int main()
+{
+    cout << maxSubsequenceDotProduct({4, 7, 9, -6, 6}, {5, 1, -1, -3, -2, -10});
+    return 0;
+}
+```
+
+Last Modified 2022-06-29
