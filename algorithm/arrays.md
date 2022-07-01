@@ -3018,4 +3018,215 @@ int main()
 }
 ```
 
-Last Modified 2022-06-22
+## 旋转环
+
+给定一个`N * N`的矩形，将矩形的元素顺时针旋转一个元素，必须要直接修改输入的矩形
+
+```python
+# O(n) time | O(w) space - where n is the total number of
+# elements in the array and w is the width of the array
+def spin_rings1(array):
+    spin_rings_helper(array, 0, len(array) - 1, 0, len(array) - 1)
+
+
+def spin_rings_helper(array, start_row, end_row, start_col, end_col):
+    if start_row >= end_row or start_col >= end_col:
+        return
+    # 先保留右上方的值
+    original_top_right_value = array[start_row][end_col]
+    # 移动上面的行
+    for col in reversed(range(start_col + 1, end_col + 1)):
+        array[start_row][col] = array[start_row][col - 1]
+    # 移动左边的列
+    for row in range(start_row, end_row):
+        array[row][start_col] = array[row + 1][start_col]
+    # 移动下面的行
+    for col in range(start_col, end_col):
+        array[end_row][col] = array[end_row][col + 1]
+    # 移动右边的列, 这里没有处理右上方向下一行的值
+    for row in reversed(range(start_row + 2, end_row + 1)):
+        array[row][end_col] = array[row - 1][end_col]
+    # 右上方向下一行的值赋予之前保存的值
+    array[start_row + 1][end_col] = original_top_right_value
+    # 递归执行, 向内缩小起始和结束的行列
+    spin_rings_helper(array, start_row + 1, end_row - 1, start_col + 1, end_col - 1)
+
+
+# O(n) time | O(1) space - where n is the total number of elements in the array
+def spin_rings2(array):
+    # 上面方法 1 的非递归方式
+    start_row, end_row = 0, len(array) - 1
+    start_col, end_col = 0, len(array) - 1
+    # 非递归方式, 不停的向内缩小处理范围
+    while start_row < end_row and start_col < end_col:
+        original_top_right_value = array[start_row][end_col]
+
+        for col in reversed(range(start_col + 1, end_col + 1)):
+            array[start_row][col] = array[start_row][col - 1]
+
+        for row in range(start_row, end_row):
+            array[row][start_col] = array[row + 1][start_col]
+
+        for col in range(start_col, end_col):
+            array[end_row][col] = array[end_row][col + 1]
+
+        for row in reversed(range(start_row + 2, end_row + 1)):
+            array[row][end_col] = array[row - 1][end_col]
+
+        array[start_row + 1][end_col] = original_top_right_value
+
+        start_row += 1
+        end_row -= 1
+        start_col += 1
+        end_col -= 1
+
+
+# O(n) time | O(1) space - where n is the total number of elements in the array
+def spin_rings3(array):
+    # 与方法 2 类似, 只是按上右下左的顺序来处理
+    length = len(array)
+    if length <= 1:
+        return array
+    end_idx = length // 2
+    current_idx = 0
+    while current_idx < end_idx:
+        previous_value = array[current_idx + 1][current_idx]
+        for top_col in range(current_idx, length - current_idx):
+            array[current_idx][top_col], previous_value = previous_value, array[current_idx][top_col]
+        right_fixed_col = length - current_idx - 1
+        for right_row in range(current_idx + 1, length - current_idx):
+            array[right_row][right_fixed_col], previous_value = previous_value, array[right_row][right_fixed_col]
+        bottom_fixed_row = length - current_idx - 1
+        for bottom_col in reversed(range(current_idx, length - current_idx - 1)):
+            array[bottom_fixed_row][bottom_col], previous_value = previous_value, array[bottom_fixed_row][bottom_col]
+        left_fixed_col = current_idx
+        for left_row in reversed(range(current_idx + 1, length - current_idx - 1)):
+            array[left_row][left_fixed_col], previous_value = previous_value, array[left_row][left_fixed_col]
+        current_idx += 1
+
+
+if __name__ == '__main__':
+    source = [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+        [9, 10, 11, 12],
+        [13, 14, 15, 16]
+    ]
+    spin_rings1(source)
+    spin_rings2(source)
+    spin_rings3(source)
+    for subarray in source:
+        print(subarray)
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void spinRingsHelper(vector<vector<int>> &arrays, int startRow, int endRow,
+                     int startCol, int endCol);
+
+// O(n) time | O(w) space - where n is the total number of
+// elements in the array and w is the width of the array
+void spinRings1(vector<vector<int>> &array)
+{
+    spinRingsHelper(array, 0, array.size() - 1, 0, array.size() - 1);
+}
+
+void spinRingsHelper(vector<vector<int>> &array, int startRow, int endRow,
+                     int startCol, int endCol)
+{
+    if (startRow >= endRow || startCol >= endCol)
+        return;
+
+    auto originalTopRightValue = array[startRow][endCol];
+
+    for (auto col = endCol; col > startCol; col--)
+    {
+        array[startRow][col] = array[startRow][col - 1];
+    }
+
+    for (auto row = startRow; row < endRow; row++)
+    {
+        array[row][startCol] = array[row + 1][startCol];
+    }
+
+    for (auto col = startCol; col < endCol; col++)
+    {
+        array[endRow][col] = array[endRow][col + 1];
+    }
+
+    for (auto row = endRow; row > startRow + 1; row--)
+    {
+        array[row][endCol] = array[row - 1][endCol];
+    }
+
+    array[startRow + 1][endCol] = originalTopRightValue;
+
+    spinRingsHelper(array, startRow + 1, endRow - 1, startCol + 1, endCol - 1);
+}
+
+// O(n) time | O(1) space - where n is the total number of elements in the array
+void spinRings2(vector<vector<int>> &array)
+{
+    int startRow = 0;
+    int endRow = array.size() - 1;
+    int startCol = 0;
+    int endCol = array.size() - 1;
+
+    while (startRow < endRow && startCol < endCol)
+    {
+        int originalTopRightValue = array[startRow][endCol];
+
+        for (int col = endCol; col > startCol; col--)
+        {
+            array[startRow][col] = array[startRow][col - 1];
+        }
+
+        for (int row = startRow; row < endRow; row++)
+        {
+            array[row][startCol] = array[row + 1][startCol];
+        }
+
+        for (int col = startCol; col < endCol; col++)
+        {
+            array[endRow][col] = array[endRow][col + 1];
+        }
+
+        for (int row = endRow; row > startRow + 1; row--)
+        {
+            array[row][endCol] = array[row - 1][endCol];
+        }
+
+        array[startRow + 1][endCol] = originalTopRightValue;
+
+        startRow++;
+        endRow--;
+        startCol++;
+        endCol--;
+    }
+}
+
+int main()
+{
+    vector<vector<int>> source = {
+        {1, 2, 3, 4},
+        {5, 6, 7, 8},
+        {9, 10, 11, 12},
+        {13, 14, 15, 16}};
+    spinRings1(source);
+    spinRings2(source);
+    for (vector<int> sub : source)
+    {
+        for (int e : sub)
+        {
+            cout << e << " ";
+        }
+        cout << endl;
+    }
+    return 0;
+}
+```
+
+Last Modified 2022-07-01
