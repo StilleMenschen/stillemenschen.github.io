@@ -3229,4 +3229,153 @@ int main()
 }
 ```
 
-Last Modified 2022-07-01
+## 平衡的索引
+
+给出一个整数数组，找出数组中以某个索引分隔且累加和相等的子数组，如`[0, 9, -8, 2, 7, 1, 11, -2, 1]`中以索引`5`分隔的数组两半部分的累加和相等，`0 + 9 + -8 + 2 + 7 == 11 + -2 + 1`
+
+```python
+# O(n^2) time | O(1) space - where n is the length of the input array
+def balance_index1(array):
+    # 最简单的方式, 对每个区间的数值进行计算后对比
+    for i in range(len(array)):
+        left_side_sum = 0
+        right_side_sum = 0
+
+        for j in range(i):
+            left_side_sum += array[j]
+
+        for j in range(i + 1, len(array)):
+            right_side_sum += array[j]
+
+        if left_side_sum == right_side_sum:
+            return i
+
+    return -1
+
+
+# O(n) time | O(n) space - where n is the length of the input array
+def balance_index2(array):
+    # 记录从左向右的累加和
+    left_side_sums = array[:]
+
+    left_side_sum = 0
+    for i in range(len(array)):
+        left_side_sums[i] = left_side_sum
+        left_side_sum += array[i]
+    # 然后反向遍历对比左右两边的累加和是否相等
+    right_side_sum = 0
+    for i in reversed(range(len(array))):
+        # 如果有符合条件的直接返回
+        if left_side_sums[i] == right_side_sum:
+            return i
+        right_side_sum += array[i]
+
+    return -1
+
+
+# O(n) time | O(1) space - where n is the length of the input array
+def balance_index3(array):
+    array_sum = sum(array)
+    # 与方法 2 类似, 只是不需要通过数组缓存计算结果
+    left_side_sum = 0
+    right_side_sum = array_sum
+    for i in range(len(array)):
+        right_side_sum -= array[i]
+        if left_side_sum == right_side_sum:
+            return i
+        left_side_sum += array[i]
+
+    return -1
+
+
+if __name__ == '__main__':
+    source = [0, 9, -8, 2, 7, 1, 11, -2, 1]
+    print(balance_index1(source))
+    print(balance_index2(source))
+    print(balance_index3(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <numeric>
+using namespace std;
+
+// O(n^2) time | O(1) space - where n is the length of the input array
+int balanceIndex1(vector<int> array)
+{
+    const int arraySize = array.size();
+    for (auto i = 0; i < arraySize; i++)
+    {
+        auto leftSideSum = 0;
+        auto rightSideSum = 0;
+
+        for (auto j = 0; j < i; j++)
+        {
+            leftSideSum += array[j];
+        }
+
+        for (auto j = i + 1; j < arraySize; j++)
+        {
+            rightSideSum += array[j];
+        }
+
+        if (leftSideSum == rightSideSum)
+            return i;
+    }
+
+    return -1;
+}
+
+// O(n) time | O(n) space - where n is the length of the input array
+int balanceIndex2(vector<int> array)
+{
+    auto leftSideSums = array;
+    auto leftSideSum = 0;
+    const int arraySize = array.size();
+    for (auto i = 0; i < arraySize; i++)
+    {
+        leftSideSums[i] = leftSideSum;
+        leftSideSum += array[i];
+    }
+
+    auto rightSideSum = 0;
+    for (int i = arraySize - 1; i >= 0; i--)
+    {
+        if (leftSideSums[i] == rightSideSum)
+            return i;
+        rightSideSum += array[i];
+    }
+
+    return -1;
+}
+
+// O(n) time | O(1) space - where n is the length of the input array
+int balanceIndex3(vector<int> array)
+{
+    auto arraySum = accumulate(array.begin(), array.end(), 0);
+    const int arraySize = array.size();
+    auto leftSideSum = 0;
+    auto rightSideSum = arraySum;
+    for (auto i = 0; i < arraySize; i++)
+    {
+        rightSideSum -= array[i];
+        if (leftSideSum == rightSideSum)
+            return i;
+        leftSideSum += array[i];
+    }
+
+    return -1;
+}
+
+int main()
+{
+    vector<int> source = {0, 9, -8, 2, 7, 1, 11, -2, 1};
+    cout << balanceIndex1(source) << endl;
+    cout << balanceIndex2(source) << endl;
+    cout << balanceIndex3(source) << endl;
+    return 0;
+}
+```
+
+Last Modified 2022-07-02
