@@ -725,4 +725,381 @@ int main()
 }
 ```
 
-Last Modified 2022-06-26
+## 拨号盘号码中的单词
+
+手机上的拨号盘的每个数字都有对应的字母，给定一组单词和一串数字，找出使用这串数字是否可以拼出给定的单词，如果可以则返回能够拼出的所有单词
+
+```python
+# O(m * w + n * 3^n) time | O(m * w + n) space - where n is the length of the
+# phone number, m is the number of words, and w is the length of the longest word
+def words_in_phone_number1(phone_number, words):
+    # 将所有的词放入字典树中
+    word_trie = get_word_trie(words)
+    final_words = {}
+    # 从手机拨号数字的所有位置开始向后推断
+    for i in range(len(phone_number)):
+        # 递归执行推断
+        explore_trie(phone_number, i, word_trie.root, final_words)
+    return list(final_words.keys())
+
+
+def get_word_trie(words):
+    word_trie = Trie()
+    for word in words:
+        word_trie.insert(word)
+    return word_trie
+
+
+def explore_trie(phone_number, digit_idx, trie_node, final_words):
+    if "*" in trie_node:
+        word = trie_node["*"]
+        final_words[word] = True
+
+    if digit_idx == len(phone_number):
+        return
+    # 获得当前索引处的数字
+    current_digit = phone_number[digit_idx]
+    # 根据数字获得拨号盘对应的所有字母
+    possible_letters = DIGIT_LETTERS[current_digit]
+    # 遍历所有的字母, 如果发现字母在字典树中存在则继续递归
+    for letter in possible_letters:
+        if letter not in trie_node:
+            continue
+        # 索引递增, 字典树移动到对应字母的子节点
+        explore_trie(phone_number, digit_idx + 1, trie_node[letter], final_words)
+
+
+DIGIT_LETTERS = {
+    "0": [],
+    "1": [],
+    "2": ["a", "b", "c"],
+    "3": ["d", "e", "f"],
+    "4": ["g", "h", "i"],
+    "5": ["j", "k", "l"],
+    "6": ["m", "n", "o"],
+    "7": ["p", "q", "r", "s"],
+    "8": ["t", "u", "v"],
+    "9": ["w", "x", "y", "z"],
+}
+
+
+class Trie:
+    def __init__(self):
+        self.root = {}
+        self.end_symbol = "*"
+
+    def insert(self, word):
+        current_trie_node = self.root
+        for letter in word:
+            if letter not in current_trie_node:
+                current_trie_node[letter] = {}
+            current_trie_node = current_trie_node[letter]
+        current_trie_node[self.end_symbol] = word
+
+
+# O(n^2 + m * w) time | O(n^2 + m * w) space - where n is the length of the
+# phone number, m is the number of words, and w is the length of the longest word
+def words_in_phone_number2(phone_number, words):
+    # 根据手机拨号数字生成字典树
+    # Note: 这里也可以考虑使用字符串的 KMP 查找算法替代字典树, 以降低空间复杂度
+    phone_number_suffix_trie = ModifiedSuffixTrie(phone_number)
+    # 通过拨号盘的字母与数字的对照表将字母转换为相应的数字, 然后通过字典树查找这串数字, 存在则表示可以通过这串数字拼出字符串
+    return list(filter(lambda word: word_is_in_phone_number(phone_number_suffix_trie, word), words))
+
+
+def word_is_in_phone_number(phone_number_suffix_trie, word):
+    # 将字符串转为拨号盘的数字字符串
+    digit_word = word_to_digits(word)
+    # 判断数字字符串是否在字典树中
+    return phone_number_suffix_trie.contains(digit_word)
+
+
+def word_to_digits(word):
+    return "".join(map(lambda letter: LETTER_DIGITS[letter], list(word)))
+
+
+LETTER_DIGITS = {
+    "a": "2", "b": "2", "c": "2",
+    "d": "3", "e": "3", "f": "3",
+    "g": "4", "h": "4", "i": "4",
+    "j": "5", "k": "5", "l": "5",
+    "m": "6", "n": "6", "o": "6",
+    "p": "7", "q": "7", "r": "7", "s": "7",
+    "t": "8", "u": "8", "v": "8",
+    "w": "9", "x": "9", "y": "9", "z": "9",
+}
+
+
+class ModifiedSuffixTrie:
+    def __init__(self, string):
+        self.root = {}
+        self.populate_modified_suffix_trie_from(string)
+
+    def populate_modified_suffix_trie_from(self, string):
+        for i in range(len(string)):
+            self.insert_substring_starting_at(i, string)
+
+    def insert_substring_starting_at(self, i, string):
+        current_trie_node = self.root
+        for j in range(i, len(string)):
+            letter = string[j]
+            if letter not in current_trie_node:
+                current_trie_node[letter] = {}
+            current_trie_node = current_trie_node[letter]
+
+    def contains(self, string):
+        current_trie_node = self.root
+        for letter in string:
+            if letter not in current_trie_node:
+                return False
+            current_trie_node = current_trie_node[letter]
+        return True
+
+
+if __name__ == '__main__':
+    print(words_in_phone_number1('3662277', ["foo", "bar", "baz", "foobar", "emo", "cap", "car", "cat"]))
+    print(words_in_phone_number2('3662277', ["foo", "bar", "baz", "foobar", "emo", "cap", "car", "cat"]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+
+unordered_map<char, vector<char>> DIGIT_LETTERS = {
+    {'0', vector<char>()},
+    {'1', vector<char>()},
+    {'2', vector<char>{'a', 'b', 'c'}},
+    {'3', vector<char>{'d', 'e', 'f'}},
+    {'4', vector<char>{'g', 'h', 'i'}},
+    {'5', vector<char>{'j', 'k', 'l'}},
+    {'6', vector<char>{'m', 'n', 'o'}},
+    {'7', vector<char>{'p', 'q', 'r', 's'}},
+    {'8', vector<char>{'t', 'u', 'v'}},
+    {'9', vector<char>{'w', 'x', 'y', 'z'}},
+};
+
+class TrieNode
+{
+public:
+    unordered_map<char, TrieNode *> children;
+    string word;
+};
+
+class Trie
+{
+public:
+    TrieNode *root;
+    char endSymbol;
+
+    Trie()
+    {
+        this->root = new TrieNode();
+        this->endSymbol = '*';
+    }
+
+    void insert(string str)
+    {
+        TrieNode *current = this->root;
+        const int strLength = str.length();
+        for (int i = 0; i < strLength; i++)
+        {
+            char letter = str[i];
+            if (current->children.find(letter) == current->children.end())
+            {
+                TrieNode *newNode = new TrieNode();
+                current->children.insert({letter, newNode});
+            }
+            current = current->children[letter];
+        }
+        current->children.insert({this->endSymbol, nullptr});
+        current->word = str;
+    }
+};
+
+Trie *getWordTrie(vector<string> words);
+void exploreTrie(string phoneNumber, int digitIdx, TrieNode *trieNode,
+                 unordered_set<string> &finalWords);
+
+// O(m * w + n * 3^n) time | O(m * w + n) space - where n is the length of the
+// phone number, m is the number of words, and w is the length of the longest
+// word
+vector<string> wordsInPhoneNumber1(string phoneNumber, vector<string> words)
+{
+    auto wordTrie = getWordTrie(words);
+    unordered_set<string> finalWords;
+    const int phoneNumberLength = phoneNumber.length();
+    for (auto i = 0; i < phoneNumberLength; i++)
+    {
+        exploreTrie(phoneNumber, i, wordTrie->root, finalWords);
+    }
+    return vector<string>(finalWords.begin(), finalWords.end());
+}
+
+Trie *getWordTrie(vector<string> words)
+{
+    auto wordTrie = new Trie();
+    for (auto word : words)
+    {
+        wordTrie->insert(word);
+    }
+    return wordTrie;
+}
+
+void exploreTrie(string phoneNumber, int digitIdx, TrieNode *trieNode,
+                 unordered_set<string> &finalWords)
+{
+    if (trieNode->children.find('*') != trieNode->children.end())
+    {
+        finalWords.insert(trieNode->word);
+    }
+
+    if (digitIdx == phoneNumber.size())
+        return;
+
+    auto currentDigit = phoneNumber[digitIdx];
+    auto possibleLetters = DIGIT_LETTERS[currentDigit];
+
+    for (auto letter : possibleLetters)
+    {
+        if (trieNode->children.find(letter) == trieNode->children.end())
+            continue;
+        exploreTrie(phoneNumber, digitIdx + 1, trieNode->children[letter],
+                    finalWords);
+    }
+}
+
+unordered_map<char, char> LETTER_DIGITS = {
+    {'a', '2'},
+    {'b', '2'},
+    {'c', '2'},
+    {'d', '3'},
+    {'e', '3'},
+    {'f', '3'},
+    {'g', '4'},
+    {'h', '4'},
+    {'i', '4'},
+    {'j', '5'},
+    {'k', '5'},
+    {'l', '5'},
+    {'m', '6'},
+    {'n', '6'},
+    {'o', '6'},
+    {'p', '7'},
+    {'q', '7'},
+    {'r', '7'},
+    {'s', '7'},
+    {'t', '8'},
+    {'u', '8'},
+    {'v', '8'},
+    {'w', '9'},
+    {'x', '9'},
+    {'y', '9'},
+    {'z', '9'},
+};
+
+class ModifiedSuffixTrie
+{
+public:
+    TrieNode *root;
+
+    ModifiedSuffixTrie(string str)
+    {
+        this->root = new TrieNode();
+        this->populateModifiedSuffixTrieFrom(str);
+    }
+
+    void populateModifiedSuffixTrieFrom(string str)
+    {
+        const int strLength = str.length();
+        for (int i = 0; i < strLength; i++)
+        {
+            this->insertSubstringStartingAt(i, str);
+        }
+    }
+
+    void insertSubstringStartingAt(int i, string str)
+    {
+        TrieNode *node = this->root;
+        const int strLength = str.length();
+        for (int j = i; j < strLength; j++)
+        {
+            char letter = str[j];
+            if (node->children.find(letter) == node->children.end())
+            {
+                TrieNode *newNode = new TrieNode();
+                node->children.insert({letter, newNode});
+            }
+            node = node->children[letter];
+        }
+    }
+
+    bool contains(string str)
+    {
+        TrieNode *node = this->root;
+        for (char letter : str)
+        {
+            if (node->children.find(letter) == node->children.end())
+            {
+                return false;
+            }
+            node = node->children[letter];
+        }
+        return true;
+    }
+};
+
+string wordToDigits(string word);
+
+// O(n^2 + m * w) time | O(n^2 + m * w) space - where n is the length of the
+// phone number, m is the number of words, and w is the length of the longest
+// word
+vector<string> wordsInPhoneNumber2(string phoneNumber, vector<string> words)
+{
+    auto phoneNumberSuffixTrie = new ModifiedSuffixTrie(phoneNumber);
+    vector<string> output;
+    for (auto word : words)
+    {
+        auto digitWord = wordToDigits(word);
+        if (phoneNumberSuffixTrie->contains(digitWord))
+        {
+            output.push_back(word);
+        }
+    }
+    return output;
+}
+
+string wordToDigits(string word)
+{
+    string digits = "";
+    for (auto letter : word)
+    {
+        digits += LETTER_DIGITS[letter];
+    }
+    return digits;
+}
+
+void iteration(vector<string> array)
+{
+    for (const string e : array)
+    {
+        cout << e << " ";
+    }
+    cout << endl;
+}
+
+int main()
+{
+    string phoneNumber = "36612277";
+    vector<string> source = {"foo", "bar", "baz", "foobar", "emo", "cap", "car", "cat"};
+    iteration(wordsInPhoneNumber1(phoneNumber, source));
+    iteration(wordsInPhoneNumber2(phoneNumber, source));
+    return 0;
+}
+```
+
+Last Modified 2022-07-02
