@@ -3378,4 +3378,179 @@ int main()
 }
 ```
 
-Last Modified 2022-07-02
+## 矩阵中重复的值
+
+给出一个整数二维数组，找出在二维数组中每一行和每一列都会出现的数值
+
+```python
+# O(n) time | O(min(w, h)) space - where n is the total number of elements in
+# the matrix and w and h are the width and height of the matrix, respectively
+def repeated_matrix_values(matrix):
+    # 初始化缓存字典
+    value_counts = initialize_counts_of_potential_values(matrix)
+    length_of_matrix = len(matrix)
+    length_of_matrix_row = len(matrix[0])
+    # 先逐行遍历
+    for row in range(length_of_matrix):
+        for col in range(length_of_matrix_row):
+            value = matrix[row][col]
+            # 要求每一行都出现, 则每一行的计数都会与行索引对应
+            correct_count_so_far = row
+            check_and_increment_value_count(value, value_counts, correct_count_so_far)
+    # 再逐列遍历
+    for col in range(length_of_matrix_row):
+        for row in range(length_of_matrix):
+            value = matrix[row][col]
+            # 要求每一列都出现, 则每一列的计数都会与列的索引和上面累加的行树对应
+            correct_count_so_far = length_of_matrix + col
+            check_and_increment_value_count(value, value_counts, correct_count_so_far)
+
+    final_values = []
+    for value in value_counts:
+        if value_counts[value] == length_of_matrix + length_of_matrix_row:
+            final_values.append(value)
+
+    return final_values
+
+
+def initialize_counts_of_potential_values(matrix):
+    value_counts = {}
+    # 对比并取拥有最大元素数量的行或者列
+    smaller_side = matrix[0]
+    if len(matrix) < len(matrix[0]):
+        smaller_side = map(lambda row: row[0], matrix)
+    # 计数初始化为 0
+    for value in smaller_side:
+        value_counts[value] = 0
+
+    return value_counts
+
+
+def check_and_increment_value_count(value, value_counts, correct_count_so_far):
+    # 不存在于缓存字典中则跳过
+    if value not in value_counts:
+        return
+    # 不符合期望的计数则跳过
+    if value_counts[value] != correct_count_so_far:
+        return
+    # 计数加 1
+    value_counts[value] += 1
+
+
+if __name__ == '__main__':
+    source = [
+        [1, 3, 7, 4, 5],
+        [2, 5, 9, 3, 3],
+        [1, 8, 5, 3, 5],
+        [5, 0, 3, 5, 6],
+        [3, 8, 3, 5, 6],
+        [1, 0, 3, 0, 5]
+    ]
+    print(repeated_matrix_values(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <climits>
+#include <unordered_map>
+using namespace std;
+
+unordered_map<int, int> initializeCountsOfPotentialValues(vector<vector<int>> matrix);
+void checkAndIncrementValueCount(int value, unordered_map<int, int> &valueCounts,
+                                 int correctCountSoFar);
+
+// O(n) time | O(min(w, h)) space - where n is the total number of elements in
+// the matrix and w and h are the width and height of the matrix, respectively
+vector<int> repeatedMatrixValues(vector<vector<int>> matrix)
+{
+    auto valueCounts = initializeCountsOfPotentialValues(matrix);
+    const int matrixSize = matrix.size();
+    const int matrixRowSize = matrix[0].size();
+    for (auto row = 0; row < matrixSize; row++)
+    {
+        for (auto col = 0; col < matrixRowSize; col++)
+        {
+            auto value = matrix[row][col];
+            auto correctCountSoFar = row;
+            checkAndIncrementValueCount(value, valueCounts, correctCountSoFar);
+        }
+    }
+
+    for (auto col = 0; col < matrixRowSize; col++)
+    {
+        for (auto row = 0; row < matrixSize; row++)
+        {
+            auto value = matrix[row][col];
+            auto correctCountSoFar = matrixSize + col;
+            checkAndIncrementValueCount(value, valueCounts, correctCountSoFar);
+        }
+    }
+
+    vector<int> finalValues = {};
+    for (auto entry : valueCounts)
+    {
+        if (entry.second == matrixSize + matrixRowSize)
+        {
+            finalValues.push_back(entry.first);
+        }
+    }
+    return finalValues;
+}
+
+unordered_map<int, int> initializeCountsOfPotentialValues(vector<vector<int>> matrix)
+{
+    unordered_map<int, int> valueCounts = {};
+
+    auto smallerSide = matrix[0];
+    if (matrix.size() < matrix[0].size())
+    {
+        smallerSide = {};
+        for (auto arr : matrix)
+        {
+            smallerSide.push_back(arr[0]);
+        }
+    }
+
+    for (auto value : smallerSide)
+    {
+        valueCounts[value] = 0;
+    }
+    return valueCounts;
+}
+
+void checkAndIncrementValueCount(int value, unordered_map<int, int> &valueCounts,
+                                 int correctCountSoFar)
+{
+    auto iterator = valueCounts.find(value);
+    if (iterator == valueCounts.end())
+        return;
+    if (valueCounts[value] != correctCountSoFar)
+        return;
+    valueCounts[value]++;
+}
+
+void iteration(vector<int> array)
+{
+    for (const int e : array)
+    {
+        cout << e << " ";
+    }
+    cout << endl;
+}
+
+int main()
+{
+    vector<vector<int>> source = {
+        {1, 3, 7, 4, 5},
+        {2, 5, 9, 3, 3},
+        {1, 8, 5, 3, 5},
+        {5, 0, 3, 5, 6},
+        {3, 8, 3, 5, 6},
+        {1, 0, 3, 0, 5}};
+    iteration(repeatedMatrixValues(source));
+    return 0;
+}
+```
+
+Last Modified 2022-07-03
