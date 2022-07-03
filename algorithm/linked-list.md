@@ -1695,7 +1695,7 @@ def reverse_linked_list(head):
     while current_node is not None:
         # 获得当前节点下一个指针, 作为缓存
         next_node = current_node.next
-        # 反转当前节点的指针执行前一个节点
+        # 反转当前节点的指针指向前一个节点
         current_node.next = previous_node
         # 移动前一个节点的指针到当前节点
         previous_node = current_node
@@ -2570,4 +2570,348 @@ int main()
 }
 ```
 
-Last Modified 2022-06-28
+## 反转 K 个链表节点
+
+给定一个链表和整数 K，根据 K 来反转第 K 个位置的 K 个节点（如果第 N 个 K 位置之后的节点数量不足 K 个，也需要进行反转）
+
+```python
+class LinkedList:
+    def __init__(self, value):
+        self.value = value
+        self.next = None
+
+
+# O(n) time | O(1) space - where n is the number of nodes in the Linked List
+def reverse_alternating_k_nodes1(head, k):
+    # 记录新的链表头
+    final_head = None
+    # 记录是否需要反转
+    is_group_to_reverse = True
+    # 计数
+    running_k = 1
+    # 前一个反转的分组尾部节点
+    previous_group_tail = None
+    # 当前反转组的头节点
+    current_group_head = head
+    # 当前节点
+    current_node = head
+
+    while current_node is not None:
+        # 判断是否需要反转, 计数是否等于 k 以及当前节点是否已经走到链表末尾
+        should_reverse = is_group_to_reverse and (running_k == k or current_node.next is None)
+        # 不需要反转的情况
+        if not should_reverse:
+            # 由于需要每间隔 k 个节点后反转 k 个节点
+            # 所以第二次计数等于 k 的时候需要记录一次分组的末尾节点
+            # 和当前分组的头节点
+            if running_k == k:
+                running_k = 1
+                # 下一次需要进行反转, 即到达了 2 * k 位置
+                is_group_to_reverse = True
+
+                previous_group_tail = current_node
+                current_group_head = current_node.next
+            else:
+                # 累加计数的值
+                running_k += 1
+            # 继续移动节点指针
+            current_node = current_node.next
+            continue
+        # 到达了 2 * k 位置的节点, 这里需要进行反转
+        # 重置计数
+        running_k = 1
+        # 标记为不许要反转
+        is_group_to_reverse = False
+        # 先记录当前节点的下一个节点
+        next_node = current_node.next
+        # 断开链表的链接
+        current_node.next = None
+        # 反转链表
+        reversed_group_head = reverse_linked_list(current_group_head)
+        # 重新将链表链接起来
+        reversed_group_tail = current_group_head
+        reversed_group_tail.next = next_node
+        # 如果上一个分组节点是空的则记录最终返回的链表头
+        if previous_group_tail is None:
+            final_head = reversed_group_head
+        # 否则重新链接上前一个链表, 因为在反转的操作里头部和尾部都已经断开了链接
+        else:
+            previous_group_tail.next = reversed_group_head
+        # 继续移动节点指针
+        current_node = next_node
+        # 更新记录的当前分组头节点
+        current_group_head = next_node
+        # 更新记录的前一个分组末尾节点
+        previous_group_tail = reversed_group_tail
+
+    return final_head
+
+
+def reverse_linked_list(head):
+    previous_node, current_node = None, head
+    while current_node is not None:
+        next_node = current_node.next
+        current_node.next = previous_node
+        previous_node = current_node
+        current_node = next_node
+    return previous_node
+
+
+# O(n) time | O(1) space - where n is the number of nodes in the Linked List
+def reverse_alternating_k_nodes2(head, k):
+    final_head = None
+
+    previous_node = None
+    # 当前节点初始指向链表头
+    current_node = head
+    while current_node is not None:
+        # 与方法 1 相比更直接, 在反转操作里直接反转 k 个节点, 并接收反转后的头节点和反转部分末尾的下一个节点
+        reversed_group_head, next_node = reverse_k_nodes(current_node, k)
+        # 由于已经反转了链表, `current_node` 其实已经变成了被反转链表部分的末尾节点
+        # 所以这里需要将链表和后面的节点链接起来
+        current_node.next = next_node
+        current_node = next_node
+        if previous_node is None:
+            # 首次处理需要记录最终返回的头节点
+            final_head = reversed_group_head
+        else:
+            # 重新链接上前一个链表, 因为在反转的操作里头部和尾部都已经断开了链接
+            previous_node.next = reversed_group_head
+        # 反转了 k 个节点后, 需要跳过 k 个节点
+        skipped_nodes_count = 0
+        while current_node is not None and skipped_nodes_count < k:
+            previous_node = current_node
+            current_node = current_node.next
+
+            skipped_nodes_count += 1
+
+    return final_head
+
+
+def reverse_k_nodes(head, k):
+    # 记录反转的节点树量
+    reversed_nodes_count = 0
+    previous_node, current_node = None, head
+    while current_node is not None and reversed_nodes_count < k:
+        next_node = current_node.next
+        current_node.next = previous_node
+        previous_node = current_node
+        current_node = next_node
+        # 累加计数
+        reversed_nodes_count += 1
+
+    return previous_node, current_node
+
+
+def constructor_linked_list(array):
+    head_element = LinkedList(array[0])
+    point = head_element
+    for i in range(1, len(array)):
+        point.next = LinkedList(array[i])
+        point = point.next
+    return head_element
+
+
+def iter_linked_list(ll):
+    while ll is not None:
+        print(ll.value, end=' ')
+        ll = ll.next
+    print()
+
+
+if __name__ == '__main__':
+    source = constructor_linked_list(list(range(1, 15)))
+    iter_linked_list(reverse_alternating_k_nodes1(source, 3))
+    source = constructor_linked_list(list(range(1, 15)))
+    iter_linked_list(reverse_alternating_k_nodes2(source, 3))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class LinkedList
+{
+public:
+    int value;
+    LinkedList *next;
+
+    LinkedList(int value)
+    {
+        this->value = value;
+        this->next = nullptr;
+    }
+};
+
+LinkedList *reverseLinkedList(LinkedList *head);
+
+// O(n) time | O(1) space - where n is the number of nodes in the Linked List
+LinkedList *reverseAlternatingKNodes1(LinkedList *head, int k)
+{
+    LinkedList *finalHead = nullptr;
+
+    auto isGroupToReverse = true;
+    auto runningK = 1;
+
+    LinkedList *previousGroupTail = nullptr;
+    LinkedList *currentGroupHead = head;
+    LinkedList *currentNode = head;
+
+    while (currentNode != nullptr)
+    {
+        auto shouldReverse =
+            isGroupToReverse && (runningK == k || currentNode->next == nullptr);
+
+        if (!shouldReverse)
+        {
+            if (runningK == k)
+            {
+                runningK = 1;
+                isGroupToReverse = true;
+
+                previousGroupTail = currentNode;
+                currentGroupHead = currentNode->next;
+            }
+            else
+            {
+                runningK += 1;
+            }
+
+            currentNode = currentNode->next;
+            continue;
+        }
+
+        runningK = 1;
+        isGroupToReverse = false;
+
+        auto nextNode = currentNode->next;
+        currentNode->next = nullptr;
+        auto reversedGroupHead = reverseLinkedList(currentGroupHead);
+        auto reversedGroupTail = currentGroupHead;
+        reversedGroupTail->next = nextNode;
+
+        if (previousGroupTail == nullptr)
+        {
+            finalHead = reversedGroupHead;
+        }
+        else
+        {
+            previousGroupTail->next = reversedGroupHead;
+        }
+
+        currentNode = nextNode;
+        currentGroupHead = nextNode;
+        previousGroupTail = reversedGroupTail;
+    }
+
+    return finalHead;
+}
+
+LinkedList *reverseLinkedList(LinkedList *head)
+{
+    LinkedList *previousNode = nullptr;
+    LinkedList *currentNode = head;
+    while (currentNode != nullptr)
+    {
+        LinkedList *nextNode = currentNode->next;
+        currentNode->next = previousNode;
+        previousNode = currentNode;
+        currentNode = nextNode;
+    }
+    return previousNode;
+}
+
+pair<LinkedList *, LinkedList *> reverseKNodes(LinkedList *head, int k);
+
+// O(n) time | O(1) space - where n is the number of nodes in the Linked List
+LinkedList *reverseAlternatingKNodes2(LinkedList *head, int k)
+{
+    LinkedList *finalHead = nullptr;
+
+    LinkedList *previousNode = nullptr;
+    auto currentNode = head;
+
+    while (currentNode != nullptr)
+    {
+        auto reversed = reverseKNodes(currentNode, k);
+        auto reversedGroupHead = reversed.first;
+        auto nextNode = reversed.second;
+
+        // The `currentNode` is now the tail of the reversed
+        // group, so we make it point to the `nextNode`.
+        currentNode->next = nextNode;
+        currentNode = nextNode;
+
+        if (previousNode == nullptr)
+        {
+            finalHead = reversedGroupHead;
+        }
+        else
+        {
+            previousNode->next = reversedGroupHead;
+        }
+
+        auto skippedNodesCount = 0;
+        while (currentNode != nullptr && skippedNodesCount < k)
+        {
+            previousNode = currentNode;
+            currentNode = currentNode->next;
+
+            skippedNodesCount++;
+        }
+    }
+
+    return finalHead;
+}
+
+pair<LinkedList *, LinkedList *> reverseKNodes(LinkedList *head, int k)
+{
+    auto reversedNodesCount = 0;
+    LinkedList *previousNode = nullptr;
+    auto currentNode = head;
+    while (currentNode != nullptr && reversedNodesCount < k)
+    {
+        auto nextNode = currentNode->next;
+        currentNode->next = previousNode;
+        previousNode = currentNode;
+        currentNode = nextNode;
+
+        reversedNodesCount++;
+    }
+    return {previousNode, currentNode};
+}
+
+LinkedList *constructorLinkedList(vector<int> array)
+{
+    LinkedList *head = new LinkedList(array[0]);
+    LinkedList *point = head;
+    const int length = array.size();
+    for (int i = 1; i < length; i++)
+    {
+        point->next = new LinkedList(array[i]);
+        point = point->next;
+    }
+    return head;
+}
+
+void iterLinkedList(LinkedList *head)
+{
+    while (head != nullptr)
+    {
+        cout << head->value << " ";
+        head = head->next;
+    }
+    cout << endl;
+}
+
+int main()
+{
+    vector<int> source = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+    iterLinkedList(reverseAlternatingKNodes1(constructorLinkedList(source), 3));
+    iterLinkedList(reverseAlternatingKNodes2(constructorLinkedList(source), 3));
+    return 0;
+}
+```
+
+Last Modified 2022-07-03
