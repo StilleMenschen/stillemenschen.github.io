@@ -2484,4 +2484,181 @@ int main()
 }
 ```
 
-Last Modified 2022-05-07
+## 计算字符串排列数
+
+给定两个字符串，一个长度较大的字符串和一个长度较小的字符串，计算在大字符串中可以通过字符的排列组合出小字符串的所有子字符串数量
+
+```python
+# O(b + s) time | O(s) space - where b is the length of the big
+# input string and s is the length of the small input string
+def count_contained_permutations(big_string, small_string):
+    # 统计小字符串中的字符数量
+    small_string_char_counts = get_char_counts(small_string)
+    # 计算小字符串中不重复字符数量
+    num_unique_chars = len(small_string_char_counts.keys())
+    # 记录在大字符串中找到的字符统计
+    running_char_counts = {}
+    # 记录符合排列组合的数量
+    permutations_count = 0
+    # 记录当前完成的每个字符计数数量
+    num_unique_chars_done = 0
+    # 分为两个指针位置
+    left_idx = 0
+    right_idx = 0
+    while right_idx < len(big_string):
+        # 先处理右指针指向的字符
+        right_char = big_string[right_idx]
+        # 如果包含在期望的字符列表中
+        if right_char in small_string_char_counts:
+            # 累加当前记录的字符
+            increase_char_count(right_char, running_char_counts)
+            # 如果某个字符达到了预期的字符数量
+            if running_char_counts[right_char] == small_string_char_counts[right_char]:
+                # 累加已统计完成的不重复字符统计
+                num_unique_chars_done += 1
+        # 如果累计已统计完的字符数与期望的总计不重复字符树一致
+        if num_unique_chars_done == num_unique_chars:
+            # 累加符合排列组合的数量
+            permutations_count += 1
+        # 累加右指针
+        right_idx += 1
+        # 判断左右指针的距离是否等于小字符串长度
+        should_increment_left_idx = right_idx - left_idx == len(small_string)
+        # 不符合则跳过, 符合则走到下面的逻辑
+        if not should_increment_left_idx:
+            continue
+
+        left_char = big_string[left_idx]
+        # 判断左指针指向的, 如果包含在期望的字符列表中
+        if left_char in small_string_char_counts:
+            # 如果某个字符达到了预期的字符数量
+            if running_char_counts[left_char] == small_string_char_counts[left_char]:
+                num_unique_chars_done -= 1
+            # 递减当前记录的字符
+            decrease_char_count(left_char, running_char_counts)
+        # 移动左指针
+        left_idx += 1
+
+    return permutations_count
+
+
+def get_char_counts(string):
+    char_counts = {}
+    for char in string:
+        increase_char_count(char, char_counts)
+    return char_counts
+
+
+def increase_char_count(char, char_counts):
+    if char not in char_counts:
+        char_counts[char] = 0
+    char_counts[char] += 1
+
+
+def decrease_char_count(char, char_counts):
+    char_counts[char] -= 1
+
+
+if __name__ == '__main__':
+    print(count_contained_permutations('cbabcacabca', 'abc'))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+using namespace std;
+
+unordered_map<char, int> getCharCounts(string str);
+void increaseCharCount(char c, unordered_map<char, int> &charCounts);
+void decreaseCharCount(char c, unordered_map<char, int> &charCounts);
+
+// O(b + s) time | O(s) space - where b is the length of the big
+// input string and s is the length of the small input string
+int countContainedPermutations(string bigString, string smallString)
+{
+    auto smallStringCharCounts = getCharCounts(smallString);
+    const int numUniqueChars = smallStringCharCounts.size();
+
+    unordered_map<char, int> runningCharCounts = {};
+    int permutationsCount = 0;
+    int numUniqueCharsDone = 0;
+    int leftIdx = 0;
+    int rightIdx = 0;
+    const int bigStringSize = bigString.size();
+    const int smallStringSize = smallString.size();
+    while (rightIdx < bigStringSize)
+    {
+        auto rightChar = bigString[rightIdx];
+        if (smallStringCharCounts.find(rightChar) != smallStringCharCounts.end())
+        {
+            increaseCharCount(rightChar, runningCharCounts);
+
+            if (runningCharCounts[rightChar] == smallStringCharCounts[rightChar])
+            {
+                numUniqueCharsDone++;
+            }
+        }
+
+        if (numUniqueCharsDone == numUniqueChars)
+        {
+            permutationsCount++;
+        }
+        rightIdx++;
+
+        auto shouldIncrementLeftIdx = (rightIdx - leftIdx == smallStringSize);
+        if (!shouldIncrementLeftIdx)
+            continue;
+
+        auto leftChar = bigString[leftIdx];
+        if (smallStringCharCounts.find(leftChar) != smallStringCharCounts.end())
+        {
+            if (runningCharCounts[leftChar] == smallStringCharCounts[leftChar])
+            {
+                numUniqueCharsDone--;
+            }
+
+            decreaseCharCount(leftChar, runningCharCounts);
+        }
+
+        leftIdx++;
+    }
+    return permutationsCount;
+}
+
+unordered_map<char, int> getCharCounts(string str)
+{
+    unordered_map<char, int> charCounts = {};
+    for (auto c : str)
+    {
+        increaseCharCount(c, charCounts);
+    }
+    return charCounts;
+}
+
+void increaseCharCount(char c, unordered_map<char, int> &charCounts)
+{
+    if (charCounts.find(c) == charCounts.end())
+    {
+        charCounts[c] = 0;
+    }
+    charCounts[c]++;
+}
+
+void decreaseCharCount(char c, unordered_map<char, int> &charCounts)
+{
+    if (charCounts.find(c) == charCounts.end())
+    {
+        charCounts[c] = 0;
+    }
+    charCounts[c]--;
+}
+
+int main()
+{
+    cout << countContainedPermutations("cbabcacabca", "abc");
+    return 0;
+}
+```
+
+Last Modified 2022-07-03
