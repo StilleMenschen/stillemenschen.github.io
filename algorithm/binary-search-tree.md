@@ -2593,4 +2593,223 @@ int main()
 }
 ```
 
-Last Modified 2022-06-30
+## 符合值范围的子树
+
+给定一个二叉搜索树和一个取值范围，找出值在此范围内的子树数量
+
+```python
+# Average case: when the tree is balanced
+# O(n) time | O(h) space - where n is the number of
+# nodes in the BST and h is the height of the BST
+def subtrees_within_range1(tree, target_range):
+    # 统计符合指定范围值的子树数量
+    return get_tree_info(tree, target_range).num_subtrees_within_range
+
+
+def get_tree_info(tree, target_range):
+    # 二叉搜索树的特点是左子树必定比父级小, 右子树必定大于或等于父级
+    num_subtrees_within_range = 0
+    max_value = tree.value
+    min_value = tree.value
+    # 递归处理左子树
+    if tree.left is not None:
+        left_subtree_info = get_tree_info(tree.left, target_range)
+        min_value = left_subtree_info.min_value
+        num_subtrees_within_range += left_subtree_info.num_subtrees_within_range
+    # 递归处理右子树
+    if tree.right is not None:
+        right_subtree_info = get_tree_info(tree.right, target_range)
+        max_value = right_subtree_info.max_value
+        num_subtrees_within_range += right_subtree_info.num_subtrees_within_range
+    # 如果左子树的最小值和右子树的最大值都在指定范围内, 则表示当前的父级也是符合条件的
+    if min_value >= target_range[0] and max_value <= target_range[1]:
+        num_subtrees_within_range += 1
+
+    return TreeInfo(
+        max_value,
+        min_value,
+        num_subtrees_within_range,
+    )
+
+
+class TreeInfo:
+    def __init__(self, max_value, min_value, num_subtrees_within_range):
+        self.max_value = max_value
+        self.min_value = min_value
+        self.num_subtrees_within_range = num_subtrees_within_range
+
+
+# This is the class of the input BST.
+class BST:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+
+# Average case: when the tree is balanced
+# O(n) time | O(h) space - where n is the number of
+# nodes in the BST and h is the height of the BST
+def subtrees_within_range2(tree, target_range):
+    answer = {"result": 0}
+    # 递归计算所有符合条件的子树数量
+    is_tree_within_range(tree, target_range, answer)
+    return answer["result"]
+
+
+def is_tree_within_range(tree, target_range, answer):
+    # 递归的终点, 空的子树返回对
+    if tree is None:
+        return True
+    # 递归处理左子树
+    left_tree_within_range = is_tree_within_range(tree.left, target_range, answer)
+    # 递归处理右子树
+    right_tree_within_range = is_tree_within_range(tree.right, target_range, answer)
+    # 当前子树的值是否在指定的范围内
+    node_in_range = target_range[0] <= tree.value <= target_range[1]
+    # 是否当前值以及左右子树都在范围内
+    tree_within_range = left_tree_within_range and right_tree_within_range and node_in_range
+    # 满足上面的条件则累加计数
+    if tree_within_range:
+        answer["result"] += 1
+
+    return tree_within_range
+
+
+def insert_level_order(array, tree, index, length):
+    if index < length and array[index] is not None:
+        tree = BST(array[index])
+        tree.left = insert_level_order(array, tree.left, 2 * index + 1, length)
+        tree.right = insert_level_order(array, tree.right, 2 * index + 2, length)
+    return tree
+
+
+if __name__ == '__main__':
+    source = [10, 5, 15, 2, 8, 13, 22, 1, 5, 9, 14]
+    root = insert_level_order(source, None, 0, len(source))
+    print(subtrees_within_range1(root, [5, 15]))
+    print(subtrees_within_range2(root, [5, 15]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+class BST
+{
+public:
+    int value;
+    BST *left;
+    BST *right;
+
+    BST(int value)
+    {
+        this->value = value;
+        this->left = nullptr;
+        this->right = nullptr;
+    }
+};
+
+struct TreeInfo
+{
+    int maxValue;
+    int minValue;
+    int numSubtreesWithinRange;
+};
+
+TreeInfo getTreeInfo(BST *tree, vector<int> targetRange);
+
+// Average case: when the tree is balanced
+// O(n) time | O(h) space - where n is the number of
+// nodes in the BST and h is the height of the BST
+int subtreesWithinRange1(BST *tree, vector<int> targetRange)
+{
+    return getTreeInfo(tree, targetRange).numSubtreesWithinRange;
+}
+
+TreeInfo getTreeInfo(BST *tree, vector<int> targetRange)
+{
+    auto numSubtreesWithinRange = 0;
+    auto maxValue = tree->value;
+    auto minValue = tree->value;
+
+    if (tree->left != nullptr)
+    {
+        auto leftSubtreeInfo = getTreeInfo(tree->left, targetRange);
+        minValue = leftSubtreeInfo.minValue;
+        numSubtreesWithinRange += leftSubtreeInfo.numSubtreesWithinRange;
+    }
+
+    if (tree->right != nullptr)
+    {
+        auto rightSubtreeInfo = getTreeInfo(tree->right, targetRange);
+        maxValue = rightSubtreeInfo.maxValue;
+        numSubtreesWithinRange += rightSubtreeInfo.numSubtreesWithinRange;
+    }
+
+    if (minValue >= targetRange[0] && maxValue <= targetRange[1])
+        numSubtreesWithinRange++;
+
+    return TreeInfo{maxValue, minValue, numSubtreesWithinRange};
+}
+
+struct Result
+{
+    int value;
+};
+
+bool isTreeWithinRange(BST *tree, vector<int> targetRange, Result *answer);
+
+// Average case: when the tree is balanced
+// O(n) time | O(h) space - where n is the number of
+// nodes in the BST and h is the height of the BST
+int subtreesWithinRange2(BST *tree, vector<int> targetRange)
+{
+    auto answer = new Result{0};
+    isTreeWithinRange(tree, targetRange, answer);
+    return answer->value;
+}
+
+bool isTreeWithinRange(BST *tree, vector<int> targetRange, Result *answer)
+{
+    if (tree == nullptr)
+        return true;
+
+    auto leftTreeWithinRange = isTreeWithinRange(tree->left, targetRange, answer);
+    auto rightTreeWithinRange =
+        isTreeWithinRange(tree->right, targetRange, answer);
+    auto nodeInRange =
+        tree->value >= targetRange[0] && tree->value <= targetRange[1];
+    auto treeWithinRange =
+        leftTreeWithinRange && rightTreeWithinRange && nodeInRange;
+
+    if (treeWithinRange)
+        answer->value++;
+
+    return treeWithinRange;
+}
+
+BST *insertLevelOrder(vector<int> &array, BST *tree, int index, int length)
+{
+    if (index < length && array[index] != INT_MIN)
+    {
+        tree = new BST(array[index]);
+        tree->left = insertLevelOrder(array, tree->left, 2 * index + 1, length);
+        tree->right = insertLevelOrder(array, tree->right, 2 * index + 2, length);
+    }
+    return tree;
+}
+
+int main()
+{
+    vector<int> source = {10, 5, 15, 2, 8, 13, 22, 1, 5, 9, 14};
+    BST *root = insertLevelOrder(source, nullptr, 0, source.size());
+    cout << subtreesWithinRange1(root, {5, 15}) << endl;
+    cout << subtreesWithinRange2(root, {5, 15}) << endl;
+    return 0;
+}
+```
+
+Last Modified 2022-07-03
