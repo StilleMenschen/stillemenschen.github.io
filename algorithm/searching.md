@@ -873,4 +873,286 @@ int main()
 }
 ```
 
-Last Modified 2022-03-02
+## 连续构建失败
+
+给定一个二维数组，每个一维数组表示一次构建任务的通过和不通过统计数据，数组中的值为通过`true`或不通过`false`，找出这些构建任务执行是否存在连续失败（通过率越来越低）的情况，
+如果有存在则返回最大的连续失败次数，如果没有连续失败的情况则返回`-1`
+
+```python
+# O(nlog(m)) time | O(n + log(m)) space - where n is the number
+# of build runs and m is the length of the longest build run
+def build_failures1(build_runs):
+    # 计算出所有构建任务的通过率
+    green_percentages = list(map(calculate_green_percentage1, build_runs))
+    # 检查连续失败次数(构建失败率越来越高, 通过率越来约低)
+    return get_longest_decreasing_subarray_length(green_percentages)
+
+
+def calculate_green_percentage1(build_run):
+    # 通过二叉树查找找到第一个失败的测试的索引
+    first_false_idx = binary_search_for_first_false1(build_run, 0, len(build_run) - 1)
+    # 通过简单计算获得通过率
+    return first_false_idx / len(build_run)
+
+
+# Recursive Binary Search.
+def binary_search_for_first_false1(array, left_idx, right_idx):
+    if left_idx > right_idx:
+        return -1
+    # 二分查找
+    middle_idx = (left_idx + right_idx) // 2
+    is_false = not array[middle_idx]
+    if is_false:
+        # 如果当前是失败的, 则判断前面是否还有失败的测试
+        is_first_false = middle_idx == 0 or array[middle_idx - 1]
+        # 当前为失败的测试, 且前面的测试是通过的, 说明找到了首次失败
+        if is_first_false:
+            return middle_idx
+        else:
+            # 不满足上述条件则向左搜索
+            return binary_search_for_first_false1(array, left_idx, middle_idx - 1)
+    else:
+        # 当前测试是成功的, 向右搜索
+        return binary_search_for_first_false1(array, middle_idx + 1, right_idx)
+
+
+def get_longest_decreasing_subarray_length(array):
+    # 记录连续失败此时
+    longest_length = 1
+    # 记录当前的连续失败次数
+    current_longest_length = 1
+
+    for i in range(1, len(array)):
+        # 检查是否连续失败
+        if array[i] < array[i - 1]:
+            # 累加失败次数
+            current_longest_length += 1
+            # 求出最大的连续失败次数
+            longest_length = max(longest_length, current_longest_length)
+        else:
+            # 不是连续失败的则重置计算次数为 1
+            current_longest_length = 1
+    # 如果连续失败次数大于 1 则返回, 否则返回 -1 表示没有连续的高失败率(低通过率)
+    return longest_length if longest_length > 1 else -1
+
+
+# O(nlog(m)) time | O(1) space - where n is the number of
+# build runs and m is the length of the longest build run
+def build_failures2(build_runs):
+    # 与上面的方法 1 类似, 只是每次只计算一次构建任务的通过率
+    longest_length = 1
+    current_longest_length = 1
+    # 先计算第一个构建任务的通过率
+    previous_green_percentage = calculate_green_percentage2(build_runs[0])
+
+    for i in range(1, len(build_runs)):
+        # 每次循环都计算当前构建任务的通过率, 并与前一次的构建任务通过率对比
+        current_green_percentage = calculate_green_percentage2(build_runs[i])
+        if current_green_percentage < previous_green_percentage:
+            current_longest_length += 1
+            longest_length = max(longest_length, current_longest_length)
+        else:
+            current_longest_length = 1
+        # 保持当前构建任务的通过率为前一次通过率
+        previous_green_percentage = current_green_percentage
+
+    return longest_length if longest_length > 1 else -1
+
+
+def calculate_green_percentage2(build_run):
+    first_false_idx = binary_search_for_first_false2(build_run)
+    return first_false_idx / len(build_run)
+
+
+# Iterative Binary Search.
+def binary_search_for_first_false2(array):
+    left_idx = 0
+    right_idx = len(array) - 1
+
+    while left_idx <= right_idx:
+        middle_idx = (left_idx + right_idx) // 2
+        is_false = not array[middle_idx]
+        if is_false:
+            is_first_false = middle_idx == 0 or array[middle_idx - 1]
+            if is_first_false:
+                return middle_idx
+            else:
+                right_idx = middle_idx - 1
+        else:
+            left_idx = middle_idx + 1
+
+    return -1
+
+
+if __name__ == '__main__':
+    source = [
+        [True, True, True, False, False],
+        [True, True, True, True, False],
+        [True, True, True, True, True, True, False, False, False],
+        [True, False, False, False, False, False],
+        [True, True, True, True, True, True, True, True, True, True, True, True, False],
+        [True, False],
+        [True, True, True, True, False, False]
+    ]
+    print(build_failures1(source))
+    print(build_failures2(source))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+using namespace std;
+
+double calculateGreenPercentage1(vector<bool> &buildRun);
+int binarySearchForFirstFalse1(vector<bool> &array, int leftIdx, int rightIdx);
+int getLongestDecreasingSubarrayLength(vector<double> &array);
+
+// O(nlog(m)) time | O(n + log(m)) space - where n is the number
+// of build runs and m is the length of the longest build run
+int buildFailures1(vector<vector<bool>> &buildRuns)
+{
+    vector<double> greenPercentages;
+    for (auto buildRun : buildRuns)
+    {
+        greenPercentages.push_back(calculateGreenPercentage1(buildRun));
+    }
+    return getLongestDecreasingSubarrayLength(greenPercentages);
+}
+
+double calculateGreenPercentage1(vector<bool> &buildRun)
+{
+    auto firstFalseIdx =
+        binarySearchForFirstFalse1(buildRun, 0, buildRun.size() - 1);
+    return (double)firstFalseIdx / buildRun.size();
+}
+
+// Recursive Binary Search.
+int binarySearchForFirstFalse1(vector<bool> &array, int leftIdx, int rightIdx)
+{
+    if (leftIdx > rightIdx)
+        return -1;
+
+    int middleIdx = (leftIdx + rightIdx) / 2;
+    auto isFalse = !array[middleIdx];
+    if (isFalse)
+    {
+        auto isFirstFalse = middleIdx == 0 || array[middleIdx - 1];
+        if (isFirstFalse)
+        {
+            return middleIdx;
+        }
+        else
+        {
+            return binarySearchForFirstFalse1(array, leftIdx, middleIdx - 1);
+        }
+    }
+    else
+    {
+        return binarySearchForFirstFalse1(array, middleIdx + 1, rightIdx);
+    }
+}
+
+int getLongestDecreasingSubarrayLength(vector<double> &array)
+{
+    auto longestLength = 1;
+    auto currentLongestLength = 1;
+    const int arraySize = array.size();
+    for (auto i = 1; i < arraySize; i++)
+    {
+        if (array[i] < array[i - 1])
+        {
+            currentLongestLength++;
+            longestLength = max(longestLength, currentLongestLength);
+        }
+        else
+        {
+            currentLongestLength = 1;
+        }
+    }
+
+    return longestLength > 1 ? longestLength : -1;
+}
+
+double calculateGreenPercentage2(vector<bool> &buildRun);
+int binarySearchForFirstFalse2(vector<bool> &array);
+
+// O(nlog(m)) time | O(1) space - where n is the number of
+// build runs and m is the length of the longest build run
+int buildFailures2(vector<vector<bool>> &buildRuns)
+{
+    auto longestLength = 1;
+    auto currentLongestLength = 1;
+    auto previousGreenPercentage = calculateGreenPercentage2(buildRuns[0]);
+    const int buildRunsSize = buildRuns.size();
+    for (auto i = 1; i < buildRunsSize; i++)
+    {
+        auto currentGreenPercentage = calculateGreenPercentage2(buildRuns[i]);
+        if (currentGreenPercentage < previousGreenPercentage)
+        {
+            currentLongestLength++;
+            longestLength = max(longestLength, currentLongestLength);
+        }
+        else
+        {
+            currentLongestLength = 1;
+        }
+        previousGreenPercentage = currentGreenPercentage;
+    }
+
+    return longestLength > 1 ? longestLength : -1;
+}
+
+double calculateGreenPercentage2(vector<bool> &buildRun)
+{
+    auto firstFalseIdx = binarySearchForFirstFalse2(buildRun);
+    return (double)firstFalseIdx / buildRun.size();
+}
+
+// Iterative Binary Search.
+int binarySearchForFirstFalse2(vector<bool> &array)
+{
+    int leftIdx = 0;
+    int rightIdx = array.size() - 1;
+
+    while (leftIdx <= rightIdx)
+    {
+        int middleIdx = (leftIdx + rightIdx) / 2;
+        bool isFalse = !array[middleIdx];
+        if (isFalse)
+        {
+            bool isFirstFalse = middleIdx == 0 || array[middleIdx - 1];
+            if (isFirstFalse)
+            {
+                return middleIdx;
+            }
+            else
+            {
+                rightIdx = middleIdx - 1;
+            }
+        }
+        else
+        {
+            leftIdx = middleIdx + 1;
+        }
+    }
+
+    return -1;
+}
+
+int main()
+{
+    vector<vector<bool>> source = {
+        {true, true, true, false, false},
+        {true, true, true, true, false},
+        {true, true, true, true, true, true, false, false, false},
+        {true, false, false, false, false, false},
+        {true, true, true, true, true, true, true, true, true, true, true, true, false},
+        {true, false},
+        {true, true, true, true, false, false}};
+    cout << buildFailures1(source) << endl;
+    cout << buildFailures2(source) << endl;
+    return 0;
+}
+```
+
+Last Modified 2022-07-03
