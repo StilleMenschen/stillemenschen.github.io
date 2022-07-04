@@ -1843,4 +1843,144 @@ int main()
 }
 ```
 
-Last Modified 2022-05-31
+## 矩阵内最长递增路径
+
+给定一个包含整数的二维数组（矩阵），矩阵内存在从小到达递增的路径，类似平面图中的路径，但是要求路径上的数值大小是逐渐递增的，找出最长的路径长度
+
+```python
+# O(n) time | O(n) space - where n is the total number of elements in the matrix
+def longest_increasing_matrix_path(matrix):
+    # 创建一个路径跟踪的缓存
+    longest_path_lengths = []
+    for i in range(len(matrix)):
+        row = []
+        # 全部的存储先默认设置为空
+        for j in range(len(matrix[0])):
+            row.append(None)
+        longest_path_lengths.append(row)
+    # 初始最长的递增路径为 0
+    longest_path_length = 0
+    for row in range(len(matrix)):
+        for col in range(len(matrix[0])):
+            # 遍历矩阵, 从所有的位置开始尝试, 获取最长的递增路径
+            longest_path_length = max(
+                # 默认的起始值为无穷小, 方便判断是否递增
+                get_longest_path_length_at(matrix, row, col, float("-inf"), longest_path_lengths),
+                longest_path_length,
+            )
+
+    return longest_path_length
+
+
+def get_longest_path_length_at(matrix, row, col, last_path_value, longest_path_lengths):
+    is_out_of_bounds = row < 0 or col < 0 or row >= len(matrix) or col >= len(matrix[0])
+    # 如果超出边界则返回 0
+    if is_out_of_bounds:
+        return 0
+
+    current_value = matrix[row][col]
+    # 如果不符合递增的要求则返回 0
+    if current_value <= last_path_value:
+        return 0
+    # 如果没有记录过最长路径则继续递归
+    if longest_path_lengths[row][col] is None:
+        # 向上下左右开始遍历, 并传递当前位置的值
+        longest_path_lengths[row][col] = 1 + max(
+            get_longest_path_length_at(matrix, row - 1, col, current_value, longest_path_lengths),
+            get_longest_path_length_at(matrix, row + 1, col, current_value, longest_path_lengths),
+            get_longest_path_length_at(matrix, row, col - 1, current_value, longest_path_lengths),
+            get_longest_path_length_at(matrix, row, col + 1, current_value, longest_path_lengths),
+        )
+
+    return longest_path_lengths[row][col]
+
+
+if __name__ == '__main__':
+    print(longest_increasing_matrix_path([
+        [1, 2, 4, 3, 2],
+        [7, 6, 5, 5, 1],
+        [8, 9, 7, 15, 14],
+        [5, 10, 11, 12, 13]
+    ]))
+```
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+int getLongestPathLengthAt(vector<vector<int>> &matrix, int row, int col,
+                           int lastPathValue,
+                           vector<vector<int>> &longestPathLengths);
+
+// O(n) time | O(n) space - where n is the total number of elements in the
+// matrix
+int longestIncreasingMatrixPath(vector<vector<int>> matrix)
+{
+    vector<vector<int>> longestPathLengths = {};
+    const int matrixSize = matrix.size();
+    const int matrixRowSize = matrix[0].size();
+    for (int i = 0; i < matrixSize; i++)
+    {
+        vector<int> row = {};
+        for (int j = 0; j < matrixRowSize; j++)
+        {
+            row.push_back(INT_MIN);
+        }
+        longestPathLengths.push_back(row);
+    }
+
+    auto longestPathLength = 0;
+    for (int row = 0; row < matrixSize; row++)
+    {
+        for (int col = 0; col < matrixRowSize; col++)
+        {
+            longestPathLength = max(
+                getLongestPathLengthAt(matrix, row, col, INT_MIN, longestPathLengths),
+                longestPathLength);
+        }
+    }
+    return longestPathLength;
+}
+
+int getLongestPathLengthAt(vector<vector<int>> &matrix, int row, int col,
+                           int lastPathValue,
+                           vector<vector<int>> &longestPathLengths)
+{
+    bool isOutOfBounds =
+        row < 0 || col < 0 || row >= matrix.size() || col >= matrix[0].size();
+    if (isOutOfBounds)
+        return 0;
+
+    auto currentValue = matrix[row][col];
+    if (currentValue <= lastPathValue)
+        return 0;
+
+    if (longestPathLengths[row][col] == INT_MIN)
+    {
+        auto candidate1 = getLongestPathLengthAt(matrix, row - 1, col, currentValue,
+                                                 longestPathLengths);
+        auto candidate2 = getLongestPathLengthAt(matrix, row + 1, col, currentValue,
+                                                 longestPathLengths);
+        auto candidate3 = getLongestPathLengthAt(matrix, row, col - 1, currentValue,
+                                                 longestPathLengths);
+        auto candidate4 = getLongestPathLengthAt(matrix, row, col + 1, currentValue,
+                                                 longestPathLengths);
+        longestPathLengths[row][col] = {
+            1 + max(max(candidate1, candidate2), max(candidate3, candidate4))};
+    }
+    return longestPathLengths[row][col];
+}
+
+int main()
+{
+    cout << longestIncreasingMatrixPath({{1, 2, 4, 3, 2},
+                                         {7, 6, 5, 5, 1},
+                                         {8, 9, 7, 15, 14},
+                                         {5, 10, 11, 12, 13}});
+    return 0;
+}
+```
+
+Last Modified 2022-07-04
