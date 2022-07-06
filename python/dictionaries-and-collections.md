@@ -25,6 +25,7 @@ for word in sorted(index.keys(), key=str.upper):
 
 ```python
 import collections
+from types import MappingProxyType
 
 
 class StrKeyDict(collections.UserDict):
@@ -45,7 +46,16 @@ print(d['2'])
 print(d[2])
 print(d.get(3, 'N/A'))
 print(1 in d)
-print(d[True])
+try:
+    print(d[True])
+except KeyError:
+    print('--- KeyError')
+
+# 代理只能访问, 不能对其进行更新操作
+d_proxy = MappingProxyType(d)
+print(d_proxy['2'])
+d['3'] = 'three'
+print(d_proxy)
 ```
 
 ## 集
