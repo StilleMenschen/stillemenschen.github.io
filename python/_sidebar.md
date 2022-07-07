@@ -13,5 +13,5 @@
   - [Special Methods](python/object-special-methods.md)
   - [Sequence](python/sequence.md)
   - [Dictionaries & Collections](python/dictionaries-and-collections.md)
-  - [String & Bytes](python/str-and-bytes.md)
+  - [Text & Bytes](python/text-and-bytes.md)
   - [Linux Compile Install](python/linux-compile-install.md)
