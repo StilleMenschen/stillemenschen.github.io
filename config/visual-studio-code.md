@@ -11,7 +11,8 @@ settings.json
     "emmet.triggerExpansionOnTab": true,
     "python.formatting.provider": "yapf",
     "python.linting.pylintPath": "pylint",
-    "php.validate.executablePath": "D:\\Programs\\php\\php.exe",
+    "php.validate.executablePath": "php.exe",
+    "php.executablePath": "php.exe",
     "prettier.printWidth": 120,
     "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
     "typescript.format.insertSpaceBeforeFunctionParenthesis": true,
@@ -89,10 +90,10 @@ settings.json
         },
     },
     "python.autoComplete.extraPaths": [
-        "D:\\Programs\\Python310\\Lib\\site-packages"
+        "D:/Python310/Lib/site-packages"
     ],
     "python.analysis.extraPaths": [
-        "D:\\Programs\\Python310\\Lib\\site-packages"
+        "D:/Python310/Lib/site-packages"
     ],
     "terminal.integrated.defaultProfile.windows": "PowerShell",
     "security.workspace.trust.enabled": false,
@@ -110,7 +111,11 @@ settings.json
     "gitlens.blame.avatars": false,
     "diffEditor.ignoreTrimWhitespace": false,
     "gitlens.views.searchAndCompare.files.layout": "tree",
+    "timeline.excludeSources": [
+        "timeline.localHistory"
+    ],
+    "files.eol": "\n"
 }
 ```
 
-Last Modified 2022-06-18
+Last Modified 2022-07-08
