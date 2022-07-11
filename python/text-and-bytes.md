@@ -180,7 +180,6 @@ Handling a string with Greek and Latin accented characters:
 
 """
 
-# BEGIN SHAVE_MARKS
 import unicodedata
 import string
 
@@ -193,9 +192,6 @@ def shave_marks(txt):
     return unicodedata.normalize('NFC', shaved)  # <3>
 
 
-# END SHAVE_MARKS
-
-# BEGIN SHAVE_MARKS_LATIN
 def shave_marks_latin(txt):
     """Remove all diacritic marks from Latin base characters"""
     norm_txt = unicodedata.normalize('NFD', txt)  # <1>
@@ -212,9 +208,6 @@ def shave_marks_latin(txt):
     return unicodedata.normalize('NFC', shaved)  # <5>
 
 
-# END SHAVE_MARKS_LATIN
-
-# BEGIN ASCIIZE
 single_map = str.maketrans("""‚ƒ„†ˆ‹‘’“”•–—˜›""",  # <1>
                            """'f"*^<''""---~>""")
 
@@ -240,7 +233,6 @@ def asciize(txt):
     no_marks = shave_marks_latin(dewinize(txt))  # <5>
     no_marks = no_marks.replace('ß', 'ss')  # <6>
     return unicodedata.normalize('NFKC', no_marks)  # <7>
-# END ASCIIZE
 ```
 
 ## Unicode 排序
@@ -273,4 +265,52 @@ for char in sample:
           sep='\t')
 ```
 
-Last Modified 2022-07-08
+## 字符串与字节序列双模式
+
+双模式是指根据提供的字符串或字节序列(bytes)来展现不同的行为
+
+```python
+import re
+
+re_numbers_str = re.compile(r'\d+')     # <1>
+re_words_str = re.compile(r'\w+')
+re_numbers_bytes = re.compile(rb'\d+')  # <2>
+re_words_bytes = re.compile(rb'\w+')
+
+text_str = ("Ramanujan saw \u0be7\u0bed\u0be8\u0bef"  # <3>
+            " as 1729 = 1³ + 12³ = 9³ + 10³.")        # <4>
+
+text_bytes = text_str.encode('utf_8')  # <5>
+
+print('Text', repr(text_str), sep='\n  ')
+print('Numbers')
+print('  str  :', re_numbers_str.findall(text_str))      # <6>
+print('  bytes:', re_numbers_bytes.findall(text_bytes))  # <7>
+print('Words')
+print('  str  :', re_words_str.findall(text_str))        # <8>
+print('  bytes:', re_words_bytes.findall(text_bytes))    # <9>
+```
+
+```python
+import os
+
+with open(b'digits-for-\xcf\x80.txt'.decode('utf8'), 'w', encoding='utf8') as f:
+    f.write('3.141592654')
+with open('abc.txt', 'w', encoding='utf8') as f:
+    f.write('abc')
+
+print(os.listdir('.'))
+print(os.listdir(b'.'))
+
+pi_name_bytes = b'digits-for-\xcf\x80.txt'
+# 将未知的字符转为保留的 Unicode 码位 (U+DC00到U+DCFF), 这些码位是未分配字符的
+pi_name_str = pi_name_bytes.decode('ascii', 'surrogateescape')
+# 由于使用了 Unicode 中的保留码位, 可能会编码失败出现异常
+try:
+    print(pi_name_str)
+except UnicodeEncodeError as e:
+    print(e)
+print(pi_name_str.encode('ascii', 'surrogateescape'))
+```
+
+Last Modified 2022-07-11
