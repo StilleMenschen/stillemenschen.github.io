@@ -14,4 +14,5 @@
   - [Sequence](python/sequence.md)
   - [Dictionaries & Collections](python/dictionaries-and-collections.md)
   - [Text & Bytes](python/text-and-bytes.md)
+  - [Functions & Class](python/functions-class.md)
   - [Linux Compile Install](python/linux-compile-install.md)
