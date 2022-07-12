@@ -86,4 +86,60 @@ def tag(name, *content, cls=None, **attrs):
         return '<%s%s />' % (name, attr_str)
 ```
 
+## 函数注解和解析
+
+```python
+from inspect import signature
+
+"""
+    >>> clip('banana ', 6)
+    'banana'
+    >>> clip('banana ', 5)
+    'banana'
+    >>> clip('banana split', 7)
+    'banana'
+    >>> clip('banana split', 11)
+    'banana'
+    >>> clip('banana split', 12)
+    'banana split'
+"""
+
+
+def clip(text: str, max_len: 'int > 0' = 80) -> str:  # <1>
+    """Return text clipped at the last space before or after max_len
+    """
+    end = None
+    if len(text) > max_len:
+        space_before = text.rfind(' ', 0, max_len)
+        if space_before >= 0:
+            end = space_before
+        else:
+            space_after = text.rfind(' ', max_len)
+            if space_after >= 0:
+                end = space_after
+    if end is None:  # no spaces were found
+        end = len(text)
+    return text[:end].rstrip()
+
+
+print(clip.__defaults__)
+# (80,)
+print(clip.__code__)  # doctest: +ELLIPSIS
+# <code object clip at 0x...>
+print(clip.__code__.co_varnames)
+# ('text', 'max_len', 'end', 'space_before', 'space_after')
+print(clip.__code__.co_argcount)
+# 2
+
+
+sig = signature(clip)
+print(sig.return_annotation)
+# <class 'str'>
+for param in sig.parameters.values():
+    note = repr(param.annotation).ljust(13)
+    print(note, ':', param.name, '=', param.default)
+# <class 'str'> : text = <class 'inspect._empty'>
+# 'int > 0'     : max_len = 80
+```
+
 Last Modified 2022-07-12
