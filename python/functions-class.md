@@ -10,6 +10,17 @@ from operator import add
 print(reduce(add, range(101)))
 
 print(sum(range(101)))
+
+class Obj:
+    pass
+
+
+def func():
+    pass
+
+
+# 函数有而对象没有的属性
+print(sorted(set(dir(func)) - set(dir(Obj()))))
 ```
 
 ## 可调用的类
@@ -142,4 +153,100 @@ for param in sig.parameters.values():
 # 'int > 0'     : max_len = 80
 ```
 
-Last Modified 2022-07-12
+## operator 模块
+
+```python
+import operator
+from operator import itemgetter
+from operator import attrgetter
+from operator import mul
+from operator import methodcaller
+from functools import reduce
+from collections import namedtuple
+
+
+def factorial(n):
+    return reduce(mul, range(1, n + 1))
+
+
+print(factorial(10))
+
+metro_data = [
+    ('Tokyo', 'JP', 36.933, (35.689722, 139.691667)),
+    ('Delhi NCR', 'IN', 21.935, (28.613889, 77.208889)),
+    ('Mexico City', 'MX', 20.142, (19.433333, -99.133333)),
+    ('New York-Newark', 'US', 20.104, (40.808611, -74.020386)),
+    ('Sao Paulo', 'BR', 19.649, (-23.547778, -46.635833)),
+]
+
+for city in sorted(metro_data, key=itemgetter(1)):
+    print(city)
+
+cc_name = itemgetter(1, 0)
+for city in metro_data:
+    print(cc_name(city))
+
+LatLong = namedtuple('LatLong', 'lat long')
+Metropolis = namedtuple('Metropolis', 'name cc pop coord')
+metro_areas = [Metropolis(name, cc, pop, LatLong(lat, long))
+               for name, cc, pop, (lat, long) in metro_data]
+print(metro_areas[0])
+print(metro_areas[0].coord.lat)
+name_lat = attrgetter('name', 'coord.lat')
+for city in sorted(metro_areas, key=attrgetter('coord.lat')):
+    print(name_lat(city))
+
+print([name for name in dir(operator) if not name.startswith('_')])
+
+sentence = 'The time has come'
+up_case = methodcaller('upper')
+print(up_case(sentence))
+hyphenate = methodcaller('replace', ' ', '-')
+print(hyphenate(sentence))
+```
+
+## 冻结函数参数
+
+```python
+from operator import mul
+from functools import partial
+from unicodedata import normalize
+
+
+def tag(name, *content, cls=None, **attrs):
+    """Generate one or more HTML tags"""
+    if cls is not None:
+        attrs['class'] = cls
+    if attrs:
+        attr_str = ''.join(' %s="%s"' % (attr, value)
+                           for attr, value
+                           in sorted(attrs.items()))
+    else:
+        attr_str = ''
+    if content:
+        return '\n'.join('<%s%s>%s</%s>' %
+                         (name, attr_str, c, name) for c in content)
+    else:
+        return '<%s%s />' % (name, attr_str)
+
+
+triple = partial(mul, 3)
+print([triple(k) for k in range(1, 10)])
+
+nfc = partial(normalize, 'NFC')
+
+s1 = 'café'
+s2 = 'cafe\u0301'
+
+print(nfc(s1) == nfc(s2))
+
+picture = partial(tag, 'img', cls='pic-frame')
+print(picture(src='boom.jpg'))
+print(picture)
+print(tag)
+print(picture.func)
+print(picture.args)
+print(picture.keywords)
+```
+
+Last Modified 2022-07-13
