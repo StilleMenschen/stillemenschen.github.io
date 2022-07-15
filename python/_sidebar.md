@@ -7,7 +7,6 @@
   - [SQLite3](python/sqlite3.md)
   - [Logging](python/logging.md)
   - [AsyncIO](python/asyncio.md)
-  - [Decorator](python/decorator.md)
   - [DateTime](python/datetime.md)
   - [cProfile](python/cprofile.md)
   - [Special Methods](python/object-special-methods.md)
@@ -16,4 +15,5 @@
   - [Text & Bytes](python/text-and-bytes.md)
   - [Functions & Class](python/functions-class.md)
   - [Functions & Design Patterns](python/functions-and-design-patterns.md)
+  - [Decorators & Closures](python/decorators-and-closures.md)
   - [Linux Compile Install](python/linux-compile-install.md)

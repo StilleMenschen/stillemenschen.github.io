@@ -1,6 +1,6 @@
-# 装饰器
+# 装饰器和闭包
 
-实现计算函数的执行时间
+## 计算函数执行时间
 
 ```python
 from time import time
@@ -59,4 +59,51 @@ if __name__ == '__main__':
     main()
 ```
 
-Last Modified 2021-06-14
+## 装饰器的调用时机
+
+```python
+"""
+    >>> import registration
+    running register(<function f1 at 0x00000150CF843760>)
+    running register(<function f2 at 0x00000150CF842200>)
+    >>> registration.register
+    [<function f1 at 0x00000150CF843760>, <function f2 at 0x00000150CF842200>]
+"""
+
+
+registry = []  # <1>
+
+
+def register(func):  # <2>
+    print('running register(%s)' % func)  # <3>
+    registry.append(func)  # <4>
+    return func  # <5>
+
+
+@register  # <6>
+def f1():
+    print('running f1()')
+
+
+@register
+def f2():
+    print('running f2()')
+
+
+def f3():  # <7>
+    print('running f3()')
+
+
+def main():  # <8>
+    print('running main()')
+    print('registry ->', registry)
+    f1()
+    f2()
+    f3()
+
+
+if __name__ == '__main__':
+    main()  # <9>
+```
+
+Last Modified 2022-07-15
