@@ -320,4 +320,32 @@ def best_promo(order):
 
 ```
 
-Last Modified 2022-07-14
+## 命令模式
+
+```python
+class MacroCommands:
+
+    def __init__(self, commands: list | tuple):
+        self.commands = list(commands)
+
+    def __call__(self, *args, **kwargs):
+        for command in self.commands:
+            result = command()
+            print(command.__name__, '->', result)
+
+
+def fibonacci(n=42, first=0, second=1):
+    if n <= 1:
+        return first
+    return fibonacci(n - 1, second, first + second)
+
+
+cmds = MacroCommands([
+    lambda: sum(range(101)),
+    fibonacci
+])
+
+cmds()
+```
+
+Last Modified 2022-07-15
