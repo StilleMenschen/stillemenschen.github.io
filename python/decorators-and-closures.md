@@ -106,4 +106,86 @@ if __name__ == '__main__':
     main()  # <9>
 ```
 
-Last Modified 2022-07-15
+## 策略模式延申
+
+```python
+# promotions.py
+
+promos = []
+
+
+def promotions(proms_func):
+    promos.append(proms_func)
+    return proms_func
+
+
+@promotions
+def fidelity_promo(order):
+    """5% discount for customers with 1000 or more fidelity points"""
+    return order.total() * .05 if order.customer.fidelity >= 1000 else 0
+
+
+@promotions
+def bulk_item_promo(order):
+    """10% discount for each LineItem with 20 or more units"""
+    discount = 0
+    for item in order.cart:
+        if item.quantity >= 20:
+            discount += item.total() * .1
+    return discount
+
+
+@promotions
+def large_order_promo(order):
+    """7% discount for orders with 10 or more distinct items"""
+    distinct_items = {item.product for item in order.cart}
+    if len(distinct_items) >= 10:
+        return order.total() * .07
+    return 0
+
+
+def best_promo(order):
+    """Select best discount available
+    """
+    return max(promo(order) for promo in promos)
+```
+
+## 闭包
+
+```python
+"""
+>>> avg = make_averager()
+>>> avg(10)
+10.0
+>>> avg(11)
+10.5
+>>> avg(12)
+11.0
+>>> avg.__code__.co_varnames
+('new_value', 'total')
+>>> avg.__code__.co_freevars
+('series',)
+>>> avg.__closure__  # doctest: +ELLIPSIS
+(<cell at 0x...: list object at 0x...>,)
+>>> avg.__closure__[0].cell_contents
+[10, 11, 12]
+"""
+
+DEMO = """
+>>> avg.__closure__
+(<cell at 0x107a44f78: list object at 0x107a91a48>,)
+"""
+
+
+def make_averager():
+    series = []
+
+    def averager(new_value):
+        series.append(new_value)
+        total = sum(series)
+        return total / len(series)
+
+    return averager
+```
+
+Last Modified 2022-07-18
