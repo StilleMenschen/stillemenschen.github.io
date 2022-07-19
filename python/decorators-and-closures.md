@@ -109,24 +109,98 @@ if __name__ == '__main__':
 ## 策略模式延申
 
 ```python
-# promotions.py
+# strategy_best4.py
+# Strategy pattern -- function-based implementation
+# selecting the best promotion from list of functions
+# registered by a decorator
 
-promos = []
+"""
+    >>> joe = Customer('John Doe', 0)
+    >>> ann = Customer('Ann Smith', 1100)
+    >>> cart = [LineItem('banana', 4, .5),
+    ...         LineItem('apple', 10, 1.5),
+    ...         LineItem('watermellon', 5, 5.0)]
+    >>> Order(joe, cart, fidelity)
+    <Order total: 42.00 due: 42.00>
+    >>> Order(ann, cart, fidelity)
+    <Order total: 42.00 due: 39.90>
+    >>> banana_cart = [LineItem('banana', 30, .5),
+    ...                LineItem('apple', 10, 1.5)]
+    >>> Order(joe, banana_cart, bulk_item)
+    <Order total: 30.00 due: 28.50>
+    >>> long_order = [LineItem(str(item_code), 1, 1.0)
+    ...               for item_code in range(10)]
+    >>> Order(joe, long_order, large_order)
+    <Order total: 10.00 due: 9.30>
+    >>> Order(joe, cart, large_order)
+    <Order total: 42.00 due: 42.00>
 
 
-def promotions(proms_func):
-    promos.append(proms_func)
-    return proms_func
+    >>> Order(joe, long_order, best_promo)
+    <Order total: 10.00 due: 9.30>
+    >>> Order(joe, banana_cart, best_promo)
+    <Order total: 30.00 due: 28.50>
+    >>> Order(ann, cart, best_promo)
+    <Order total: 42.00 due: 39.90>
+
+"""
+
+from collections import namedtuple
+
+Customer = namedtuple('Customer', 'name fidelity')
 
 
-@promotions
-def fidelity_promo(order):
+class LineItem:
+
+    def __init__(self, product, quantity, price):
+        self.product = product
+        self.quantity = quantity
+        self.price = price
+
+    def total(self):
+        return self.price * self.quantity
+
+
+class Order:  # the Context
+
+    def __init__(self, customer, cart, promotion=None):
+        self.customer = customer
+        self.cart = list(cart)
+        self.promotion = promotion
+
+    def total(self):
+        if not hasattr(self, '__total'):
+            self.__total = sum(item.total() for item in self.cart)
+        return self.__total
+
+    def due(self):
+        if self.promotion is None:
+            discount = 0
+        else:
+            discount = self.promotion(self)
+        return self.total() - discount
+
+    def __repr__(self):
+        fmt = '<Order total: {:.2f} due: {:.2f}>'
+        return fmt.format(self.total(), self.due())
+
+
+promos = []  # <1>
+
+
+def promotion(promo_func):  # <2>
+    promos.append(promo_func)
+    return promo_func
+
+
+@promotion  # <3>
+def fidelity(order):
     """5% discount for customers with 1000 or more fidelity points"""
     return order.total() * .05 if order.customer.fidelity >= 1000 else 0
 
 
-@promotions
-def bulk_item_promo(order):
+@promotion
+def bulk_item(order):
     """10% discount for each LineItem with 20 or more units"""
     discount = 0
     for item in order.cart:
@@ -135,8 +209,8 @@ def bulk_item_promo(order):
     return discount
 
 
-@promotions
-def large_order_promo(order):
+@promotion
+def large_order(order):
     """7% discount for orders with 10 or more distinct items"""
     distinct_items = {item.product for item in order.cart}
     if len(distinct_items) >= 10:
@@ -144,7 +218,7 @@ def large_order_promo(order):
     return 0
 
 
-def best_promo(order):
+def best_promo(order):  # <4>
     """Select best discount available
     """
     return max(promo(order) for promo in promos)
@@ -177,6 +251,17 @@ DEMO = """
 """
 
 
+class Averager():
+
+    def __init__(self):
+        self.series = []
+
+    def __call__(self, new_value):
+        self.series.append(new_value)
+        total = sum(self.series)
+        return total / len(self.series)
+
+
 def make_averager():
     series = []
 
@@ -186,6 +271,85 @@ def make_averager():
         return total / len(series)
 
     return averager
+
+def make_averager_variable():
+    total = 0
+    count = 0
+
+    def averager(new_value):
+        nonlocal total, count
+        total += new_value
+        count += 1
+        return total / count
+
+    return averager
 ```
 
-Last Modified 2022-07-18
+## 带有参数的装饰器
+
+```python
+# clockdeco_param.py
+
+"""
+>>> snooze(.1)  # doctest: +ELLIPSIS
+[0.101...s] snooze(0.1) -> None
+>>> clock('{name}: {elapsed}')(time.sleep)(.2)  # doctest: +ELLIPSIS
+sleep: 0.20...
+>>> clock('{name}({args}) dt={elapsed:0.3f}s')(time.sleep)(.2)
+sleep(0.2) dt=0.201s
+"""
+
+import time
+import functools
+
+DEFAULT_FMT = '[{elapsed:0.8f}s] {name}({arg_str}) -> {result}'
+
+
+def clock(fmt=DEFAULT_FMT):
+    def decorate(func):
+        @functools.wraps(func)
+        def clocked(*args, **kwargs):
+            t0 = time.time()
+            _result = func(*args, **kwargs)
+            elapsed = time.time() - t0
+            name = func.__name__
+            arg_list = []
+            if args:
+                arg_list.append(', '.join(repr(arg) for arg in args))
+            if kwargs:
+                pairs = ['%s=%r' % (k, w) for k, w in sorted(kwargs.items())]
+                arg_list.append(', '.join(pairs))
+            arg_str = ', '.join(arg_list)
+            result = repr(_result)
+            print(fmt.format(**locals()))
+            return _result
+
+        return clocked
+
+    return decorate
+
+
+# @clock()
+# def snooze(seconds, msg='hh'):
+#     time.sleep(seconds)
+#     return msg
+
+
+@clock('{name}({arg_str}) dt={elapsed:0.3f}s')
+def snooze(seconds, msg='hh'):
+    time.sleep(seconds)
+    return msg
+
+
+# @clock('{name}: {elapsed}s')
+# def snooze(seconds):
+#     time.sleep(seconds)
+
+
+if __name__ == '__main__':
+    for i in range(3):
+        snooze(.123, msg='Haha')
+
+```
+
+Last Modified 2022-07-19
