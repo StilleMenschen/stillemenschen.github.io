@@ -352,4 +352,108 @@ if __name__ == '__main__':
 
 ```
 
+## LRU 缓存
+
+```python
+"""
+>>> fibonacci(6)
+[0.00000000s] fibonacci(0) -> 0
+[0.00000000s] fibonacci(1) -> 1
+[0.00000000s] fibonacci(2) -> 1
+[0.00000000s] fibonacci(3) -> 2
+[0.00000000s] fibonacci(4) -> 3
+[0.00000000s] fibonacci(5) -> 5
+[0.00000000s] fibonacci(6) -> 8
+8
+"""
+
+import time
+import functools
+
+DEFAULT_FMT = '[{elapsed:0.8f}s] {name}({arg_str}) -> {result}'
+
+
+def clock(func):
+    @functools.wraps(func)
+    def clocked(*args, **kwargs):
+        t0 = time.time()
+        _result = func(*args, **kwargs)
+        elapsed = time.time() - t0
+        name = func.__name__
+        arg_list = []
+        if args:
+            arg_list.append(', '.join(repr(arg) for arg in args))
+        if kwargs:
+            pairs = ['%s=%r' % (k, w) for k, w in sorted(kwargs.items())]
+            arg_list.append(', '.join(pairs))
+        arg_str = ', '.join(arg_list)
+        result = repr(_result)
+        print(DEFAULT_FMT.format(**locals()))
+        return _result
+
+    return clocked
+
+
+@functools.lru_cache()  # <1>
+@clock  # <2>
+def fibonacci(n: int) -> int:
+    if n < 2:
+        return n
+    return fibonacci(n - 2) + fibonacci(n - 1)
+
+
+if __name__ == '__main__':
+    print(fibonacci(6))
+```
+
+## 泛函数
+
+```python
+"""
+>>> htmlize({1, 2, 3})
+'<pre>{1, 2, 3}</pre>'
+>>> htmlize(abs)
+'<pre>&lt;built-in function abs&gt;</pre>'
+>>> htmlize('Heimlich & Co.\\n- a game')
+'<p>Heimlich &amp; Co.<br>\\n- a game</p>'
+>>> htmlize(42)
+'<pre>42 (0x2a)</pre>'
+>>> print(htmlize(['alpha', 66, {3, 2, 1}]))
+<ul>
+<li><p>alpha</p></li>
+<li><pre>66 (0x42)</pre></li>
+<li><pre>{1, 2, 3}</pre></li>
+</ul>
+"""
+
+import numbers
+import html
+from functools import singledispatch
+from collections import abc
+
+
+@singledispatch
+def htmlize(obj):
+    content = html.escape(repr(obj))
+    return '<pre>{}</pre>'.format(content)
+
+
+@htmlize.register(str)
+def _(text):
+    content = html.escape(text).replace('\n', '<br>\n')
+    return '<p>{0}</p>'.format(content)
+
+
+@htmlize.register(numbers.Integral)
+def _(n):
+    return '<pre>{0} (0x{0:x})</pre>'.format(n)
+
+
+@htmlize.register(tuple)
+@htmlize.register(abc.MutableSequence)
+def _(seq):
+    inner = '</li>\n<li>'.join(htmlize(item) for item in seq)
+    return '<ul>\n<li>' + inner + '</li>\n</ul>'
+```
+
 Last Modified 2022-07-19
