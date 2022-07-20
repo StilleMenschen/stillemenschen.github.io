@@ -16,4 +16,5 @@
   - [Functions & Class](python/functions-class.md)
   - [Functions & Design Patterns](python/functions-and-design-patterns.md)
   - [Decorators & Closures](python/decorators-and-closures.md)
+  - [Object Reference](python/object-reference.md)
   - [Linux Compile Install](python/linux-compile-install.md)
