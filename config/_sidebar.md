@@ -8,3 +8,5 @@
   - [Visual Studio Code](config/visual-studio-code.md)
   - [Sublime Text](config/sublime-text.md)
   - [Linux Proxy](config/linux-proxy.md)
+  - [Maven](config/maven.md)
+  - [Gradle](config/gradle.md)
