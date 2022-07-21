@@ -1,5 +1,10 @@
 # maven
 
+环境变量`MAVEN_HOME`指定主目录，默认在`${USER_HOME}/.m2`
+
+- `${USER_HOME}/.m2/settings.xml`
+- `${MAVEN_HOME}/conf/settings.xml`
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"

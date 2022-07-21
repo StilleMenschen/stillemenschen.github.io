@@ -1,5 +1,10 @@
 # gradle
 
+环境变量`GRADLE_USER_HOME`指定主目录，默认在`${USER_HOME}/.gradle`
+
+- `${GRADLE_USER_HOME}/init.gradle`
+- `${GRADLE_USER_HOME}/init.d/build.gradle`
+
 ```groovy
 allprojects {
   repositories {
