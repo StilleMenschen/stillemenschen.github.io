@@ -8,43 +8,75 @@
 ## 浅复制和深复制
 
 ```python
+"""
+>>> import copy
+>>> bus1 = Bus(['Alice', 'Bill', 'Claire', 'David'])
+>>> bus2 = copy.copy(bus1)
+>>> bus3 = copy.deepcopy(bus1)
+>>> bus1.drop('Bill')
+>>> bus2.passengers
+['Alice', 'Claire', 'David']
+>>> bus3.passengers
+['Alice', 'Bill', 'Claire', 'David']
+>>> bus1.passengers is bus2.passengers
+True
+"""
+
 import copy
 
 
 class Bus:
-    def __init__(self, passenger=None):
-        if passenger is None:
-            self.passenger = []
+    def __init__(self, passengers=None):
+        if passengers is None:
+            self.passengers = []
         else:
-            self.passenger = list(passenger)
+            self.passengers = list(passengers)
 
     def pick(self, name):
-        self.passenger.append(name)
+        self.passengers.append(name)
 
     def drop(self, name):
-        self.passenger.remove(name)
+        self.passengers.remove(name)
 
     def __str__(self):
-        return str(self.passenger)
-
-
-bus1 = Bus(['Alice', 'Tom', 'Bob', 'David', 'Claire'])
-bus2 = copy.copy(bus1)
-bus3 = copy.deepcopy(bus1)
-
-bus1.pick('John')
-bus2.drop('Bob')
-bus2.drop('Tom')
-bus3.pick('Jack')
-
-print(bus1)
-print(bus2)
-print(bus3)
-print(id(bus1), id(bus2), id(bus3))
-print(id(bus1.passenger), id(bus2.passenger), id(bus3.passenger))
-print(bus1.passenger is bus2.passenger)
+        return str(self.passengers)
 ```
 
 > 如果需要在类实例的方法或单一函数中传递可变类型，需要谨慎考虑传入的数据是否会做修改或者是否要独立保存数据
 
-Last Modified 2022-07-20
+## 弱引用
+
+```python
+"""
+>>> import weakref
+>>> stock = weakref.WeakValueDictionary()
+>>> catalog = [Cheese('Red Leicester'), Cheese('Tilsit'),
+...                 Cheese('Brie'), Cheese('Parmesan')]
+...
+>>> for cheese in catalog:
+...     stock[cheese.kind] = cheese
+...
+>>> sorted(stock.keys())
+['Brie', 'Parmesan', 'Red Leicester', 'Tilsit']
+>>> del catalog
+>>> sorted(stock.keys())
+['Parmesan']
+>>> del cheese
+>>> sorted(stock.keys())
+[]
+"""
+
+
+class Cheese:
+
+    def __init__(self, kind):
+        self.kind = kind
+
+    def __repr__(self):
+        return 'Cheese(%r)' % self.kind
+```
+
+> 基本的`list`和`dict`实例不能作为弱引用所指对象，但其子类可以。
+> `set`可以作为所指对象，`int`和`tuple`不能作为所指对象，子类也不可以。
+
+Last Modified 2022-07-21
