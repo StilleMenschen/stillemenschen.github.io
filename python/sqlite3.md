@@ -43,7 +43,7 @@ for row in c.execute('SELECT * FROM stocks ORDER BY price'):
     print(row)
 ```
 
-> Python 2 的语法类似
+>Python 2 的语法类似
 
 ## 参考文档
 

@@ -28,9 +28,9 @@ table th:first-of-type {
 
 - config 文件 - 所有项目特定的配置设置都存储在其中
 
-> Git 在您当前使用的任何存储库的 Git 目录 (.git/config) 中的配置文件中查找配置值。这些值特定于该单个存储库。例如，假设您
->设置 Git 的全局配置使用您的个人电子邮件地址。如果您希望将工作电子邮件用于特定项目而不是个人电子邮件，则该更改将添加到
->此文件中。
+>Git 在您当前使用的任何存储库的 Git 目录 (.git/config) 中的配置文件中查找配置值。这些值特定于该单个存储库。
+>例如，假设您设置 Git 的全局配置使用您的个人电子邮件地址。如果您希望将工作电子邮件用于特定项目而不是个人电子邮件，
+>则该更改将添加到此文件中。
 
 - description 文件 - 这个文件只被 GitWeb 程序使用，所以我们可以忽略它
 - hooks 目录- 这是我们可以放置客户端或服务器端脚本的地方，我们可以使用它们来挂钩 Git 的不同生命周期事件
@@ -92,7 +92,7 @@ Git URL 支持多种协议，SSH 协议支持指定登录服务器的账号名
 - http[s]://host.xz[:port]/path/to/repo.git/
 - ftp[s]://host.xz[:port]/path/to/repo.git/
 
-> HTTP 协议还支持直接在 URL 中指定账户和密码，如 `https://user:password@repositores.com/path/to/repo.git` 但要注意用户名
+>HTTP 协议还支持直接在 URL 中指定账户和密码，如 `https://user:password@repositores.com/path/to/repo.git` 但要注意用户名
 >和密码出现了特殊字符时要先使用 URL 编码，如账户名是一个邮箱，则邮箱的 `@` 符号要经过 URL 编码，如 `user%40example.net`
 >表示 `user@example.net`
 
@@ -185,7 +185,7 @@ git status [<options>…​] [--] [<pathspec>…​]
 
 >一般路径通配符最常用的是`*`和`?`，`*`表示零个或多个字符，`?`表示零个或一个字符；还有一种特殊的`**`表示，这个表示仅在使
 >用路径分隔符时有效，如`**/a`代表任意目录中的一个子目录 a， `/opt/**/abc.conf`代表/opt 目录中任意深度层级下的文件
-> abc.conf，而`/a/b/**`代表目录/a/b 下的任意深度的文件和目录
+>abc.conf，而`/a/b/**`代表目录/a/b 下的任意深度的文件和目录
 
 ### 例子
 

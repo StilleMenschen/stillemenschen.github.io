@@ -22,7 +22,7 @@
 
 如果线程正在执行一个 Java 方法，这个计数器记录的是正在执行的虚拟机字节码指令的地址；如果正在执行的是 Native 方法，则这个计数器值为空。此内存区域是唯一一个在 JVM 规范中没有规定任何 OutOfMemoryError 情况的区域。
 
-> JVM（Java Virtual Machine）
+>JVM（Java Virtual Machine）
 
 ## 虚拟机栈
 

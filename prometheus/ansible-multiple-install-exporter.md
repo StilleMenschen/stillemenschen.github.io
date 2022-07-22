@@ -24,7 +24,7 @@ pip install ansible==2.10.9
 ```
 
 >这里有个很神奇的地方，2.10.9 版本在 pypi 上面找不到，但实际上又可以安装；如果安装速度太慢，可以考虑切换 pip 的镜像源为
-> taobao 的安装源https://mirrors.aliyun.com/pypi/simple/
+>taobao 的安装源https://mirrors.aliyun.com/pypi/simple/
 
 ## 被控端配置
 

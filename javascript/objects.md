@@ -81,7 +81,7 @@ Object.defineProperty(o, "conflict", {
 // 抛出错误 TypeError: value appears only in data descriptors, get appears only in accessor descriptors
 ```
 
-> `value`和`writable`一同出现，如果设置了`set()`、`get()`则不能同时设置`value`
+>`value`和`writable`一同出现，如果设置了`set()`、`get()`则不能同时设置`value`
 
 ## 检查对象相等
 
@@ -223,7 +223,7 @@ console.log(copy);
 // { foo:1, get bar() { return 2 } }
 ```
 
-> `Object.assign()`默认只拷贝深层对象的引用，且每次拷贝会覆盖上一次拷贝过的同名属性。如果在复制时发生了错误，那么之前拷
+>`Object.assign()`默认只拷贝深层对象的引用，且每次拷贝会覆盖上一次拷贝过的同名属性。如果在复制时发生了错误，那么之前拷
 >贝成功的属性也同样生效
 
 Last Modified 2021-10-23

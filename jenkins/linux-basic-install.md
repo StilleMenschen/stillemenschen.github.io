@@ -91,7 +91,7 @@ nohup java -DJENKINS_HOME=${jenkins_dir}/data -jar ${jenkins_dir}/jenkins.war --
 
 保存文件，确认当前命令行在`/home/jenkins`目录下，执行`sh ./startup.sh`
 
-> sh 文件就不给执行权限了，实际也不会经常去重启 Jenkins 的，除非服务器太垃圾了(笑)
+>sh 文件就不给执行权限了，实际也不会经常去重启 Jenkins 的，除非服务器太垃圾了(笑)
 
 假设服务器分配的 IP 地址是`192.168.0.1`，访问`http://192.168.0.1:8888`就可以看到解锁 Jenkins 的界面了，这里先别去找管理员密码登录，
 先做下面的操作，修改插件的服务器地址到国内镜像

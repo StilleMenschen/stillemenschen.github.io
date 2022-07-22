@@ -64,7 +64,7 @@ if __name__ == '__main__':
     main()
 ```
 
-> Python 2 中的 datetime 没有获取时间戳的方法
+>Python 2 中的 datetime 没有获取时间戳的方法
 
 ## 参考文档
 

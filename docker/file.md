@@ -201,7 +201,7 @@ ADD [--chown=<user>:<group>] <src>... <dest>
 ADD [--chown=<user>:<group>] ["<src>",... "<dest>"]
 ```
 
-> `--chown`选项仅在 Linux 操作系统中生效
+>`--chown`选项仅在 Linux 操作系统中生效
 
 `ADD`指令可以复制目录、文件或者远程`URL`中的文件，`<src>`允许指定多个，多个`<src>`的情况下，如果是目录或者文件，它们将会
 按当前构建的上下文路径来解析
@@ -431,7 +431,7 @@ ARG buildno=1
 ```
 
 > <span style="color: red">不建议使用构建时变量来传递诸如 github 密钥，用户凭据等机密信息。构建时变量值对于任何使用
-> docker history 命令查看镜像的用户都是可见的</span>
+>docker history 命令查看镜像的用户都是可见的</span>
 
 `ARG`变量定义从`Dockerfile`中定义的行开始生效，而不是该参数在命令行被指定或在其他地方使用了该变量开始生效。例如，考虑以
 下 Dockerfile
