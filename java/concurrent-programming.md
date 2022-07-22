@@ -63,8 +63,8 @@ public class UtilTests {
 }
 ```
 
-> 在 `java.util.concurrent.atomic` 包中还有一个 `AtomicStampedReference` 类实现，它变更数据时不仅会校对期望的数据值，
-> 还会为每次变化都记录一个版本号并在每次变化值时进行校对，以解决 ABA 问题。Atomic 在竞争激烈时能维持常态，相比 Lock 性能好一些，但只能同步一个值
+>在 `java.util.concurrent.atomic` 包中还有一个 `AtomicStampedReference` 类实现，它变更数据时不仅会校对期望的数据值，
+>还会为每次变化都记录一个版本号并在每次变化值时进行校对，以解决 ABA 问题。Atomic 在竞争激烈时能维持常态，相比 Lock 性能好一些，但只能同步一个值
 
 ## Synchronized
 
@@ -142,7 +142,7 @@ public class SynchronizedExample {
 }
 ```
 
-> 同步代码属于不可中断的锁，适用于冲突不是很激烈的情况，代码可读性较好。
+>同步代码属于不可中断的锁，适用于冲突不是很激烈的情况，代码可读性较好。
 > Lock 为可中断的锁，多样化同步，在竞争激烈时能维持常态
 
 ## Volatile

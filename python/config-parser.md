@@ -55,7 +55,7 @@ top_secret = config['Frameworks']
 print('path:', top_secret.get('path'))
 ```
 
-> 配置文件的单行注释为`#`或`;`
+>配置文件的单行注释为`#`或`;`
 
 ## Python 2
 

@@ -118,11 +118,11 @@ networks:
         - subnet: 172.22.0.0/16
 ```
 
-> 使用此 compose 文件安装服务时，默认的 Web 服务登录账号密码为`Admin/zabbix`，如果默认密码有变更，可关
-> 注[Zabbix 登录配置参考页](https://www.zabbix.com/documentation/current/manual/quickstart/login)
+>使用此 compose 文件安装服务时，默认的 Web 服务登录账号密码为`Admin/zabbix`，如果默认密码有变更，可关
+>注[Zabbix 登录配置参考页](https://www.zabbix.com/documentation/current/manual/quickstart/login)
 
-> 如果宿主机上有其它正在运行的 docker 容器，自定义的网卡子网（网段）可能会存在冲突的情况，需要找出与宿主机和当前服务器网
-> 络环境中不冲突的网段进行设置
+>如果宿主机上有其它正在运行的 docker 容器，自定义的网卡子网（网段）可能会存在冲突的情况，需要找出与宿主机和当前服务器网
+>络环境中不冲突的网段进行设置
 
 ## 参考文档
 

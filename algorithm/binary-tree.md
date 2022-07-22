@@ -2380,7 +2380,7 @@ def get_next_leaf_node(traversal_stack):
     current_node = traversal_stack.pop()
     # 判断节点是否叶子节点, 不是叶子节点则继续循环
     while not is_leaf_node(current_node):
-        # 栈的特点是先进后出, 而先序遍历是 父节点 -> 左子树 -> 右子树
+        # 栈的特点是先进后出, 而先序遍历是 父节点 ->左子树 ->右子树
         # 所以先放入右子树再放入左子树, 这样左子树会优先出栈
         if current_node.right is not None:
             traversal_stack.append(current_node.right)

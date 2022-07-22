@@ -7,7 +7,7 @@
 - ssh 远程工具和文件传输工具
 - 有条件的的话最好准备一个梯子
 
-> 本文档基于 CentOS 7 系统上的操作编写
+>本文档基于 CentOS 7 系统上的操作编写
 
 ## 下载
 
@@ -31,7 +31,7 @@ wget https://get.jenkins.io/war-stable/2.263.4/jenkins.war
 curl -O https://get.jenkins.io/war-stable/2.263.4/jenkins.war
 ```
 
-> 其它的镜像网站因为没有使用过，就不做说明了
+>其它的镜像网站因为没有使用过，就不做说明了
 
 ## 安装依赖软件
 
@@ -152,6 +152,6 @@ cat /home/jenkins/data/secrets/initialAdminPassword
 
 最后就是开始使用 Jenkins，使用刚刚创建的账户登录或者 admin 账户登录
 
-> 将上面写过的`startup.sh`和`shutdown.sh`文件结合起来实际上就是重启的操作了
+>将上面写过的`startup.sh`和`shutdown.sh`文件结合起来实际上就是重启的操作了
 
 Last Modified 2022-02-19

@@ -462,7 +462,7 @@ services:
 ```
 
 - `ipv4_address`或`ipv6_address` 自定义网络地址（容器的网络环境内）
-  > 如果需要 IPv6 寻址，则必须设置`enable_ipv6`选项，并且必须使用版本`2.x`的 Compose 文件
+  >如果需要 IPv6 寻址，则必须设置`enable_ipv6`选项，并且必须使用版本`2.x`的 Compose 文件
 
 ```yml
 version: "3.9"
@@ -529,7 +529,7 @@ platform: linux/arm64/v8
 
 宿主机与容器内端口映射
 
-> 端口映射与`network_mode: host`不兼容
+>端口映射与`network_mode: host`不兼容
 
 ```yml
 ports:
@@ -893,8 +893,8 @@ volumes:
     external: true
 ```
 
-> 对于该格式的`3.3`版及更低版本，外部不能与其他卷配置键（driver，driver_opts，labels）结合使用。对于`3.4`及更高版本，此
-> 限制不再存在
+>对于该格式的`3.3`版及更低版本，外部不能与其他卷配置键（driver，driver_opts，labels）结合使用。对于`3.4`及更高版本，此
+>限制不再存在
 
 ## labels
 

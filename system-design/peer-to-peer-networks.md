@@ -8,6 +8,6 @@
 
 当一组机器在集群中以不协调的方式相互交谈以通过系统传播信息而不需要中央数据源时。
 
-> 可以参考 Uber 的一个框架 [Kraken](https://github.com/uber/kraken)
+>可以参考 Uber 的一个框架 [Kraken](https://github.com/uber/kraken)
 
 Last Modified 2022-02-10

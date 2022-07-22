@@ -67,7 +67,7 @@ table th:first-of-type {
 | --volumes-from          | 从指定的容器挂载卷                                                              |
 | -w, --workdir           | 容器内的工作目录                                                                |
 
-> 部分选项是通过键值对（`key=value`）来指定的
+>部分选项是通过键值对（`key=value`）来指定的
 
 ## 示例
 

@@ -11,7 +11,7 @@ sudo yum install -y readline-devel
 sudo yum install -y sqlite*
 ```
 
-> 安装`readline-devel`是为了方便在`Python`的命令行里面使用方向键和退格键，安装`sqlite`则是`ipython`用到了这个依赖
+>安装`readline-devel`是为了方便在`Python`的命令行里面使用方向键和退格键，安装`sqlite`则是`ipython`用到了这个依赖
 
 ## 安装延长支持版 OpenSSL
 
@@ -74,9 +74,9 @@ make
 make altinstall
 ```
 
-> 上面的配置没有使用到优化，官方文档里面是建议用`--enable-optimizations --with-lto`（PGO + LTO）配置 Python，以便实现最佳性能。<br>
-> 默认安装的`Python`是在`/usr/local/bin`目录下的，为了和服务器本身存在的`Python 2`区分开，执行程序一般是程序名加版本号，如`python3.10`。<br>
-> 如果安装过程中有报错可以先删掉`Makefile`，执行`make clean`或者`make distclean`，然后重新配置和安装。
+>上面的配置没有使用到优化，官方文档里面是建议用`--enable-optimizations --with-lto`（PGO + LTO）配置 Python，以便实现最佳性能。<br>
+>默认安装的`Python`是在`/usr/local/bin`目录下的，为了和服务器本身存在的`Python 2`区分开，执行程序一般是程序名加版本号，如`python3.10`。<br>
+>如果安装过程中有报错可以先删掉`Makefile`，执行`make clean`或者`make distclean`，然后重新配置和安装。
 
 ## 尝试安装框架
 
@@ -90,7 +90,7 @@ python3.10 -m pip install -U -i https://mirrors.aliyun.com/pypi/simple/ requests
 python3.10
 ```
 
-> 或者用`ipython`也可以，有语法提示
+>或者用`ipython`也可以，有语法提示
 
 ```python
 import requests

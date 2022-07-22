@@ -18,7 +18,7 @@
 
 - 最近在看[Python](python/)相关的书籍
 
-> 此文档基于 NodeJS 的 [docsify](https://docsify.js.org/#/zh-cn/) 框架生成
+>此文档基于 NodeJS 的 [docsify](https://docsify.js.org/#/zh-cn/) 框架生成
 
 [GitHub](https://github.com/StilleMenschen/stillemenschen.github.io) | [关于撰写人](about/ "撰写人自述") |
 [网抑云主页](https://music.163.com/#/user/home?id=247886432)

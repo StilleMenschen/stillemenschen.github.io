@@ -78,7 +78,7 @@ git branch --edit-description [<branchname>]
 | --column[=\<options\>], --no-column | 单列展示分支                                                                 |
 | -r, --remotes                       | 列出远程分支或删除远程分支（配合`-d`选项）                                   |
 | -a, --all                           | 列出远程和本地的所有分支                                                     |
-| -l, --list                          | 列出分支，配合 \<pattern\> 可以过滤分支，如`git branch --list 'maint-*'`     |
+| -l, --list                          | 列出分支，配合 \<pattern\>可以过滤分支，如`git branch --list 'maint-*'`     |
 | --show-current                      | 显示当前分支，在分离`HEAD`的情况下不会有任何输出                             |
 | -v, -vv, --verbose                  | 在列表模式下展示每个`HEAD`的 sha1 和提交标题行，以及上游分支的关系（如果有） |
 | -q, --quiet                         | 创建或删除分支时仅输出错误消息                                               |
@@ -101,7 +101,7 @@ git branch --edit-description [<branchname>]
    git switch my2.6.14
    ```
 
-   > 也可以使用 `checkout -b my2.6.14 v2.6.14` 替代上面的两个命令
+   >也可以使用 `checkout -b my2.6.14 v2.6.14` 替代上面的两个命令
 
 2. 列出符合条件的分支
 

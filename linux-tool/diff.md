@@ -6,7 +6,7 @@
 diff [OPTION]... FILES
 ```
 
-> 与 diff 类似的一个命令是 cmp，cmp 可以逐个字节比较文件内容
+>与 diff 类似的一个命令是 cmp，cmp 可以逐个字节比较文件内容
 
 ## 选项
 

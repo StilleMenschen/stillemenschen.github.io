@@ -84,6 +84,6 @@ Transient hostname: local
 
 删除输入文本中重复的行
 
-> 可以通过阅读手册或使用`--help`选项获取更多使用说明
+>可以通过阅读手册或使用`--help`选项获取更多使用说明
 
 Last Modified 2022-01-25

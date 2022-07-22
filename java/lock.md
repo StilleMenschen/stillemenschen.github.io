@@ -111,7 +111,7 @@ public class ReentrantLockExample {
 }
 ```
 
-> 是否使用对象锁，需要考虑并发量大小和冲突是否激烈，以及能否预估并发的增长量
+>是否使用对象锁，需要考虑并发量大小和冲突是否激烈，以及能否预估并发的增长量
 
 ## ReentrantReadWriteLock
 
@@ -291,6 +291,6 @@ public class Point {
 }
 ```
 
-> 相较于对象锁，synchronized 不会造成死锁，因为这个关键字的加锁和解锁是由 JVM 来保证的
+>相较于对象锁，synchronized 不会造成死锁，因为这个关键字的加锁和解锁是由 JVM 来保证的
 
 Last Modified 2022-01-16

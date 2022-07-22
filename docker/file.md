@@ -13,7 +13,7 @@ Docker 可以通过阅读`Dockerfile`中的指令来自动构建镜像。`Docker
 最好以空目录作为上下文，并将`Dockerfile`保留在该目录中。仅添加构建`Dockerfile`所需的文件。
 
 > <span style="color: red">警告：不要将根目录`/`用作`PATH`，因为它会导致构建执行时将硬盘驱动器的全部内容传输到 Docker 守
-> 护程序。</span>
+>护程序。</span>
 
 ## 基本格式
 
@@ -239,8 +239,8 @@ ADD --chown=1 files* /somedir/
 ADD --chown=10:11 files* /somedir/
 ```
 
-> 如果容器内的文件系统中不存在`/etc/passwd`或`/etc/group`文件，当`--chown`中使用具体的用户名或组名时，会导致`ADD`指令执
-> 行失败，而使用数字的`UID`和`GID`不会访问容器进行检查，`ADD`指令可以正常执行
+>如果容器内的文件系统中不存在`/etc/passwd`或`/etc/group`文件，当`--chown`中使用具体的用户名或组名时，会导致`ADD`指令执
+>行失败，而使用数字的`UID`和`GID`不会访问容器进行检查，`ADD`指令可以正常执行
 
 `ADD`指令遵循以下原则
 
@@ -252,7 +252,7 @@ ADD --chown=10:11 files* /somedir/
   （如`http://example.com`将不起作用）
 - 如果`<src>`是采用公认压缩格式（identity, gzip, bzip2 或 xz）的本地`tar`归档文件，则将其解压缩为目录。来自远程 URL 的资
   源不会被解压缩。复制或解压缩目录时，其行为与 tar -x 相同
-  > 如果一个空的文件恰好以`.tar.gz`结尾，则不会被解压缩，而是被简单地拷贝到容器中，也不会出现解压缩的错误信息
+  >如果一个空的文件恰好以`.tar.gz`结尾，则不会被解压缩，而是被简单地拷贝到容器中，也不会出现解压缩的错误信息
 - 如果`<src>`是目录，则将复制目录中的所有内容到`<dest>`，包括文件系统元数据
 - 如果`<src>`是任何其他类型的文件，则将其与元数据一起单独复制。在这种情况下，如果`<dest>`以`/`结束，则它将被视为目录，并
   且`<src>`的内容将写入`<dest>/base(<src>)`。
@@ -295,7 +295,7 @@ ENTRYPOINT command param1 param2
 递信号。这意味着可执行文件将不是容器的`PID 1`，并且不会接收`Unix`信号，因此您的可执行文件将不会
 从`docker stop <container>`接收到`SIGTERM`
 
-> 只有`Dockerfile`中的最后一条`ENTRYPOINT`指令才会生效
+>只有`Dockerfile`中的最后一条`ENTRYPOINT`指令才会生效
 
 下表显示了针对不同的`ENTRYPOINT/CMD`组合执行的命令
 
@@ -306,8 +306,8 @@ ENTRYPOINT command param1 param2
 | `CMD ["p1_cmd", "p2_cmd"]`   | p1_cmd p2_cmd              | /bin/sh -c exec_entry p1_entry   | exec_entry p1_entry p1_cmd p2_cmd              |
 | `CMD exec_cmd p1_cmd`        | /bin/sh -c exec_cmd p1_cmd | /bin/sh -c exec_entry p1_entry   | exec_entry p1_entry /bin/sh -c exec_cmd p1_cmd |
 
-> 如果从基本`image`定义了`CMD`，则设置`ENTRYPOINT`会将`CMD`重置为空值。在这种情况下，必须在当前`image`中定义`CMD`以具有
-> 值
+>如果从基本`image`定义了`CMD`，则设置`ENTRYPOINT`会将`CMD`重置为空值。在这种情况下，必须在当前`image`中定义`CMD`以具有
+>值
 
 参数覆盖示例
 
@@ -376,8 +376,8 @@ USER <user>[:<group>]
 USER <UID>[:<GID>]
 ```
 
-> 如果没有为用户声明组，则该镜像（或后续说明）将以`root`组作为该用户的所属组运行，Windows 系统中，必须先使用`net user`创
-> 建一个实际的用户，才能使用该指令声明
+>如果没有为用户声明组，则该镜像（或后续说明）将以`root`组作为该用户的所属组运行，Windows 系统中，必须先使用`net user`创
+>建一个实际的用户，才能使用该指令声明
 
 ## WORKDIR
 
@@ -488,7 +488,7 @@ no_proxy
 当将镜像用作另一个构建的基础时，`ONBUILD`指令会在镜像上添加一个触发指令，以便稍后执行。该触发器将在子级镜像构建的上下文
 中执行，就像它已被插入到子级`Dockerfile`中的`FROM`指令之后一样
 
-> 不允许使用链接的`ONBUILD`指令，如`ONBUILD ONBUILD`
+>不允许使用链接的`ONBUILD`指令，如`ONBUILD ONBUILD`
 
 使用以下`Dockerfile`构建一个父级镜像运行一个`Spring Boot`程序
 

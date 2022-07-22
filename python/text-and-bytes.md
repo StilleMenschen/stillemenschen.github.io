@@ -85,7 +85,7 @@ for expression in expressions.split():
 my_file.close()
 ```
 
-> 在`Windows`系统中常常会因为编码的混乱而出现不可预知的错误，所以要尽量指定读写文件的明确编码
+>在`Windows`系统中常常会因为编码的混乱而出现不可预知的错误，所以要尽量指定读写文件的明确编码
 
 ## 获得图片首部
 

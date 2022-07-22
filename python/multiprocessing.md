@@ -91,7 +91,7 @@ if __name__ == '__main__':
 
 ## 进程池
 
-> 需要 Python 3.7 及以上的版本
+>需要 Python 3.7 及以上的版本
 
 ```python
 from concurrent.futures import ProcessPoolExecutor

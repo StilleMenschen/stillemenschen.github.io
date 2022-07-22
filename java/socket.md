@@ -148,6 +148,6 @@ public class SocketClient {
 }
 ```
 
-> 由于传输的数据包含了`Unicode`字符，运行此示例代码前请保证Java文件编码为`UTF-8`
+>由于传输的数据包含了`Unicode`字符，运行此示例代码前请保证Java文件编码为`UTF-8`
 
 Last Modified 2021-05-30

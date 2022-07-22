@@ -23,7 +23,7 @@ pip install --force-reinstall pip==20.3.4
 pip install ansible==2.10.9
 ```
 
-> 这里有个很神奇的地方，2.10.9 版本在 pypi 上面找不到，但实际上又可以安装；如果安装速度太慢，可以考虑切换 pip 的镜像源为
+>这里有个很神奇的地方，2.10.9 版本在 pypi 上面找不到，但实际上又可以安装；如果安装速度太慢，可以考虑切换 pip 的镜像源为
 > taobao 的安装源https://mirrors.aliyun.com/pypi/simple/
 
 ## 被控端配置
@@ -38,7 +38,7 @@ centos77.server.test ansible_host=192.168.1.77 ansible_port=22 ansible_user=root
 centos78.server.test ansible_host=192.168.1.78 ansible_port=22 ansible_user=root ansible_password="abc@78."
 ```
 
-> 官方建议还是不要将服务器密码写在配置文件中，尽量在所有被控服务器和控制服务器之间做好免密登录，尽量不要使用 root 用户
+>官方建议还是不要将服务器密码写在配置文件中，尽量在所有被控服务器和控制服务器之间做好免密登录，尽量不要使用 root 用户
 
 保存文件后，可以试试服务器是否访问正常
 
@@ -46,8 +46,8 @@ centos78.server.test ansible_host=192.168.1.78 ansible_port=22 ansible_user=root
 ansible testServer -m ping
 ```
 
-> 如果执行 ping 的时候有提示远程登录的错误，可以先使用 ssh 分别登录一次被控端服务器，保存鉴权信息到控制端服务器
-> 的`known_hosts`中，执行`cat ~/.ssh/known_hosts`查看是否已经有对应机器的鉴权文件
+>如果执行 ping 的时候有提示远程登录的错误，可以先使用 ssh 分别登录一次被控端服务器，保存鉴权信息到控制端服务器
+>的`known_hosts`中，执行`cat ~/.ssh/known_hosts`查看是否已经有对应机器的鉴权文件
 
 ## 采集器配置
 

@@ -25,7 +25,7 @@
   - `P2D` 解析为 `2` 天
   - `-P6H3M` 解析为 `-6` 小时和 `-3`分钟
 
-  > 详细可参考[java.time.Duration](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html)
+  >详细可参考[java.time.Duration](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html)
 
 - `${__XPath(/path/to/build.xml, //target/@name)}` XPath 函数读取 XML 文件并匹配 XPath。每次调用该函数时，将返回下一个匹
   配项。在文件末尾，它将绕回开始。如果没有匹配的节点，则该函数将返回空字符串，并且警告消息将写入 JMeter 日志文件
