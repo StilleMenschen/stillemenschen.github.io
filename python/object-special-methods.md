@@ -20,6 +20,9 @@ class FrenchDeck:
     def __len__(self):
         return len(self._cards)
 
+    def __iter__(self):
+        return iter(self._cards)
+
     def __getitem__(self, key):
         return self._cards[key]
 
@@ -33,6 +36,19 @@ print(random.choice(deck))
 sorted_deck = sorted(deck, key=deck.spades_high)
 print(sorted_deck[:10])
 print(sorted_deck[12:13])
+
+
+def set_card(decks, key, value):
+    if not isinstance(value, Card):
+        raise ValueError(f"the value must be {Card.__name__}")
+    # 访问内置的属性
+    decks._cards[key] = value
+
+
+# 补丁
+FrenchDeck.__setitem__ = set_card
+random.shuffle(deck)
+print(deck[:10])
 ```
 
 ## 可被散列的向量类
