@@ -20,4 +20,5 @@
   - [Abstract Base Class](python/abstract-base-class.md)
   - [Class Inheritance](python/class-inheritance.md)
   - [Arithmetic Operators](python/arithmetic-operators.md)
+  - [Iterators & Generators](python/iterators-and-generators.md)
   - [Linux Compile Install](python/linux-compile-install.md)
