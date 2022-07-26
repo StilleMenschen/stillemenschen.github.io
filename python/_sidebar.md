@@ -19,4 +19,5 @@
   - [Object Reference](python/object-reference.md)
   - [Abstract Base Class](python/abstract-base-class.md)
   - [Class Inheritance](python/class-inheritance.md)
+  - [Arithmetic Operators](python/arithmetic-operators.md)
   - [Linux Compile Install](python/linux-compile-install.md)
