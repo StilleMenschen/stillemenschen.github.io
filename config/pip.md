@@ -38,4 +38,11 @@ USER_BASE = r'D:\Program'
 
 >文件夹中的`Python37`中的`37`数字一般是取当前安装的 Python 版本号前两位
 
-Last Modified 2021-07-18
+使用命令设置镜像
+
+```bash
+pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+pip config set install.trusted-host pypi.tuna.tsinghua.edu.cn
+```
+
+Last Modified 2021-07-27
