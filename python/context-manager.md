@@ -1,5 +1,36 @@
 # 上下文管理
 
+## 特殊的 else
+
+```python
+items = range(2, 11, 2)
+
+for item in items:
+    print(item)
+    if item > 60:
+        break
+else:
+    # 没有被 break 才会执行
+    print('the for loop else')
+
+idx = 0
+
+while idx < len(items):
+    print(items[idx])
+    idx += 1
+else:
+    # 没有被 break 才会执行
+    print('the while loop else')
+
+try:
+    print('first of try/except')
+except Exception as e:
+    print(e)
+else:
+    # 没有抛出异常才会执行
+    print('after try/except')
+```
+
 ## 基本的上下文
 
 ```python

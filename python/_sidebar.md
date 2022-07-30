@@ -9,6 +9,7 @@
   - [AsyncIO](python/asyncio.md)
   - [DateTime](python/datetime.md)
   - [cProfile](python/cprofile.md)
+  - [Automation](python/automation.md)
   - [Special Methods](python/object-special-methods.md)
   - [Sequence](python/sequence.md)
   - [Dictionaries & Collections](python/dictionaries-and-collections.md)
