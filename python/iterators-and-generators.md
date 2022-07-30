@@ -253,6 +253,28 @@ itertools Tests:
 """
 ```
 
+```python
+"""
+>>> s = 'ABC'
+>>> t = tuple(range(1, 4))
+>>> list(chain(s, t))
+['A', 'B', 'C', 1, 2, 3]
+>>> list(chain_form(s, t))
+['A', 'B', 'C', 1, 2, 3]
+"""
+
+
+def chain(*iterables):
+    for it in iterables:
+        for i in it:
+            yield i
+
+
+def chain_form(*iterables):
+    for it in iterables:
+        yield from it
+```
+
 ## iter 函数
 
 ```python
