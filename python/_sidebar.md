@@ -21,4 +21,5 @@
   - [Class Inheritance](python/class-inheritance.md)
   - [Arithmetic Operators](python/arithmetic-operators.md)
   - [Iterators & Generators](python/iterators-and-generators.md)
+  - [Context Manager](python/context-manager.md)
   - [Linux Compile Install](python/linux-compile-install.md)
