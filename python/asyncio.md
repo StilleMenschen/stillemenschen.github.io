@@ -164,7 +164,7 @@ async def print_http_headers(request_url):
     )
 
     writer.write(query.encode('latin-1'))
-    print(f'get url {request_url}')
+    lines = [f'get url {request_url}']
     while True:
         line = await reader.readline()
         if not line:
@@ -172,8 +172,8 @@ async def print_http_headers(request_url):
 
         line = line.decode('latin1').rstrip()
         if line:
-            print(f'HTTP header> {line}')
-
+            lines.append(f'HTTP header> {line}')
+    print('\n'.join(lines))
     # Ignore the body, close the socket
     writer.close()
 
