@@ -494,6 +494,8 @@ if __name__ == '__main__':
     make_process()
 ```
 
+>使用多进程可以绕开`GIL`锁，利用`CPU`的多个核心执行程序，以提高效率
+
 ### threading 模块
 
 ```python
@@ -581,4 +583,7 @@ if __name__ == '__main__':
     make_thread()
 ```
 
-Last Modified 2022-08-01
+>`CPython`解释器本身是线程不安全的，因此有全局解释器锁（`GIL`），一次只允许使用一个线程执行 Python 字节码。因此，一个 Python 进程通常不能同时使用多个 CPU 核心。
+>标准库中每个使用 C 语言编写的所有阻塞型`I/O`函数，在等待操作系统返回结果时都会释放`GIL`，允许其它线程运行。`time.sleep()`函数也会释放`GIL`
+
+Last Modified 2022-08-03
