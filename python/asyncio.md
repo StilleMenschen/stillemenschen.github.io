@@ -1,5 +1,97 @@
 # 异步IO
 
+## 对比线程与异步协程
+
+```python
+# credits: Adapted from Michele Simionato's
+# multiprocessing example in the python-list:
+# https://mail.python.org/pipermail/python-list/2009-February/538048.html
+
+import threading
+import itertools
+import time
+
+
+def spin(msg, done):  # <1>
+    for char in itertools.cycle('|/-\\'):  # <3>
+        status = char + ' ' + msg
+        print(status, flush=True, end='\r')
+        if done.wait(.1):  # <5>
+            break
+    print(' ' * len(status), end='\r')
+
+def slow_function():  # <7>
+    # pretend waiting a long time for I/O
+    time.sleep(3)  # <8>
+    return 42
+
+
+def supervisor():  # <9>
+    done = threading.Event()
+    spinner = threading.Thread(target=spin,
+                               args=('thinking!', done))
+    print('spinner object:', spinner)  # <10>
+    spinner.start()  # <11>
+    result = slow_function()  # <12>
+    done.set()  # <13>
+    spinner.join()  # <14>
+    return result
+
+
+def main():
+    result = supervisor()  # <15>
+    print('Answer:', result)
+
+
+if __name__ == '__main__':
+    main()
+```
+
+```python
+# credits: Example by Luciano Ramalho inspired by
+# Michele Simionato's multiprocessing example in the python-list:
+# https://mail.python.org/pipermail/python-list/2009-February/538048.html
+
+import asyncio
+import itertools
+
+
+async def spin(msg):  # <1>
+    for char in itertools.cycle('|/-\\'):
+        status = char + ' ' + msg
+        print(status, flush=True, end='\r')
+        try:
+            await asyncio.sleep(.1)  # <2>
+        except asyncio.CancelledError:  # <3>
+            # 捕获取消执行任务的异常, 中止循环
+            break
+    print(' ' * len(status), end='\r')
+
+
+async def slow_function():  # <4>
+    # pretend waiting a long time for I/O
+    await asyncio.sleep(3)  # <5>
+    return 42
+
+
+async def supervisor():  # <6>
+    spinner = asyncio.create_task(spin('thinking!'))  # <7>
+    print('spinner object:', spinner)  # <8>
+    result = await slow_function()  # <9>
+    # 取消执行任务
+    spinner.cancel()  # <10>
+    return result
+
+
+def main():
+    result = asyncio.run(supervisor())  # <11>
+    print('Answer:', result)
+
+
+if __name__ == '__main__':
+    main()
+```
+
 ## 协程与任务
 
 ```python
@@ -194,4 +286,4 @@ if __name__ == '__main__':
 - 协程与任务 https://docs.python.org/zh-cn/3.7/library/asyncio-task.html
 - 事件循环 https://docs.python.org/zh-cn/3.7/library/asyncio-eventloop.html
 
-Last Modified 2021-05-28
+Last Modified 2022-08-04
