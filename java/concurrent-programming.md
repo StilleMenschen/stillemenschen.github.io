@@ -484,6 +484,7 @@ public class CyclicBarrierExample {
 ```java
 package com.example.concurrent;
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -492,45 +493,45 @@ import java.util.concurrent.*;
 public class FutureTaskExample {
 
     private static final Logger log = LoggerFactory.getLogger(FutureTaskExample.class);
+    private static final int FINAL_RESULT = 42;
 
-    private static class AsyncTask implements Callable<String> {
+    private static class AsyncTask implements Callable<Integer> {
 
         @Override
-        public String call() throws Exception {
+        public Integer call() throws Exception {
             log.info("async task is running");
             Thread.sleep(3000);
-            return "OK";
+            return FINAL_RESULT;
         }
     }
 
 
-    private static void testCallable() throws Exception {
-        final ExecutorService pool = Executors.newFixedThreadPool(1);
-        final Future<String> future = pool.submit(new AsyncTask());
+    private static void testCallable(final ExecutorService pool) throws Exception {
+        final Future<Integer> future = pool.submit(new AsyncTask());
         log.info("testCallable - main task is running");
         Thread.sleep(1000);
-        final String result = future.get();
+        final Integer result = future.get();
         log.info("testCallable - get result {}", result);
-        pool.shutdown();
     }
 
-    private static void testFutureTask() throws Exception {
-        final ExecutorService pool = Executors.newFixedThreadPool(1);
-        final FutureTask<String> task = new FutureTask<>(new AsyncTask());
+    private static void testFutureTask(final ExecutorService pool) throws Exception {
+        final FutureTask<Integer> task = new FutureTask<>(new AsyncTask());
         pool.execute(task);
         log.info("testFutureTask - main task is running");
         Thread.sleep(1000);
-        final String result = task.get();
+        final Integer result = task.get();
         log.info("testFutureTask - get result {}", result);
-        pool.shutdown();
     }
 
     public static void main(String[] args) {
+        final ExecutorService pool = Executors.newFixedThreadPool(2);
         try {
-            testCallable();
-            testFutureTask();
+            testCallable(pool);
+            testFutureTask(pool);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+        } finally {
+            pool.shutdown();
         }
     }
 }
