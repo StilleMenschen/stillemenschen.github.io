@@ -240,6 +240,14 @@ DEFAULT_CONCUR_REQ = 30  # <4>
 MAX_CONCUR_REQ = 1000  # <5>
 
 
+def get_flag(base_url, cc):
+    url = '{}/{cc}/{cc}.gif'.format(base_url, cc=cc.lower())
+    resp = requests.get(url)
+    if resp.status_code != 200:  # <1>
+        resp.raise_for_status()
+    return resp.content
+
+
 def download_one(cc, base_url, verbose=False):
     try:
         image = get_flag(base_url, cc)
@@ -391,7 +399,7 @@ async def downloader_coro(cc_list, base_url, verbose, concur_req):  # <1>
 
 
 def download_many(cc_list, base_url, verbose, concur_req):
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     coro = downloader_coro(cc_list, base_url, verbose, concur_req)
     counts = loop.run_until_complete(coro)  # <14>
     loop.close()  # <15>
