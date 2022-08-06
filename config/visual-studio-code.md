@@ -12,7 +12,6 @@ settings.json
     "python.formatting.provider": "yapf",
     "python.linting.pylintPath": "pylint",
     "php.validate.executablePath": "php.exe",
-    "php.executablePath": "php.exe",
     "prettier.printWidth": 120,
     "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
     "typescript.format.insertSpaceBeforeFunctionParenthesis": true,
@@ -82,7 +81,7 @@ settings.json
     "git.autofetch": "all",
     "terminal.integrated.profiles.windows": {
         "Git-Bash": {
-            "path": "D:\\Programs\\Git\\bin\\bash.exe",
+            "path": "D:\\Git\\bin\\bash.exe",
             "args": [
                 "--login"
             ],
@@ -118,4 +117,4 @@ settings.json
 }
 ```
 
-Last Modified 2022-07-08
+Last Modified 2022-08-06
