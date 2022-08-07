@@ -23,5 +23,6 @@
   - [Coroutine](python/coroutine.md)
   - [Futures](python/futures.md)
   - [AsyncIO](python/asyncio.md)
-  - [Meta Programming](python/meta-programming)
+  - [Meta Programming](python/meta-programming.md)
+  - [Property Descriptor](python/property-descriptor.md)
   - [Linux Compile Install](python/linux-compile-install.md)
