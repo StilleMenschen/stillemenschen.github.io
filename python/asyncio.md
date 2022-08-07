@@ -100,7 +100,7 @@ charfinder.py
 # charfinder.py
 
 """
-Unicode character finder utility:
+Unicode's character finder utility:
 find characters based on words in their official names.
 
 This can be used from the command line, just pass words as arguments.
