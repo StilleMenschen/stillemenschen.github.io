@@ -25,4 +25,5 @@
   - [AsyncIO](python/asyncio.md)
   - [Meta Programming](python/meta-programming.md)
   - [Property Descriptor](python/property-descriptor.md)
+  - [Class Meta Programming](python/class-meta-programming.md)
   - [Linux Compile Install](python/linux-compile-install.md)
