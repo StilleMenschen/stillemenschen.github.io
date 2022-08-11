@@ -465,6 +465,59 @@ def quick_sort_helper(array, start_idx, end_idx):
         quick_sort_helper(array, start_idx, right_idx - 1)
 
 
+def quicksort(array):
+    """快速排序"""
+    length = len(array)
+    queue = [(0, length,)]
+    while len(queue):
+        start_idx, end_idx = queue.pop(0)
+        if end_idx - start_idx < 5:
+            for i in range(start_idx + 1, end_idx):
+                j = i - 1
+                while j >= start_idx:
+                    if compare(array, j, j + 1) <= 0:
+                        break
+                    swap(j, j + 1, array)
+                    j -= 1
+            continue
+        j, i, k = start_idx, (start_idx + end_idx) // 2, end_idx - 1
+        if compare(array, k, i) < 0:
+            swap(k, i, array)
+        if compare(array, k, j) < 0:
+            swap(k, j, array)
+        if compare(array, j, i) < 0:
+            swap(j, i, array)
+        pivot, left, right = j, start_idx, end_idx
+        while left <= right:
+            right -= 1
+            while right > start_idx and compare(array, right, pivot) >= 0:
+                right -= 1
+            left += 1
+            while left < end_idx and compare(array, left, pivot) <= 0:
+                left += 1
+            if left > right:
+                continue
+            swap(left, right, array)
+        swap(pivot, right, array)
+        n1 = right - start_idx
+        n2 = end_idx - left
+        if n1 > 1:
+            queue.append((start_idx, right,))
+        if n2 > 1:
+            queue.append((left, end_idx,))
+    return array
+
+
+def compare(arr, i, j):
+    """比较数组两个位置的值大小"""
+    if arr[i] < arr[j]:
+        return -1
+    elif arr[i] > arr[j]:
+        return 1
+    else:
+        return 0
+
+
 def swap(i, j, array):
     array[i], array[j] = array[j], array[i]
 
@@ -472,6 +525,7 @@ def swap(i, j, array):
 if __name__ == '__main__':
     source = [8, 5, -3, 2, 9, 6, 3]
     print(quick_sort(source))
+    print(quicksort(source))
 ```
 
 ```cpp
@@ -1208,4 +1262,4 @@ int main()
 }
 ```
 
-Last Modified 2022-06-07
+Last Modified 2022-08-11
