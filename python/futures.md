@@ -53,6 +53,285 @@ if __name__ == '__main__':
     main()
 ```
 
+```python
+import sys
+import time
+import hashlib
+from concurrent import futures
+from random import randrange
+
+JOBS = 12
+SIZE = 2**20
+STATUS = '{} workers, elapsed time: {:.2f}s'
+
+
+def sha(size):
+    data = bytearray(randrange(256) for i in range(size))
+    algo = hashlib.new('sha256')
+    algo.update(data)
+    return algo.hexdigest()
+
+
+def main(workers=None):
+    if workers:
+        workers = int(workers)
+    t0 = time.time()
+
+    with futures.ProcessPoolExecutor(workers) as executor:
+        actual_workers = executor._max_workers
+        to_do = (executor.submit(sha, SIZE) for i in range(JOBS))
+        for future in futures.as_completed(to_do):
+            res = future.result()
+            print(res)
+
+    print(STATUS.format(actual_workers, time.time() - t0))
+
+if __name__ == '__main__':
+    if len(sys.argv) == 2:
+        workers = int(sys.argv[1])
+    else:
+        workers = None
+    main(workers)
+```
+
+## 算法示例
+
+### RC4 算法
+
+```python
+"""RC4 compatible algorithm"""
+
+
+def arcfour(key, in_bytes, loops=20):
+    kbox = bytearray(256)  # create key box
+    for i, car in enumerate(key):  # copy key and vector
+        kbox[i] = car
+    j = len(key)
+    for i in range(j, 256):  # repeat until full
+        kbox[i] = kbox[i - j]
+
+    # [1] initialize sbox
+    sbox = bytearray(range(256))
+
+    # repeat sbox mixing loop, as recommened in CipherSaber-2
+    # http://ciphersaber.gurus.com/faq.html#cs2
+    j = 0
+    for k in range(loops):
+        for i in range(256):
+            j = (j + sbox[i] + kbox[i]) % 256
+            sbox[i], sbox[j] = sbox[j], sbox[i]
+
+    # main loop
+    i = 0
+    j = 0
+    out_bytes = bytearray()
+
+    for car in in_bytes:
+        i = (i + 1) % 256
+        # [2] shuffle sbox
+        j = (j + sbox[i]) % 256
+        sbox[i], sbox[j] = sbox[j], sbox[i]
+        # [3] compute t
+        t = (sbox[i] + sbox[j]) % 256
+        k = sbox[t]
+        car = car ^ k
+        out_bytes.append(car)
+
+    return out_bytes
+
+
+def test():
+    from time import time
+    clear = bytearray(b'1234567890' * 100000)
+    t0 = time()
+    cipher = arcfour(b'key', clear)
+    print('elapsed time: %.2fs' % (time() - t0))
+    result = arcfour(b'key', cipher)
+    assert result == clear, '%r != %r' % (result, clear)
+    print('elapsed time: %.2fs' % (time() - t0))
+    print('OK')
+
+
+if __name__ == '__main__':
+    test()
+```
+
+### 算法验证
+
+```python
+#!/usr/bin/env python3
+
+from arcfour import arcfour
+
+'''
+Source of the test vectors:
+    A Stream Cipher Encryption Algorithm "Arcfour"
+    http://tools.ietf.org/html/draft-kaukonen-cipher-arcfour-03
+'''
+
+TEST_VECTORS = [
+    ('CRYPTLIB', {
+        'Plain Text': (0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00),
+        'Key': (0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF),
+        'Cipher Text': (0x74, 0x94, 0xC2, 0xE7, 0x10, 0x4B, 0x08, 0x79),
+    }
+     ),
+    ('COMMERCE', {
+        'Plain Text': (0xdc, 0xee, 0x4c, 0xf9, 0x2c),
+        'Key': (0x61, 0x8a, 0x63, 0xd2, 0xfb),
+        'Cipher Text': (0xf1, 0x38, 0x29, 0xc9, 0xde),
+    }
+     ),
+    ('SSH ARCFOUR', {
+        'Plain Text': (
+            0x52, 0x75, 0x69, 0x73, 0x6c, 0x69, 0x6e, 0x6e,
+            0x75, 0x6e, 0x20, 0x6c, 0x61, 0x75, 0x6c, 0x75,
+            0x20, 0x6b, 0x6f, 0x72, 0x76, 0x69, 0x73, 0x73,
+            0x73, 0x61, 0x6e, 0x69, 0x2c, 0x20, 0x74, 0xe4,
+            0x68, 0x6b, 0xe4, 0x70, 0xe4, 0x69, 0x64, 0x65,
+            0x6e, 0x20, 0x70, 0xe4, 0xe4, 0x6c, 0x6c, 0xe4,
+            0x20, 0x74, 0xe4, 0x79, 0x73, 0x69, 0x6b, 0x75,
+            0x75, 0x2e, 0x20, 0x4b, 0x65, 0x73, 0xe4, 0x79,
+            0xf6, 0x6e, 0x20, 0x6f, 0x6e, 0x20, 0x6f, 0x6e,
+            0x6e, 0x69, 0x20, 0x6f, 0x6d, 0x61, 0x6e, 0x61,
+            0x6e, 0x69, 0x2c, 0x20, 0x6b, 0x61, 0x73, 0x6b,
+            0x69, 0x73, 0x61, 0x76, 0x75, 0x75, 0x6e, 0x20,
+            0x6c, 0x61, 0x61, 0x6b, 0x73, 0x6f, 0x74, 0x20,
+            0x76, 0x65, 0x72, 0x68, 0x6f, 0x75, 0x75, 0x2e,
+            0x20, 0x45, 0x6e, 0x20, 0x6d, 0x61, 0x20, 0x69,
+            0x6c, 0x6f, 0x69, 0x74, 0x73, 0x65, 0x2c, 0x20,
+            0x73, 0x75, 0x72, 0x65, 0x20, 0x68, 0x75, 0x6f,
+            0x6b, 0x61, 0x61, 0x2c, 0x20, 0x6d, 0x75, 0x74,
+            0x74, 0x61, 0x20, 0x6d, 0x65, 0x74, 0x73, 0xe4,
+            0x6e, 0x20, 0x74, 0x75, 0x6d, 0x6d, 0x75, 0x75,
+            0x73, 0x20, 0x6d, 0x75, 0x6c, 0x6c, 0x65, 0x20,
+            0x74, 0x75, 0x6f, 0x6b, 0x61, 0x61, 0x2e, 0x20,
+            0x50, 0x75, 0x75, 0x6e, 0x74, 0x6f, 0x20, 0x70,
+            0x69, 0x6c, 0x76, 0x65, 0x6e, 0x2c, 0x20, 0x6d,
+            0x69, 0x20, 0x68, 0x75, 0x6b, 0x6b, 0x75, 0x75,
+            0x2c, 0x20, 0x73, 0x69, 0x69, 0x6e, 0x74, 0x6f,
+            0x20, 0x76, 0x61, 0x72, 0x61, 0x6e, 0x20, 0x74,
+            0x75, 0x75, 0x6c, 0x69, 0x73, 0x65, 0x6e, 0x2c,
+            0x20, 0x6d, 0x69, 0x20, 0x6e, 0x75, 0x6b, 0x6b,
+            0x75, 0x75, 0x2e, 0x20, 0x54, 0x75, 0x6f, 0x6b,
+            0x73, 0x75, 0x74, 0x20, 0x76, 0x61, 0x6e, 0x61,
+            0x6d, 0x6f, 0x6e, 0x20, 0x6a, 0x61, 0x20, 0x76,
+            0x61, 0x72, 0x6a, 0x6f, 0x74, 0x20, 0x76, 0x65,
+            0x65, 0x6e, 0x2c, 0x20, 0x6e, 0x69, 0x69, 0x73,
+            0x74, 0xe4, 0x20, 0x73, 0x79, 0x64, 0xe4, 0x6d,
+            0x65, 0x6e, 0x69, 0x20, 0x6c, 0x61, 0x75, 0x6c,
+            0x75, 0x6e, 0x20, 0x74, 0x65, 0x65, 0x6e, 0x2e,
+            0x20, 0x2d, 0x20, 0x45, 0x69, 0x6e, 0x6f, 0x20,
+            0x4c, 0x65, 0x69, 0x6e, 0x6f),
+        'Key': (
+            0x29, 0x04, 0x19, 0x72, 0xfb, 0x42, 0xba, 0x5f,
+            0xc7, 0x12, 0x77, 0x12, 0xf1, 0x38, 0x29, 0xc9),
+        'Cipher Text': (
+            0x35, 0x81, 0x86, 0x99, 0x90, 0x01, 0xe6, 0xb5,
+            0xda, 0xf0, 0x5e, 0xce, 0xeb, 0x7e, 0xee, 0x21,
+            0xe0, 0x68, 0x9c, 0x1f, 0x00, 0xee, 0xa8, 0x1f,
+            0x7d, 0xd2, 0xca, 0xae, 0xe1, 0xd2, 0x76, 0x3e,
+            0x68, 0xaf, 0x0e, 0xad, 0x33, 0xd6, 0x6c, 0x26,
+            0x8b, 0xc9, 0x46, 0xc4, 0x84, 0xfb, 0xe9, 0x4c,
+            0x5f, 0x5e, 0x0b, 0x86, 0xa5, 0x92, 0x79, 0xe4,
+            0xf8, 0x24, 0xe7, 0xa6, 0x40, 0xbd, 0x22, 0x32,
+            0x10, 0xb0, 0xa6, 0x11, 0x60, 0xb7, 0xbc, 0xe9,
+            0x86, 0xea, 0x65, 0x68, 0x80, 0x03, 0x59, 0x6b,
+            0x63, 0x0a, 0x6b, 0x90, 0xf8, 0xe0, 0xca, 0xf6,
+            0x91, 0x2a, 0x98, 0xeb, 0x87, 0x21, 0x76, 0xe8,
+            0x3c, 0x20, 0x2c, 0xaa, 0x64, 0x16, 0x6d, 0x2c,
+            0xce, 0x57, 0xff, 0x1b, 0xca, 0x57, 0xb2, 0x13,
+            0xf0, 0xed, 0x1a, 0xa7, 0x2f, 0xb8, 0xea, 0x52,
+            0xb0, 0xbe, 0x01, 0xcd, 0x1e, 0x41, 0x28, 0x67,
+            0x72, 0x0b, 0x32, 0x6e, 0xb3, 0x89, 0xd0, 0x11,
+            0xbd, 0x70, 0xd8, 0xaf, 0x03, 0x5f, 0xb0, 0xd8,
+            0x58, 0x9d, 0xbc, 0xe3, 0xc6, 0x66, 0xf5, 0xea,
+            0x8d, 0x4c, 0x79, 0x54, 0xc5, 0x0c, 0x3f, 0x34,
+            0x0b, 0x04, 0x67, 0xf8, 0x1b, 0x42, 0x59, 0x61,
+            0xc1, 0x18, 0x43, 0x07, 0x4d, 0xf6, 0x20, 0xf2,
+            0x08, 0x40, 0x4b, 0x39, 0x4c, 0xf9, 0xd3, 0x7f,
+            0xf5, 0x4b, 0x5f, 0x1a, 0xd8, 0xf6, 0xea, 0x7d,
+            0xa3, 0xc5, 0x61, 0xdf, 0xa7, 0x28, 0x1f, 0x96,
+            0x44, 0x63, 0xd2, 0xcc, 0x35, 0xa4, 0xd1, 0xb0,
+            0x34, 0x90, 0xde, 0xc5, 0x1b, 0x07, 0x11, 0xfb,
+            0xd6, 0xf5, 0x5f, 0x79, 0x23, 0x4d, 0x5b, 0x7c,
+            0x76, 0x66, 0x22, 0xa6, 0x6d, 0xe9, 0x2b, 0xe9,
+            0x96, 0x46, 0x1d, 0x5e, 0x4d, 0xc8, 0x78, 0xef,
+            0x9b, 0xca, 0x03, 0x05, 0x21, 0xe8, 0x35, 0x1e,
+            0x4b, 0xae, 0xd2, 0xfd, 0x04, 0xf9, 0x46, 0x73,
+            0x68, 0xc4, 0xad, 0x6a, 0xc1, 0x86, 0xd0, 0x82,
+            0x45, 0xb2, 0x63, 0xa2, 0x66, 0x6d, 0x1f, 0x6c,
+            0x54, 0x20, 0xf1, 0x59, 0x9d, 0xfd, 0x9f, 0x43,
+            0x89, 0x21, 0xc2, 0xf5, 0xa4, 0x63, 0x93, 0x8c,
+            0xe0, 0x98, 0x22, 0x65, 0xee, 0xf7, 0x01, 0x79,
+            0xbc, 0x55, 0x3f, 0x33, 0x9e, 0xb1, 0xa4, 0xc1,
+            0xaf, 0x5f, 0x6a, 0x54, 0x7f),
+    }
+     ),
+]
+
+for name, vectors in TEST_VECTORS:
+    print(name, end='')
+    plain = bytearray(vectors['Plain Text'])
+    cipher = bytearray(vectors['Cipher Text'])
+    key = bytearray(vectors['Key'])
+    assert cipher == arcfour(key, plain, loops=1)
+    assert plain == arcfour(key, cipher, loops=1)
+    print(' --> OK')
+```
+
+### 多进程运行算法
+
+```python
+import sys
+import time
+from concurrent import futures
+from random import randrange
+from arcfour import arcfour
+
+JOBS = 12
+SIZE = 2 ** 18
+
+KEY = b"'Twas brillig, and the slithy toves\nDid gyre"
+STATUS = '{} workers, elapsed time: {:.2f}s'
+
+
+def arcfour_test(size, key):
+    in_text = bytearray(randrange(256) for i in range(size))
+    cypher_text = arcfour(key, in_text)
+    out_text = arcfour(key, cypher_text)
+    assert in_text == out_text, 'Failed arcfour_test'
+    return size
+
+
+def main(workers=None):
+    if workers:
+        workers = int(workers)
+    t0 = time.time()
+
+    with futures.ProcessPoolExecutor(workers) as executor:
+        actual_workers = executor._max_workers
+        to_do = []
+        for i in range(JOBS, 0, -1):
+            size = SIZE + int(SIZE / JOBS * (i - JOBS / 2))
+            job = executor.submit(arcfour_test, size, KEY)
+            to_do.append(job)
+
+        for future in futures.as_completed(to_do):
+            res = future.result()
+            print('{:.1f} KB'.format(res / 2 ** 10))
+
+    print(STATUS.format(actual_workers, time.time() - t0))
+
+
+if __name__ == '__main__':
+    if len(sys.argv) == 2:
+        worker_number = int(sys.argv[1])
+    else:
+        worker_number = None
+    main(worker_number)
+```
+
 ## 国家旗帜下载
 
 ### 公共模块
@@ -413,185 +692,11 @@ if __name__ == '__main__':
 
 ## 并发模块
 
-### multiprocessing 模块
-
-```python
-from multiprocessing import Process
-from multiprocessing import cpu_count
-from os import getpid
-from random import randint
-
-
-def compare(arr, i, j):
-    """比较数组两个位置的值大小"""
-    if arr[i] < arr[j]:
-        return -1
-    elif arr[i] > arr[j]:
-        return 1
-    else:
-        return 0
-
-
-def swap(arr, i, j):
-    """交换数组两个位置的值"""
-    arr[i], arr[j] = arr[j], arr[i]
-
-
-def quicksort(array):
-    """快速排序"""
-    length = len(array)
-    queue = [(0, length,)]
-    while len(queue):
-        start_idx, end_idx = queue.pop(0)
-        if end_idx - start_idx < 5:
-            for i in range(start_idx + 1, end_idx):
-                j = i - 1
-                while j >= start_idx:
-                    if compare(array, j, j + 1) <= 0:
-                        break
-                    swap(array, j, j + 1)
-                    j -= 1
-            continue
-        j, i, k = start_idx, (start_idx + end_idx) // 2, end_idx - 1
-        if compare(array, k, i) < 0:
-            swap(array, k, i)
-        if compare(array, k, j) < 0:
-            swap(array, k, j)
-        if compare(array, j, i) < 0:
-            swap(array, j, i)
-        pivot, left, right = j, start_idx, end_idx
-        while left <= right:
-            right -= 1
-            while right > start_idx and compare(array, right, pivot) >= 0:
-                right -= 1
-            left += 1
-            while left < end_idx and compare(array, left, pivot) <= 0:
-                left += 1
-            if left > right:
-                continue
-            swap(array, left, right)
-        swap(array, pivot, right)
-        n1 = right - start_idx
-        n2 = end_idx - left
-        if n1 > 1:
-            queue.append((start_idx, right,))
-        if n2 > 1:
-            queue.append((left, end_idx,))
-
-
-def task(task_id):
-    print(f'[Task {getpid()}] process {task_id}')
-    source_list = [e + randint(-50, 50) for e in range(10)]
-    print('before', source_list)
-    quicksort(source_list)
-    print('after', source_list)
-
-
-def make_process():
-    for i in range(cpu_count()):
-        p = Process(target=task, args=(i + 1,))
-        p.start()
-        # 挂起等待子进程结束
-        # p.join()
-
-
-print('__name__ :  ' + __name__)
-
-if __name__ == '__main__':
-    print(f'[Main {getpid()}] process...')
-    make_process()
-```
+如果想更细致地义并发逻辑，可以考虑使用`multiprocessing`和`threading`模块
 
 >使用多进程可以绕开`GIL`锁，利用`CPU`的多个核心执行程序，以提高效率
-
-### threading 模块
-
-```python
-from threading import Thread
-from os import cpu_count
-from random import randint
-
-
-def compare(arr, i, j):
-    """比较数组两个位置的值大小"""
-    if arr[i] < arr[j]:
-        return -1
-    elif arr[i] > arr[j]:
-        return 1
-    else:
-        return 0
-
-
-def swap(arr, i, j):
-    """交换数组两个位置的值"""
-    arr[i], arr[j] = arr[j], arr[i]
-
-
-def quicksort(array):
-    """快速排序"""
-    length = len(array)
-    queue = [(0, length,)]
-    while len(queue):
-        start_idx, end_idx = queue.pop(0)
-        if end_idx - start_idx < 5:
-            for i in range(start_idx + 1, end_idx):
-                j = i - 1
-                while j >= start_idx:
-                    if compare(array, j, j + 1) <= 0:
-                        break
-                    swap(array, j, j + 1)
-                    j -= 1
-            continue
-        j, i, k = start_idx, (start_idx + end_idx) // 2, end_idx - 1
-        if compare(array, k, i) < 0:
-            swap(array, k, i)
-        if compare(array, k, j) < 0:
-            swap(array, k, j)
-        if compare(array, j, i) < 0:
-            swap(array, j, i)
-        pivot, left, right = j, start_idx, end_idx
-        while left <= right:
-            right -= 1
-            while right > start_idx and compare(array, right, pivot) >= 0:
-                right -= 1
-            left += 1
-            while left < end_idx and compare(array, left, pivot) <= 0:
-                left += 1
-            if left > right:
-                continue
-            swap(array, left, right)
-        swap(array, pivot, right)
-        n1 = right - start_idx
-        n2 = end_idx - left
-        if n1 > 1:
-            queue.append((start_idx, right,))
-        if n2 > 1:
-            queue.append((left, end_idx,))
-
-
-def task(task_id):
-    message = f'[Task {task_id}] process...\n'
-    source_list = [e + randint(-50, 50) for e in range(10)]
-    message += f'before {source_list}\n'
-    quicksort(source_list)
-    message += f'after {source_list}\n'
-    print(message, end='')
-
-
-def make_thread():
-    for i in range(cpu_count() * 2):
-        t = Thread(target=task, args=(i + 1,))
-        t.start()
-        # 挂起等待子线程结束
-        # t.join()
-
-
-if __name__ == '__main__':
-    print('[Main] process...')
-    make_thread()
-```
 
 >`CPython`解释器本身是线程不安全的，因此有全局解释器锁（`GIL`），一次只允许使用一个线程执行 Python 字节码。因此，一个 Python 进程通常不能同时使用多个 CPU 核心。
 >标准库中每个使用 C 语言编写的所有阻塞型`I/O`函数，在等待操作系统返回结果时都会释放`GIL`，允许其它线程运行。`time.sleep()`函数也会释放`GIL`
 
-Last Modified 2022-08-03
+Last Modified 2022-08-11
