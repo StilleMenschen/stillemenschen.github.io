@@ -195,4 +195,182 @@ print('<[14]> evaltime module end')
 <[15]> evaltime_meta module end
 ```
 
-Last Modified 2022-08-10
+## 元类属性的顺序
+
+```python
+import abc
+import collections
+
+
+class AutoStorage:
+    __counter = 0
+
+    def __init__(self):
+        cls = self.__class__
+        prefix = cls.__name__
+        index = cls.__counter
+        self.storage_name = '_{}#{}'.format(prefix, index)
+        cls.__counter += 1
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+        else:
+            return getattr(instance, self.storage_name)
+
+    def __set__(self, instance, value):
+        setattr(instance, self.storage_name, value)
+
+
+class Validated(abc.ABC, AutoStorage):
+
+    def __set__(self, instance, value):
+        value = self.validate(instance, value)
+        super().__set__(instance, value)
+
+    @abc.abstractmethod
+    def validate(self, instance, value):
+        """return validated value or raise ValueError"""
+
+
+class Quantity(Validated):
+    """a number greater than zero"""
+
+    def validate(self, instance, value):
+        if value <= 0:
+            raise ValueError('value must be > 0')
+        return value
+
+
+class NonBlank(Validated):
+    """a string with at least one non-space character"""
+
+    def validate(self, instance, value):
+        value = value.strip()
+        if len(value) == 0:
+            raise ValueError('value cannot be empty or blank')
+        return value
+
+
+class EntityMeta(type):
+    """Metaclass for business entities with validated fields"""
+
+    @classmethod
+    def __prepare__(cls, name, bases):
+        return collections.OrderedDict()  # <1>
+
+    def __init__(cls, name, bases, attr_dict):
+        super().__init__(name, bases, attr_dict)
+        cls._field_names = []  # <2>
+        for key, attr in attr_dict.items():  # <3>
+            if isinstance(attr, Validated):
+                type_name = type(attr).__name__
+                attr.storage_name = '_{}#{}'.format(type_name, key)
+                cls._field_names.append(key)  # <4>
+
+
+class Entity(metaclass=EntityMeta):
+    """Business entity with validated fields"""
+
+    @classmethod
+    def field_names(cls):  # <5>
+        for name in cls._field_names:
+            yield name
+```
+
+```python
+"""
+
+A line item for a bulk food order has description, weight and price fields::
+
+    >>> raisins = LineItem('Golden raisins', 10, 6.95)
+    >>> raisins.weight, raisins.description, raisins.price
+    (10, 'Golden raisins', 6.95)
+
+A ``subtotal`` method gives the total price for that line item::
+
+    >>> raisins.subtotal()
+    69.5
+
+The weight of a ``LineItem`` must be greater than 0::
+
+    >>> raisins.weight = -20
+    Traceback (most recent call last):
+        ...
+    ValueError: value must be > 0
+
+No change was made::
+
+    >>> raisins.weight
+    10
+
+    >>> raisins = LineItem('Golden raisins', 10, 6.95)
+    >>> dir(raisins)[:3]
+    ['_NonBlank#description', '_Quantity#price', '_Quantity#weight']
+    >>> LineItem.description.storage_name
+    '_NonBlank#description'
+    >>> raisins.description
+    'Golden raisins'
+    >>> getattr(raisins, '_NonBlank#description')
+    'Golden raisins'
+
+If the descriptor is accessed in the class, the descriptor object is
+returned:
+
+    >>> LineItem.weight  # doctest: +ELLIPSIS
+    <model_v8.Quantity object at 0x...>
+    >>> LineItem.weight.storage_name
+    '_Quantity#weight'
+
+
+The `NonBlank` descriptor prevents empty or blank strings to be used
+for the description:
+
+    >>> br_nuts = LineItem('Brazil Nuts', 10, 34.95)
+    >>> br_nuts.description = ' '
+    Traceback (most recent call last):
+        ...
+    ValueError: value cannot be empty or blank
+    >>> void = LineItem('', 1, 1)
+    Traceback (most recent call last):
+        ...
+    ValueError: value cannot be empty or blank
+
+
+Fields can be retrieved in the order they were declared:
+
+    >>> for name in LineItem.field_names():
+    ...     print(name)
+    ...
+    description
+    weight
+    price
+
+
+"""
+
+import model_v8 as model
+
+
+class LineItem(model.Entity):
+    description = model.NonBlank()
+    weight = model.Quantity()
+    price = model.Quantity()
+
+    def __init__(self, description, weight, price):
+        self.description = description
+        self.weight = weight
+        self.price = price
+
+    def subtotal(self):
+        return self.weight * self.price
+```
+
+>`__prepare__`方法只在元类中有用，而且必须声明为类方法（添加`@classmethod`装饰器）。解释器调用元类的`__new__`方法之前会先调用`__prepare__`方法，使用类定义体中的属性创建映射。`__prepare__`方法的第一个参数是元类，随后两个参数分别是要构建的类名称和基类组成的元组，返回值必须是映射。元类构建新类时，`__prepare__`方法返回的映射会传给`__new__`方法的最后一个参数，然后再传给`__init__`方法。
+
+- `cls.__bases__` 由类的基类组成的元组
+- `cls.__qualname__` 获取类或函数的限定名称，即从全局模块的全局作用域到类的点分路径
+- `cls.__subclasses__()` 返回一个列表，包含类的直接子类。这个方法的实现使用弱引用，防止在超类和子类（子类在`__bases__`属性中存储指向超类的强引用）之间出现循环引用。这个方法返回的列表是内存中现存的子类
+- `cls.mro()` 构建类时，如果要获取存储在类属性`__mro__`中的超类元组，解释器会调用这个方法。元类可以覆盖这个方法，定制要构建的类解析方法的顺序。
+
+Last Modified 2022-08-11
