@@ -224,7 +224,7 @@ int main()
 在两个序列中分别找出序列 1 和序列 2 中相差最小的两个数
 
 ```python
-# O(n * log(n) + m*log(m)) time | O(1) space
+# O(n * log(n) + m * log(m)) time | O(1) space
 def smallest_difference(array1, array2):
     array1.sort()
     array2.sort()
@@ -238,12 +238,15 @@ def smallest_difference(array1, array2):
     while idx1 < len1 and idx2 < len2:
         first_num = array1[idx1]
         second_num = array2[idx2]
+        # 先移动一个序列找到最小的值
         if first_num < second_num:
             current = second_num - first_num
             idx1 += 1
+        # 再移动另一个序列找到最小的值
         elif first_num > second_num:
             current = first_num - second_num
             idx2 += 1
+        # 如果两个位置的值相等说明已经找到了最小的差异, 即 0 (以 X Y 坐标轴来看, 同一个位置的点是距离最短的)
         else:
             return first_num, second_num
         if current < smallest:
