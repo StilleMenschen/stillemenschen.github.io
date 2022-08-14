@@ -88,10 +88,10 @@ def main(workers=None):
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
-        workers = int(sys.argv[1])
+        worker_numbers = int(sys.argv[1])
     else:
-        workers = None
-    main(workers)
+        worker_numbers = None
+    main(worker_numbers)
 ```
 
 ## 算法示例
