@@ -5,3 +5,4 @@
   - [迷你观察者](javascript/mini-watchers.md)
   - [Promise](javascript/promise.md)
   - [Objects](javascript/objects.md)
+  - [Step Executor](javascript/step-executor.md)
