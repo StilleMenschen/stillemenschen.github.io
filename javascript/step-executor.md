@@ -26,13 +26,13 @@ function multiStep(steps, args, callback) {
     } while (tasks.length > 0 && +new Date() - start < 50 && (task = tasks.shift()));
 
     if (tasks.length > 0) {
-      setTimeout(innerTask, 0);
+      setTimeout(innerTask, 25);
     } else {
       callback();
     }
   }
 
-  setTimeout(innerTask);
+  setTimeout(innerTask, 25);
 }
 
 multiStep([a1, a2, a3], ["Hello", "World!"], () => {
