@@ -84,7 +84,8 @@ http {
     gzip_min_length  128k;
     gzip_buffers     4 16k;
     gzip_comp_level  4;
-    gzip_types       text/plain application/javascript text/css application/xml text/javascript application/x-httpd-php image/jpeg image/gif image/png image/svg+xml;
+    gzip_types       text/plain application/javascript text/css application/xml application/json
+                     text/javascript application/x-httpd-php text/xml image/svg+xml;
     gzip_vary on;
 
     server {
@@ -163,4 +164,4 @@ http {
 }
 ```
 
-Last Modified 2021-08-19
+Last Modified 2022-08-17
