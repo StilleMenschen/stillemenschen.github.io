@@ -25,6 +25,7 @@ yarn 的配置命令
 yarn config set prefix "/opt/nodejs/yarn"
 yarn config set global-folder "/opt/nodejs/yarn/global"
 yarn config set cache-folder "/opt/nodejs/cache"
+yarn config set registry https://registry.npm.taobao.org/
 ```
 
-Last Modified 2022-08-06
+Last Modified 2022-08-17
