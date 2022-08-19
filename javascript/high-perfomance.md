@@ -155,4 +155,62 @@ function myFunc(myObj) {
 
 >因为加载脚本允许跨域，可能会存在安全问题
 
+## 不同的加载方式
+
+### 延迟加载
+
+```javascript
+function addHandler(target, eventType, handler) {
+  if (target.addEventListener) {
+    // DOM2
+    addHandler = function (target, eventType, handler) {
+      target.addEventListener(eventType, handler, false);
+    };
+  } else {
+    // < IE 9
+    addHandler = function (target, eventType, handler) {
+      target.attachEvent("on" + eventType, handler);
+    };
+  }
+
+  addHandler(target, eventType, handler);
+}
+
+function removeHandler(target, eventType, handler) {
+  if (target.removeEventListener) {
+    // DOM2
+    removeHandler = function (target, eventType, handler) {
+      target.removeEventListener(eventType, handler, false);
+    };
+  } else {
+    // < IE 9
+    removeHandler = function (target, eventType, handler) {
+      target.attachEvent("on" + eventType, handler);
+    };
+  }
+
+  removeHandler(target, eventType, handler);
+}
+```
+
+### 条件预加载
+
+```javascript
+var addHandler = document.body.addEventListener
+  ? function (target, eventType, handler) {
+      target.addEventListener(eventType, handler, false);
+    }
+  : function (target, eventType, handler) {
+      target.attachEvent("on" + eventType, handler);
+    };
+
+var removeHandler = document.body.removeEventListener
+  ? function (target, eventType, handler) {
+      target.removeEventListener(eventType, handler, false);
+    }
+  : function (target, eventType, handler) {
+      target.attachEvent("on" + eventType, handler);
+    };
+```
+
 Last Modified 2022-08-19
