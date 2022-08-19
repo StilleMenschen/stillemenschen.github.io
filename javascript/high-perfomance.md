@@ -21,7 +21,7 @@
 - 减少页面的重绘和重排，可以先缓存元素再操作，或者使用`document.createDocumentFragment`（推荐），再或者先克隆元素修改完成后再替换
 - 通过事件委托（由父级元素来处理其子节点的事件）来减少事件处理器的数量
 
->事实上`HTML`集合一直与文档保持着连接，每次获取其最新信息时，都会重复执行查询操作，即使只是获取元素数量也是如此，这正是低效之源
+> 事实上`HTML`集合一直与文档保持着连接，每次获取其最新信息时，都会重复执行查询操作，即使只是获取元素数量也是如此，这正是低效之源
 
 ## 算法和流程控制
 
@@ -29,4 +29,130 @@
 - 减少每次迭代的计算量和减少循环的迭代次数
 - 经常使用但又较少产生变化的数据考虑使用缓存
 
-Last Modified 2022-08-18
+## 连接字符串
+
+```javascript
+function timeTo(f, t) {
+  console.time(t);
+  f();
+  console.timeEnd(t);
+}
+
+function each(task, timer) {
+  for (let i = 0; i < timer; i++) {
+    task();
+  }
+}
+
+function main() {
+  const baseCase = 5e6;
+
+  timeTo(() => {
+    let a = "a";
+    each(() => {
+      a += "a";
+    }, baseCase);
+  }, "task-plus-equal");
+
+  timeTo(() => {
+    let b = [];
+    each(() => {
+      b.push("b");
+    }, baseCase);
+    const r = b.join("");
+  }, "task-array-join");
+
+  timeTo(() => {
+    let c = "c";
+    each(() => {
+      c = c.concat("c");
+    }, baseCase);
+  }, "task-concat");
+}
+setTimeout(main, 1000);
+```
+
+在 chromium 内核的浏览器中
+
+```
+task-plus-equal: 526.25390625 ms
+task-array-join: 269.375244140625 ms
+task-concat: 612.717041015625 ms
+```
+
+## 正则表达式
+
+- 使用向前查看和反向引用模拟原子组，模板类似`(?=(pattern))\1`，原子组`(?>...)`是一种具有特殊反转性的非捕获组，一但原子组中存在一个正则表达式，该组的任何回溯位置都会被丢弃，使正则引擎回溯结束得更快一点。
+- 关注如何让正则表达式更快地失败
+- 正则表达式以简单、必需的子元开始
+- 使用量词模式，使它们后面的子元互斥
+- 减少分支数量，缩小分支范围
+  > 如`cat|bat`替换为`[cb]at`，`read|red`替换为`rea?d`，`red|raw`替换为`r(?:ed|aw)`，`(.|\r|\n)`替换为`[\s\S]`
+- 使用非捕获组
+- 只捕获感兴趣的文本以减少后续处理
+- 使用合适的量词（基于预期的回溯数量）可以显著提升性能
+
+一个取出字符串首尾空白的合适例子
+
+```javascript
+if (!String.prototype.trim) {
+  String.prototype.trim = function () {
+    var str = this.replace(/^\s+/, ""),
+      end = str.length - 1,
+      ws = /\s/;
+    while (ws.test(str.charAt(end))) {
+      end--;
+    }
+    return str.slice(0, end + 1);
+  };
+}
+```
+
+## AJAX
+
+### 信标
+
+```javascript
+let url = "/status_tracker.php";
+let params = ["step=2", "time=12445354897"];
+
+let img = new Image();
+img.src = `${url}?${params.join("&")}`;
+```
+
+>只能发送`GET`请求传输简单的数据
+
+### JSONP
+
+```php
+<?php
+header("Content-Type: application/json; charset=UTF-8");
+$obj = json_decode($_GET["x"], false);
+
+$conn = new mysqli("myServer", "myUser", "myPassword", "Northwind");
+$result = $conn->query("SELECT name FROM ".$obj->$table." LIMIT ".$obj->$limit);
+$outp = array();
+$outp = $result->fetch_all(MYSQLI_ASSOC);
+
+echo "myFunc(".json_encode($outp).")";
+?>
+```
+
+```javascript
+const obj = { table: "products", limit: 10 };
+let s = document.createElement("script");
+s.src = "jsonp_demo_db.php?x=" + JSON.stringify(obj);
+document.body.appendChild(s);
+
+function myFunc(myObj) {
+  let txt = "";
+  for (let x in myObj) {
+    txt += myObj[x].name + "<br>";
+  }
+  document.getElementById("demo").innerHTML = txt;
+}
+```
+
+>因为加载脚本允许跨域，可能会存在安全问题
+
+Last Modified 2022-08-19
