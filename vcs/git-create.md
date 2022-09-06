@@ -110,6 +110,15 @@ Git URL 支持多种协议，SSH 协议支持指定登录服务器的账号名
    git clone http://192.168.1.1:9527/path/to/repo.git /usr/local/src/repo/
    ```
 
+3. 浅克隆后设置可以获取所有的分支
+
+   ```bash
+   git clone --depth 100 git@www.example.com/repository.git
+   cd repository
+   git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+   git fetch --all
+   ```
+
 ## commit
 
 记录对存储库的更改
@@ -201,4 +210,4 @@ git status [<options>…​] [--] [<pathspec>…​]
    git status --ignored=traditional -s
    ```
 
-Last Modified 2021-09-05
+Last Modified 2022-09-06
