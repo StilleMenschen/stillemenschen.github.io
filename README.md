@@ -16,7 +16,7 @@
 
 **补充**
 
-- 最近在看[Python](python/)相关的书籍
+- 最近在找技术类相关的书籍
 
 >此文档基于 NodeJS 的 [docsify](https://docsify.js.org/#/zh-cn/) 框架生成
 
