@@ -222,6 +222,8 @@ table th:first-of-type {
    ps -ef
    ps -eF
    ps -ely
+   ps aux
+   ps lax
    ```
 
 2. 输出进程树
@@ -274,4 +276,4 @@ table th:first-of-type {
 
 - man7 ps https://man7.org/linux/man-pages/man1/ps.1.html
 
-Last Modified 2021-05-05
+Last Modified 2022-09-17
