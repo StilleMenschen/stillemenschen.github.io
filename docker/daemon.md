@@ -117,4 +117,24 @@ docker 全局配置文件
 }
 ```
 
-Last Modified 2021-04-14
+## 启用 Docker 命令行自动补全功能
+
+在控制台输入 docker 命令时可以获得自动补全能力，提高效率。
+
+Docker 自带了 bash 的命令行补全，用其他 shell，如 zsh，则需采用 zsh 的插件或者自行获取补全信息
+
+```bash
+echo 'source /usr/share/bash-completion/completions/docker' >> ~/.bashrc
+```
+
+```zsh
+mkdir -p ~/.zsh/completion
+curl -L https://raw.githubusercontent.com/docker/cli/master/contrib/completion/zsh/_docker > ~/.zsh/completion/_docker
+
+echo 'fpath=(~/.zsh/completion $fpath)' >> ~/.zshrc
+echo 'autoload -Uz compinit && compinit -u' >> ~/.zshrc
+```
+
+>使用此功能还需要先安装对应的支持程序，如`bash-completion`
+
+Last Modified 2022-09-19
