@@ -26,4 +26,5 @@
 - groupmod 修改用户组
 - groupdel 删除用户组
 - shell 可执行脚本
+- system log 系统日志
 - 更多的命令

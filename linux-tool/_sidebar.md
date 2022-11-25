@@ -27,4 +27,5 @@
   - [groupdel](linux-tool/groupdel.md)
   - [shell](linux-tool/shell.md)
   - [keyshot](linux-tool/keyboard-shortcuts.md)
+  - [system log](linux-tool/system-log.md)
   - [More Possible](linux-tool/more-possible.md)
