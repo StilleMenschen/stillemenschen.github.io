@@ -184,4 +184,9 @@ table th:first-of-type {
    lsof -n /root
    ```
 
-Last Modified 2021-04-11
+6. 过滤除本机连接外的其它连接（这里判断了网卡的地址，不同的内网环境可能不一样
+   ```bash
+   lsof -i -Pln | grep -v "[0-9]->$(ifconfig | awk '/inet *192/{print $2}')" | egrep -v '\*:[0-9]+'
+   ```
+
+Last Modified 2022-11-25
