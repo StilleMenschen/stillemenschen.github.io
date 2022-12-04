@@ -25,6 +25,7 @@
   - [groupadd](linux-tool/groupadd.md)
   - [groupmod](linux-tool/groupmod.md)
   - [groupdel](linux-tool/groupdel.md)
+  - [ss](linux-tool/ss.md)
   - [shell](linux-tool/shell.md)
   - [keyshot](linux-tool/keyboard-shortcuts.md)
   - [system log](linux-tool/system-log.md)
