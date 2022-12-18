@@ -60,6 +60,8 @@ Transient hostname: local
 
 同时查看一个或多个文本文件的内容
 
+>`tac`为反转全部行,`rev`为反转每一行
+
 ## wc
 
 统计文本文件字符数、行数或字节数，也能统计单词数，但前提是单词是以空格隔开的
@@ -67,6 +69,8 @@ Transient hostname: local
 ## man
 
 使用手册（manuals），如`man lsof`、`man ls`、`man tail`，打开的手册页面可以按箭头上下翻页，按 q 键退出
+
+>如果不清楚命令但想要找关键词,可以使用`man -k [KEYWORDS]`来搜索手册
 
 ## bc
 
