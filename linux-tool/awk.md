@@ -50,19 +50,19 @@ table th:first-of-type {
 | -v var=val, --assign var=val           | 自定义变量`key=value`形式                                                                                                                                                                                                                                                               |
 | -d[file], --dump-variables[=file]      | 将全局变量，变量的类型和最终值的排序列表打印到文件中。如果没有提供文件，则将此列表打印到当前目录中名为`awkvars.out`的文件中。如果提供了文件，则`-d`和文件之间不允许有空格。                                                                                                             |
 | -e program-text, --source program-text | 在程序文本中提供程序源代码                                                                                                                                                                                                                                                              |
-| -E file, --exec file                   | 与`-f`相似，从文件中读取 awk 程序文本。 与`-f`有两个区别：<br>此选项终止选项处理。命令行上的其他任何内容都直接传递给 awk 程序<br>不允许使用`var=value`形式的命令行变量分配                                                                                                            |
+| -E file, --exec file                   | 与`-f`相似，从文件中读取 awk 程序文本。 与`-f`有两个区别：<br>此选项终止选项处理。命令行上的其他任何内容都直接传递给 awk 程序<br>不允许使用`var=value`形式的命令行变量分配                                                                                                              |
 | -h, --help                             | 输出使用帮助信息并退出                                                                                                                                                                                                                                                                  |
 | -p[file], --profile[=file]             | 启用对 awk 程序的性能分析。表示`--no-optimize`。默认情况下，配置文件是在名为`awkprof.out`的文件中创建的。可选的 file 参数使您可以为配置文件指定其他文件名。如果提供了文件，则`-p`和文件之间不允许有空格。该配置文件在左边距中包含程序中每个语句的执行计数，以及每个函数的函数调用计数。 |
 | -S, --sandbox                          | 启用沙盒，禁用`system()`函数，使用`getline`输入重定向，使用`print`和`printf`输出重定向，以及动态扩展。另外，禁止在 gawk 开始运行时将不存在的文件名添加到`ARGV`。当您要从可疑来源运行 awk 脚本并且需要确保脚本无法访问系统（指定的输入数据文件除外）时，此功能特别有用                   |
 | -V, --version                          | 打印版本信息并退出                                                                                                                                                                                                                                                                      |
 | --                                     | 标记所有选项的结尾。跟随`-`的所有命令行选项都放在 ARGV 中，即使它们以减号开头                                                                                                                                                                                                           |
 
->使用`-d`选项列出所有全局变量是在程序中查找错误的好方法。如果您的大型程序具有很多功能，并且还希望确保您的函数不会无意中
->使用本应是局部变量的全局变量，那么您也可以使用此选项。（使用 i，j 等简单变量名称时，这是一个特别容易犯的错误）
+> 使用`-d`选项列出所有全局变量是在程序中查找错误的好方法。如果您的大型程序具有很多功能，并且还希望确保您的函数不会无意中
+> 使用本应是局部变量的全局变量，那么您也可以使用此选项。（使用 i，j 等简单变量名称时，这是一个特别容易犯的错误）
 
 ## 匹配表达式
 
->`@include`可以引用其它外部脚本文件，如`@include "/usr/awklib/network"`表示引用`/usr/awklib/network`文件中的 awk 脚本
+> `@include`可以引用其它外部脚本文件，如`@include "/usr/awklib/network"`表示引用`/usr/awklib/network`文件中的 awk 脚本
 
 | 语法            | 说明                                                                                                |
 | :-------------- | :-------------------------------------------------------------------------------------------------- |
@@ -84,8 +84,8 @@ FNR >= 3 {print "current line number greater than 3"}
 $1 == 3 {print "The first field is equal to 3"}
 ```
 
->在花括号语句块前可以使用两个特殊的标记`BEGIN`和`END`，`BEGIN`表示开始前执行的语句块，`END`表示结束后执行的语句块，
->如`BEGIN{print "start"}{print $0}END{print "end"}`表示开始时输出一次`start`，中间持续输出每一行，结束后输出一次`end`
+> 在花括号语句块前可以使用两个特殊的标记`BEGIN`和`END`，`BEGIN`表示开始前执行的语句块，`END`表示结束后执行的语句块，
+> 如`BEGIN{print "start"}{print $0}END{print "end"}`表示开始时输出一次`start`，中间持续输出每一行，结束后输出一次`end`
 
 ## 转义字符
 
@@ -146,8 +146,8 @@ var3=var1 + var2
 
 支持的操作符：`+`、`-`、`*`、`/`、`%`、`^`、`+=`、`-=`、`*=`、`/=`、`%=`、`^=`、`++`、`--`
 
->`^`表示幂运算，如`a=2^3;print a`输出`a`的值为 8。`^=`表示幂运算并赋值，如`a=2;b=3;a^=b;print a`输出`a`的值为 8。由
->于`/=`是运算操作符，如果想在正则表达式中表示`/==/`匹配，应该写成`/[=]=/`
+> `^`表示幂运算，如`a=2^3;print a`输出`a`的值为 8。`^=`表示幂运算并赋值，如`a=2;b=3;a^=b;print a`输出`a`的值为 8。由
+> 于`/=`是运算操作符，如果想在正则表达式中表示`/==/`匹配，应该写成`/[=]=/`
 
 ### 数组
 
@@ -198,11 +198,30 @@ BEGIN {
 
 ## 条件表达式
 
+```
+if (condition) statement [ else statement ]
+while (condition) statement
+do statement while (condition)
+for (expr1; expr2; expr3) statement
+for (var in array) statement
+break
+continue
+delete array[index]
+delete array
+exit [ expression ]
+{ statements }
+switch (expression) {
+case value|regex : statement
+...
+[ default: statement ]
+}
+```
+
 ### 判断表达式
 
 支持类似 C 语言的`if`、`if-else`、`if-else if-else`、`switch-case`
 
->`"jack" in arr1`表示判断字符串`jack`是否存在于数组`arr1`的索引中
+> `"jack" in arr1`表示判断字符串`jack`是否存在于数组`arr1`的索引中
 
 ### 循环表达式
 
@@ -244,6 +263,25 @@ BEGIN {
 | substr(string, start [, length ])            | 返回`string`中从字符编号`start`开始的指定`length`的子字符串。如果不指定`length`则返回从`start`位置开始一直到末尾的子字符串                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | tolower(string)                              | 将`string`中的大写字母全部转换为小写字母                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | toupper(string)                              | 将`string`中的小写字母全部转换为大写字母                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+
+## 正则表达式特殊集合
+
+| 集合         | 说明                                             |
+| :----------- | :----------------------------------------------- |
+| `[:alnum:]`  | 字母数字字符                                     |
+| `[:alpha:]`  | 字母字符                                         |
+| `[:blank:]`  | 空格或制表符                                     |
+| `[:cntrl:]`  | 控制字符                                         |
+| `[:digit:]`  | 数字字符                                         |
+| `[:graph:]`  | 可打印且可见的字符（空格可打印但不可见）         |
+| `[:lower:]`  | 小写字母字符                                     |
+| `[:print:]`  | 可打印字符（不是控制字符）                       |
+| `[:punct:]`  | 标点字符（不是字母、数字、控制字符或空格的字符） |
+| `[:space:]`  | 空格字符（如空格、制表符、换页符等）             |
+| `[:upper:]`  | 大写字母字符                                     |
+| `[:xdigit:]` | 十六进制字母字符                                 |
+
+> 在正则表达式中使用时还需要再加一个方括号，如`/[[:alnum:]]/`
 
 ## 命令示例
 
@@ -289,7 +327,7 @@ BEGIN {
    awk '$4 == "A"{sub(/555/,"963",$2);print}' mail-list
    ```
 
-4. 提取Maven`pom.xml`文件中的版本号
+4. 提取 Maven`pom.xml`文件中的版本号
 
    ```bash
    awk -v RS="</*version>" 'NR==2{print}' pom.xml
@@ -297,4 +335,4 @@ BEGIN {
 
 更多说明可参考 GNU 的[awk](https://www.gnu.org/software/gawk/manual/gawk.html)文档
 
-Last Modified 2021-04-11
+Last Modified 2023-01-06
