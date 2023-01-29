@@ -54,7 +54,7 @@ Transient hostname: local
 
 ## head/tail
 
-查看文本前面或后面的几行，默认 10 行
+查看文本前面或后面的几行，默认`10`行
 
 ## cat
 
@@ -68,17 +68,22 @@ Transient hostname: local
 
 ## man
 
-使用手册（manuals），如`man lsof`、`man ls`、`man tail`，打开的手册页面可以按箭头上下翻页，按 q 键退出
+使用手册（manuals），如`man lsof`、`man ls`、`man tail`，打开的手册页面可以按箭头上下滚动，`u`向上翻页，`d`向下翻页，按`q`键退出
 
 >如果不清楚命令但想要找关键词,可以使用`man -k [KEYWORDS]`来搜索手册
 
 ## bc
 
-一个简单的计算器，支持加减乘除和括号，输入 quit 退出
+一个简单的计算器，支持加减乘除和括号，输入`quit`退出。也可以通过管道传入式子来计算
 
 ## sort
 
 以指定方式按行排序输入文本
+
+```bash
+ss -tn | sort -k 5
+(ls -l | sed 1d) | sort -nk5
+```
 
 ## seq
 
@@ -88,6 +93,16 @@ Transient hostname: local
 
 删除输入文本中重复的行
 
+## column
+
+列表输出内容
+
+```bash
+(printf "PERM LINKS OWNER GROUP SIZE MONTH DAY " ; \
+           printf "HH:MM/YEAR NAME\n" ; \
+           ls -l | sed 1d) | column -t
+```
+
 >可以通过阅读手册或使用`--help`选项获取更多使用说明
 
-Last Modified 2022-01-25
+Last Modified 2023-01-29
