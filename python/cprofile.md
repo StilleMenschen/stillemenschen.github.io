@@ -6,7 +6,7 @@ import pstats
 import os
 
 
-def enable_cprofile(filename):
+def profiling(filename):
     """
     Decorator for function profiling.
     """
@@ -35,7 +35,7 @@ def enable_cprofile(filename):
 ```
 
 ```python
-from profiling import enable_cprofile
+from profiling import profiling
 
 
 def get_pattern(substring):
@@ -82,7 +82,7 @@ def knuth_morris_pratt_algorithm(string, substring):
     return does_match(string, substring, pattern)
 
 
-@enable_cprofile('./algorithm.prof')
+@profiling('./algorithm.prof')
 def main():
     print(knuth_morris_pratt_algorithm('alg normal algorithm is', 'algo'))
     print(knuth_morris_pratt_algorithm('abxabcabcaby', 'abcaby'))
@@ -97,4 +97,4 @@ export ENABLE_PROFILE=True
 python3 algorithm.py
 ```
 
-Last Modified 2022-02-14
+Last Modified 2023-02-17
