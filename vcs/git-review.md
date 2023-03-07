@@ -184,6 +184,13 @@ table th:first-of-type {
    git log --since="2020-01-01 13:00:00" --until="2020-02-23 08:00:00"
    ```
 
+10. 查看指定的`qa`分支所有合并提交
+
+   ```
+   git log --merges --pretty=format:"%s %H %cD %an(%ae)" qa
+   git log --merges --pretty=format:"%s %H %cD %an(%ae)" qa | grep '1\.1\.'
+   ```
+
 ## show
 
 查看具体的提交明细信息
@@ -233,4 +240,4 @@ git diff [<options>] --no-index [--] <path> <path>
    git diff
    ```
 
-Last Modified 2021-08-29
+Last Modified 2023-03-07
