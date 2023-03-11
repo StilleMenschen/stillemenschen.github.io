@@ -206,8 +206,8 @@ public class BenchmarkDemo {
     @Fork(value = 2)
     @Threads(2)
     @OutputTimeUnit(TimeUnit.MILLISECONDS)
-    @Warmup(iterations = 1, time = 2)
-    @Measurement(iterations = 1, time = 4)
+    @Warmup(iterations = 1, time = 2) // iterations 预热次数
+    @Measurement(iterations = 1, time = 4) // iterations 实际运行次数
     public void piCalculation() {
         BigDecimal part1 = arc_tan(57).multiply(new BigDecimal(176));
         BigDecimal part2 = arc_tan(239).multiply(new BigDecimal(28));
@@ -247,6 +247,8 @@ public class BenchmarkDemo {
 }
 ```
 
+如果使用`IntelliJ IDEA`，可以安装插件`JMH Java Microbenchmark Harness`，能直接识别并执行
+
 >参考`https://github.com/openjdk/jmh`
 
-Last Modified 2023-02-16
+Last Modified 2023-03-11
