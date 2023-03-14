@@ -85,11 +85,8 @@ docker 全局配置文件
   "pidfile": "",
   "raw-logs": false,
   "registry-mirrors": [
-    "https://docker.mirrors.ustc.edu.cn",
     "https://registry.docker-cn.com",
-    "https://hub-mirror.c.163.com",
-    "https://cr.console.aliyun.com",
-    "https://reg-mirror.qiniu.com"
+    "https://hub-mirror.c.163.com"
   ],
   "runtimes": {
     "cc-runtime": {
@@ -137,4 +134,4 @@ echo 'autoload -Uz compinit && compinit -u' >> ~/.zshrc
 
 >使用此功能还需要先安装对应的支持程序，如`bash-completion`
 
-Last Modified 2022-09-19
+Last Modified 2023-03-14
