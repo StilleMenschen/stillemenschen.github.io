@@ -3,3 +3,4 @@
   - [Mybatis Config](spring/mybatis-config.md)
   - [Logback Config](spring/logback-config.md)
   - [Hibernate Validator](spring/hibernate-validator.md)
+  - [Security Exception Handler](spring/security-exception-handler.md)
