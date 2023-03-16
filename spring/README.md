@@ -5,3 +5,4 @@
 - Hibernate Validator 配置
 - 异常处理配置
 - Security 异常处理配置
+- 去除字符串前后空格

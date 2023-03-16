@@ -5,3 +5,4 @@
   - [Hibernate Validator](spring/hibernate-validator.md)
   - [Exception Handler](spring/exception-handler.md)
   - [Security Exception Handler](spring/security-exception-handler.md)
+  - [String Trimmer](spring/string-trimmer.md)
