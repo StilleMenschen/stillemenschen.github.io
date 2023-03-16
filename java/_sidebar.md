@@ -12,6 +12,6 @@
   - [Lock](java/lock.md)
   - [Thread Pool](java/thread-pool.md)
   - [Runtime Data Area](java/runtime-data-area.md)
-  - [Monitor](java/monitor.md)
+  - [VM Monitor](java/vm-monitor.md)
   - [Benchmark](java/benchmark.md)
   - [Snowflake](java/snowflake.md)
