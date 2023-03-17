@@ -25,7 +25,6 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.io.IOException;
-import java.util.Objects;
 
 /**
  * 全局去除传入数据中 {@link String} 类型数据的前后空格
@@ -65,7 +64,7 @@ public class StringTrimmerConfiguration {
                     public String deserialize(JsonParser jsonParser, DeserializationContext ctx)
                             throws IOException {
                         String value = jsonParser.getValueAsString();
-                        if (Objects.nonNull(value) && StringUtils.hasText(value)) {
+                        if (StringUtils.hasText(value)) {
                             // 非空值且不是只有空格的情况下处理返回
                             return value.trim();
                         }
@@ -76,4 +75,4 @@ public class StringTrimmerConfiguration {
 }
 ```
 
-Last Modified 2023-03-16
+Last Modified 2023-03-17
