@@ -15,3 +15,4 @@
   - [VM Monitor](java/vm-monitor.md)
   - [Benchmark](java/benchmark.md)
   - [Snowflake](java/snowflake.md)
+  - [Circular Iterator](java/circular-Iterator.md)
