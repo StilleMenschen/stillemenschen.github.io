@@ -16,3 +16,4 @@
   - [Benchmark](java/benchmark.md)
   - [Snowflake](java/snowflake.md)
   - [Circular Iterator](java/circular-Iterator.md)
+  - [String Variable Replacement](java/string-variable-replacement.md)
