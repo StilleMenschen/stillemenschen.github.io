@@ -49,10 +49,10 @@ table th:first-of-type {
 
 ## 其他说明
 
-SIZE 是整数和可选单位（例如：10M 是 10 _ 1024 _ 1024）。 单位为 K，M，G，T，P，E，Z，Y（1024 的幂）或 KB，MB，...（1000
+SIZE 是整数和可选单位（例如：10M 是 10 \* 1024 \* 1024）。 单位为 K，M，G，T，P，E，Z，Y（1024 的幂）或 KB，MB，...（1000
 的幂）。
 
-使用 --color=auto 选项，ls 只在标准输出被连至终端时才生成颜色代码。
+ls 只有在连至终端时使用`--color=auto`选项，标准输出才会生成颜色代码。
 
 退出状态：
 
@@ -117,4 +117,4 @@ SIZE 是整数和可选单位（例如：10M 是 10 _ 1024 _ 1024）。 单位�
    ls -Alhgo --sort=time --time-style=long-iso
    ```
 
-Last Modified 2021-04-11
+Last Modified 2023-03-29
