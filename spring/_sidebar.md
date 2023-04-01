@@ -6,3 +6,4 @@
   - [Exception Handler](spring/exception-handler.md)
   - [Security Exception Handler](spring/security-exception-handler.md)
   - [String Trimmer](spring/string-trimmer.md)
+  - [Enumerations Serialization](spring/enum-serialization-persistence.md)
