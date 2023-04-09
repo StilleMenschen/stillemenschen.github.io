@@ -71,13 +71,17 @@ public class Account extends BaseEntity {
     @NotBlank(message = "密码不能为空")
     private String password;
     @Email(message = "邮箱格式不正确")
+    @NotBlank(message = "邮箱不允许为空")
     private String email;
     @Pattern(regexp = "1\\d{10}", message = "手机号格式不正确")
+    @NotBlank(message = "手机号不允许为空")
     private String telephone;
     @NotBlank(message = "用户姓名不允许为空")
     private String name;
     @Enumerated(EnumType.STRING)
     private Role role;
+    // 通过其它方式来启用和禁用
+    @Column(updatable = false)
     private Boolean enabled;
 
     @Override
@@ -495,6 +499,9 @@ public class AccountApplicationService {
 
 }
 ```
+
+`@Validated`在方法中声明只是用于标记校验的分组以及启用`@Valid`的数据校验，
+自定义的注解校验（实现了`ConstraintValidator`接口）仍然需要在类上添加`@Validated`来生效
 
 ```java
 package tech.tystnad.resource;
