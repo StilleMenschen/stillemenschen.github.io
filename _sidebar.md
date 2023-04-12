@@ -16,7 +16,7 @@
 - [NodeJS](nodejs/)
 - [Vue](vue/)
 - [Java](java/)
-- [Spring](spring/)
+- [Spring Framework](spring-framework/)
 - [Config](config/)
 - [Talk](talk/)
 - [Cloud](cloud/)

@@ -13,6 +13,8 @@
 - [Python](python/)包含了部分内置模块的参考
 - [Git](vcs/)中包含基本的使用参考
 - [交谈中的要点](talk/)
+- [Java](java/)包含了一些学习基础
+- [Spring Framework](spring-framework/)记录了一些配置相关信息
 
 **补充**
 
