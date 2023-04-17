@@ -24,11 +24,11 @@ docker 全局配置文件
   "debug": true,
   "default-address-pools": [
     {
-      "base": "172.80.0.0/16",
+      "base": "172.16.0.0/16",
       "size": 24
     },
     {
-      "base": "172.90.0.0/16",
+      "base": "172.24.0.0/16",
       "size": 24
     }
   ],
@@ -134,4 +134,4 @@ echo 'autoload -Uz compinit && compinit -u' >> ~/.zshrc
 
 >使用此功能还需要先安装对应的支持程序，如`bash-completion`
 
-Last Modified 2023-03-14
+Last Modified 2023-04-17
