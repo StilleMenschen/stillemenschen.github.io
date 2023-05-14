@@ -2,3 +2,4 @@
 
 - 性能
 - pytest
+- selenium
