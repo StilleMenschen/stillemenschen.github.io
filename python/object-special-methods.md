@@ -51,6 +51,8 @@ random.shuffle(deck)
 print(deck[:10])
 ```
 
+有了`__len__`和`__getitem__`方法后，类的表现就可以像序列一样，可以迭代和切片；`len()`运行速度非常快的原因是直接读取了C中的结构体属性，没有调用方法
+
 ## 可被散列的向量类
 
 ```python
@@ -535,4 +537,4 @@ class Vector:
         return cls(memv)
 ```
 
-Last Modified 2022-07-24
+Last Modified 2023-05-19

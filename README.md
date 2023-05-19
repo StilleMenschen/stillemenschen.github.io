@@ -1,6 +1,6 @@
-# Documents
+# Learning records
 
-这些是参考手册，不是教程
+此文档主要做参考，未包含教程
 
 **现有**
 
