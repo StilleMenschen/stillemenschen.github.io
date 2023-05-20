@@ -175,4 +175,43 @@ dq.extendleft([10, 20, 30, 40])
 print(dq)
 ```
 
-Last Modified 2022-06-28
+## 匹配句法
+
+```python
+def describe_number(num):
+    match num:
+        case 0:
+            return "zero"
+        case 1:
+            return "one"
+        case 2:
+            return "two"
+        case _:
+            return "many"
+```
+
+```python
+def describe_fruit(fruit):
+    match fruit:
+        case "apple" | "pear":
+            return "It's a round fruit."
+        case "banana" | "orange":
+            return "It's a long fruit."
+        case _:
+            return "It's not a fruit I recognize."
+```
+
+```python
+def describe_list(lst):
+    match lst:
+        case []:
+            return "This is an empty list."
+        case [1, 2, *rest]:
+            return f"The first two items are 1 and 2. There are {len(rest)} more items."
+        case [_, *rest, 10]:
+            return f"The list ends with a 10. There are {len(rest)} items before it."
+        case _:
+            return "This is an arbitrary list."
+```
+
+Last Modified 2023-05-20
