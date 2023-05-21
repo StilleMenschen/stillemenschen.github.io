@@ -87,6 +87,9 @@ numbers = (1, 2, [10, 20])
 try:
     # tuple 是不可变的, 但 list 可以改变
     numbers[2] += [30, 40]
+except TypeError:
+    # 虽然会抛出异常, 但其实第三个可变的list数据还是被修改了
+    print('TypeError')
 finally:
     print(numbers)
 ```
@@ -214,4 +217,4 @@ def describe_list(lst):
             return "This is an arbitrary list."
 ```
 
-Last Modified 2023-05-20
+Last Modified 2023-05-21

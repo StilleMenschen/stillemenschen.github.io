@@ -27,3 +27,4 @@
   - [Property Descriptor](python/property-descriptor.md)
   - [Class Meta Programming](python/class-meta-programming.md)
   - [Linux Compile Install](python/linux-compile-install.md)
+  - [Python Virtual Machine](python/virtual-machine.md)
