@@ -190,43 +190,33 @@ dq.extendleft([10, 20, 30, 40])
 print(dq)
 ```
 
-## 匹配句法
+## 排序
+
+请注意，如果`__gt__()` 没有实现，< 可以退回到使用 `__lt__()`
 
 ```python
-def describe_number(num):
-    match num:
-        case 0:
-            return "zero"
-        case 1:
-            return "one"
-        case 2:
-            return "two"
-        case _:
-            return "many"
+class Student:
+    def __init__(self, name, grade, age):
+        self.name = name
+        self.grade = grade
+        self.age = age
+
+    def __repr__(self):
+        return repr((self.name, self.grade, self.age))
+
+
+student_objects = [
+    Student('john', 'A', 15),
+    Student('jane', 'B', 12),
+    Student('dave', 'B', 10),
+]
+
+Student.__lt__ = lambda self, other: self.age < other.age
+print(sorted(student_objects))
+
+students = ['dave', 'john', 'jane']
+new_grades = {'john': 'F', 'jane': 'A', 'dave': 'C'}
+print(sorted(students, key=new_grades.__getitem__))
 ```
 
-```python
-def describe_fruit(fruit):
-    match fruit:
-        case "apple" | "pear":
-            return "It's a round fruit."
-        case "banana" | "orange":
-            return "It's a long fruit."
-        case _:
-            return "It's not a fruit I recognize."
-```
-
-```python
-def describe_list(lst):
-    match lst:
-        case []:
-            return "This is an empty list."
-        case [1, 2, *rest]:
-            return f"The first two items are 1 and 2. There are {len(rest)} more items."
-        case [_, *rest, 10]:
-            return f"The list ends with a 10. There are {len(rest)} items before it."
-        case _:
-            return "This is an arbitrary list."
-```
-
-Last Modified 2023-05-21
+Last Modified 2023-05-22
