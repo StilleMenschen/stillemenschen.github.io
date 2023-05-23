@@ -551,17 +551,4 @@ def describe_fruit(fruit):
             return "It's not a fruit I recognize."
 ```
 
-```python
-def describe_list(lst):
-    match lst:
-        case []:
-            return "This is an empty list."
-        case [1, 2, *rest]:
-            return f"The first two items are 1 and 2. There are {len(rest)} more items."
-        case [_, *rest, 10]:
-            return f"The list ends with a 10. There are {len(rest)} items before it."
-        case _:
-            return "This is an arbitrary list."
-```
-
-Last Modified 2023-05-22
+Last Modified 2023-05-23

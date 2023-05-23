@@ -172,6 +172,16 @@ print(np_array[:, 1])
 print(np_array.transpose())
 ```
 
+## 拆包
+
+```python
+def fun(a, b, c, d, *others):
+    return a, b, c, d, others
+
+
+print(fun(*[1, 2], 3, *range(4, 7)))
+```
+
 ## 双向队列
 
 ```python
@@ -219,4 +229,57 @@ new_grades = {'john': 'F', 'jane': 'A', 'dave': 'C'}
 print(sorted(students, key=new_grades.__getitem__))
 ```
 
-Last Modified 2023-05-22
+## 匹配句法
+
+```python
+"""
+metro_lat_long.py
+
+Demonstration of nested tuple unpacking::
+
+    >>> main()
+                    |  latitude | longitude
+    Mexico City     |   19.4333 |  -99.1333
+    New York-Newark |   40.8086 |  -74.0204
+    São Paulo       |  -23.5478 |  -46.6358
+
+"""
+
+# tag::MAIN[]
+metro_areas = [
+    ('Tokyo', 'JP', 36.933, (35.689722, 139.691667)),
+    ('Delhi NCR', 'IN', 21.935, (28.613889, 77.208889)),
+    ('Mexico City', 'MX', 20.142, (19.433333, -99.133333)),
+    ('New York-Newark', 'US', 20.104, (40.808611, -74.020386)),
+    ('São Paulo', 'BR', 19.649, (-23.547778, -46.635833)),
+]
+
+
+def describe_list(lst):
+    match lst:
+        case []:
+            return "This is an empty list."
+        case [1, 2, *rest]:
+            return f"The first two items are 1 and 2. There are {len(rest)} more items."
+        case [_, *rest, 10]:
+            return f"The list ends with a 10. There are {len(rest)} items before it."
+        case _:
+            return "This is an arbitrary list."
+
+
+def main():
+    print(f'{"":15} | {"latitude":>9} | {"longitude":>9}')
+    for record in metro_areas:
+        match record:  # <1>
+            case [name, _, _, (lat, lon)] if lon <= 0:  # <2>
+                print(f'{name:15} | {lat:9.4f} | {lon:9.4f}')
+
+
+# end::MAIN[]
+
+if __name__ == '__main__':
+    main()
+
+```
+
+Last Modified 2023-05-23

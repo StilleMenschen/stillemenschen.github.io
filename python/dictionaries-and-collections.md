@@ -58,6 +58,80 @@ d['3'] = 'three'
 print(d_proxy)
 ```
 
+## 字典推导
+
+```python
+dial_codes = [
+    (880, 'Bangladesh'),
+    (55, 'Brazil'),
+    (86, 'China'),
+    (91, 'India'),
+    (62, 'Indonesia'),
+    (81, 'Japan'),
+    (234, 'Nigeria'),
+    (92, 'Pakistan'),
+    (7, 'Russia'),
+    (1, 'United States'),
+]
+
+country_dial = {country: code for code, country in dial_codes}
+
+print(country_dial)
+
+country_dial = {code: country.upper()
+                for country, code in sorted(country_dial.items())
+                if code < 70}
+
+print(country_dial)
+```
+
+## 模式匹配
+
+```python
+"""
+Pattern matching with mapping—requires Python ≥ 3.10
+
+# tag::DICT_MATCH_TEST[]
+>>> b1 = dict(api=1, author='Douglas Hofstadter',
+...         type='book', title='Gödel, Escher, Bach')
+>>> get_creators(b1)
+['Douglas Hofstadter']
+>>> from collections import OrderedDict
+>>> b2 = OrderedDict(api=2, type='book',
+...         title='Python in a Nutshell',
+...         authors='Martelli Ravenscroft Holden'.split())
+>>> get_creators(b2)
+['Martelli', 'Ravenscroft', 'Holden']
+>>> get_creators({'type': 'book', 'pages': 770})
+Traceback (most recent call last):
+    ...
+ValueError: Invalid 'book' record: {'type': 'book', 'pages': 770}
+>>> get_creators('Spam, spam, spam')
+Traceback (most recent call last):
+    ...
+ValueError: Invalid record: 'Spam, spam, spam'
+
+# end::DICT_MATCH_TEST[]
+"""
+
+# tag::DICT_MATCH[]
+def get_creators(record: dict) -> list:
+    match record:
+        case {'type': 'book', 'api': 2, 'authors': [*names]}:  # <1>
+            return names
+        case {'type': 'book', 'api': 1, 'author': name}:  # <2>
+            return [name]
+        case {'type': 'book'}:  # <3>
+            raise ValueError(f"Invalid 'book' record: {record!r}")
+        case {'type': 'movie', 'director': name}:  # <4>
+            return [name]
+        case _:  # <5>
+            raise ValueError(f'Invalid record: {record!r}')
+# end::DICT_MATCH[]
+```
+
+>不同于序列模式匹配，即使只有部分匹配成功，也不会出现错误
+
 ## 集
 
 ```python
@@ -82,4 +156,4 @@ print(latin_1)
 print(latin_1.union(a, b))
 ```
 
-Last Modified 2022-07-06
+Last Modified 2023-05-23
