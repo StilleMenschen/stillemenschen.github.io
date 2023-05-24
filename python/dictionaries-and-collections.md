@@ -1,5 +1,8 @@
 # 字典与集合
 
+如果一个对象的哈希码在整个生命周期内永不改变（依据`__hash__()`方法），而且可与其它对象比较（依据`__eq__()`方法），那么这个对象就是可哈希的。
+两个可哈希对象仅当哈希码相等时相等。
+
 ## 字典的默认值
 
 ```python
@@ -9,6 +12,7 @@ import collections
 
 WORD_RE = re.compile(r'\w+')
 
+# 创建一个有默认值的字典，指定list作为默认值的default factory
 index = collections.defaultdict(list)
 # 读取参数传递的文本文件中的单词并统计出现位置
 with open(sys.argv[1], 'r', encoding='UTF-8') as fp:
@@ -17,6 +21,7 @@ with open(sys.argv[1], 'r', encoding='UTF-8') as fp:
             word = match.group()
             column_no = match.start() + 1
             location = line_no, column_no
+            # default factory 仅为 __getitem__ 提供默认值
             index[word].append(location)
 
 for word in sorted(index.keys(), key=str.upper):
@@ -30,11 +35,14 @@ from types import MappingProxyType
 
 class StrKeyDict(collections.UserDict):
     def __missing__(self, key):
+        # 检查类型，防止下面的调用进入递归
+        # 因为找不到 key 时默认就会进入此特殊方法
         if isinstance(key, str):
             raise KeyError(key)
         return self[str(key)]
 
     def __contains__(self, key):
+        # data 是 UserDict 内置的 dict，可以读写此数据使操作表现保持一致
         return str(key) in self.data
 
     def __setitem__(self, key, value):
