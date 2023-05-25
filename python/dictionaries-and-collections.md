@@ -140,7 +140,7 @@ def get_creators(record: dict) -> list:
 
 >不同于序列模式匹配，即使只有部分匹配成功，也不会出现错误
 
-## 集
+## 集合
 
 ```python
 from unicodedata import name
@@ -155,13 +155,30 @@ print(a & b)
 # 差集
 print(a - b)
 print(b - a)
-# 异或
+# 对称差集(补集)
 print(a ^ b)
+
+s = {1, 2}
+z = {1, 2, 3}
+
+# 包含于
+print(z in s)
+# 子集
+print(s <= z)
+# 真子集
+print(s < z)
+# 真超集
+print(s > z)
+# 超集
+print(z >= s)
 
 latin_1 = {chr(i) for i in range(32, 256) if 'SIGN' in name(chr(i), '')}
 print(latin_1)
 
 print(latin_1.union(a, b))
+
+# 不可变集合
+print(frozenset(a ^ b))
 ```
 
-Last Modified 2023-05-23
+Last Modified 2023-05-25
