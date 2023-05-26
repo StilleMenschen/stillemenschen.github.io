@@ -8,11 +8,12 @@
 4. 快捷的弹性伸缩
 5. 可计量的服务
 
-## 三种服务
+## 四种服务
 
-1. 云基础设施即服务（laaS）
-2. 云平台即服务（PaaS）
-3. 云软件即服务（SaaS）
+1. 云基础设施即服务（Infrastructure as a Service，IaaS）
+2. 云平台即服务（Platform as a Service，PaaS）
+3. 云软件即服务（Software as a Service，SaaS）
+4. 云函数即服务（Functions as a Service，FaaS）
 
 ## 四类部署模式
 
