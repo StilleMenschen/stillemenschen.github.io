@@ -3,7 +3,7 @@
 字符的标识，即码点，是`0~1,114,111`范围内的数（十进制），在 Unicode 标准中以`4~6`个十六进制数表示，前加`U+`，取值范围是`U+0000~U+10FFFF`。例如，字母 A 的码
 点是`U+0041`，欧元符号的码点是`U+20AC`，音乐中高音谱号的码点是`U+1D11E`。
 
-字符的具体表述取决于所用的编码。编码是在码点和字节序列之间转换时使用的算法。例如，字母A（U+0041）在 UTF-8 编码中使用单个字节`\x41`表述，而在 UTF-16LE 编码中使用字节序列`\x41\x00`表述。再比如，欧元符号（U+20AC）在 UTF-8 编码中需要3个字节，即`\xe2\x82\xac`，而在 UTF-16LE 中，同一个码点编码成两个字节，即`\xac\x20`。
+字符的具体表述取决于所用的编码。编码是在码点和字节序列之间转换时使用的算法。例如，字母 A（U+0041）在 UTF-8 编码中使用单个字节`\x41`表述，而在 UTF-16LE 编码中使用字节序列`\x41\x00`表述。再比如，欧元符号（U+20AC）在 UTF-8 编码中需要 3 个字节，即`\xe2\x82\xac`，而在 UTF-16LE 中，同一个码点编码成两个字节，即`\xac\x20`。
 
 把码点转换成字节序列的过程叫编码，把字节序列转换成码点的过程叫解码。
 
@@ -66,6 +66,27 @@ print(octets)
 ```
 
 ```python
+a = bytes('Python 蟒蛇', encoding='utf8')
+print(a[0])
+print(a[:1])
+
+# 字节的项和切片获得的数据是不一样的，对应索引的项是一个整数，而切片则是字节序列
+
+print(a[-1])
+# 135
+print(a[-1:])
+# b'\x87'
+
+b = ' '.join(map(lambda e: f'{e:X}', a))
+print(b)
+# 50 79 74 68 6F 6E 20 E8 9F 92 E8 9B 87
+print(bytes.fromhex(b))
+# b'Python \xe8\x9f\x92\xe8\x9b\x87'
+```
+
+了解当前操作系统的默认编码
+
+```python
 import locale
 import sys
 
@@ -92,7 +113,32 @@ for expression in expressions.split():
 my_file.close()
 ```
 
->在`Windows`系统中常常会因为编码的混乱而出现不可预知的错误，所以要尽量指定读写文件的明确编码
+下面的程序，可以尝试在操作系统中直接执行输出，或将输出的内容重定向到一个文件中，可能会得到不同的结果
+
+```python
+import sys
+from unicodedata import name
+
+print(sys.version)
+print()
+print('sys.stdout.isatty():', sys.stdout.isatty())
+print('sys.stdout.encoding:', sys.stdout.encoding)
+print()
+
+# \N 表示 Unicode 的字面量转义
+
+test_chars = [
+    '\N{HORIZONTAL ELLIPSIS}',       # exists in cp1252, not in cp437
+    '\N{INFINITY}',                  # exists in cp437, not in cp1252
+    '\N{CIRCLED NUMBER FORTY TWO}',  # not in cp437 or in cp1252
+]
+
+for char in test_chars:
+    print(f'Trying to output {name(char)}:')
+    print(char)
+```
+
+> 在`Windows`系统中常常会因为编码的混乱而出现不可预知的错误，所以要尽量指定读写文件的明确编码
 
 ## 获得图片首部
 
@@ -154,6 +200,8 @@ def fold_equal(str1, str2):
     return (normalize('NFC', str1).casefold() ==
             normalize('NFC', str2).casefold())
 ```
+
+> 如果想尝试检测字符编码，可以看看[chardet](https://github.com/chardet/chardet)库
 
 ## 去除变音字符
 
@@ -254,6 +302,8 @@ print(sorted_fruits)
 print(sorted(fruits))
 ```
 
+> 另外还有一个库`pyicu`也可用于排序 Unicode 字符，但安装比较复杂，需要自己编译依赖
+
 ```python
 import re
 import unicodedata
@@ -271,6 +321,35 @@ for char in sample:
           unicodedata.name(char),
           sep='\t')
 ```
+
+## 字符查找
+
+```python
+#!/usr/bin/env python3
+import sys
+import unicodedata
+
+START, END = ord(' '), sys.maxunicode + 1           # <1>
+
+def find(*query_words, start=START, end=END):       # <2>
+    query = {w.upper() for w in query_words}        # <3>
+    for code in range(start, end):
+        char = chr(code)                            # <4>
+        name = unicodedata.name(char, None)         # <5>
+        if name and query.issubset(name.split()):   # <6>
+            print(f'U+{code:04X}\t{char}\t{name}')  # <7>
+
+def main(words):
+    if words:
+        find(*words)
+    else:
+        print('Please provide words to find.')
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
+```
+
+> 关于`unicodedata`模块的使用可参考 https://docs.python.org/zh-cn/3/library/unicodedata.html
 
 ## 字符串与字节序列双模式
 
@@ -320,4 +399,4 @@ except UnicodeEncodeError as e:
 print(pi_name_str.encode('ascii', 'surrogateescape'))
 ```
 
-Last Modified 2022-07-11
+Last Modified 2023-05-26

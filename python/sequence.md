@@ -23,6 +23,138 @@ for metro in metro_areas:
     print(c._asdict())
 ```
 
+```python
+"""
+match_cities.py
+"""
+
+# tag::CITY[]
+import typing
+
+
+class City(typing.NamedTuple):
+    continent: str
+    name: str
+    country: str
+
+
+cities = [
+    City('Asia', 'Tokyo', 'JP'),
+    City('Asia', 'Delhi', 'IN'),
+    City('North America', 'Mexico City', 'MX'),
+    City('North America', 'New York', 'US'),
+    City('South America', 'São Paulo', 'BR'),
+]
+
+
+# end::CITY[]
+
+# tag::ASIA[]
+def match_asian_cities():
+    results = []
+    for city in cities:
+        match city:
+            case City(continent='Asia'):
+                results.append(city)
+    return results
+
+
+# end::ASIA[]
+
+# tag::ASIA_POSITIONAL[]
+def match_asian_cities_pos():
+    results = []
+    for city in cities:
+        match city:
+            case City('Asia'):
+                results.append(city)
+    return results
+
+
+# end::ASIA_POSITIONAL[]
+
+
+# tag::ASIA_COUNTRIES[]
+def match_asian_countries():
+    results = []
+    for city in cities:
+        match city:
+            case City(continent='Asia', country=cc):
+                results.append(cc)
+    return results
+
+
+# end::ASIA_COUNTRIES[]
+
+# tag::ASIA_COUNTRIES_POSITIONAL[]
+def match_asian_countries_pos():
+    results = []
+    for city in cities:
+        match city:
+            case City('Asia', _, country):
+                results.append(country)
+    return results
+
+
+# end::ASIA_COUNTRIES_POSITIONAL[]
+
+
+def match_india():
+    results = []
+    for city in cities:
+        match city:
+            case City(_, name, 'IN'):
+                results.append(name)
+    return results
+
+
+def match_brazil():
+    results = []
+    for city in cities:
+        match city:
+            case City(country='BR', name=name):
+                results.append(name)
+    return results
+
+
+def main():
+    tests = ((n, f) for n, f in globals().items() if n.startswith('match_'))
+
+    for name, func in tests:
+        print(f'{name:15}\t{func()}')
+
+
+if __name__ == '__main__':
+    main()
+```
+
+```python
+"""
+``Coordinate``: simple class decorated with ``dataclass`` and a custom ``__str__``::
+
+    >>> moscow = Coordinate(55.756, 37.617)
+    >>> print(moscow)
+    55.8°N, 37.6°E
+
+"""
+
+# tag::COORDINATE[]
+
+from dataclasses import dataclass
+
+# 默认情况下示例是可变的，除非指定 frozen=True
+@dataclass(frozen=True)
+class Coordinate:
+    lat: float
+    lon: float
+
+    def __str__(self):
+        ns = 'N' if self.lat >= 0 else 'S'
+        we = 'E' if self.lon >= 0 else 'W'
+        return f'{abs(self.lat):.1f}°{ns}, {abs(self.lon):.1f}°{we}'
+# end::COORDINATE[]
+```
+
 ## 切片
 
 ```python
@@ -172,6 +304,26 @@ print(np_array[:, 1])
 print(np_array.transpose())
 ```
 
+`array`支持的类型参考
+
+| 类型码 | C 类型             | Python 类型       | 以字节表示的最小尺寸 | 备注                                 |
+| ------ | ------------------ | ----------------- | -------------------- | ------------------------------------ |
+| `'b'`  | signed char        | int               | 1                    |                                      |
+| `'B'`  | unsigned char      | int               | 1                    |                                      |
+| `'u'`  | wchar_t            | Unicode character | 2                    | 由于平台的不同它可能为 16 位或 32 位 |
+| `'h'`  | signed short       | int               | 2                    |                                      |
+| `'H'`  | unsigned short     | int               | 2                    |                                      |
+| `'i'`  | signed int         | int               | 2                    |                                      |
+| `'I'`  | unsigned int       | int               | 2                    |                                      |
+| `'l'`  | signed long        | int               | 4                    |                                      |
+| `'L'`  | unsigned long      | int               | 4                    |                                      |
+| `'q'`  | signed long long   | int               | 8                    |                                      |
+| `'Q'`  | unsigned long long | int               | 8                    |                                      |
+| `'f'`  | float              | float             | 4                    |                                      |
+| `'d'`  | double             | float             | 8                    |                                      |
+
+值的实际表示由机器架构决定（严格来说，由 C 实现）。实际大小可以通过`array.itemsize`属性访问
+
 ## 拆包
 
 ```python
@@ -282,4 +434,4 @@ if __name__ == '__main__':
 
 ```
 
-Last Modified 2023-05-23
+Last Modified 2023-05-26
