@@ -3,6 +3,7 @@
 ## 命名元组
 
 ```python
+import json
 from collections import namedtuple
 
 City = namedtuple('City', 'name country population coordinates')
@@ -21,138 +22,16 @@ for metro in metro_areas:
     c = City._make(metro)
     print(c)
     print(c._asdict())
-```
 
-```python
-"""
-match_cities.py
-"""
+Coordinate = namedtuple('Coordinate', 'lat lon reference', defaults=['WGS84'])
 
-# tag::CITY[]
-import typing
+print(Coordinate._field_defaults)
 
+delhi_data = ('Delhi NCR', 'IN', 21.935, Coordinate(28.613889, 77.208889))
+delhi = City._make(delhi_data)
 
-class City(typing.NamedTuple):
-    continent: str
-    name: str
-    country: str
-
-
-cities = [
-    City('Asia', 'Tokyo', 'JP'),
-    City('Asia', 'Delhi', 'IN'),
-    City('North America', 'Mexico City', 'MX'),
-    City('North America', 'New York', 'US'),
-    City('South America', 'São Paulo', 'BR'),
-]
-
-
-# end::CITY[]
-
-# tag::ASIA[]
-def match_asian_cities():
-    results = []
-    for city in cities:
-        match city:
-            case City(continent='Asia'):
-                results.append(city)
-    return results
-
-
-# end::ASIA[]
-
-# tag::ASIA_POSITIONAL[]
-def match_asian_cities_pos():
-    results = []
-    for city in cities:
-        match city:
-            case City('Asia'):
-                results.append(city)
-    return results
-
-
-# end::ASIA_POSITIONAL[]
-
-
-# tag::ASIA_COUNTRIES[]
-def match_asian_countries():
-    results = []
-    for city in cities:
-        match city:
-            case City(continent='Asia', country=cc):
-                results.append(cc)
-    return results
-
-
-# end::ASIA_COUNTRIES[]
-
-# tag::ASIA_COUNTRIES_POSITIONAL[]
-def match_asian_countries_pos():
-    results = []
-    for city in cities:
-        match city:
-            case City('Asia', _, country):
-                results.append(country)
-    return results
-
-
-# end::ASIA_COUNTRIES_POSITIONAL[]
-
-
-def match_india():
-    results = []
-    for city in cities:
-        match city:
-            case City(_, name, 'IN'):
-                results.append(name)
-    return results
-
-
-def match_brazil():
-    results = []
-    for city in cities:
-        match city:
-            case City(country='BR', name=name):
-                results.append(name)
-    return results
-
-
-def main():
-    tests = ((n, f) for n, f in globals().items() if n.startswith('match_'))
-
-    for name, func in tests:
-        print(f'{name:15}\t{func()}')
-
-
-if __name__ == '__main__':
-    main()
-```
-
-```python
-"""
-``Coordinate``: simple class decorated with ``dataclass`` and a custom ``__str__``::
-
-    >>> moscow = Coordinate(55.756, 37.617)
-    >>> print(moscow)
-    55.8°N, 37.6°E
-
-"""
-
-# tag::COORDINATE[]
-
-from dataclasses import dataclass
-
-# 默认情况下示例是可变的，除非指定 frozen=True
-@dataclass(frozen=True)
-class Coordinate:
-    lat: float
-    lon: float
-
-    def __str__(self):
-        ns = 'N' if self.lat >= 0 else 'S'
-        we = 'E' if self.lon >= 0 else 'W'
-        return f'{abs(self.lat):.1f}°{ns}, {abs(self.lon):.1f}°{we}'
-# end::COORDINATE[]
+print(delhi._asdict())
+print(json.dumps(delhi._asdict()))
 ```
 
 ## 切片
@@ -434,4 +313,4 @@ if __name__ == '__main__':
 
 ```
 
-Last Modified 2023-05-26
+Last Modified 2023-05-27

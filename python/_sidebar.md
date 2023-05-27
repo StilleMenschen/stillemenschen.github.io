@@ -11,6 +11,7 @@
   - [Sequence](python/sequence.md)
   - [Dictionaries & Collections](python/dictionaries-and-collections.md)
   - [Text & Bytes](python/text-and-bytes.md)
+  - [Data Classes](python/data-classes.md)
   - [Functions & Class](python/functions-class.md)
   - [Functions & Design Patterns](python/functions-and-design-patterns.md)
   - [Decorators & Closures](python/decorators-and-closures.md)
