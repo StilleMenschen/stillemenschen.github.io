@@ -7,3 +7,4 @@
   - [Objects](javascript/objects.md)
   - [High Perfomance](javascript/high-perfomance.md)
   - [Step Executor](javascript/step-executor.md)
+  - [To Fixed](javascript/to-fixed.md)
