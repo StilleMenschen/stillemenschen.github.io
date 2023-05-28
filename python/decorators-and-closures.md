@@ -63,11 +63,13 @@ if __name__ == '__main__':
 
 ```python
 """
-    >>> import registration
-    running register(<function f1 at 0x00000150CF843760>)
-    running register(<function f2 at 0x00000150CF842200>)
-    >>> registration.register
-    [<function f1 at 0x00000150CF843760>, <function f2 at 0x00000150CF842200>]
+ - 从外部引用时的输出
+
+    >>> import registration  # doctest: +ELLIPSIS
+    running register(<function f1 at ...>)
+    running register(<function f2 at ...>)
+    >>> registration.registry   # doctest: +ELLIPSIS
+    [<function f1 at ...>, <function f2 at ...>]
 """
 
 
