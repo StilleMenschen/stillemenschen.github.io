@@ -2,4 +2,5 @@
 - [Kubernetes](kubernetes/)
   - [Cloud Computing](kubernetes/cloud-computing.md)
   - [Simple Building](kubernetes/simple-build.md)
+  - [Install Tools](kubernetes/kubernetes-install.md)
   - [Basic](kubernetes/basic.md)
