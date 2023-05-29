@@ -63,49 +63,56 @@ if __name__ == '__main__':
 
 ```python
 """
- - 从外部引用时的输出
+从外部调用
 
-    >>> import registration  # doctest: +ELLIPSIS
-    running register(<function f1 at ...>)
-    running register(<function f2 at ...>)
-    >>> registration.registry   # doctest: +ELLIPSIS
-    [<function f1 at ...>, <function f2 at ...>]
+>>> from registration import *  # doctest: +ELLIPSIS
+running register(active=False)->decorate(<function f1 at ...>)
+running register(active=True)->decorate(<function f2 at ...>)
+>>> register()(f3)  # doctest: +ELLIPSIS
+running register(active=True)->decorate(<function f3 at ...>)
+<function f3 at ...>
+>>> registry  # doctest: +ELLIPSIS
+{<function f3 at ...>, <function f2 at ...>}
+>>> register(active=False)(f2)  # doctest: +ELLIPSIS
+running register(active=False)->decorate(<function f2 at ...>)
+<function f2 at ...>
+>>> registry  # doctest: +ELLIPSIS
+{<function f3 at ...>}
 """
 
+# tag::REGISTRATION_PARAM[]
 
-registry = []  # <1>
-
-
-def register(func):  # <2>
-    print('running register(%s)' % func)  # <3>
-    registry.append(func)  # <4>
-    return func  # <5>
+registry = set()  # <1>
 
 
-@register  # <6>
+def register(active=True):  # <2>
+    def decorate(func):  # <3>
+        print('running register'
+              f'(active={active})->decorate({func})')
+        if active:  # <4>
+            registry.add(func)
+        else:
+            registry.discard(func)  # <5>
+
+        return func  # <6>
+
+    return decorate  # <7>
+
+
+@register(active=False)  # <8>
 def f1():
     print('running f1()')
 
 
-@register
+@register()  # <9>
 def f2():
     print('running f2()')
 
 
-def f3():  # <7>
+def f3():
     print('running f3()')
 
-
-def main():  # <8>
-    print('running main()')
-    print('registry ->', registry)
-    f1()
-    f2()
-    f3()
-
-
-if __name__ == '__main__':
-    main()  # <9>
+# end::REGISTRATION_PARAM[]
 ```
 
 ## 策略模式延申
@@ -290,19 +297,17 @@ def make_averager_variable():
 ## 带有参数的装饰器
 
 ```python
-# clockdeco_param.py
-
 """
 >>> snooze(.1)  # doctest: +ELLIPSIS
-[0.101...s] snooze(0.1) -> None
+[0.1...s] snooze(0.1) -> None
 >>> clock('{name}: {elapsed}')(time.sleep)(.2)  # doctest: +ELLIPSIS
 sleep: 0.20...
->>> clock('{name}({args}) dt={elapsed:0.3f}s')(time.sleep)(.2)
-sleep(0.2) dt=0.201s
+>>> clock('{name}({args}) dt={elapsed:0.3f}s')(time.sleep)(.2)  # doctest: +ELLIPSIS
+sleep((0.2,)) dt=...s
 """
 
-import time
 import functools
+import time
 
 DEFAULT_FMT = '[{elapsed:0.8f}s] {name}({arg_str}) -> {result}'
 
@@ -331,27 +336,33 @@ def clock(fmt=DEFAULT_FMT):
     return decorate
 
 
-# @clock()
-# def snooze(seconds, msg='hh'):
-#     time.sleep(seconds)
-#     return msg
+class clock01:  # <1>
+
+    def __init__(self, fmt=DEFAULT_FMT):  # <2>
+        self.fmt = fmt
+
+    def __call__(self, func):  # <3>
+        def clocked(*_args):
+            t0 = time.perf_counter()
+            _result = func(*_args)  # <4>
+            elapsed = time.perf_counter() - t0
+            name = func.__name__
+            args = ', '.join(repr(arg) for arg in _args)
+            result = repr(_result)
+            print(self.fmt.format(**locals()))
+            return _result
+
+        return clocked
 
 
-@clock('{name}({arg_str}) dt={elapsed:0.3f}s')
-def snooze(seconds, msg='hh'):
+@clock()
+def snooze(seconds):
     time.sleep(seconds)
-    return msg
-
-
-# @clock('{name}: {elapsed}s')
-# def snooze(seconds):
-#     time.sleep(seconds)
 
 
 if __name__ == '__main__':
     for i in range(3):
-        snooze(.123, msg='Haha')
-
+        snooze(.123)
 ```
 
 ## LRU 缓存
@@ -395,7 +406,7 @@ def clock(func):
 
     return clocked
 
-
+# 叠放装饰器, 类似于 f = lru_cache(clock(func))
 @functools.lru_cache()  # <1>
 @clock  # <2>
 def fibonacci(n: int) -> int:
@@ -410,52 +421,84 @@ if __name__ == '__main__':
 
 ## 泛函数
 
+在单分派函数中尽量使用抽象基类，这样兼容的类型会多一些
+
 ```python
-"""
->>> htmlize({1, 2, 3})
+r"""
+htmlize(): generic function example
+
+# tag::HTMLIZE_DEMO[]
+
+>>> htmlize({1, 2, 3})  # <1>
 '<pre>{1, 2, 3}</pre>'
 >>> htmlize(abs)
 '<pre>&lt;built-in function abs&gt;</pre>'
->>> htmlize('Heimlich & Co.\\n- a game')
-'<p>Heimlich &amp; Co.<br>\\n- a game</p>'
->>> htmlize(42)
+>>> htmlize('Heimlich & Co.\n- a game')  # <2>
+'<p>Heimlich &amp; Co.<br/>\n- a game</p>'
+>>> htmlize(42)  # <3>
 '<pre>42 (0x2a)</pre>'
->>> print(htmlize(['alpha', 66, {3, 2, 1}]))
+>>> print(htmlize(['alpha', 66, {3, 2, 1}]))  # <4>
 <ul>
 <li><p>alpha</p></li>
 <li><pre>66 (0x42)</pre></li>
 <li><pre>{1, 2, 3}</pre></li>
 </ul>
+>>> htmlize(True)  # <5>
+'<pre>True</pre>'
+>>> htmlize(fractions.Fraction(2, 3))  # <6>
+'<pre>2/3</pre>'
+>>> htmlize(2/3)   # <7>
+'<pre>0.6666666666666666 (2/3)</pre>'
+>>> htmlize(decimal.Decimal('0.02380952'))
+'<pre>0.02380952 (1/42)</pre>'
+
+# end::HTMLIZE_DEMO[]
 """
 
-import numbers
-import html
+# tag::HTMLIZE[]
+
 from functools import singledispatch
 from collections import abc
+import fractions
+import decimal
+import html
+import numbers
 
-
-@singledispatch
-def htmlize(obj):
+@singledispatch  # <1>
+def htmlize(obj: object) -> str:
     content = html.escape(repr(obj))
-    return '<pre>{}</pre>'.format(content)
+    return f'<pre>{content}</pre>'
 
+@htmlize.register  # <2>
+def _(text: str) -> str:  # <3>
+    content = html.escape(text).replace('\n', '<br/>\n')
+    return f'<p>{content}</p>'
 
-@htmlize.register(str)
-def _(text):
-    content = html.escape(text).replace('\n', '<br>\n')
-    return '<p>{0}</p>'.format(content)
-
-
-@htmlize.register(numbers.Integral)
-def _(n):
-    return '<pre>{0} (0x{0:x})</pre>'.format(n)
-
-
-@htmlize.register(tuple)
-@htmlize.register(abc.MutableSequence)
-def _(seq):
+@htmlize.register  # <4>
+def _(seq: abc.Sequence) -> str:
     inner = '</li>\n<li>'.join(htmlize(item) for item in seq)
     return '<ul>\n<li>' + inner + '</li>\n</ul>'
+
+@htmlize.register  # <5>
+def _(n: numbers.Integral) -> str:
+    return f'<pre>{n} (0x{n:x})</pre>'
+
+@htmlize.register  # <6>
+def _(n: bool) -> str:
+    return f'<pre>{n}</pre>'
+
+@htmlize.register(fractions.Fraction)  # <7>
+def _(x) -> str:
+    frac = fractions.Fraction(x)
+    return f'<pre>{frac.numerator}/{frac.denominator}</pre>'
+
+@htmlize.register(decimal.Decimal)  # <8>
+@htmlize.register(float)
+def _(x) -> str:
+    frac = fractions.Fraction(x).limit_denominator()
+    return f'<pre>{x} ({frac.numerator}/{frac.denominator})</pre>'
+
+# end::HTMLIZE[]
 ```
 
-Last Modified 2022-07-19
+Last Modified 2023-05-29
