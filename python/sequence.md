@@ -276,7 +276,6 @@ Demonstration of nested tuple unpacking::
 
 """
 
-# tag::MAIN[]
 metro_areas = [
     ('Tokyo', 'JP', 36.933, (35.689722, 139.691667)),
     ('Delhi NCR', 'IN', 21.935, (28.613889, 77.208889)),
@@ -306,7 +305,6 @@ def main():
                 print(f'{name:15} | {lat:9.4f} | {lon:9.4f}')
 
 
-# end::MAIN[]
 
 if __name__ == '__main__':
     main()

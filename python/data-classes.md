@@ -41,7 +41,6 @@ Card(rank='Q', suit='hearts')
 
 Sort with *spades high* overall ranking
 
-# tag::SPADES_HIGH[]
 >>> Card.suit_values = dict(spades=3, hearts=2, diamonds=1, clubs=0)  # <1>
 >>> def spades_high(card):                                            # <2>
 ...     rank_value = FrenchDeck.ranks.index(card.rank)
@@ -56,7 +55,6 @@ Sort with *spades high* overall ranking
 >>> highest_card.overall_rank()
 51
 
-# end::SPADES_HIGH[]
 
 
 >>> for card in sorted(deck, key=Card.overall_rank):  # doctest: +ELLIPSIS
@@ -103,14 +101,12 @@ This version has a field with a default value::
 
 """
 
-# tag::COORDINATE[]
 from typing import NamedTuple
 
 class Coordinate(NamedTuple):
     lat: float                # <1>
     lon: float
     reference: str = 'WGS84'  # <2>
-# end::COORDINATE[]
 ```
 
 ```python
@@ -118,7 +114,6 @@ class Coordinate(NamedTuple):
 match_cities.py
 """
 
-# tag::CITY[]
 import typing
 
 
@@ -137,9 +132,7 @@ cities = [
 ]
 
 
-# end::CITY[]
 
-# tag::ASIA[]
 def match_asian_cities():
     results = []
     for city in cities:
@@ -149,9 +142,7 @@ def match_asian_cities():
     return results
 
 
-# end::ASIA[]
 
-# tag::ASIA_POSITIONAL[]
 def match_asian_cities_pos():
     results = []
     for city in cities:
@@ -161,10 +152,8 @@ def match_asian_cities_pos():
     return results
 
 
-# end::ASIA_POSITIONAL[]
 
 
-# tag::ASIA_COUNTRIES[]
 def match_asian_countries():
     results = []
     for city in cities:
@@ -174,9 +163,7 @@ def match_asian_countries():
     return results
 
 
-# end::ASIA_COUNTRIES[]
 
-# tag::ASIA_COUNTRIES_POSITIONAL[]
 def match_asian_countries_pos():
     results = []
     for city in cities:
@@ -186,7 +173,6 @@ def match_asian_countries_pos():
     return results
 
 
-# end::ASIA_COUNTRIES_POSITIONAL[]
 
 
 def match_india():
@@ -230,7 +216,6 @@ if __name__ == '__main__':
 
 """
 
-# tag::COORDINATE[]
 
 from dataclasses import dataclass, asdict, field
 
@@ -247,7 +232,6 @@ class Coordinate:
         return f'{abs(self.lat):.1f}°{ns}, {abs(self.lon):.1f}°{we}'
 
 
-# end::COORDINATE[]
 
 @dataclass
 class Point:
@@ -281,7 +265,6 @@ print(d)
 这个装饰器还支持其它的参数，参考官方说明 https://docs.python.org/zh-cn/3/library/dataclasses.html
 
 ```python
-# tag::DOCTESTS[]
 """
 ``HackerClubMember`` objects accept an optional ``handle`` argument::
 
@@ -309,9 +292,7 @@ To fix, ``leo2`` must be created with an explicit ``handle``::
     >>> leo2
     HackerClubMember(name='Leo DaVinci', guests=[], handle='Neo')
 """
-# end::DOCTESTS[]
 
-# tag::HACKERCLUB[]
 from dataclasses import dataclass, field
 
 
@@ -334,7 +315,6 @@ class HackerClubMember(ClubMember):  # <1>
             msg = f'handle {self.handle!r} already exists.'
             raise ValueError(msg)
         cls.all_handles.add(self.handle)  # <7>
-# end::HACKERCLUB[]
 ```
 
 ## 都柏林核心模式
@@ -366,7 +346,6 @@ A complete resource record:
     ...     ResourceType.BOOK, description, 'EN',
     ...     ['computer programming', 'OOP'])
 
-# tag::DOCTEST[]
     >>> book  # doctest: +NORMALIZE_WHITESPACE
     Resource(
         identifier = '978-0-13-475759-9',
@@ -379,7 +358,6 @@ A complete resource record:
         subjects = ['computer programming', 'OOP'],
     )
 
-# end::DOCTEST[]
 """
 
 from dataclasses import dataclass, field, fields
@@ -406,7 +384,6 @@ class Resource:
     language: str = ''
     subjects: list[str] = field(default_factory=list)
 
-# tag::REPR[]
     def __repr__(self):
         cls = self.__class__
         cls_name = cls.__name__
@@ -418,7 +395,6 @@ class Resource:
 
         res.append(')')                                   # <5>
         return '\n'.join(res)                             # <6>
-# end::REPR[]
 
 
 class ResourceDict(TypedDict):

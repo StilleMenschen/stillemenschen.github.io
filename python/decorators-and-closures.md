@@ -80,7 +80,6 @@ running register(active=False)->decorate(<function f2 at ...>)
 {<function f3 at ...>}
 """
 
-# tag::REGISTRATION_PARAM[]
 
 registry = set()  # <1>
 
@@ -112,7 +111,6 @@ def f2():
 def f3():
     print('running f3()')
 
-# end::REGISTRATION_PARAM[]
 ```
 
 ## 策略模式延申
@@ -427,7 +425,6 @@ if __name__ == '__main__':
 r"""
 htmlize(): generic function example
 
-# tag::HTMLIZE_DEMO[]
 
 >>> htmlize({1, 2, 3})  # <1>
 '<pre>{1, 2, 3}</pre>'
@@ -452,10 +449,8 @@ htmlize(): generic function example
 >>> htmlize(decimal.Decimal('0.02380952'))
 '<pre>0.02380952 (1/42)</pre>'
 
-# end::HTMLIZE_DEMO[]
 """
 
-# tag::HTMLIZE[]
 
 from functools import singledispatch
 from collections import abc
@@ -498,7 +493,6 @@ def _(x) -> str:
     frac = fractions.Fraction(x).limit_denominator()
     return f'<pre>{x} ({frac.numerator}/{frac.denominator})</pre>'
 
-# end::HTMLIZE[]
 ```
 
 Last Modified 2023-05-29

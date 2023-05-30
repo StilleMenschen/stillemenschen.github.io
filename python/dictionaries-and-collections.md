@@ -99,7 +99,6 @@ print(country_dial)
 """
 Pattern matching with mapping—requires Python ≥ 3.10
 
-# tag::DICT_MATCH_TEST[]
 >>> b1 = dict(api=1, author='Douglas Hofstadter',
 ...         type='book', title='Gödel, Escher, Bach')
 >>> get_creators(b1)
@@ -119,10 +118,8 @@ Traceback (most recent call last):
     ...
 ValueError: Invalid record: 'Spam, spam, spam'
 
-# end::DICT_MATCH_TEST[]
 """
 
-# tag::DICT_MATCH[]
 def get_creators(record: dict) -> list:
     match record:
         case {'type': 'book', 'api': 2, 'authors': [*names]}:  # <1>
@@ -135,7 +132,6 @@ def get_creators(record: dict) -> list:
             return [name]
         case _:  # <5>
             raise ValueError(f'Invalid record: {record!r}')
-# end::DICT_MATCH[]
 ```
 
 >不同于序列模式匹配，即使只有部分匹配成功，也不会出现错误
