@@ -4,3 +4,4 @@
   - [Simple Building](kubernetes/simple-build.md)
   - [Install Tools](kubernetes/kubernetes-install.md)
   - [Basic](kubernetes/basic.md)
+  - [Apply Resources](kubernetes/apply-resources.md)
