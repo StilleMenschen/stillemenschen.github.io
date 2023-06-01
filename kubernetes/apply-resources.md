@@ -102,4 +102,135 @@ kubectl delete -f k8s/
 
 如果想要参数化资源文件配置，可以考虑使用包管理器 Helm，这个是云原生计算基金会的项目之一
 
-Last Modified 2023-05-31
+## 模板化的资源
+
+需要先安装 Helm，地址：https://helm.sh/docs/intro/install/
+
+下面是模板化的配置文件，里面的标记变量由 Helm 自动填写
+
+templates/deployment.yaml
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.container.name }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.container.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.container.name }}
+        environment: {{ .Values.environment }}
+    spec:
+      containers:
+        - name: {{ .Values.container.name }}
+          image: {{ .Values.container.image }}:{{ .Values.container.tag }}
+          ports:
+            - containerPort: {{ .Values.container.port }}
+          env:
+            - name: environment
+              value: {{ .Values.environment }}
+```
+
+templates/service.yaml
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.container.name }}-service
+  labels:
+    app: {{ .Values.container.name }}
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: {{ .Values.container.port }}
+  selector:
+    app: {{ .Values.container.name }}
+  type: LoadBalancer
+```
+
+Helm 配置文件
+
+Chart.yaml
+
+```yaml
+apiVersion: v1
+description: A Helm chart for myapp
+version: 1.0.1
+appVersion: 1.0.0
+name: demo
+sources:
+  - https://github.com/cloudnativedevops/cloudnatived
+```
+
+### 不同上下文环境的配置
+
+production-values.yaml
+
+```yaml
+environment: production
+```
+
+staging-values.yaml
+
+```yaml
+environment: staging
+```
+
+values.yaml
+
+```yaml
+environment: development
+container:
+  name: demo
+  port: 8888
+  image: cloudnatived/demo
+  tag: hello
+replicas: 1
+```
+
+## 通过 Helm 安装
+
+```bash
+ls k8s/demo
+Chart.yaml             prod-values.yaml staging-values.yaml    templates
+values.yaml
+```
+
+```bash
+kubectl delete all --selector app=demo
+```
+
+```bash
+helm install --name demo ./k8s/demo
+```
+
+查看正在运行的 Release
+
+```bash
+helm list
+```
+
+## Helm 简介
+
+三大概念
+
+Chart 代表着 Helm 包。它包含在 Kubernetes 集群内部运行应用程序，工具或服务所需的所有资源定义。你可以把它看作是 Homebrew formula，Apt dpkg，或 Yum RPM 在 Kubernetes 中的等价物。
+
+Repository（仓库） 是用来存放和共享 charts 的地方。它就像 Perl 的 CPAN 档案库网络 或是 Fedora 的 软件包仓库，只不过它是供 Kubernetes 包所使用的。
+
+Release 是运行在 Kubernetes 集群中的 chart 的实例。一个 chart 通常可以在同一个集群中安装多次。每一次安装都会创建一个新的 release。以 MySQL chart 为例，如果你想在你的集群中运行两个数据库，你可以安装该 chart 两次。每一个数据库都会拥有它自己的 release 和 release name。
+
+在了解了上述这些概念以后，我们就可以这样来解释 Helm：
+
+Helm 安装 charts 到 Kubernetes 集群中，每次安装都会创建一个新的 release。你可以在 Helm 的 chart repositories 中寻找新的 chart。
+
+> 详见 https://helm.sh/docs/intro/using_helm/
+
+Last Modified 2023-06-01
