@@ -51,9 +51,9 @@ random.shuffle(deck)
 print(deck[:10])
 ```
 
-有了`__len__`和`__getitem__`方法后，类的表现就可以像序列一样，可以迭代和切片；`len()`运行速度非常快的原因是直接读取了C中的结构体属性，没有调用方法
+有了`__len__`和`__getitem__`方法后，类的表现就可以像序列一样，可以迭代和切片；`len()`运行速度非常快的原因是直接读取了 C 中的结构体属性，没有调用方法
 
-## 可被散列的向量类
+## 二维向量
 
 ```python
 """
@@ -130,15 +130,13 @@ Tests of `x` and `y` read-only properties:
     >>> v1.x = 123
     Traceback (most recent call last):
       ...
-    AttributeError: can't set attribute
+    AttributeError: can't set attribute 'x'
 
 Tests of hashing:
 
     >>> v1 = Vector2d(3, 4)
     >>> v2 = Vector2d(3.1, 4.2)
-    >>> hash(v1), hash(v2)
-    (7, 384307168202284039)
-    >>> len(set([v1, v2]))
+    >>> len({v1, v2})
     2
 
 """
@@ -146,13 +144,11 @@ Tests of hashing:
 from array import array
 import math
 
-
 class Vector2d:
-    __slots__ = ('__x', '__y')
+    __match_args__ = ('x', 'y')  # <1>
+    __slots__ = ('__x', '__y')  # <2>
 
     typecode = 'd'
-
-    # methods follow (omitted in book listing)
 
     def __init__(self, x, y):
         self.__x = float(x)
@@ -184,7 +180,7 @@ class Vector2d:
         return tuple(self) == tuple(other)
 
     def __hash__(self):
-        return hash(self.x) ^ hash(self.y)
+        return hash((self.x, self.y))
 
     def __abs__(self):
         return math.hypot(self.x, self.y)
@@ -213,17 +209,17 @@ class Vector2d:
         return cls(*memv)
 ```
 
->原子不可变数据类型（`str`、`bytes`和数值类型）都是可散列类型，`frozenset`也是可散列类型，而`tuple`只有在内部所有元素都是可散列类型的情况下才是可散列的
+> 原子不可变数据类型（`str`、`bytes`和数值类型）都是可散列类型，`frozenset`也是可散列类型，而`tuple`只有在内部所有元素都是可散列类型的情况下才是可散列的
 
->默认情况下，Python 在各个实例中名为`__dict__`的字典里存储实例属性。但是字典会消耗大量的内存。如果要处理较大的数据量可以考虑通过`__slots__`类属性，
->能节省大量内存，方法是让解释器在元组中存储实例属性，而不用字典。继承自超类的`__slots__`属性不会生效，Python只会使用类中定义的`__slots__`。
->如果需要让类支持弱引用，则需要实现`__weakref__`，并且同时存在`__slots__`的话还要添加到`__slots__`中。
+> 默认情况下，Python 在各个实例中名为`__dict__`的字典里存储实例属性。但是字典会消耗大量的内存。如果要处理较大的数据量可以考虑通过`__slots__`类属性，
+> 能节省大量内存，方法是让解释器在元组中存储实例属性，而不用字典。继承自超类的`__slots__`属性不会生效，Python 只会使用类中定义的`__slots__`。
+> 如果需要让类支持弱引用，则需要实现`__weakref__`，并且同时存在`__slots__`的话还要添加到`__slots__`中。
 
-## 更完整的类示例
+## 多维向量
 
 ```python
 """
-A multi-dimensional ``Vector`` class, take 5
+A multi-dimensional ``Vector`` class, take 4
 
 A ``Vector`` is built from an iterable of numbers::
 
@@ -325,7 +321,7 @@ Test of slicing::
     >>> v7[1,2]
     Traceback (most recent call last):
       ...
-    TypeError: Vector indices must be integers
+    TypeError: 'tuple' object cannot be interpreted as an integer
 
 
 Tests of dynamic attribute access::
@@ -335,16 +331,6 @@ Tests of dynamic attribute access::
     0.0
     >>> v7.y, v7.z, v7.t
     (1.0, 2.0, 3.0)
-
-Tests of preventing attributes from 'a' to 'z'::
-    >>> v1.x = 7
-    Traceback (most recent call last):
-      ...
-    AttributeError: readonly attribute 'x'
-    >>> v1.w = 7
-    Traceback (most recent call last):
-      ...
-    AttributeError: can't set attributes 'a' to 'z' in 'Vector'
 
 Dynamic attribute lookup failures::
 
@@ -373,66 +359,22 @@ Tests of hashing::
     (7, 2, 1)
 
 
-Most hash values of non-integers vary from a 32-bit to 64-bit CPython build::
+Most hash codes of non-integers vary from a 32-bit to 64-bit CPython build::
 
     >>> import sys
     >>> hash(v2) == (384307168202284039 if sys.maxsize > 2**32 else 357915986)
     True
 
-
-Tests of ``format()`` with Cartesian coordinates in 2D::
-
-    >>> v1 = Vector([3, 4])
-    >>> format(v1)
-    '(3.0, 4.0)'
-    >>> format(v1, '.2f')
-    '(3.00, 4.00)'
-    >>> format(v1, '.3e')
-    '(3.000e+00, 4.000e+00)'
-
-
-Tests of ``format()`` with Cartesian coordinates in 3D and 7D::
-
-    >>> v3 = Vector([3, 4, 5])
-    >>> format(v3)
-    '(3.0, 4.0, 5.0)'
-    >>> format(Vector(range(7)))
-    '(0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0)'
-
-
-Tests of ``format()`` with spherical coordinates in 2D, 3D and 4D::
-
-    >>> format(Vector([1, 1]), 'h')  # doctest:+ELLIPSIS
-    '<1.414213..., 0.785398...>'
-    >>> format(Vector([1, 1]), '.3eh')
-    '<1.414e+00, 7.854e-01>'
-    >>> format(Vector([1, 1]), '0.5fh')
-    '<1.41421, 0.78540>'
-    >>> format(Vector([1, 1, 1]), 'h')  # doctest:+ELLIPSIS
-    '<1.73205..., 0.95531..., 0.78539...>'
-    >>> format(Vector([2, 2, 2]), '.3eh')
-    '<3.464e+00, 9.553e-01, 7.854e-01>'
-    >>> format(Vector([0, 0, 0]), '0.5fh')
-    '<0.00000, 0.00000, 0.00000>'
-    >>> format(Vector([-1, -1, -1, -1]), 'h')  # doctest:+ELLIPSIS
-    '<2.0, 2.09439..., 2.18627..., 3.92699...>'
-    >>> format(Vector([2, 2, 2, 2]), '.3eh')
-    '<4.000e+00, 1.047e+00, 9.553e-01, 7.854e-01>'
-    >>> format(Vector([0, 1, 0, 0]), '0.5fh')
-    '<1.00000, 1.57080, 0.00000, 0.00000>'
 """
 
-import functools
-import itertools  # <1>
-import math
-import numbers
-import operator
-import reprlib
 from array import array
+import reprlib
+import math
+import functools
+import operator
 
 
 class Vector:
-    # 数值类型 decimal
     typecode = 'd'
 
     def __init__(self, components):
@@ -442,10 +384,9 @@ class Vector:
         return iter(self._components)
 
     def __repr__(self):
-        # reprlib 可以在字符较多时以 '...' 来代替
         components = reprlib.repr(self._components)
         components = components[components.find('['):-1]
-        return 'Vector({})'.format(components)
+        return f'Vector({components})'
 
     def __str__(self):
         return str(tuple(self))
@@ -463,7 +404,7 @@ class Vector:
         return functools.reduce(operator.xor, hashes, 0)
 
     def __abs__(self):
-        return math.sqrt(sum(x * x for x in self))
+        return math.hypot(*self)
 
     def __bool__(self):
         return bool(abs(self))
@@ -471,32 +412,30 @@ class Vector:
     def __len__(self):
         return len(self._components)
 
-    def __getitem__(self, index):
-        # 检查索引是否为整数
-        cls = type(self)
-        if isinstance(index, slice):
-            return cls(self._components[index])
-        elif isinstance(index, numbers.Integral):
-            return self._components[index]
-        else:
-            msg = '{.__name__} indices must be integers'
-            raise TypeError(msg.format(cls))
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            cls = type(self)
+            return cls(self._components[key])
+        index = operator.index(key)
+        return self._components[index]
 
-    shortcut_names = 'xyzt'
+    __match_args__ = ('x', 'y', 'z', 't')
 
     def __getattr__(self, name):
         cls = type(self)
-        if len(name) == 1:
-            pos = cls.shortcut_names.find(name)
-            if 0 <= pos < len(self._components):
-                return self._components[pos]
-        msg = '{.__name__!r} object has no attribute {!r}'
-        raise AttributeError(msg.format(cls, name))
-
-    def __setattr__(self, name, value):
+        try:
+            pos = cls.__match_args__.index(name)
+        except ValueError:
+            pos = -1
+        if 0 <= pos < len(self._components):
+            return self._components[pos]
+        msg = f'{cls.__name__!r} object has no attribute {name!r}'
+        raise AttributeError(msg)
+    """
+     def __setattr__(self, name, value):
         cls = type(self)
         if len(name) == 1:  # <1>
-            if name in cls.shortcut_names:  # <2>
+            if name in cls.__match_args__:  # <2>
                 error = 'readonly attribute {attr_name!r}'
             elif name.islower():  # <3>
                 error = "can't set attributes 'a' to 'z' in {cls_name!r}"
@@ -506,29 +445,7 @@ class Vector:
                 msg = error.format(cls_name=cls.__name__, attr_name=name)
                 raise AttributeError(msg)
         super().__setattr__(name, value)  # <6>
-
-    def angle(self, n):  # <2>
-        r = math.sqrt(sum(x * x for x in self[n:]))
-        a = math.atan2(r, self[n - 1])
-        if (n == len(self) - 1) and (self[-1] < 0):
-            return math.pi * 2 - a
-        else:
-            return a
-
-    def angles(self):  # <3>
-        return (self.angle(n) for n in range(1, len(self)))
-
-    def __format__(self, fmt_spec=''):
-        if fmt_spec.endswith('h'):  # hyper-spherical coordinates
-            fmt_spec = fmt_spec[:-1]
-            coords = itertools.chain([abs(self)],
-                                     self.angles())  # <4>
-            outer_fmt = '<{}>'  # <5>
-        else:
-            coords = self
-            outer_fmt = '({})'  # <6>
-        components = (format(c, fmt_spec) for c in coords)  # <7>
-        return outer_fmt.format(', '.join(components))  # <8>
+    """
 
     @classmethod
     def frombytes(cls, octets):
@@ -537,4 +454,4 @@ class Vector:
         return cls(memv)
 ```
 
-Last Modified 2023-05-19
+Last Modified 2023-06-01
