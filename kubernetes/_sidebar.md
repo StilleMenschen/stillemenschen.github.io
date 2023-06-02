@@ -5,3 +5,4 @@
   - [Install Tools](kubernetes/kubernetes-install.md)
   - [Basic](kubernetes/basic.md)
   - [Apply Resources](kubernetes/apply-resources.md)
+  - [Resources Manage](kubernetes/resources-manage.md)
