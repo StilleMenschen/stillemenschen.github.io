@@ -17,8 +17,6 @@ Kubernetes 支持配置 Pod 所需的 CPU 和内存资源，这样可以告诉�
 
 尽管你只能逐个容器地指定请求和限制值，考虑 Pod 的总体资源请求和限制也是有用的。对特定资源而言，Pod 的资源请求/限制是 Pod 中各容器对该类型资源的请求/限制的总和。
 
-## 资源单位
-
 ### CPU 资源单位
 
 CPU 资源的限制和请求以 “cpu” 为单位。在 Kubernetes 中，一个 CPU 等于 1 个物理 CPU 核 或者 1 个虚拟核，取决于节点是一台物理主机还是运行在某物理主机上的虚拟机。
@@ -37,7 +35,7 @@ memory 的限制和请求以字节为单位。你可以使用普通的整数，�
 128974848, 129e6, 129M, 128974848000m, 123Mi
 ```
 
-## 资源配置例子
+### 配置示例
 
 以下 Pod 有两个容器。每个容器的请求为 0.25 CPU 和 64MiB（2^26 字节）内存，每个容器的资源限制为 0.5 CPU 和 128MiB 内存。你可以认为该 Pod 的资源请求为 0.5 CPU 和 128 MiB 内存，资源限制为 1 CPU 和 256MiB 内存。
 
@@ -260,6 +258,8 @@ readinessProbe:
 
 在 Kubernetes 中，**名字空间（Namespace）**提供一种机制，将同一集群中的资源划分为相互隔离的组。同一名字空间内的资源名称要唯一，但跨名字空间时没有这个要求。名字空间作用域仅针对带有名字空间的对象，（例如 Deployment、Service 等），这种作用域对集群范围的对象 （例如 StorageClass、Node、PersistentVolume 等）不适用。
 
+Kubernetes 名字空间为集群中的 Pod、Service 和 Deployment 提供了作用域。与一个名字空间交互的用户不会看到另一个名字空间中的内容。
+
 Kubernetes 启动时会创建四个初始名字空间：
 
     default
@@ -273,5 +273,110 @@ Kubernetes 启动时会创建四个初始名字空间：
 
     kube-system
     该名字空间用于 Kubernetes 系统创建的对象。
+
+> 避免使用前缀 kube- 创建名字空间，因为它是为 Kubernetes 系统名字空间保留的。
+
+### 查看命名空间
+
+```bash
+kubectl get namespace
+```
+
+### 使用命名空间
+
+```
+kubectl create namespace <名字空间名称>
+kubectl run nginx --image=nginx --namespace=<名字空间名称>
+kubectl get pods --namespace=<名字空间名称>
+kubectl --namespace=<名字空间名称> delete pod nginx
+```
+
+> 注意：命名空间删除后，会关联删除命名空间下的**所有内容**！
+
+配置文件的方式
+
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: <insert-namespace-name-here>
+```
+
+### 命名空间和 DNS
+
+当你创建服务时，Kubernetes 会创建相应的 DNS 条目。此条目的格式为 <服务名称>.<名字空间名称>.svc.cluster.local。这意味着如果容器使用 <服务名称>，它将解析为名字空间本地的服务。这对于在多个名字空间（如开发、暂存和生产）中使用相同的配置非常有用。如果要跨名字空间访问，则需要使用完全限定的域名（FQDN）。
+
+> 更多信息参考 https://kubernetes.io/zh-cn/docs/concepts/services-networking/
+
+## 资源配额
+
+当多个用户或团队共享具有固定节点数目的集群时，人们会担心有人使用超过其基于公平原则所分配到的资源量。
+
+资源配额是帮助管理员解决这一问题的工具。
+
+资源配额，通过 ResourceQuota 对象来定义，对每个命名空间的资源消耗总量提供限制。它可以限制命名空间中某种类型的对象的总数目上限，也可以限制命名空间中的 Pod 可以使用的计算资源的总上限。
+
+```yaml
+apiVersion: v1
+  kind: ResourceQuota
+  metadata:
+    name: pods-low
+  spec:
+    hard:
+      cpu: "5"
+      memory: 10Gi
+      pods: "10"
+```
+
+针对命名空间应用上面的配置
+
+```bash
+kubectl apply --namespace demo -f resource-quota.yaml
+```
+
+> 更多信息参考 https://kubernetes.io/zh-cn/docs/concepts/policy/resource-quotas/
+
+### 限制范围
+
+默认情况下，Kubernetes 集群上的容器运行使用的计算资源没有限制。使用 Kubernetes 资源配额，管理员（也称为 集群操作者）可以在一个指定的命名空间内限制集群资源的使用与创建。在命名空间中，一个 Pod 最多能够使用命名空间的资源配额所定义的 CPU 和内存用量。作为集群操作者或命名空间级的管理员，你可能也会担心如何确保一个 Pod 不会垄断命名空间内所有可用的资源。
+
+LimitRange 是限制命名空间内可为每个适用的对象类别 （例如 Pod 或 PersistentVolumeClaim） 指定的资源分配量（限制和请求）的策略对象。
+
+一个 LimitRange（限制范围） 对象提供的限制能够做到：
+
+- 在一个命名空间中实施对每个 Pod 或 Container 最小和最大的资源使用量的限制。
+- 在一个命名空间中实施对每个 PersistentVolumeClaim 能申请的最小和最大的存储空间大小的限制。
+- 在一个命名空间中实施对一种资源的申请值和限制值的比值的控制。
+- 设置一个命名空间中对计算资源的默认申请/限制值，并且自动的在运行时注入到多个 Container 中。
+
+当某命名空间中有一个 LimitRange 对象时，将在该命名空间中实施 LimitRange 限制。LimitRange 的名称必须是合法的 DNS 子域名。
+
+```yaml
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cpu-resource-constraint
+spec:
+  limits:
+    - default: # 此处定义默认限制值
+        cpu: 500m
+      defaultRequest: # 此处定义默认请求值
+        cpu: 500m
+      max: # max 和 min 定义限制范围
+        cpu: "1"
+      min:
+        cpu: 100m
+      type: Container
+```
+
+LimitRange 不 检查所应用的默认值的一致性。这意味着 LimitRange 设置的 limit 的默认值可能小于客户端提交给 API 服务器的规约中为容器指定的 request 值。如果发生这种情况，最终 Pod 将无法调度。
+
+当容器不满足运行要求时，会出现以下类似的错误
+
+```
+Pod "example-conflict-with-limitrange-cpu" is invalid: spec.containers[0].resources.requests: Invalid value: "700m": must be less than or equal to cpu limit
+```
+
+从理论上讲，你只需在 LimitRange 中设置默认值，而不必为每个容器指定请求或约束。但这不是一个好习惯。要想知道容器的请求和约束，应该只需要查看容器的规范即可，而不必知道是否有 LimitRange 在起作用。我们应该将 LimitRange 作为最后一道防线，防止容器的所有者忘记指定请求和约束而引发问题。
 
 Last Modified 2023-06-03
