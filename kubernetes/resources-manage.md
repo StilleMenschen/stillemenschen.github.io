@@ -233,6 +233,45 @@ readinessProbe:
 
 最短就绪时间
 
-.spec.minReadySeconds 是一个可选字段，用于指定新创建的 Pod 在没有任意容器崩溃情况下的最小就绪时间， 只有超出这个时间 Pod 才被视为可用。默认值为 0（Pod 在准备就绪后立即将被视为可用）。
+.spec.minReadySeconds 是一个可选字段，用于指定新创建的 Pod 在没有任意容器崩溃情况下的最小就绪时间，只有超出这个时间 Pod 才被视为可用。默认值为 0（Pod 在准备就绪后立即将被视为可用）。
 
-Last Modified 2023-06-02
+## 中断预算
+
+有时，Kubernetes 需要停止你的 Pod（这个过程叫作驱逐），即使 Pod 处于活动状态，且已准备就绪。例如，也许运行 Pod 的节点在升级之前已处于排空的状态，需要将 Pod 移动到另一个节点上。
+然而，只要有足够的副本运行，这种行为就不会导致应用程序停机。你可以使用 Pod 中断预算（PodDisruptionBudget）资源指定应用程序在任何给定时间内可以承受损失多少 Pod。
+例如，你可以指定一次中断的数量不能超过应用程序 Pod 的 10％。或者指定 Kubernetes 可以驱逐任意数量的 Pod，但需要保证至少有三个副本在运行。
+
+一个 PodDisruptionBudget 有 3 个字段：
+
+- 标签选择算符 .spec.selector 用于指定其所作用的 Pod 集合，该字段为必需字段。
+- .spec.minAvailable 表示驱逐后仍须保证可用的 Pod 数量。即使因此影响到 Pod 驱逐 （即该条件在和 Pod 驱逐发生冲突时优先保证）。minAvailable 值可以是绝对值，也可以是百分比。
+- .spec.maxUnavailable （Kubernetes 1.7 及更高的版本中可用）表示驱逐后允许不可用的 Pod 的最大数量。其值可以是绝对值或是百分比。
+
+用户在同一个 PodDisruptionBudget 中只能够指定 maxUnavailable 和 minAvailable 中的一个。maxUnavailable 只能够用于控制存在相应控制器的 Pod 的驱逐（即不受控制器控制的 Pod 不在 maxUnavailable 控制范围内）。
+
+- 示例 1：设置 minAvailable 值为 5 的情况下，驱逐时需保证 PodDisruptionBudget 的 selector 选中的 Pod 中 5 个或 5 个以上处于健康状态。
+- 示例 2：设置 minAvailable 值为 30% 的情况下，驱逐时需保证 Pod 所需副本的至少 30% 处于健康状态。
+- 示例 3：设置 maxUnavailable 值为 5 的情况下，驱逐时需保证所需副本中最多 5 个处于不可用状态。
+- 示例 4：设置 maxUnavailable 值为 30% 的情况下，只要不健康的副本数量不超过所需副本总数的 30% （取整到最接近的整数），就允许驱逐。如果所需副本的总数仅为一个，则仍允许该单个副本中断，从而导致不可用性实际达到 100%。
+
+> 干扰预算并不能真正保证指定数量/百分比的 Pod 一直处于运行状态。例如：当 Pod 集合的规模处于预算指定的最小值时，承载集合中某个 Pod 的节点发生了故障，这样就导致集合中可用 Pod 的数量低于预算指定值。预算只能够针对调度器自发执行驱逐提供保护，而不能针对所有 Pod 不可用的诱因。
+
+## 命名空间
+
+在 Kubernetes 中，**名字空间（Namespace）**提供一种机制，将同一集群中的资源划分为相互隔离的组。同一名字空间内的资源名称要唯一，但跨名字空间时没有这个要求。名字空间作用域仅针对带有名字空间的对象，（例如 Deployment、Service 等），这种作用域对集群范围的对象 （例如 StorageClass、Node、PersistentVolume 等）不适用。
+
+Kubernetes 启动时会创建四个初始名字空间：
+
+    default
+    Kubernetes 包含这个名字空间，以便于你无需创建新的名字空间即可开始使用新集群。
+
+    kube-node-lease
+    该名字空间包含用于与各个节点关联的 Lease（租约）对象。节点租约允许 kubelet 发送心跳，由此控制面能够检测到节点故障。
+
+    kube-public
+    所有的客户端（包括未经身份验证的客户端）都可以读取该名字空间。该名字空间主要预留为集群使用，以便某些资源需要在整个集群中可见可读。该名字空间的公共属性只是一种约定而非要求。
+
+    kube-system
+    该名字空间用于 Kubernetes 系统创建的对象。
+
+Last Modified 2023-06-03
