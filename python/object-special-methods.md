@@ -3,8 +3,8 @@
 ## 用类表示的牌组
 
 ```python
-import random
 import collections
+import random
 
 Card = collections.namedtuple('Card', ['rank', 'suit'])
 
@@ -45,10 +45,10 @@ def set_card(decks, key, value):
     decks._cards[key] = value
 
 
-# 补丁
+# 猴子补丁
 FrenchDeck.__setitem__ = set_card
-random.shuffle(deck)
-print(deck[:10])
+new_deck = random.sample(tuple(deck), len(deck))
+print(new_deck[:10])
 ```
 
 有了`__len__`和`__getitem__`方法后，类的表现就可以像序列一样，可以迭代和切片；`len()`运行速度非常快的原因是直接读取了 C 中的结构体属性，没有调用方法
@@ -219,7 +219,7 @@ class Vector2d:
 
 ```python
 """
-A multi-dimensional ``Vector`` class, take 4
+A multidimensional ``Vector`` class, take 5
 
 A ``Vector`` is built from an iterable of numbers::
 
@@ -231,7 +231,7 @@ A ``Vector`` is built from an iterable of numbers::
     Vector([0.0, 1.0, 2.0, 3.0, 4.0, ...])
 
 
-Tests with 2-dimensions (same results as ``vector2d_v1.py``)::
+Tests with two dimensions (same results as ``vector2d_v1.py``)::
 
     >>> v1 = Vector([3, 4])
     >>> x, y = v1
@@ -262,7 +262,7 @@ Test of ``.frombytes()`` class method:
     True
 
 
-Tests with 3-dimensions::
+Tests with three dimensions::
 
     >>> v1 = Vector([3, 4, 5])
     >>> x, y, z = v1
@@ -365,6 +365,47 @@ Most hash codes of non-integers vary from a 32-bit to 64-bit CPython build::
     >>> hash(v2) == (384307168202284039 if sys.maxsize > 2**32 else 357915986)
     True
 
+
+Tests of ``format()`` with Cartesian coordinates in 2D::
+
+    >>> v1 = Vector([3, 4])
+    >>> format(v1)
+    '(3.0, 4.0)'
+    >>> format(v1, '.2f')
+    '(3.00, 4.00)'
+    >>> format(v1, '.3e')
+    '(3.000e+00, 4.000e+00)'
+
+
+Tests of ``format()`` with Cartesian coordinates in 3D and 7D::
+
+    >>> v3 = Vector([3, 4, 5])
+    >>> format(v3)
+    '(3.0, 4.0, 5.0)'
+    >>> format(Vector(range(7)))
+    '(0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0)'
+
+
+Tests of ``format()`` with spherical coordinates in 2D, 3D and 4D::
+
+    >>> format(Vector([1, 1]), 'h')  # doctest:+ELLIPSIS
+    '<1.414213..., 0.785398...>'
+    >>> format(Vector([1, 1]), '.3eh')
+    '<1.414e+00, 7.854e-01>'
+    >>> format(Vector([1, 1]), '0.5fh')
+    '<1.41421, 0.78540>'
+    >>> format(Vector([1, 1, 1]), 'h')  # doctest:+ELLIPSIS
+    '<1.73205..., 0.95531..., 0.78539...>'
+    >>> format(Vector([2, 2, 2]), '.3eh')
+    '<3.464e+00, 9.553e-01, 7.854e-01>'
+    >>> format(Vector([0, 0, 0]), '0.5fh')
+    '<0.00000, 0.00000, 0.00000>'
+    >>> format(Vector([-1, -1, -1, -1]), 'h')  # doctest:+ELLIPSIS
+    '<2.0, 2.09439..., 2.18627..., 3.92699...>'
+    >>> format(Vector([2, 2, 2, 2]), '.3eh')
+    '<4.000e+00, 1.047e+00, 9.553e-01, 7.854e-01>'
+    >>> format(Vector([0, 1, 0, 0]), '0.5fh')
+    '<1.00000, 1.57080, 0.00000, 0.00000>'
 """
 
 from array import array
@@ -372,6 +413,7 @@ import reprlib
 import math
 import functools
 import operator
+import itertools  # <1>
 
 
 class Vector:
@@ -431,21 +473,29 @@ class Vector:
             return self._components[pos]
         msg = f'{cls.__name__!r} object has no attribute {name!r}'
         raise AttributeError(msg)
-    """
-     def __setattr__(self, name, value):
-        cls = type(self)
-        if len(name) == 1:  # <1>
-            if name in cls.__match_args__:  # <2>
-                error = 'readonly attribute {attr_name!r}'
-            elif name.islower():  # <3>
-                error = "can't set attributes 'a' to 'z' in {cls_name!r}"
-            else:
-                error = ''  # <4>
-            if error:  # <5>
-                msg = error.format(cls_name=cls.__name__, attr_name=name)
-                raise AttributeError(msg)
-        super().__setattr__(name, value)  # <6>
-    """
+
+    def angle(self, n):  # <2>
+        r = math.hypot(*self[n:])
+        a = math.atan2(r, self[n-1])
+        if (n == len(self) - 1) and (self[-1] < 0):
+            return math.pi * 2 - a
+        else:
+            return a
+
+    def angles(self):  # <3>
+        return (self.angle(n) for n in range(1, len(self)))
+
+    def __format__(self, fmt_spec=''):
+        if fmt_spec.endswith('h'):  # hyperspherical coordinates
+            fmt_spec = fmt_spec[:-1]
+            coords = itertools.chain([abs(self)],
+                                     self.angles())  # <4>
+            outer_fmt = '<{}>'  # <5>
+        else:
+            coords = self
+            outer_fmt = '({})'  # <6>
+        components = (format(c, fmt_spec) for c in coords)  # <7>
+        return outer_fmt.format(', '.join(components))  # <8>
 
     @classmethod
     def frombytes(cls, octets):
@@ -454,4 +504,4 @@ class Vector:
         return cls(memv)
 ```
 
-Last Modified 2023-06-01
+Last Modified 2023-06-03

@@ -27,5 +27,6 @@
   - [Meta Programming](python/meta-programming.md)
   - [Property Descriptor](python/property-descriptor.md)
   - [Class Meta Programming](python/class-meta-programming.md)
+  - [Type Check](python/type-check.md)
   - [Linux Compile Install](python/linux-compile-install.md)
   - [Python Virtual Machine](python/virtual-machine.md)
