@@ -7,3 +7,4 @@
   - [Security Exception Handler](spring-framework/security-exception-handler.md)
   - [String Trimmer](spring-framework/string-trimmer.md)
   - [Enumerations Serialization](spring-framework/enum-serialization-persistence.md)
+  - [Unit Test](spring-framework/unit-test.md)
