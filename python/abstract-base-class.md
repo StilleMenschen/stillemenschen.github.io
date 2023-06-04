@@ -2,6 +2,8 @@
 
 ## 抽象基类
 
+从 Python 2.6 开始，标准库提供了多个抽象基类，大都在 collections.abc 模块中定义，不过其它地方也有，例如，io 包和 numbers 包中就有一些抽家基类。但是，collections.abc 中的抽象基类最常用。
+
 ```python
 import abc
 
@@ -34,6 +36,8 @@ class Tombola(abc.ABC):  # <1>
         self.load(items)  # <7>
         return tuple(sorted(items))
 ```
+
+> LookupError 是 KeyError、IndexError 的基类，参考 https://docs.python.org/zh-cn/3.11/library/exceptions.html#exception-hierarchy
 
 ```python
 """
@@ -103,6 +107,8 @@ def function_names(obj):
     return {name for name, _ in getmembers(obj, isfunction)}
 ```
 
+> @abstractmethod 之上可以叠放其它装饰器，如 @classmethod 或者 @staticmethod ，但 @abstractmethod 和 def 之间不可以有其它装饰器
+
 ## 实现类
 
 ```python
@@ -114,6 +120,7 @@ from tombola import Tombola
 class BingoCage(Tombola):  # <1>
 
     def __init__(self, items):
+        # 用从操作系统提供的源生成随机数
         self._randomizer = random.SystemRandom()  # <2>
         self._items = []
         self.load(items)  # <3>
@@ -330,8 +337,8 @@ if __name__ == '__main__':
     main(sys.argv)
 ```
 
->关于虚拟子类的比较参考：https://docs.python.org/zh-cn/3/library/abc.html#abc.get_cache_token
+> 关于虚拟子类的比较参考：https://docs.python.org/zh-cn/3/library/abc.html#abc.get_cache_token
 
->关于数值的抽象基类`numbers`可参考：https://docs.python.org/zh-cn/3/library/numbers.html
+> 关于数值的抽象基类`numbers`可参考：https://docs.python.org/zh-cn/3/library/numbers.html
 
 Last Modified 2022-07-24
