@@ -6,3 +6,4 @@
   - [Basic](kubernetes/basic.md)
   - [Apply Resources](kubernetes/apply-resources.md)
   - [Resources Manage](kubernetes/resources-manage.md)
+  - [Optimize Cost](kubernetes/optimize-cost.md)
