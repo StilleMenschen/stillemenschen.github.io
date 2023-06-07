@@ -4,7 +4,7 @@
 
 ```python
 """
-A multi-dimensional ``Vector`` class, take 8: operator ``==``
+A multi-dimensional ``Vector`` class, take 7: operator ``*``
 
 A ``Vector`` is built from an iterable of numbers::
 
@@ -106,7 +106,7 @@ Test of slicing::
     >>> v7[1,2]
     Traceback (most recent call last):
       ...
-    TypeError: Vector indices must be integers
+    TypeError: 'tuple' object cannot be interpreted as an integer
 
 
 Tests of dynamic attribute access::
@@ -144,7 +144,7 @@ Tests of hashing::
     (7, 2, 1)
 
 
-Most hash values of non-integers vary from a 32-bit to 64-bit Python build::
+Most hash codes of non-integers vary from a 32-bit to 64-bit Python build::
 
     >>> import sys
     >>> hash(v2) == (384307168202284039 if sys.maxsize > 2**32 else 357915986)
@@ -271,7 +271,7 @@ Tests of ``*`` with unsuitable operands::
 
     >>> v1 * (1, 2)
     Traceback (most recent call last):
-      ...
+    ...
     TypeError: can't multiply sequence by non-int of type 'Vector'
 
 
@@ -292,22 +292,39 @@ Tests of operator `==`::
 
 Tests of operator `!=`::
 
+    >>> vz = Vector([5, 6, 7])
     >>> va != vb
     False
     >>> vc != v2d
     False
     >>> va != (1, 2, 3)
     True
+    >>> [10, 20, 30] @ vz
+    380.0
+    >>> va @ 3
+    Traceback (most recent call last):
+    ...
+    TypeError: unsupported operand type(s) for @: 'Vector' and 'int'
+
+
+For ``@`` to work, both operands need to have the same length::
+
+    >>> va = Vector([1, 2, 3])
+    >>> vb = Vector([1, 2])
+    >>> va @ vb
+    Traceback (most recent call last):
+    ...
+    ValueError: @ requires vectors of equal length.
 
 """
 
-from array import array
-import reprlib
-import math
-import numbers
 import functools
-import operator
 import itertools
+import math
+import operator
+import reprlib
+from array import array
+from collections import abc
 
 
 class Vector:
@@ -322,7 +339,7 @@ class Vector:
     def __repr__(self):
         components = reprlib.repr(self._components)
         components = components[components.find('['):-1]
-        return 'Vector({})'.format(components)
+        return f'Vector({components})'
 
     def __str__(self):
         return str(tuple(self))
@@ -331,7 +348,6 @@ class Vector:
         return (bytes([ord(self.typecode)]) +
                 bytes(self._components))
 
-    # BEGIN VECTOR_V8_EQ
     def __eq__(self, other):
         if isinstance(other, Vector):  # <1>
             return (len(self) == len(other) and
@@ -339,14 +355,12 @@ class Vector:
         else:
             return NotImplemented  # <2>
 
-    # END VECTOR_V8_EQ
-
     def __hash__(self):
         hashes = (hash(x) for x in self)
         return functools.reduce(operator.xor, hashes, 0)
 
     def __abs__(self):
-        return math.sqrt(sum(x * x for x in self))
+        return math.hypot(*self)
 
     def __neg__(self):
         return Vector(-x for x in self)
@@ -360,29 +374,28 @@ class Vector:
     def __len__(self):
         return len(self._components)
 
-    def __getitem__(self, index):
-        cls = type(self)
-        if isinstance(index, slice):
-            return cls(self._components[index])
-        elif isinstance(index, numbers.Integral):
-            return self._components[index]
-        else:
-            msg = '{.__name__} indices must be integers'
-            raise TypeError(msg.format(cls))
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            cls = type(self)
+            return cls(self._components[key])
+        index = operator.index(key)
+        return self._components[index]
 
-    shortcut_names = 'xyzt'
+    __match_args__ = ('x', 'y', 'z', 't')
 
     def __getattr__(self, name):
         cls = type(self)
-        if len(name) == 1:
-            pos = cls.shortcut_names.find(name)
-            if 0 <= pos < len(self._components):
-                return self._components[pos]
-        msg = '{.__name__!r} object has no attribute {!r}'
-        raise AttributeError(msg.format(cls, name))
+        try:
+            pos = cls.__match_args__.index(name)
+        except ValueError:
+            pos = -1
+        if 0 <= pos < len(self._components):
+            return self._components[pos]
+        msg = f'{cls.__name__!r} object has no attribute {name!r}'
+        raise AttributeError(msg)
 
     def angle(self, n):
-        r = math.sqrt(sum(x * x for x in self[n:]))
+        r = math.hypot(*self[n:])
         a = math.atan2(r, self[n - 1])
         if (n == len(self) - 1) and (self[-1] < 0):
             return math.pi * 2 - a
@@ -421,16 +434,33 @@ class Vector:
         return self + other
 
     def __mul__(self, scalar):
-        if isinstance(scalar, numbers.Real):
-            return Vector(n * scalar for n in self)
+        try:
+            # 类型检查
+            factor = float(scalar)
+        except TypeError:
+            return NotImplemented
+        return Vector(n * factor for n in self)
+
+    def __rmul__(self, scalar):
+        # 反向操作委托给正向操作
+        return self * scalar
+
+    def __matmul__(self, other):
+        # 检查抽象基类，传入的对象必须实现了 __len__ 和 __iter__ 方法
+        if (isinstance(other, abc.Sized) and
+                isinstance(other, abc.Iterable)):
+            if len(self) == len(other):
+                return sum(a * b for a, b in zip(self, other))
+            else:
+                raise ValueError('@ requires vectors of equal length.')
         else:
             return NotImplemented
 
-    def __rmul__(self, scalar):
-        return self * scalar
+    def __rmatmul__(self, other):
+        return self @ other
 ```
 
->`Vector2d`参考章节[Special Methods](python/object-special-methods.md)。Python 在比较对象时会尝试调用两个对象的`__eq__`特殊方法，正向和反向的比较，如果方法都返回了`NotImplemented`最后则会尝试比较对象的`ID`
+>`Vector2d`参考章节[Special Methods](python/object-special-methods.md)。Python 在比较对象时会尝试调用两个对象的`__eq__`、`__ne__`特殊方法，正向和反向的比较（`==`和`!=`），如果方法都返回了`NotImplemented`最后则会尝试比较对象的`ID`，不会抛出`TypeError`
 
 ## 增量运算
 
@@ -561,4 +591,6 @@ class AddableBingoCage(BingoCage):  # <2>
         return self  # <8>
 ```
 
-Last Modified 2022-07-26
+> 要注意`NotImplemented`不属于异常，只是告诉解析器尝试对调操作符
+
+Last Modified 2023-06-07
