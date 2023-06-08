@@ -7,3 +7,4 @@
   - [Apply Resources](kubernetes/apply-resources.md)
   - [Resources Manage](kubernetes/resources-manage.md)
   - [Optimize Cost](kubernetes/optimize-cost.md)
+  - [Operations Management](kubernetes/cluster-operations-management.md)
