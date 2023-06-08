@@ -8,7 +8,6 @@ import random
 
 Card = collections.namedtuple('Card', ['rank', 'suit'])
 
-
 class FrenchDeck:
     ranks = [str(n) for n in range(2, 11)] + list('JQKA')
     suits = 'spades diamonds clubs heart'.split()
@@ -29,6 +28,11 @@ class FrenchDeck:
     def spades_high(self, card):
         rank_value = self.ranks.index(card.rank)
         return rank_value * len(self.suits_values) + self.suits_values[card.suit]
+
+
+# 也可以利用迭代模块生成牌组
+# import itertools
+# list(itertools.starmap(Card, itertools.product(ranks, suits)))
 
 
 deck = FrenchDeck()
@@ -682,4 +686,4 @@ class Vector:
         return cls(memv)
 ```
 
-Last Modified 2023-06-04
+Last Modified 2023-06-08

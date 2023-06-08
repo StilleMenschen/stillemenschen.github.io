@@ -1,6 +1,49 @@
 # 迭代器与生成器
 
+## 可迭代对象
+
+使用内置函数 iter 可以获取迭代器的对象。如果对象实现了能返回迭代器的`__iter__`方法，那么对象就是可迭代的。序列都可以迭代。实现了`__getitem__`方法，而且接受从 0 开始的索引，这种对象也可以迭代。
+
+```python
+"""
+Sentence: access words by index
+
+    >>> text = 'To be, or not to be, that is the question'
+    >>> s = Sentence(text)
+    >>> len(s)
+    10
+    >>> s[1], s[5]
+    ('be', 'be')
+    >>> s
+    Sentence('To be, or no... the question')
+
+"""
+
+import re
+import reprlib
+
+RE_WORD = re.compile(r'\w+')
+
+
+class Sentence:
+
+    def __init__(self, text):
+        self.text = text
+        self.words = RE_WORD.findall(text)  # <1>
+
+    def __getitem__(self, index):
+        return self.words[index]  # <2>
+
+    def __len__(self):  # <3>
+        return len(self.words)
+
+    def __repr__(self):
+        return 'Sentence(%s)' % reprlib.repr(self.text)  # <4>
+```
+
 ## 迭代器
+
+迭代器耗尽后不可以重置，必须重新创建迭代器，调用`iter()`
 
 ```python
 """
@@ -41,6 +84,10 @@ class SentenceIter():
     def __iter__(self):
         return self
 ```
+
+> 如果要自行实现`__next__`方法，在迭代耗尽时应当抛出`StopIteration`，详见`collections.abc.Iterator`
+
+## 生成器
 
 ```python
 """
@@ -144,6 +191,7 @@ class ArithmeticProgression:
             result = self.begin + self.step * index
 
 
+# 因为允许传入 int 或 float 类型，如果传入的是 int 和 float 则取 float 类型生成
 def aritprog_gen(begin, step, end=None):
     first = type(begin + step)(begin)
     ap_gen = itertools.count(first, step)
@@ -304,4 +352,24 @@ with open('dummy', 'r', encoding='utf8') as fp:
         print(line, end='')
 ```
 
-Last Modified 2022-07-30
+## yield from
+
+```python
+def tree(cls, level=0):
+    yield cls.__name__, level
+    # 终止递归的条件是 __subclasses__ 没有元素
+    for sub_cls in cls.__subclasses__():
+        yield from tree(sub_cls, level + 1)
+
+
+def display(cls):
+    for cls_name, level in tree(cls):
+        indent = ' ' * 4 * level
+        print(f'{indent}{cls_name}')
+
+
+if __name__ == '__main__':
+    display(BaseException)
+```
+
+Last Modified 2023-06-08
