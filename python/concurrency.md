@@ -58,4 +58,162 @@
 
 10. 若想在多核上运行 CPU 密集型 Python 代码，必须使用多个 Python 进程。
 
+## 素数计算
+
+```python
+"""
+primes.py
+"""
+
+import math
+
+PRIME_FIXTURE = [
+    (2, True),
+    (142702110479723, True),
+    (299593572317531, True),
+    (3333333333333301, True),
+    (3333333333333333, False),
+    (3333335652092209, False),
+    (4444444444444423, True),
+    (4444444444444444, False),
+    (4444444488888889, False),
+    (5555553133149889, False),
+    (5555555555555503, True),
+    (5555555555555555, False),
+    (6666666666666666, False),
+    (6666666666666719, True),
+    (6666667141414921, False),
+    (7777777536340681, False),
+    (7777777777777753, True),
+    (7777777777777777, False),
+    (9999999999999917, True),
+    (9999999999999999, False),
+]
+
+NUMBERS = [n for n, _ in PRIME_FIXTURE]
+
+
+def is_prime(n: int) -> bool:
+    if n < 2:
+        return False
+    if n == 2:
+        return True
+    if n % 2 == 0:
+        return False
+
+    root = math.isqrt(n)
+    for i in range(3, root + 1, 2):
+        if n % i == 0:
+            return False
+    return True
+
+
+if __name__ == '__main__':
+
+    for n, prime in PRIME_FIXTURE:
+        prime_res = is_prime(n)
+        assert prime_res == prime
+        print(n, prime)
+```
+
+```python
+"""
+procs.py: shows that multiprocessing on a multicore machine
+can be faster than sequential code for CPU-intensive work.
+"""
+
+import sys
+from multiprocessing import Process, SimpleQueue, cpu_count  # <1>
+from multiprocessing import queues  # <2>
+from time import perf_counter
+from typing import NamedTuple
+
+from primes import is_prime, NUMBERS
+
+
+class PrimeResult(NamedTuple):  # <3>
+    n: int
+    prime: bool
+    elapsed: float
+
+
+JobQueue = queues.SimpleQueue[int]  # <4>
+ResultQueue = queues.SimpleQueue[PrimeResult]  # <5>
+
+
+def check(n: int) -> PrimeResult:  # <6>
+    t0 = perf_counter()
+    res = is_prime(n)
+    # 返回一个包装的结果
+    return PrimeResult(n, res, perf_counter() - t0)
+
+
+def worker(jobs: JobQueue, results: ResultQueue) -> None:  # <7>
+    # 持续地从队列中取出数据，如果数据是非 0 的则计算素数
+    while n := jobs.get():  # <8>
+        # 将素数计算处理结果放入队列
+        results.put(check(n))  # <9>
+    # 如果队列中没有数据了则将空结果放入队列，告诉主进程工作已经结束
+    results.put(PrimeResult(0, False, 0.0))  # <10>
+
+
+def start_jobs(
+        procs: int, jobs: JobQueue, results: ResultQueue  # <11>
+) -> None:
+    for n in NUMBERS:
+        jobs.put(n)  # <12>
+    # 按参数给定的 worker 数量启动子进程
+    for _ in range(procs):
+        proc = Process(target=worker, args=(jobs, results))  # <13>
+        proc.start()  # <14>
+        # 把 0 放入队列中，当所有有些的数据（非零的，即要判断是否为素数的数据）都取出后，
+        # 通过放入的 0 来告诉工作（子）进程工作结束了
+        jobs.put(0)  # <15>
+
+
+def main() -> None:
+    if len(sys.argv) < 2:  # <1>
+        procs = cpu_count()
+    else:
+        procs = int(sys.argv[1])
+
+    print(f'Checking {len(NUMBERS)} numbers with {procs} processes:')
+    t0 = perf_counter()
+    # jobs 放入即将要计算的数据
+    jobs: JobQueue = SimpleQueue()  # <2>
+    # results 放入计算后的结果
+    results: ResultQueue = SimpleQueue()
+    start_jobs(procs, jobs, results)  # <3>
+    checked = report(procs, results)  # <4>
+    elapsed = perf_counter() - t0
+    print(f'{checked} checks in {elapsed:.2f}s')  # <5>
+
+
+def report(procs: int, results: ResultQueue) -> int:  # <6>
+    checked = 0
+    procs_done = 0
+    # 循环从结果队列中取出数据
+    while procs_done < procs:  # <7>
+        # 这里的 get() 方法调用后会阻塞当前进程
+        n, prime, elapsed = results.get()  # <8>
+        # 如果取到的是 0 则表示工作（子）进程已经结束了
+        if n == 0:  # <9>
+            procs_done += 1
+        else:
+            # 累计已计算完成的数据量
+            checked += 1  # <10>
+            label = 'P' if prime else ' '
+            print(f'{n:16}  {label} {elapsed:9.6f}s')
+    return checked
+
+
+if __name__ == '__main__':
+    main()
+```
+
+```bash
+python3 procs.py 6
+python3 procs.py 12
+```
+
 Last Modified 2023-06-10
