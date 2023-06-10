@@ -525,7 +525,9 @@ def zip(*iterables):
 True
 ```
 
-## 匹配句法
+## match case
+
+参考[PEP 636](https://peps.python.org/pep-0636/)的演示
 
 ```python
 def describe_number(num):
@@ -551,4 +553,20 @@ def describe_fruit(fruit):
             return "It's not a fruit I recognize."
 ```
 
-Last Modified 2023-05-23
+```python
+def k(exp):
+    match exp:
+        case ['just', [*params], *body]:
+            print(f'[just] params: {params}\nbody: {body}')
+        case ['must', [*params], *body] if len(body) < 3:
+            print(f'[must] params: {params}\nbody: {body}')
+        case _:
+            print(f'not match, origin{exp}')
+
+
+k(('just', [1, 2, 3], 'a', 'b', 'c'))
+k(('must', [1, 2, 3], 'a', 'b', 'c', 'd'))
+k(('must', [1, 2, 3], 'a', 'b'))
+```
+
+Last Modified 2023-06-10

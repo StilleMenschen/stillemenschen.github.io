@@ -40,30 +40,35 @@ A "mirroring" ``stdout`` context.
 While active, the context manager reverses text output to
 ``stdout``::
 
+
+    >>> from mirror import LookingGlass
     >>> with LookingGlass() as what:  # <1>
     ...      print('Alice, Kitty and Snowdrop')  # <2>
     ...      print(what)
     ...
     pordwonS dna yttiK ,ecilA
     YKCOWREBBAJ
-    >>> what  # <4>
+    >>> what  # <3>
     'JABBERWOCKY'
-    >>> print('Back to normal.')  # <5>
+    >>> print('Back to normal.')  # <4>
     Back to normal.
+
 
 
 This exposes the context manager operation::
 
+
+    >>> from mirror import LookingGlass
     >>> manager = LookingGlass()  # <1>
     >>> manager  # doctest: +ELLIPSIS
-    <....LookingGlass object at 0x...>
+    <mirror.LookingGlass object at 0x...>
     >>> monster = manager.__enter__()  # <2>
     >>> monster == 'JABBERWOCKY'  # <3>
     eurT
     >>> monster
     'YKCOWREBBAJ'
     >>> manager  # doctest: +ELLIPSIS
-    >...x0 ta tcejbo ssalGgnikooL...<
+    >... ta tcejbo ssalGgnikooL.rorrim<
     >>> manager.__exit__(None, None, None)  # <4>
     >>> monster
     'JABBERWOCKY'
@@ -71,6 +76,8 @@ This exposes the context manager operation::
 
 The context manager can handle and "swallow" exceptions.
 
+
+    >>> from mirror import LookingGlass
     >>> with LookingGlass():
     ...      print('Humpty Dumpty')
     ...      x = 1/0  # <1>
@@ -87,13 +94,15 @@ The context manager can handle and "swallow" exceptions.
       ...
     NameError: name 'no_such_name' is not defined
 
+
 """
+
+import sys
 
 
 class LookingGlass:
 
     def __enter__(self):  # <1>
-        import sys
         self.original_write = sys.stdout.write  # <2>
         sys.stdout.write = self.reverse_write  # <3>
         return 'JABBERWOCKY'  # <4>
@@ -102,12 +111,11 @@ class LookingGlass:
         self.original_write(text[::-1])
 
     def __exit__(self, exc_type, exc_value, traceback):  # <6>
-        import sys  # <7>
-        sys.stdout.write = self.original_write  # <8>
-        if exc_type is ZeroDivisionError:  # <9>
+        sys.stdout.write = self.original_write  # <7>
+        if exc_type is ZeroDivisionError:  # <8>
             print('Please DO NOT divide by zero!')
-            return True  # <10>
-        # <11>
+            return True  # <9>
+        # <10>
 ```
 
 ```python
@@ -117,6 +125,8 @@ A "mirroring" ``stdout`` context manager.
 While active, the context manager reverses text output to
 ``stdout``::
 
+
+    >>> from mirror_gen import looking_glass
     >>> with looking_glass() as what:  # <1>
     ...      print('Alice, Kitty and Snowdrop')
     ...      print(what)
@@ -125,10 +135,16 @@ While active, the context manager reverses text output to
     YKCOWREBBAJ
     >>> what
     'JABBERWOCKY'
+    >>> print('back to normal')
+    back to normal
+
+
 
 
 This exposes the context manager operation::
 
+
+    >>> from mirror_gen import looking_glass
     >>> manager = looking_glass()  # <1>
     >>> manager  # doctest: +ELLIPSIS
     <contextlib._GeneratorContextManager object at 0x...>
@@ -144,14 +160,28 @@ This exposes the context manager operation::
     >>> monster
     'JABBERWOCKY'
 
+
+The decorated generator also works as a decorator:
+
+
+    >>> @looking_glass()
+    ... def verse():
+    ...     print('The time has come')
+    ...
+    >>> verse()  # <1>
+    emoc sah emit ehT
+    >>> print('back to normal')  # <2>
+    back to normal
+
+
 """
 
 import contextlib
+import sys
 
 
 @contextlib.contextmanager  # <1>
 def looking_glass():
-    import sys
     original_write = sys.stdout.write  # <2>
 
     def reverse_write(text):  # <3>
@@ -171,6 +201,7 @@ A "mirroring" ``stdout`` context manager.
 While active, the context manager reverses text output to
 ``stdout``::
 
+    >>> from mirror_gen import looking_glass
     >>> with looking_glass() as what:  # <1>
     ...      print('Alice, Kitty and Snowdrop')
     ...      print(what)
@@ -181,8 +212,10 @@ While active, the context manager reverses text output to
     'JABBERWOCKY'
 
 
+
 This exposes the context manager operation::
 
+    >>> from mirror_gen import looking_glass
     >>> manager = looking_glass()  # <1>
     >>> manager  # doctest: +ELLIPSIS
     <contextlib._GeneratorContextManager object at 0x...>
@@ -205,6 +238,7 @@ ZeroDivisionError is reported by doctest) but passes
 if executed by hand in the Python 3 console (the exception
 is handled by the context manager):
 
+    >>> from mirror_gen_exc import looking_glass
     >>> with looking_glass():
     ...      print('Humpty Dumpty')
     ...      x = 1/0  # <1>
@@ -212,6 +246,7 @@ is handled by the context manager):
     ...
     ytpmuD ytpmuH
     Please DO NOT divide by zero!
+
 
     >>> with looking_glass():
     ...      print('Humpty Dumpty')
@@ -225,11 +260,11 @@ is handled by the context manager):
 """
 
 import contextlib
+import sys
 
 
 @contextlib.contextmanager
 def looking_glass():
-    import sys
     original_write = sys.stdout.write
 
     def reverse_write(text):
@@ -247,4 +282,4 @@ def looking_glass():
             print(msg)  # <4>
 ```
 
-Last Modified 2022-07-30
+Last Modified 2023-06-10
