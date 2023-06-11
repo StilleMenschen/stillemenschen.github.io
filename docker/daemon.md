@@ -84,10 +84,7 @@ docker 全局配置文件
   "oom-score-adjust": -500,
   "pidfile": "",
   "raw-logs": false,
-  "registry-mirrors": [
-    "https://registry.docker-cn.com",
-    "https://hub-mirror.c.163.com"
-  ],
+  "registry-mirrors": ["https://registry.docker-cn.com", "https://hub-mirror.c.163.com"],
   "runtimes": {
     "cc-runtime": {
       "path": "/usr/bin/cc-runtime"
@@ -114,7 +111,7 @@ docker 全局配置文件
 }
 ```
 
-## 启用 Docker 命令行自动补全功能
+## 命令行补全
 
 在控制台输入 docker 命令时可以获得自动补全能力，提高效率。
 
@@ -132,6 +129,6 @@ echo 'fpath=(~/.zsh/completion $fpath)' >> ~/.zshrc
 echo 'autoload -Uz compinit && compinit -u' >> ~/.zshrc
 ```
 
->使用此功能还需要先安装对应的支持程序，如`bash-completion`
+> 使用此功能还需要先安装对应的支持程序，如`bash-completion`
 
-Last Modified 2023-04-17
+Last Modified 2023-06-11
