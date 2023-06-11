@@ -340,17 +340,20 @@ if __name__ == '__main__':
 """Utilities for second set of flag examples.
 """
 
-import os
-import time
-import sys
-import string
 import argparse
-from collections import namedtuple
+import string
+import sys
+import time
+from collections import Counter
 from enum import Enum
+from pathlib import Path
 
-Result = namedtuple('Result', 'status data')
 
-HTTPStatus = Enum('Status', 'ok not_found error')
+class DownloadStatus(Enum):
+    OK = 1
+    NOT_FOUND = 2
+    ERROR = 3
+
 
 POP20_CC = ('CN IN US ID BR PK NG BD RU JP '
             'MX PH VN ET EG DE IR TR CD FR').split()
@@ -359,59 +362,69 @@ DEFAULT_CONCUR_REQ = 1
 MAX_CONCUR_REQ = 1
 
 SERVERS = {
-    'REMOTE': 'http://flupy.org/data/flags',
-    'LOCAL': 'http://localhost:8001/flags',
-    'DELAY': 'http://localhost:8002/flags',
-    'ERROR': 'http://localhost:8003/flags',
+    'REMOTE': 'https://www.fluentpython.com/data/flags',
+    'LOCAL': 'http://192.168.4.105:1984/data/flags',
+    'DELAY': 'http://localhost:8001/flags',
+    'ERROR': 'http://localhost:8002/flags',
 }
 DEFAULT_SERVER = 'LOCAL'
 
-DEST_DIR = 'downloads/'
-COUNTRY_CODES_FILE = 'country_codes.txt'
+DEST_DIR = Path('downloaded')
+COUNTRY_CODES = """AD AE AF AG AL AM AO AR AT AU AZ BA BB BD BE BF BG BH BI BJ BN BO BR BS BT
+BW BY BZ CA CD CF CG CH CI CL CM CN CO CR CU CV CY CZ DE DJ DK DM DZ EC EE
+EG ER ES ET FI FJ FM FR GA GB GD GE GH GM GN GQ GR GT GW GY HN HR HT HU ID
+IE IL IN IQ IR IS IT JM JO JP KE KG KH KI KM KN KP KR KW KZ LA LB LC LI LK
+LR LS LT LU LV LY MA MC MD ME MG MH MK ML MM MN MR MT MU MV MW MX MY MZ NA
+NE NG NI NL NO NP NR NZ OM PA PE PG PH PK PL PT PW PY QA RO RS RU RW SA SB
+SC SD SE SG SI SK SL SM SN SO SR SS ST SV SY SZ TD TG TH TJ TL TM TN TO TR
+TT TV TW TZ UA UG US UY UZ VA VC VE VN VU WS YE ZA ZM ZW"""
 
 
-def save_flag(img, filename):
-    path = os.path.join(DEST_DIR, filename)
-    with open(path, 'wb') as fp:
-        fp.write(img)
+def save_flag(img: bytes, filename: str) -> None:
+    (DEST_DIR / filename).write_bytes(img)
 
 
-def initial_report(cc_list, actual_req, server_label):
+def initial_report(cc_list: list[str],
+                   actual_req: int,
+                   server_label: str) -> None:
     if len(cc_list) <= 10:
         cc_msg = ', '.join(cc_list)
     else:
-        cc_msg = 'from {} to {}'.format(cc_list[0], cc_list[-1])
-    print('{} site: {}'.format(server_label, SERVERS[server_label]))
-    msg = 'Searching for {} flag{}: {}'
+        cc_msg = f'from {cc_list[0]} to {cc_list[-1]}'
+    print(f'{server_label} site: {SERVERS[server_label]}')
     plural = 's' if len(cc_list) != 1 else ''
-    print(msg.format(len(cc_list), plural, cc_msg))
-    plural = 's' if actual_req != 1 else ''
-    msg = '{} concurrent connection{} will be used.'
-    print(msg.format(actual_req, plural))
+    print(f'Searching for {len(cc_list)} flag{plural}: {cc_msg}')
+    if actual_req == 1:
+        print('1 connection will be used.')
+    else:
+        print(f'{actual_req} concurrent connections will be used.')
 
 
-def final_report(cc_list, counter, start_time):
-    elapsed = time.time() - start_time
+def final_report(cc_list: list[str],
+                 counter: Counter[DownloadStatus],
+                 start_time: float) -> None:
+    elapsed = time.perf_counter() - start_time
     print('-' * 20)
-    msg = '{} flag{} downloaded.'
-    plural = 's' if counter[HTTPStatus.ok] != 1 else ''
-    print(msg.format(counter[HTTPStatus.ok], plural))
-    if counter[HTTPStatus.not_found]:
-        print(counter[HTTPStatus.not_found], 'not found.')
-    if counter[HTTPStatus.error]:
-        plural = 's' if counter[HTTPStatus.error] != 1 else ''
-        print('{} error{}.'.format(counter[HTTPStatus.error], plural))
-    print('Elapsed time: {:.2f}s'.format(elapsed))
+    plural = 's' if counter[DownloadStatus.OK] != 1 else ''
+    print(f'{counter[DownloadStatus.OK]:3} flag{plural} downloaded.')
+    if counter[DownloadStatus.NOT_FOUND]:
+        print(f'{counter[DownloadStatus.NOT_FOUND]:3} not found.')
+    if counter[DownloadStatus.ERROR]:
+        plural = 's' if counter[DownloadStatus.ERROR] != 1 else ''
+        print(f'{counter[DownloadStatus.ERROR]:3} error{plural}.')
+    print(f'Elapsed time: {elapsed:.2f}s')
 
 
-def expand_cc_args(every_cc, all_cc, cc_args, limit):
-    codes = set()
+def expand_cc_args(every_cc: bool,
+                   all_cc: bool,
+                   cc_args: list[str],
+                   limit: int) -> list[str]:
+    codes: set[str] = set()
     A_Z = string.ascii_uppercase
     if every_cc:
         codes.update(a + b for a in A_Z for b in A_Z)
     elif all_cc:
-        with open(COUNTRY_CODES_FILE) as fp:
-            text = fp.read()
+        text = COUNTRY_CODES
         codes.update(text.split())
     else:
         for cc in (c.upper() for c in cc_args):
@@ -420,8 +433,8 @@ def expand_cc_args(every_cc, all_cc, cc_args, limit):
             elif len(cc) == 2 and all(c in A_Z for c in cc):
                 codes.add(cc)
             else:
-                msg = 'each CC argument must be A to Z or AA to ZZ.'
-                raise ValueError('*** Usage error: ' + msg)
+                raise ValueError('*** Usage error: each CC argument '
+                                 'must be A to Z or AA to ZZ.')
     return sorted(codes)[:limit]
 
 
@@ -430,48 +443,55 @@ def process_args(default_concur_req):
     parser = argparse.ArgumentParser(
         description='Download flags for country codes. '
                     'Default: top 20 countries by population.')
-    parser.add_argument('cc', metavar='CC', nargs='*',
-                        help='country code or 1st letter (eg. B for BA...BZ)')
-    parser.add_argument('-a', '--all', action='store_true',
-                        help='get all available flags (AD to ZW)')
-    parser.add_argument('-e', '--every', action='store_true',
-                        help='get flags for every possible code (AA...ZZ)')
-    parser.add_argument('-l', '--limit', metavar='N', type=int,
-                        help='limit to N first codes', default=sys.maxsize)
-    parser.add_argument('-m', '--max_req', metavar='CONCURRENT', type=int,
-                        default=default_concur_req,
-                        help='maximum concurrent requests (default={})'
-                        .format(default_concur_req))
-    parser.add_argument('-s', '--server', metavar='LABEL',
-                        default=DEFAULT_SERVER,
-                        help='Server to hit; one of {} (default={})'
-                        .format(server_options, DEFAULT_SERVER))
-    parser.add_argument('-v', '--verbose', action='store_true',
-                        help='output detailed progress info')
+    parser.add_argument(
+        'cc', metavar='CC', nargs='*',
+        help='country code or 1st letter (eg. B for BA...BZ)')
+    parser.add_argument(
+        '-a', '--all', action='store_true',
+        help='get all available flags (AD to ZW)')
+    parser.add_argument(
+        '-e', '--every', action='store_true',
+        help='get flags for every possible code (AA...ZZ)')
+    parser.add_argument(
+        '-l', '--limit', metavar='N', type=int, help='limit to N first codes',
+        default=sys.maxsize)
+    parser.add_argument(
+        '-m', '--max_req', metavar='CONCURRENT', type=int,
+        default=default_concur_req,
+        help=f'maximum concurrent requests (default={default_concur_req})')
+    parser.add_argument(
+        '-s', '--server', metavar='LABEL', default=DEFAULT_SERVER,
+        help=f'Server to hit; one of {server_options} '
+             f'(default={DEFAULT_SERVER})')
+    parser.add_argument(
+        '-v', '--verbose', action='store_true',
+        help='output detailed progress info')
     args = parser.parse_args()
     if args.max_req < 1:
         print('*** Usage error: --max_req CONCURRENT must be >= 1')
         parser.print_usage()
-        sys.exit(1)
+        # "standard" exit status codes:
+        # https://stackoverflow.com/questions/1101957/are-there-any-standard-exit-status-codes-in-linux/40484670#40484670
+        sys.exit(2)  # command line usage error
     if args.limit < 1:
         print('*** Usage error: --limit N must be >= 1')
         parser.print_usage()
-        sys.exit(1)
+        sys.exit(2)  # command line usage error
     args.server = args.server.upper()
     if args.server not in SERVERS:
-        print('*** Usage error: --server LABEL must be one of',
-              server_options)
+        print(f'*** Usage error: --server LABEL '
+              f'must be one of {server_options}')
         parser.print_usage()
-        sys.exit(1)
+        sys.exit(2)  # command line usage error
     try:
         cc_list = expand_cc_args(args.every, args.all, args.cc, args.limit)
     except ValueError as exc:
         print(exc.args[0])
         parser.print_usage()
-        sys.exit(1)
+        sys.exit(2)  # command line usage error
 
     if not cc_list:
-        cc_list = sorted(POP20_CC)
+        cc_list = sorted(POP20_CC)[:args.limit]
     return args, cc_list
 
 
@@ -480,10 +500,9 @@ def main(download_many, default_concur_req, max_concur_req):
     actual_req = min(args.max_req, max_concur_req, len(cc_list))
     initial_report(cc_list, actual_req, args.server)
     base_url = SERVERS[args.server]
-    t0 = time.time()
+    DEST_DIR.mkdir(exist_ok=True)
+    t0 = time.perf_counter()
     counter = download_many(cc_list, base_url, args.verbose, actual_req)
-    assert sum(counter.values()) == len(cc_list), \
-        'some downloads are unaccounted for'
     final_report(cc_list, counter, t0)
 ```
 
@@ -507,76 +526,88 @@ Sample run::
     Elapsed time: 7.46s
 
 """
-import collections
-from concurrent import futures
 
-import requests
-import tqdm  # <1>
+from collections import Counter
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from http import HTTPStatus
 
-from flags2_common import main, HTTPStatus, save_flag, Result
+import httpx
+import tqdm  # type: ignore
 
-DEFAULT_CONCUR_REQ = 30  # <4>
-MAX_CONCUR_REQ = 1000  # <5>
+from flags2_common import main, save_flag, DownloadStatus
+
+DEFAULT_CONCUR_REQ = 30  # <2>
+MAX_CONCUR_REQ = 1000  # <3>
 
 
-def get_flag(base_url, cc):
-    url = '{}/{cc}/{cc}.gif'.format(base_url, cc=cc.lower())
-    resp = requests.get(url)
-    if resp.status_code != 200:  # <1>
-        resp.raise_for_status()
+def get_flag(base_url: str, cc: str) -> bytes:
+    url = f'{base_url}/{cc}/{cc}.gif'.lower()
+    resp = httpx.get(url, timeout=3.1, follow_redirects=True)
+    # 如果不是 2xx 的响应代码则抛出异常
+    resp.raise_for_status()  # <3>
     return resp.content
 
 
-def download_one(cc, base_url, verbose=False):
+def download_one(cc: str, base_url: str, verbose: bool = False) -> DownloadStatus:
     try:
         image = get_flag(base_url, cc)
-    except requests.exceptions.HTTPError as exc:  # <2>
+    except httpx.HTTPStatusError as exc:  # <4>
         res = exc.response
-        if res.status_code == 404:
-            status = HTTPStatus.not_found  # <3>
-            msg = 'not found'
-        else:  # <4>
-            raise
+        if res.status_code == HTTPStatus.NOT_FOUND:
+            status = DownloadStatus.NOT_FOUND  # <5>
+            msg = f'not found: {res.url}'
+        else:
+            # 将错误抛出由上层处理
+            raise  # <6>
     else:
-        save_flag(image, cc.lower() + '.gif')
-        status = HTTPStatus.ok
+        save_flag(image, f'{cc}.gif')
+        status = DownloadStatus.OK
         msg = 'OK'
 
-    if verbose:  # <5>
+    if verbose:  # <7>
         print(cc, msg)
 
-    return Result(status, cc)  # <6>
+    return status
 
 
-def download_many(cc_list, base_url, verbose, concur_req):
-    counter = collections.Counter()
-    with futures.ThreadPoolExecutor(max_workers=concur_req) as executor:  # <6>
-        to_do_map = {}  # <7>
-        for cc in sorted(cc_list):  # <8>
-            future = executor.submit(download_one,
-                                     cc, base_url, verbose)  # <9>
-            to_do_map[future] = cc  # <10>
-        done_iter = futures.as_completed(to_do_map)  # <11>
+def download_many(cc_list: list[str],
+                  base_url: str,
+                  verbose: bool,
+                  concur_req: int) -> Counter[DownloadStatus]:
+    counter: Counter[DownloadStatus] = Counter()
+    with ThreadPoolExecutor(max_workers=concur_req) as executor:  # <4>
+        to_do_map = {}  # <5>
+        # 将所有请求提交到线程池中
+        for cc in sorted(cc_list):  # <6>
+            future = executor.submit(download_one, cc,
+                                     base_url, verbose)  # <7>
+            to_do_map[future] = cc  # <8>
+        # 将返回的 Future 转换为一个完成迭代器，即完成处理的 Future 会返回（惰性迭代）
+        done_iter = as_completed(to_do_map)  # <9>
         if not verbose:
-            done_iter = tqdm.tqdm(done_iter, total=len(cc_list))  # <12>
-        for future in done_iter:  # <13>
+            # 进度条
+            done_iter = tqdm.tqdm(done_iter, total=len(cc_list))  # <10>
+        for future in done_iter:  # <11>
             try:
-                res = future.result()  # <14>
-            except requests.exceptions.HTTPError as exc:  # <15>
-                error_msg = 'HTTP {res.status_code} - {res.reason}'
-                error_msg = error_msg.format(res=exc.response)
-            except requests.exceptions.ConnectionError as exc:
-                error_msg = 'Connection error'
+                # 挂起等待完成
+                status = future.result()  # <12>
+            except httpx.HTTPStatusError as exc:  # <13>
+                error_msg = 'HTTP error {resp.status_code} - {resp.reason_phrase}'
+                error_msg = error_msg.format(resp=exc.response)
+            except httpx.RequestError as exc:
+                error_msg = f'{exc} {type(exc)}'.strip()
+            except KeyboardInterrupt:
+                break
             else:
                 error_msg = ''
-                status = res.status
 
             if error_msg:
-                status = HTTPStatus.error
+                status = DownloadStatus.ERROR
+            # 根据不同的错误类型累计完成数量
             counter[status] += 1
             if verbose and error_msg:
-                cc = to_do_map[future]  # <16>
-                print('*** Error for {}: {}'.format(cc, error_msg))
+                cc = to_do_map[future]  # <14>
+                print(f'{cc} error: {error_msg}')
 
     return counter
 
@@ -594,94 +625,113 @@ asyncio async/await version
 
 """
 import asyncio
-import collections
+from collections import Counter
+from http import HTTPStatus
+from pathlib import Path
 
-import aiohttp
-from aiohttp import web
-import tqdm
+import httpx
+import tqdm  # type: ignore
 
-from flags2_common import main, HTTPStatus, Result, save_flag
+from flags2_common import main, DownloadStatus, save_flag
 
-# default set low to avoid errors from remote site, such as
-# 503 - Service Temporarily Unavailable
+# low concurrency default to avoid errors from remote site,
+# such as 503 - Service Temporarily Unavailable
 DEFAULT_CONCUR_REQ = 5
 MAX_CONCUR_REQ = 1000
 
 
-class FetchError(Exception):  # <1>
-    def __init__(self, country_code):
-        self.country_code = country_code
+async def get_flag(client: httpx.AsyncClient,  # <1>
+                   base_url: str,
+                   cc: str) -> bytes:
+    """下载图片"""
+    url = f'{base_url}/{cc}/{cc}.gif'.lower()
+    resp = await client.get(url, timeout=3.1, follow_redirects=True)  # <2>
+    resp.raise_for_status()
+    return resp.content
 
 
-async def get_flag(session, base_url, cc):  # <2>
-    url = '{}/{cc}/{cc}.gif'.format(base_url, cc=cc.lower())
-    async with session.get(url) as resp:
-        if resp.status == 200:
-            return await resp.read()
-        elif resp.status == 404:
-            raise web.HTTPNotFound()
-        else:
-            raise aiohttp.HttpProcessingError(
-                code=resp.status, message=resp.reason,
-                headers=resp.headers)
+async def get_country(client: httpx.AsyncClient,
+                      base_url: str,
+                      cc: str) -> str:  # <1>
+    """获得图片完整的文件名称"""
+    url = f'{base_url}/{cc}/metadata.json'.lower()
+    resp = await client.get(url, timeout=3.1, follow_redirects=True)
+    resp.raise_for_status()
+    metadata = resp.json()  # <2>
+    return metadata['country']  # <3>
 
 
-async def download_one(session, cc, base_url, semaphore, verbose):  # <3>
+async def download_one(client: httpx.AsyncClient,
+                       cc: str,
+                       base_url: str,
+                       semaphore: asyncio.Semaphore,
+                       verbose: bool) -> DownloadStatus:
     try:
-        async with semaphore:  # <4>
-            image = await get_flag(session, base_url, cc)  # <5>
-    except web.HTTPNotFound:  # <6>
-        status = HTTPStatus.not_found
-        msg = 'not found'
-    except Exception as exc:
-        raise FetchError(cc) from exc  # <7>
+        async with semaphore:  # <1>
+            image = await get_flag(client, base_url, cc)
+        async with semaphore:  # <2>
+            country = await get_country(client, base_url, cc)
+    except httpx.HTTPStatusError as exc:
+        res = exc.response
+        if res.status_code == HTTPStatus.NOT_FOUND:
+            status = DownloadStatus.NOT_FOUND
+            msg = f'not found: {res.url}'
+        else:
+            raise
     else:
-        save_flag(image, cc.lower() + '.gif')  # <8>
-        status = HTTPStatus.ok
+        filename = country.replace(' ', '_')  # <3>
+        # 将保存图片的操作放到线程中执行
+        await asyncio.to_thread(save_flag, image, f'{filename}.gif')
+        status = DownloadStatus.OK
         msg = 'OK'
-
     if verbose and msg:
         print(cc, msg)
+    return status
 
-    return Result(status, cc)
 
-
-async def downloader_coro(cc_list, base_url, verbose, concur_req):  # <1>
-    counter = collections.Counter()
+async def supervisor(cc_list: list[str],
+                     base_url: str,
+                     verbose: bool,
+                     concur_req: int) -> Counter[DownloadStatus]:  # <1>
+    counter: Counter[DownloadStatus] = Counter()
     semaphore = asyncio.Semaphore(concur_req)  # <2>
-    async with aiohttp.ClientSession() as session:  # <8>
-        to_do = [download_one(session, cc, base_url, semaphore, verbose)
+    async with httpx.AsyncClient() as client:
+        to_do = [download_one(client, cc, base_url, semaphore, verbose)
                  for cc in sorted(cc_list)]  # <3>
-
         to_do_iter = asyncio.as_completed(to_do)  # <4>
         if not verbose:
             to_do_iter = tqdm.tqdm(to_do_iter, total=len(cc_list))  # <5>
-        for future in to_do_iter:  # <6>
+        error: httpx.HTTPError | None = None  # <6>
+        for coro in to_do_iter:  # <7>
             try:
-                res = await future  # <7>
-            except FetchError as exc:  # <8>
-                country_code = exc.country_code  # <9>
-                try:
-                    error_msg = exc.__cause__.args[0]  # <10>
-                except IndexError:
-                    error_msg = exc.__cause__.__class__.__name__  # <11>
-                if verbose and error_msg:
-                    msg = '*** Error for {}: {}'
-                    print(msg.format(country_code, error_msg))
-                status = HTTPStatus.error
-            else:
-                status = res.status
+                status = await coro  # <8>
+            except httpx.HTTPStatusError as exc:
+                error_msg = 'HTTP error {resp.status_code} - {resp.reason_phrase}'
+                error_msg = error_msg.format(resp=exc.response)
+                error = exc  # <9>
+            except httpx.RequestError as exc:
+                error_msg = f'{exc} {type(exc)}'.strip()
+                error = exc  # <10>
+            except KeyboardInterrupt:
+                break
 
-            counter[status] += 1  # <12>
+            if error:
+                status = DownloadStatus.ERROR  # <11>
+                if verbose:
+                    url = str(error.request.url)  # <12>
+                    cc = Path(url).stem.upper()  # <13>
+                    print(f'{cc} error: {error_msg}')
+            counter[status] += 1
 
-    return counter  # <13>
+    return counter
 
 
-def download_many(cc_list, base_url, verbose, concur_req):
-    loop = asyncio.new_event_loop()
-    coro = downloader_coro(cc_list, base_url, verbose, concur_req)
-    counts = loop.run_until_complete(coro)  # <14>
-    loop.close()  # <15>
+def download_many(cc_list: list[str],
+                  base_url: str,
+                  verbose: bool,
+                  concur_req: int) -> Counter[DownloadStatus]:
+    coro = supervisor(cc_list, base_url, verbose, concur_req)
+    counts = asyncio.run(coro)  # <14>
 
     return counts
 
@@ -690,13 +740,10 @@ if __name__ == '__main__':
     main(download_many, DEFAULT_CONCUR_REQ, MAX_CONCUR_REQ)
 ```
 
+> 参考代码来自《流畅的 Python：第二版》的 [GitHub 仓库](https://github.com/fluentpython/example-code-2e/tree/master/20-executors/getflags)
+
 ## 并发模块
 
-如果想更细致地义并发逻辑，可以考虑使用`multiprocessing`和`threading`模块
+如果想更细致地义并发逻辑，可以考虑使用`multiprocessing`和`threading`模块，这两个模块分别提供了进程池和线程池，方便使用和管理。
 
->使用多进程可以绕开`GIL`锁，利用`CPU`的多个核心执行程序，以提高效率
-
->`CPython`解释器本身是线程不安全的，因此有全局解释器锁（`GIL`），一次只允许使用一个线程执行 Python 字节码。因此，一个 Python 进程通常不能同时使用多个 CPU 核心。
->标准库中每个使用 C 语言编写的所有阻塞型`I/O`函数，在等待操作系统返回结果时都会释放`GIL`，允许其它线程运行。`time.sleep()`函数也会释放`GIL`
-
-Last Modified 2022-08-11
+Last Modified 2023-06-11
