@@ -1,5 +1,13 @@
 # 异步 IO
 
+asyncio 事件循环在背后调用`.send`驱动你的协程，而你的协程使用 await 等待其他协程，包括库提供的协程。前文说过，await 的实现大量借鉴 yield from，也调用`.send`驱动协程。
+
+await 链最终到达一个底层可异步调用对象，返回一个生成器，由事件循环驱动，对计时器或网络 1/0 等事件做出响应。位于 await 链末端的底层可异步调用对象深埋在库的实现中，不作为 API 开放，有可能是 Python/C 扩展。
+
+使用 asyncio.gather 和 asyncio.create_task 等函数可以启动多个并发 await 通道，在单个线程内由单个事件循环驱动多个 I/O 操作并发执行。
+
+async with 语句用于异步的上下文管理器，即一种以协程实现`__aenter__`和`__aexit__`方法的对象
+
 ## 线程与异步协程
 
 ```python
@@ -566,9 +574,42 @@ if __name__ == '__main__':
     main(*sys.argv[1:])
 ```
 
+## 域名检测
+
+```python
+import asyncio
+import socket
+from keyword import kwlist
+
+MAX_KEYWORD_LEN = 8  # <1>
+
+
+async def probe(domain: str) -> tuple[str, bool]:  # <2>
+    loop = asyncio.get_running_loop()  # <3>
+    try:
+        await loop.getaddrinfo(domain, None)  # <4>
+    except socket.gaierror:
+        return domain, False
+    return domain, True
+
+
+async def main() -> None:  # <5>
+    names = (kw for kw in kwlist if len(kw) <= MAX_KEYWORD_LEN)  # <6>
+    domains = (f'{name}.dev'.lower() for name in names)  # <7>
+    coros = [probe(domain) for domain in domains]  # <8>
+    for coro in asyncio.as_completed(coros):  # <9>
+        domain, found = await coro  # <10>
+        mark = '+' if found else ' '
+        print(f'{mark} {domain}')
+
+
+if __name__ == '__main__':
+    asyncio.run(main())  # <11>
+```
+
 ## 参考文档
 
 - 协程与任务 https://docs.python.org/zh-cn/3/library/asyncio-task.html
 - 事件循环 https://docs.python.org/zh-cn/3/library/asyncio-eventloop.html
 
-Last Modified 2023-06-10
+Last Modified 2023-06-11
