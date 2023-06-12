@@ -1,8 +1,8 @@
 # 异步 IO
 
-asyncio 事件循环在背后调用`.send`驱动你的协程，而你的协程使用 await 等待其他协程，包括库提供的协程。前文说过，await 的实现大量借鉴 yield from，也调用`.send`驱动协程。
+asyncio 事件循环在背后调用`.send`驱动你的协程，而协程使用 await 等待其他协程，包括库提供的协程。await 的实现大量借鉴 yield from，也调用`.send`驱动协程。
 
-await 链最终到达一个底层可异步调用对象，返回一个生成器，由事件循环驱动，对计时器或网络 1/0 等事件做出响应。位于 await 链末端的底层可异步调用对象深埋在库的实现中，不作为 API 开放，有可能是 Python/C 扩展。
+await 链最终到达一个底层可异步调用对象，返回一个生成器，由事件循环驱动，对计时器或网络 I/O 等事件做出响应。位于 await 链末端的底层可异步调用对象深埋在库的实现中，不作为 API 开放，有可能是 Python/C 扩展。
 
 使用 asyncio.gather 和 asyncio.create_task 等函数可以启动多个并发 await 通道，在单个线程内由单个事件循环驱动多个 I/O 操作并发执行。
 
@@ -612,4 +612,4 @@ if __name__ == '__main__':
 - 协程与任务 https://docs.python.org/zh-cn/3/library/asyncio-task.html
 - 事件循环 https://docs.python.org/zh-cn/3/library/asyncio-eventloop.html
 
-Last Modified 2023-06-11
+Last Modified 2023-06-12
