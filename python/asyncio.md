@@ -446,63 +446,192 @@ def test_find_with_start_stop(sample_index):
 ## TCP 服务
 
 ```python
-#!/usr/bin/env python3
+#!/usr/bin/env python
+
+"""
+Class ``InvertedIndex`` builds an inverted index mapping each word to
+the set of Unicode characters which contain that word in their names.
+
+Optional arguments to the constructor are ``first`` and ``last+1``
+character codes to index, to make testing easier. In the examples
+below, only the ASCII range was indexed.
+
+The `entries` attribute is a `defaultdict` with uppercased single
+words as keys::
+
+    >>> idx = InvertedIndex(32, 128)
+    >>> idx.entries['DOLLAR']
+    {'$'}
+    >>> sorted(idx.entries['SIGN'])
+    ['#', '$', '%', '+', '<', '=', '>']
+    >>> idx.entries['A'] & idx.entries['SMALL']
+    {'a'}
+    >>> idx.entries['BRILLIG']
+    set()
+
+The `.search()` method takes a string, uppercases it, splits it into
+words, and returns the intersection of the entries for each word::
+
+    >>> idx.search('capital a')
+    {'A'}
+
+"""
 
 import sys
-import asyncio
-from asyncio import streams
+import time
+from collections import defaultdict
+from collections.abc import Iterator
 
-from charfinder import UnicodeNameIndex  # <1>
+import unicodedata
+
+STOP_CODE: int = sys.maxunicode + 1
+
+Char = str
+Index = defaultdict[str, set[Char]]
+
+
+def tokenize(text: str) -> Iterator[str]:
+    """return iterator of uppercased words"""
+    for word in text.upper().replace('-', ' ').split():
+        yield word
+
+
+class InvertedIndex:
+    entries: Index
+
+    def __init__(self, start: int = 32, stop: int = STOP_CODE):
+        t0 = time.perf_counter()
+        entries: Index = defaultdict(set)
+        # 索引所有字符
+        for char in (chr(i) for i in range(start, stop)):
+            name = unicodedata.name(char, '')
+            if name:
+                for word in tokenize(name):
+                    entries[word].add(char)
+        self.entries = entries
+        print('initialize time', time.perf_counter() - t0, 's')
+
+    def search(self, query: str) -> set[Char]:
+        if words := list(tokenize(query)):
+            found = self.entries[words[0]]
+            return found.intersection(*(self.entries[w] for w in words[1:]))
+        else:
+            return set()
+
+
+def format_results(chars: set[Char]) -> Iterator[str]:
+    for char in sorted(chars):
+        name = unicodedata.name(char)
+        code = ord(char)
+        yield f'U+{code:04X}\t{char}\t{name}'
+
+
+def main(words: list[str]) -> None:
+    if not words:
+        print('Please give one or more words to search.')
+        sys.exit(2)  # command line usage error
+    index = InvertedIndex()
+    chars = index.search(' '.join(words))
+    for line in format_results(chars):
+        print(line)
+    print('─' * 66, f'{len(chars)} found')
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
+```
+
+```python
+#!/usr/bin/env python3
+
+import asyncio
+import functools
+import sys
+from asyncio.trsock import TransportSocket
+from typing import cast
+
+from charindex import InvertedIndex, format_results  # <1>
 
 CRLF = b'\r\n'
 PROMPT = b'?> '
 
-index = UnicodeNameIndex()  # <2>
 
-
-async def handle_queries(reader: streams.StreamReader, writer: streams.StreamWriter):  # <3>
+async def finder(index: InvertedIndex,  # <2>
+                 reader: asyncio.StreamReader,
+                 writer: asyncio.StreamWriter) -> None:
+    # 获得客户端信息
+    client = writer.get_extra_info('peername')  # <3>
     while True:  # <4>
         writer.write(PROMPT)  # can't await!  # <5>
+        # 等待写入响应数据完成
         await writer.drain()  # must await!  # <6>
         data = await reader.readline()  # <7>
+        if not data:  # <8>
+            # 没有接收到数据则结束连接
+            break
         try:
-            query = data.decode().strip()
-        except UnicodeDecodeError:  # <8>
+            # 获得数据（默认以 UTF-8 字符编码）
+            query = data.decode().strip()  # <9>
+        except UnicodeDecodeError:  # <10>
+            # 如果出现解码错误的默认一个空字符
             query = '\x00'
-        client = writer.get_extra_info('peername')  # <9>
-        print('Received from {}: {!r}'.format(client, query))  # <10>
+        print(f' From {client}: {query!r}')  # <11>
         if query:
-            if ord(query[:1]) < 32:  # <11>
+            # 如果是控制字符则结束连接
+            if ord(query[:1]) < 32:  # <12>
                 break
-            lines = list(index.find_description_strs(query))  # <12>
-            if lines:
-                writer.writelines(line.encode() + CRLF for line in lines)  # <13>
-            writer.write(index.status(query, len(lines)).encode() + CRLF)  # <14>
+            results = await search(query, index, writer)  # <13>
+            print(f'   To {client}: {results} results.')  # <14>
 
-            await writer.drain()  # <15>
-            print('Sent {} results'.format(len(lines)))  # <16>
-
-    print('Close the client socket')  # <17>
-    writer.close()  # <18>
+    writer.close()  # <15>
+    # 等待关闭
+    await writer.wait_closed()  # <16>
+    print(f'Close {client}.')  # <17>
 
 
-async def main(address='127.0.0.1', port=2323):  # <1>
-    port = int(port)
-    server = await asyncio.start_server(handle_queries, address, port)  # <2>
+async def search(query: str,  # <1>
+                 index: InvertedIndex,
+                 writer: asyncio.StreamWriter) -> int:
+    chars = index.search(query)  # <2>
+    lines = (line.encode() + CRLF for line  # <3>
+             in format_results(chars))
+    writer.writelines(lines)  # <4>
+    # 等待写入数据完成
+    await writer.drain()  # <5>
+    status_line = f'{"─" * 66} {len(chars)} found'  # <6>
+    writer.write(status_line.encode() + CRLF)
+    # 等待写入数据完成
+    await writer.drain()
+    return len(chars)
 
-    host = server.sockets[0].getsockname()  # <3>
-    print('Serving on {}. Hit CTRL-C to stop.'.format(host))  # <4>
 
-    async with server:
-        await server.serve_forever()
+async def supervisor(index: InvertedIndex, host: str, port: int) -> None:
+    # 当一个新的客户端连接被建立时，回调函数 client_connected_cb 会被调用。该函数会接收到一对参数 (reader, writer)，
+    # reader是类 StreamReader 的实例，而writer是类 StreamWriter 的实例。
+    # 这里利用 partial 冻结了第一个参数
+    server = await asyncio.start_server(functools.partial(finder, index), host, port)  # <3>
+
+    socket_list = cast(tuple[TransportSocket, ...], server.sockets)  # <4>
+    addr = socket_list[0].getsockname()
+    print(f'Serving on {addr}. Hit CTRL-C to stop.')  # <5>
+    # 持续运行
+    await server.serve_forever()  # <6>
+
+
+def main(host: str = '127.0.0.1', port_arg: str = '2323'):
+    port = int(port_arg)
+    print('Building index.')
+    # 创建倒排索引
+    index = InvertedIndex()  # <7>
+    try:
+        # 启动事件循环
+        asyncio.run(supervisor(index, host, port))  # <8>
+    except KeyboardInterrupt:  # <9>
+        print('\nServer shut down.')
 
 
 if __name__ == '__main__':
-    # python3 tcp_charfinder.py 127.0.0.1 9527
-    try:
-        asyncio.run(main(*sys.argv[1:]))  # <5>
-    except KeyboardInterrupt:
-        print('Server stopped')
+    main(*sys.argv[1:])
 ```
 
 ```bash
@@ -605,6 +734,89 @@ async def main() -> None:  # <5>
 
 if __name__ == '__main__':
     asyncio.run(main())  # <11>
+```
+
+## 异步迭代
+
+```python
+"""domainlib.py
+"""
+
+import asyncio
+import socket
+from collections.abc import Iterable, AsyncIterator
+from typing import NamedTuple, Optional
+
+
+class Result(NamedTuple):  # <1>
+    domain: str
+    found: bool
+
+
+OptionalLoop = Optional[asyncio.AbstractEventLoop]  # <2>
+
+
+async def probe(domain: str, loop: OptionalLoop = None) -> Result:  # <3>
+    if loop is None:
+        loop = asyncio.get_running_loop()
+    try:
+        await loop.getaddrinfo(domain, None)
+    except socket.gaierror:
+        return Result(domain, False)
+    return Result(domain, True)
+
+
+async def multi_probe(domains: Iterable[str]) -> AsyncIterator[Result]:  # <4>
+    loop = asyncio.get_running_loop()
+    coros = [probe(domain, loop) for domain in domains]  # <5>
+    for coro in asyncio.as_completed(coros):  # <6>
+        result = await coro  # <7>
+        yield result  # <8>
+
+
+async def main():
+    names = 'python.org go-lang.org rust-lang.org no-lang.invalid'.split()
+    gen_found = (name async for name, found in multi_probe(names) if found)
+    async for name in gen_found:
+        print(name)
+    coros = [probe(name) for name in names]
+    results = await asyncio.gather(*coros)
+    print(results)
+
+
+if __name__ == '__main__':
+    asyncio.run(main())
+```
+
+```python
+#!/usr/bin/env python3
+import asyncio
+import sys
+from keyword import kwlist
+
+from domainlib import multi_probe
+
+
+async def main(tld: str) -> None:
+    tld = tld.strip('.')
+    names = (kw for kw in kwlist if len(kw) <= 4)  # <1>
+    domains = (f'{name}.{tld}'.lower() for name in names)  # <2>
+    print('FOUND\t\tNOT FOUND')  # <3>
+    print('=====\t\t=========')
+    async for domain, found in multi_probe(domains):  # <4>
+        indent = '' if found else '\t\t'  # <5>
+        print(f'{indent}{domain}')
+
+
+if __name__ == '__main__':
+    if len(sys.argv) == 2:
+        asyncio.run(main(sys.argv[1]))  # <6>
+    else:
+        print('Please provide a TLD.', f'Example: {sys.argv[0]} COM.BR')
+```
+
+```bash
+python domaincheck.py .dev
 ```
 
 ## 参考文档
