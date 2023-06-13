@@ -819,9 +819,19 @@ if __name__ == '__main__':
 python domaincheck.py .dev
 ```
 
+异步编程适合 I/O 密集型的函数，系统中的函数，大多数是属于 I/O 密集型的，相比处理数据，用在等待 I/O 上的时间更多。在等待的过程中，函数把控制权交给事件循环，驱动其它被挂起的任务执行。
+
+异步编程中，要注意 CPU 密集型的函数是否会影响事件循环使其被被拖累，严重影响性能。正确地处理 CPU 密集型函数和 I/O 密集型函数非常重要，发现 CPU 占用出现瓶颈后，可以考虑以下处理方式
+
+- 把任务委托给 Python 进程池。
+- 把任务委托给外部任务队列。
+- 使用 Cython、 C、 Rust，或者可编译成机器码、能与 Python/C API 交互的其他语言（最好能释放 GIL）重写相关代码。
+
+> 如果大量使用 Python，要考虑将部分代码加入到自动化测试中，专门检测性能问题，尽早发现尽早处理。
+
 ## 参考文档
 
 - 协程与任务 https://docs.python.org/zh-cn/3/library/asyncio-task.html
 - 事件循环 https://docs.python.org/zh-cn/3/library/asyncio-eventloop.html
 
-Last Modified 2023-06-12
+Last Modified 2023-06-13
