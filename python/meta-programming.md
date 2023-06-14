@@ -4,60 +4,13 @@
 
 ```python
 """
-osconfeed.py: Script to download the OSCON schedule feed
-
-
-    >>> feed = load()  # <1>
-    >>> sorted(feed['Schedule'].keys())  # <2>
-    ['conferences', 'events', 'speakers', 'venues']
-    >>> for key, value in sorted(feed['Schedule'].items()):
-    ...     print('{:3} {}'.format(len(value), key))  # <3>
-    ...
-      1 conferences
-    485 events
-    354 speakers
-     53 venues
-    >>> feed['Schedule']['speakers'][-1]['name']  # <4>
-    'Carina C. Zona'
-    >>> feed['Schedule']['speakers'][-1]['serial']  # <5>
-    141590
-    >>> feed['Schedule']['events'][40]['name']
-    'There *Will* Be Bugs'
-    >>> feed['Schedule']['events'][40]['speakers']  # <6>
-    [3471, 5199]
-
-
-"""
-
-from urllib.request import urlopen
-import warnings
-import os
-import json
-
-URL = 'https://raw.githubusercontent.com/pythonprobr/oscon2014/master/schedule/osconfeed.json'
-JSON = 'data/osconfeed.json'
-
-
-def load():
-    if not os.path.exists(JSON):
-        msg = 'downloading {} to {}'.format(URL, JSON)
-        warnings.warn(msg)  # <1>
-        with urlopen(URL) as remote, open(JSON, 'wb') as local:  # <2>
-            local.write(remote.read())
-
-    with open(JSON) as fp:
-        return json.load(fp)  # <3>
-```
-
-```python
-"""
 explore2.py: Script to explore the OSCON schedule feed
 
-    >>> from osconfeed import load
-    >>> raw_feed = load()
+    >>> import json
+    >>> raw_feed = json.load(open('data/osconfeed.json'))
     >>> feed = FrozenJSON(raw_feed)
     >>> len(feed.Schedule.speakers)
-    354
+    357
     >>> sorted(feed.Schedule.keys())
     ['conferences', 'events', 'speakers', 'venues']
     >>> feed.Schedule.speakers[-1].name
@@ -74,8 +27,8 @@ explore2.py: Script to explore the OSCON schedule feed
 
 """
 
+import keyword
 from collections import abc
-from keyword import iskeyword
 
 
 class FrozenJSON:
@@ -85,8 +38,10 @@ class FrozenJSON:
 
     def __new__(cls, arg):  # <1>
         if isinstance(arg, abc.Mapping):
+            # 如果是字典则调用父类构建，会执行 __init__
             return super().__new__(cls)  # <2>
         elif isinstance(arg, abc.MutableSequence):  # <3>
+            # 如果是列表则逐个构建
             return [cls(item) for item in arg]
         else:
             return arg
@@ -94,19 +49,24 @@ class FrozenJSON:
     def __init__(self, mapping):
         self.__data = {}
         for key, value in mapping.items():
-            # 如果是关键字则加上特殊的后缀, 如 item.class_
-            if iskeyword(key):
+            # 针对关键字设置下划线
+            if keyword.iskeyword(key):
                 key += '_'
             self.__data[key] = value
 
     def __getattr__(self, name):
-        if hasattr(self.__data, name):
+        try:
             return getattr(self.__data, name)
-        else:
+        except AttributeError:
+            # 递归动态构建属性
             return FrozenJSON(self.__data[name])  # <4>
+
+    def __dir__(self):
+        # 列出当前拥有的键
+        return self.__data.keys()
 ```
 
-对应的<a href="/python/osconfeed.json.zip">JSON 数据</a>
+对应的<a href="/python/osconfeed.json.gz">JSON 数据</a>
 
 ## shelve 存储数据
 
@@ -407,6 +367,6 @@ class BlackKnight:
 
   此方法会无条件地被调用以实现对类实例属性的访问。如果类还定义了`__getattr__()`，则后者不会被调用，除非`__getattribute__()`显式地调用它或是引发了`AttributeError`。[官方文档说明](https://docs.python.org/zh-cn/3/reference/datamodel.html#object.__getattribute__)
 
->对于自定义类来说，如果隐式调用特殊方法，仅当特殊方法在对象所属的类型上定义，而不是在对象的实例字典中定义时，才能确保调用成功。
+> 对于自定义类来说，如果隐式调用特殊方法，仅当特殊方法在对象所属的类型上定义，而不是在对象的实例字典中定义时，才能确保调用成功。
 
-Last Modified 2022-08-07
+Last Modified 2023-06-14
