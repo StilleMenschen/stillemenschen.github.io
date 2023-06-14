@@ -134,4 +134,13 @@ dst 192.168.1.1/24:80
    ss -a -A 'all,!tcp,!udp'
    ```
 
-Last Modified 2022-12-04
+8. 如果是虚拟化隔离的程序，需要先进入其命名空间才能查看它的网络连接，如通过 Docker 允许的程序
+
+   ```bash
+   docker inspect -f {{.State.Pid}} nginx
+   docker top nginx
+   nsenter -n -t [进程PID]
+   ss -tn
+   ```
+
+Last Modified 2023-06-14
