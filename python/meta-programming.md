@@ -68,131 +68,153 @@ class FrozenJSON:
 
 对应的<a href="/python/osconfeed.json.gz">JSON 数据</a>
 
-## shelve 存储数据
+## 属性读取缓存
 
 ```python
 """
-schedule2.py: traversing OSCON schedule data
+schedule_v5.py: cached properties using functools
 
-    >>> import shelve
-    >>> db = shelve.open(DB_NAME)
-    >>> if CONFERENCE not in db: load_db(db)
-
-
-    >>> DbRecord.set_db(db)  # <1>
-    >>> event = DbRecord.fetch('event.33950')  # <2>
-    >>> event  # <3>
+    >>> event = Record.fetch('event.33950')
+    >>> event
     <Event 'There *Will* Be Bugs'>
-    >>> event.venue  # <4>
-    <DbRecord serial='venue.1449'>
-    >>> event.venue.name  # <5>
+    >>> event.venue
+    <Record serial=1449>
+    >>> event.venue_serial
+    1449
+    >>> event.venue.name
     'Portland 251'
-    >>> for spkr in event.speakers:  # <6>
-    ...     print('{0.serial}: {0.name}'.format(spkr))
+
+    >>> for spkr in event.speakers:  # <3>
+    ...     print(f'{spkr.serial}: {spkr.name}')
     ...
-    speaker.3471: Anna Martelli Ravenscroft
-    speaker.5199: Alex Martelli
-
-
-    >>> db.close()
+    3471: Anna Martelli Ravenscroft
+    5199: Alex Martelli
 
 """
 
-import warnings
-import inspect  # <1>
+import inspect
+import json
+from functools import cached_property, cache
 
-import osconfeed
-
-DB_NAME = 'data/schedule2_db'  # <2>
-CONFERENCE = 'conference.115'
+JSON_PATH = 'data/osconfeed.json'
 
 
 class Record:
+    __index = None
+
     def __init__(self, **kwargs):
         self.__dict__.update(kwargs)
 
-    def __eq__(self, other):  # <3>
-        if isinstance(other, Record):
-            return self.__dict__ == other.__dict__
-        else:
-            return NotImplemented
+    def __repr__(self):
+        return f'<{self.__class__.__name__} serial={self.serial!r}>'
+
+    @staticmethod
+    def fetch(key):
+        if Record.__index is None:
+            Record.__index = load()
+        return Record.__index[key]
 
 
-class MissingDatabaseError(RuntimeError):
-    """Raised when a database is required but was not set."""  # <1>
+class Event(Record):
 
-
-class DbRecord(Record):  # <2>
-
-    __db = None  # <3>
-
-    @staticmethod  # <4>
-    def set_db(db):
-        DbRecord.__db = db  # <5>
-
-    @staticmethod  # <6>
-    def get_db():
-        return DbRecord.__db
-
-    @classmethod  # <7>
-    def fetch(cls, ident):
-        db = cls.get_db()
+    def __repr__(self):
         try:
-            return db[ident]  # <8>
-        except TypeError:
-            if db is None:  # <9>
-                msg = "database not set; call '{}.set_db(my_db)'"
-                raise MissingDatabaseError(msg.format(cls.__name__))
-            else:  # <10>
-                raise
+            return f'<{self.__class__.__name__} {self.name!r}>'
+        except AttributeError:
+            return super().__repr__()
 
-    def __repr__(self):
-        if hasattr(self, 'serial'):  # <11>
-            cls_name = self.__class__.__name__
-            return '<{} serial={!r}>'.format(cls_name, self.serial)
-        else:
-            return super().__repr__()  # <12>
-
-
-class Event(DbRecord):  # <1>
-
-    @property
+    @cached_property
     def venue(self):
-        key = 'venue.{}'.format(self.venue_serial)
-        return self.__class__.fetch(key)  # <2>
+        key = f'venue.{self.venue_serial}'
+        return self.__class__.fetch(key)
 
-    @property
+    @property  # <1>
+    @cache  # <2>
     def speakers(self):
-        if not hasattr(self, '_speaker_objs'):  # <3>
-            speakers_serials = self.__dict__['speakers']  # <4>
-            fetch = self.__class__.fetch  # <5>
-            self._speaker_objs = [fetch('speaker.{}'.format(key))
-                                  for key in speakers_serials]  # <6>
-        return self._speaker_objs  # <7>
+        spkr_serials = self.__dict__['speakers']
+        fetch = self.__class__.fetch
+        return [fetch(f'speaker.{key}')
+                for key in spkr_serials]
 
-    def __repr__(self):
-        if hasattr(self, 'name'):  # <8>
-            cls_name = self.__class__.__name__
-            return '<{} {!r}>'.format(cls_name, self.name)
+
+def load(path=JSON_PATH):
+    records = {}
+    with open(path) as fp:
+        raw_data = json.load(fp)
+    for collection, raw_records in raw_data['Schedule'].items():
+        record_type = collection[:-1]
+        cls_name = record_type.capitalize()
+        cls = globals().get(cls_name, Record)
+        if inspect.isclass(cls) and issubclass(cls, Record):
+            factory = cls
         else:
-            return super().__repr__()  # <9>
+            factory = Record
+        for raw_record in raw_records:
+            key = f'{record_type}.{raw_record["serial"]}'
+            records[key] = factory(**raw_record)
+    return records
+```
+
+```python
+import pytest
+
+import schedule_v5 as schedule
+
+@pytest.fixture
+def records():
+    yield schedule.load(schedule.JSON_PATH)
 
 
-def load_db(db):
-    raw_data = osconfeed.load()
-    warnings.warn('loading ' + DB_NAME)
-    for collection, rec_list in raw_data['Schedule'].items():
-        record_type = collection[:-1]  # <1>
-        cls_name = record_type.capitalize()  # <2>
-        cls = globals().get(cls_name, DbRecord)  # <3>
-        if inspect.isclass(cls) and issubclass(cls, DbRecord):  # <4>
-            factory = cls  # <5>
-        else:
-            factory = DbRecord  # <6>
-        for record in rec_list:  # <7>
-            key = '{}.{}'.format(record_type, record['serial'])
-            record['serial'] = key
-            db[key] = factory(**record)  # <8>
+def test_load(records):
+    assert len(records) == 895
+
+
+def test_record_attr_access():
+    rec = schedule.Record(spam=99, eggs=12)
+    assert rec.spam == 99
+    assert rec.eggs == 12
+
+
+def test_venue_record(records):
+    venue = records['venue.1469']
+    assert venue.serial == 1469
+    assert venue.name == 'Exhibit Hall C'
+
+
+def test_fetch_speaker_record():
+    speaker = schedule.Record.fetch('speaker.3471')
+    assert speaker.name == 'Anna Martelli Ravenscroft'
+
+
+def test_event_type():
+    event = schedule.Record.fetch('event.33950')
+    assert type(event) is schedule.Event
+    assert repr(event) == "<Event 'There *Will* Be Bugs'>"
+
+
+def test_event_repr():
+    event = schedule.Record.fetch('event.33950')
+    assert repr(event) == "<Event 'There *Will* Be Bugs'>"
+    event2 = schedule.Event(serial=77, kind='show')
+    assert repr(event2) == '<Event serial=77>'
+
+
+def test_event_venue():
+    event = schedule.Record.fetch('event.33950')
+    assert event.venue_serial == 1449
+    assert event.venue == schedule.Record.fetch('venue.1449')
+    assert event.venue.name == 'Portland 251'
+
+
+def test_event_speakers():
+    event = schedule.Record.fetch('event.33950')
+    assert len(event.speakers) == 2
+    anna, alex = [schedule.Record.fetch(f'speaker.{s}') for s in (3471, 5199)]
+    assert event.speakers == [anna, alex]
+
+def test_event_no_speakers():
+    event = schedule.Record.fetch('event.36848')
+    assert event.speakers == []
 ```
 
 ## 特性替代属性
@@ -369,4 +391,4 @@ class BlackKnight:
 
 > 对于自定义类来说，如果隐式调用特殊方法，仅当特殊方法在对象所属的类型上定义，而不是在对象的实例字典中定义时，才能确保调用成功。
 
-Last Modified 2023-06-14
+Last Modified 2023-06-16
