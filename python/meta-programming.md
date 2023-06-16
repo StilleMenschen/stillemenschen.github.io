@@ -126,12 +126,15 @@ class Event(Record):
     @cached_property
     def venue(self):
         key = f'venue.{self.venue_serial}'
+        # 避免同名属性覆盖
         return self.__class__.fetch(key)
 
+    # 类似于 speakers = property(cache(speakers))
     @property  # <1>
     @cache  # <2>
     def speakers(self):
         spkr_serials = self.__dict__['speakers']
+        # 避免同名属性覆盖
         fetch = self.__class__.fetch
         return [fetch(f'speaker.{key}')
                 for key in spkr_serials]
@@ -144,7 +147,9 @@ def load(path=JSON_PATH):
     for collection, raw_records in raw_data['Schedule'].items():
         record_type = collection[:-1]
         cls_name = record_type.capitalize()
+        # 从全局对象中获取类型，如果获取不到则使用 Record 类型
         cls = globals().get(cls_name, Record)
+        # 判断获取到的对象为类且是 Record 的子类
         if inspect.isclass(cls) and issubclass(cls, Record):
             factory = cls
         else:
@@ -154,6 +159,12 @@ def load(path=JSON_PATH):
             records[key] = factory(**raw_record)
     return records
 ```
+
+cached_property() 的设定与 property() 有所不同。 常规的 property 会阻止属性写入，除非定义了 setter。 与之相反，cached_property 则允许写入。
+
+cached_property 装饰器仅在执行查找且不存在同名属性时才会运行。 当运行时，cached_property 会写入同名的属性。 后续的属性读取和写入操作会优先于 cached_property 方法，其行为就像普通的属性一样。
+
+缓存的值可通过删除该属性来清空。 这允许 cached_property 方法再次运行。详见[官方文档](https://docs.python.org/zh-cn/3/library/functools.html#functools.cached_property)
 
 ```python
 import pytest
@@ -215,6 +226,61 @@ def test_event_speakers():
 def test_event_no_speakers():
     event = schedule.Record.fetch('event.36848')
     assert event.speakers == []
+```
+
+## 特性覆盖实例属性
+
+```python
+"""
+>>> obj = Class()
+>>> vars(obj)  # vars 返回 __dict__
+{}
+>>> obj.data
+'the class data attr'
+>>> obj.data = 'bar'  # 遮盖类属性
+>>> vars(obj)
+{'data': 'bar'}
+>>> obj.data
+'bar'
+>>> Class.data  # 类属性没有变化
+'the class data attr'
+>>> Class.prop  # doctest: +ELLIPSIS
+<property object at ...>
+>>> obj.prop
+'the prop value'
+>>> obj.prop = 'foo'  # doctest: +ELLIPSIS
+Traceback (most recent call last):
+  ...
+AttributeError: property 'prop' of 'Class' object has no setter
+>>> obj.__dict__['prop'] = 'foo'  # 设置实例的属性
+>>> vars(obj)
+{'data': 'bar', 'prop': 'foo'}
+>>> obj.prop  # 没有覆盖类特性
+'the prop value'
+>>> Class.prop  # doctest: +ELLIPSIS
+<property object at ...>
+>>> Class.prop = 'baz'  # 覆盖类特性
+>>> obj.prop  # 这时是实例的属性
+'foo'
+>>> obj.data
+'bar'
+>>> Class.data
+'the class data attr'
+>>> Class.data = property(lambda self: 'the "data" prop value')  # 特性覆盖类的属性
+>>> obj.data  # 实例的属性被特性覆盖
+'the "data" prop value'
+>>> del Class.data  # 删除类的特性
+>>> obj.data  # 现在是实例的属性
+'bar'
+"""
+
+
+class Class:
+    data = 'the class data attr'
+
+    @property
+    def prop(self):
+        return 'the prop value'
 ```
 
 ## 特性替代属性
@@ -391,4 +457,4 @@ class BlackKnight:
 
 > 对于自定义类来说，如果隐式调用特殊方法，仅当特殊方法在对象所属的类型上定义，而不是在对象的实例字典中定义时，才能确保调用成功。
 
-Last Modified 2023-06-16
+Last Modified 2023-06-17
