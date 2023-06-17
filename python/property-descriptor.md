@@ -20,15 +20,14 @@ The weight of a ``LineItem`` must be greater than 0::
     >>> raisins.weight = -20
     Traceback (most recent call last):
         ...
-    ValueError: value must be > 0
+    ValueError: weight must be > 0
 
 Negative or 0 price is not acceptable either::
 
     >>> truffle = LineItem('White truffle', 100, 0)
     Traceback (most recent call last):
         ...
-    ValueError: value must be > 0
-
+    ValueError: price must be > 0
 
 No change was made::
 
@@ -47,14 +46,19 @@ class Quantity:  # <1>
         if value > 0:
             instance.__dict__[self.storage_name] = value  # <4>
         else:
-            raise ValueError('value must be > 0')
+            msg = f'{self.storage_name} must be > 0'
+            raise ValueError(msg)
+
+    def __get__(self, instance, owner):  # <5>
+        return instance.__dict__[self.storage_name]
+
 
 
 class LineItem:
-    weight = Quantity('weight')  # <5>
-    price = Quantity('price')  # <6>
+    weight = Quantity('weight')  # <1>
+    price = Quantity('price')  # <2>
 
-    def __init__(self, description, weight, price):  # <7>
+    def __init__(self, description, weight, price):  # <3>
         self.description = description
         self.weight = weight
         self.price = price
@@ -84,25 +88,19 @@ The weight of a ``LineItem`` must be greater than 0::
     >>> raisins.weight = -20
     Traceback (most recent call last):
         ...
-    ValueError: value must be > 0
+    ValueError: weight must be > 0
 
 No change was made::
 
     >>> raisins.weight
     10
 
-The value of the attributes managed by the descriptors are stored in
-alternate attributes, created by the descriptors in each ``LineItem``
-instance::
+Negative or 0 price is not acceptable either::
 
-    >>> raisins = LineItem('Golden raisins', 10, 6.95)
-    >>> dir(raisins)  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-    ['_Quantity#0', '_Quantity#1', '__class__', ...
-     'description', 'price', 'subtotal', 'weight']
-    >>> getattr(raisins, '_Quantity#0')
-    10
-    >>> getattr(raisins, '_Quantity#1')
-    6.95
+    >>> truffle = LineItem('White truffle', 100, 0)
+    Traceback (most recent call last):
+        ...
+    ValueError: price must be > 0
 
 If the descriptor is accessed in the class, the descriptor object is
 returned:
@@ -110,37 +108,26 @@ returned:
     >>> LineItem.weight  # doctest: +ELLIPSIS
     <...Quantity object at 0x...>
     >>> LineItem.weight.storage_name
-    '_Quantity#0'
+    'weight'
 
 """
 
 
 class Quantity:
-    __counter = 0
 
-    def __init__(self):
-        cls = self.__class__
-        prefix = cls.__name__
-        index = cls.__counter
-        self.storage_name = '_{}#{}'.format(prefix, index)
-        # 累加计数, 确保新的属性名不会被覆盖(注意这里是使用了类本身而不是实例)
-        cls.__counter += 1
+    def __set_name__(self, owner, name):  # <1>
+        self.storage_name = name  # <2>
 
-    def __get__(self, instance, owner):
-        if instance is None:
-            return self  # <1>
-        else:
-            return getattr(instance, self.storage_name)  # <2>
-
-    def __set__(self, instance, value):
+    def __set__(self, instance, value):  # <3>
         if value > 0:
-            setattr(instance, self.storage_name, value)
+            instance.__dict__[self.storage_name] = value
         else:
-            raise ValueError('value must be > 0')
+            msg = f'{self.storage_name} must be > 0'
+            raise ValueError(msg)
 
 
 class LineItem:
-    weight = Quantity()
+    weight = Quantity()  # <2>
     price = Quantity()
 
     def __init__(self, description, weight, price):
@@ -180,115 +167,85 @@ No change was made::
     >>> raisins.weight
     10
 
-The value of the attributes managed by the descriptors are stored in
-alternate attributes, created by the descriptors in each ``LineItem``
-instance::
+The value of the attributes managed by the properties are stored in
+instance attributes, created in each ``LineItem`` instance::
 
-    >>> raisins = LineItem('Golden raisins', 10, 6.95)
-    >>> dir(raisins)  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-    [... '_quantity:0', '_quantity:1', 'description',
-    'price', 'subtotal', 'weight']
-    >>> getattr(raisins, '_quantity:0')
-    10
-    >>> getattr(raisins, '_quantity:1')
-    6.95
+    >>> nutmeg = LineItem('Moluccan nutmeg', 8, 13.95)
+    >>> nutmeg.weight, nutmeg.price  # <1>
+    (8, 13.95)
+    >>> nutmeg.__dict__  # <2>
+    {'description': 'Moluccan nutmeg', 'weight': 8, 'price': 13.95}
+
 
 """
 
 
-def quantity():  # <1>
-    try:
-        quantity.counter += 1  # <2>
-    except AttributeError:
-        quantity.counter = 0  # <3>
+def quantity(storage_name):  # <1>
 
-    storage_name = '_{}:{}'.format('quantity', quantity.counter)  # <4>
+    def qty_getter(instance):  # <2>
+        return instance.__dict__[storage_name]  # <3>
 
-    def qty_getter(instance):  # <5>
-        return getattr(instance, storage_name)
-
-    def qty_setter(instance, value):
+    def qty_setter(instance, value):  # <4>
         if value > 0:
-            setattr(instance, storage_name, value)
+            instance.__dict__[storage_name] = value  # <5>
         else:
             raise ValueError('value must be > 0')
 
-    return property(qty_getter, qty_setter)
+    return property(qty_getter, qty_setter)  # <6>
 
 
 class LineItem:
-    weight = quantity()
-    price = quantity()
+    weight = quantity('weight')  # <1>
+    price = quantity('price')  # <2>
 
     def __init__(self, description, weight, price):
         self.description = description
-        self.weight = weight
+        self.weight = weight  # <3>
         self.price = price
 
     def subtotal(self):
-        return self.weight * self.price
+        return self.weight * self.price  # <4>
 ```
 
 ## 允许自定义校验的描述符
 
 ```python
+"""model_v5.py
 """
-model_v5_check.py
-"""
-
 import abc
 
 
-class AutoStorage:
-    __counter = 0
+class Validated(abc.ABC):
 
-    def __init__(self):
-        cls = self.__class__
-        prefix = cls.__name__
-        index = cls.__counter
-        self.storage_name = '_{}#{}'.format(prefix, index)
-        cls.__counter += 1
-
-    def __get__(self, instance, owner):
-        if instance is None:
-            return self
-        else:
-            return getattr(instance, self.storage_name)
+    def __set_name__(self, owner, name):
+        self.storage_name = name
 
     def __set__(self, instance, value):
-        setattr(instance, self.storage_name, value)
-
-
-class Validated(abc.ABC, AutoStorage):
-
-    def __set__(self, instance, value):
-        value = self.validate(instance, value)
-        super().__set__(instance, value)
+        value = self.validate(self.storage_name, value)  # <1>
+        instance.__dict__[self.storage_name] = value  # <2>
 
     @abc.abstractmethod
-    def validate(self, instance, value):
+    def validate(self, name, value):  # <3>
         """return validated value or raise ValueError"""
 
 
-INVALID = object()
+class Quantity(Validated):
+    """a number greater than zero"""
+
+    def validate(self, name, value):  # <1>
+        if value <= 0:
+            raise ValueError(f'{name} must be > 0')
+        return value
 
 
-class Check(Validated):
+class NonBlank(Validated):
+    """a string with at least one non-space character"""
 
-    def __init__(self, checker):
-        super().__init__()
-        self.checker = checker
-        if checker.__doc__ is None:
-            doc = ''
-        else:
-            doc = checker.__doc__ + '; '
-        self.message = doc + '{!r} is not valid.'
-
-    def validate(self, instance, value):
-        result = self.checker(value)
-        if result is INVALID:
-            raise ValueError(self.message.format(value))
-        return result
+    def validate(self, name, value):
+        value = value.strip()
+        if not value:  # <2>
+            raise ValueError(f'{name} cannot be blank')
+        return value  # <3>
 ```
 
 ```python
@@ -310,31 +267,27 @@ The weight of a ``LineItem`` must be greater than 0::
     >>> raisins.weight = -20
     Traceback (most recent call last):
         ...
-    ValueError: value must be > 0; -20 is not valid.
+    ValueError: weight must be > 0
 
 No change was made::
 
     >>> raisins.weight
     10
 
-The value of the attributes managed by the descriptors are stored in
-alternate attributes, created by the descriptors in each ``LineItem``
-instance::
+Negative or 0 price is not acceptable either::
 
-    >>> raisins = LineItem('Golden raisins', 10, 6.95)
-    >>> dir(raisins)  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-    ['_Check#0', '_Check#1', '_Check#2', '__class__', ...
-     'description', 'price', 'subtotal', 'weight']
-    >>> [getattr(raisins, name) for name in dir(raisins) if name.startswith('_Check#')]
-    ['Golden raisins', 10, 6.95]
+    >>> truffle = LineItem('White truffle', 100, 0)
+    Traceback (most recent call last):
+        ...
+    ValueError: price must be > 0
 
 If the descriptor is accessed in the class, the descriptor object is
 returned:
 
     >>> LineItem.weight  # doctest: +ELLIPSIS
-    <model_v5_check.Check object at 0x...>
+    <model_v5.Quantity object at 0x...>
     >>> LineItem.weight.storage_name
-    '_Check#1'
+    'weight'
 
 The `NonBlank` descriptor prevents empty or blank strings to be used
 for the description:
@@ -343,31 +296,22 @@ for the description:
     >>> br_nuts.description = ' '
     Traceback (most recent call last):
         ...
-    ValueError: ' ' is not valid.
+    ValueError: description cannot be blank
     >>> void = LineItem('', 1, 1)
     Traceback (most recent call last):
         ...
-    ValueError: '' is not valid.
+    ValueError: description cannot be blank
+
 
 """
 
-import model_v5_check as model
-
-
-def gt_zero(x):
-    """value must be > 0"""
-    return x if x > 0 else model.INVALID
-
-
-def non_blank(txt):
-    txt = txt.strip()
-    return txt if txt else model.INVALID
+import model_v5 as model  # <1>
 
 
 class LineItem:
-    description = model.Check(non_blank)
-    weight = model.Check(gt_zero)
-    price = model.Check(gt_zero)
+    description = model.NonBlank()  # <2>
+    weight = model.Quantity()
+    price = model.Quantity()
 
     def __init__(self, description, weight, price):
         self.description = description
