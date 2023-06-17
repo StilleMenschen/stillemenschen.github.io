@@ -326,10 +326,12 @@ instance attributes, created in each ``LineItem`` instance::
 def quantity(storage_name):  # <1>
 
     def qty_getter(instance):  # <2>
+        # 防止无限递归
         return instance.__dict__[storage_name]  # <3>
 
     def qty_setter(instance, value):  # <4>
         if value > 0:
+            # 防止无限递归
             instance.__dict__[storage_name] = value  # <5>
         else:
             raise ValueError('value must be > 0')
@@ -431,29 +433,41 @@ class BlackKnight:
 
 ## 特殊函数或属性
 
+在用户定义的类中，以下特殊方法用于获取、设直、删除和列山属性。
+
+使用点号表示法或内置的函数 getattr，hasattr 和 setattr 存取属性都会触发相应的特殊方法。但是，直接通过实例的`__dict__`属性读写属性不会触发这些特殊方法，必要时，这是绕过特殊方法的常用方式。
+
 - `__class__`
 
-  对象属性的引用（即`obj.__class__`与`type(obj)`的作用相同）。Python 的某些特殊方法，例如`__getattr__`，只在对象的类中寻找，而不在实例中寻找
+  对象所属类的引用（例如， `obj.__class__` 与 type(obj) 的作用相同）。Python 的某些特殊方法（例如 `__getattr__`），只在对象的类中而不在实例中寻找。
 
 - `__dict__`
 
-  一个映射，存储对象或类的可写属性。有`__dict__`属性的对象，任何时候都能随意设置新属性。如果类有`__slots__`属性，它的实例可能没有`__dict__`属性。
+  存储对象或类的可写属性的映射。有`__dict__`属性的对象，任何时候都能随意设置新属性。对于有`__slots__`属性的类，其实例可能没有`__dict__`属性。
 
 - `__slots__`
 
-  类可以定义这个属性，限制实例能有哪些属性。`__slots__`属性的值是一个字符串组成的元组，指明允许有的属性。如果`__slots__`中没有`__dict__`，那么该类的实例没有`__dict__`属性，实例只允许有指定名称的属性。
+  类可以定义这个属性，节省内存。`__slots__`属性的值是一个字符串元组，列出了允许有的属性。如果 `__slots__` 中没有 `__dict__`，那么该类的实例就没有`__dict__`属性，而只允许有`__slots__`中列出的属性。
 
 - `dir([object])`
 
-  如果没有实参，则返回当前本地作用域中的名称列表。如果有实参，它会尝试返回该对象的有效属性列表。参考[官方文档说明](https://docs.python.org/zh-cn/3/library/functions.html#dir)
+  列出对象的大多数属性。官方文档说，dir 函数的目的是交互式使用，因此没有提供完整的属性列表，只列出了一组“重要的”属性名。dir 函数能审查有或没有`__dict__`属性的对象。dir 函数不列出`__dict__`属性本身，但会列出其中的键。实现特殊方法`__dir__`可以自定义 dir 函数的输出。如果没有指定可选的 object 参数，则 dir 函数会列出当前作用域中的名称。
+
+- `getattr(object, name [, default])`
+
+  从 object 对象中获取 name 字符串对应的属性。主要用于获取事先不知道名称的属性（或方法）。获取的属性可能来自对象所属的类或超类。如果指定的属性不存在，则 getattr 函数会抛出 `AttributeError` 异常，或者返回 default 参数的值（如果提供了的话）。在标准库中， cmd 包的 Cmd.onecmd 方法就很好地利用了 gettatr，用于获取并执行用户定义的命令。
+
+- `hasattr(object ,name)`
+
+  如果 object 对象中存在指定的属性，或者能以某种方式（例如继承）通过 object 对象获取指定的属性，那么就返回 True。Python 标准库文档指出：“这个函数的实现方法是调用 getattr(object, name) 函数，看看是否抛出`AttributeError`异常。”
+
+- `setattr(objec, name, value)`
+
+  把 object 对象指定属性的值设为 value，前提是 object 对象能接受提供的值。这可能创建一个新属性，也可能覆盖现有属性。
 
 - `vars([object])`
 
-  返回模块、类、实例或任何其它具有`__dict__`属性的对象的`__dict__`属性。参考[官方文档说明](https://docs.python.org/zh-cn/3/library/functions.html#vars)
-
-- `__getattribute__`
-
-  此方法会无条件地被调用以实现对类实例属性的访问。如果类还定义了`__getattr__()`，则后者不会被调用，除非`__getattribute__()`显式地调用它或是引发了`AttributeError`。[官方文档说明](https://docs.python.org/zh-cn/3/reference/datamodel.html#object.__getattribute__)
+  返回 object 对象的`__dict__`属性。如果实例所属的类定义了`__slots__` 属性且实例没有`__dict__`属性，那么 vars 函数就不能处理（相反，dir 函数能处理）这样的实例。如果没有指定参数，那么 vars() 函数的作用与 locals() 函数一样：返回表示本地作用域的字典。
 
 > 对于自定义类来说，如果隐式调用特殊方法，仅当特殊方法在对象所属的类型上定义，而不是在对象的实例字典中定义时，才能确保调用成功。
 
