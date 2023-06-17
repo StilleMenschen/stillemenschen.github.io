@@ -469,6 +469,26 @@ class BlackKnight:
 
   返回 object 对象的`__dict__`属性。如果实例所属的类定义了`__slots__` 属性且实例没有`__dict__`属性，那么 vars 函数就不能处理（相反，dir 函数能处理）这样的实例。如果没有指定参数，那么 vars() 函数的作用与 locals() 函数一样：返回表示本地作用域的字典。
 
+- `__delattr__(self, name)`
+
+  只要使用 del 语句删除属性,就会调用这个方法。例如,del obj.attr 语句触发 `Class.__delattr_(obj,'attr')`。如果 attr 是一个特性,而且类实现了 `__delattr__` 方法,则永不调用特性的删值方法。
+
+- `__dir__(self)`
+
+  在对象上调用 dir 函数时会调用这个方法,以列出属性。例如, dir(obj) 触发 `Class.__dir__(obj)`。所有现代的 Python 控制台在 Tab 补全时也使用该方法。
+
+- `_getattr__(self, name)`
+
+  仅当获取指定的属性失败,搜索过 obj、Class 及其超类之后会调用这个方法。表达式 `obj.no_such_attr`、 `getattr(obj, 'no_such_attr')` 和 `hasattr(obj, 'no_such_attr')` 可能触发 `Class.__getattr__(obj, 'no_such_attr')` ,但是,仅当在 obj、 Class 及其超类中找不到指定的属性时才触发。
+
+- `__getattribute__(self, name)`
+
+  在 Python 代码中尝试直接获取指定名称的属性时始终调用这个方法［某些情况下(例如获取 `__repr__`方法时)解释器可能会绕过该方法］。点号表示法与内置函数 getattr 和 hasattr 会触发这个方法。`__getattr__`仅在`__getattribute__`之后,而且仅当 `__getattribute__` 抛出 AttributeError 时调用。为了在获取 obj 实例的属性时不导致无限递归, `__getattribute__` 方法的实现要使用 `super().__getattribute__(obj, name)`
+
+- `__setattr__(self, name, value)`
+
+  尝试设置指定名称的属性时总会调用这个方法。点号表示法和内置函数 setattr 会触发这个方法。例如, obj.attr ＝ 42 和 `setattr(obj, 'attr', 42)` 都会触发 `Class.__setattr__(obj, 'attr', 42)`。
+
 > 对于自定义类来说，如果隐式调用特殊方法，仅当特殊方法在对象所属的类型上定义，而不是在对象的实例字典中定义时，才能确保调用成功。
 
 Last Modified 2023-06-17
