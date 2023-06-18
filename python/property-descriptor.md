@@ -328,200 +328,185 @@ class LineItem:
 """
 Overriding descriptor (a.k.a. data descriptor or enforced descriptor):
 
+    >>> obj = Model()
+    >>> obj.over  # doctest: +ELLIPSIS
+    Overriding.__get__() invoked with args:
+        self     = <descriptorkinds.Overriding object at 0x...>
+        instance = <descriptorkinds.Model object at 0x...>
+        owner    = <class 'descriptorkinds.Model'>
+    >>> Model.over  # doctest: +ELLIPSIS
+    Overriding.__get__() invoked with args:
+        self     = <descriptorkinds.Overriding object at 0x...>
+        instance = None
+        owner    = <class 'descriptorkinds.Model'>
 
-    >>> obj = Managed()  # <1>
-    >>> obj.over  # <2>
-    -> Overriding.__get__(<Overriding object>, <Managed object>, <class Managed>)
-    >>> Managed.over  # <3>
-    -> Overriding.__get__(<Overriding object>, None, <class Managed>)
-    >>> obj.over = 7  # <4>
-    -> Overriding.__set__(<Overriding object>, <Managed object>, 7)
-    >>> obj.over  # <5>
-    -> Overriding.__get__(<Overriding object>, <Managed object>, <class Managed>)
-    >>> obj.__dict__['over'] = 8  # <6>
-    >>> vars(obj)  # <7>
+
+An overriding descriptor cannot be shadowed by assigning to an instance:
+
+    >>> obj = Model()
+    >>> obj.over = 7  # doctest: +ELLIPSIS
+    Overriding.__set__() invoked with args:
+        self     = <descriptorkinds.Overriding object at 0x...>
+        instance = <descriptorkinds.Model object at 0x...>
+        value    = 7
+    >>> obj.over  # doctest: +ELLIPSIS
+    Overriding.__get__() invoked with args:
+        self     = <descriptorkinds.Overriding object at 0x...>
+        instance = <descriptorkinds.Model object at 0x...>
+        owner    = <class 'descriptorkinds.Model'>
+
+
+Not even by poking the attribute into the instance ``__dict__``:
+
+    >>> obj.__dict__['over'] = 8
+    >>> obj.over  # doctest: +ELLIPSIS
+    Overriding.__get__() invoked with args:
+        self     = <descriptorkinds.Overriding object at 0x...>
+        instance = <descriptorkinds.Model object at 0x...>
+        owner    = <class 'descriptorkinds.Model'>
+    >>> vars(obj)
     {'over': 8}
-    >>> obj.over  # <8>
-    -> Overriding.__get__(<Overriding object>, <Managed object>, <class Managed>)
-
 
 Overriding descriptor without ``__get__``:
 
-(these tests are reproduced below without +ELLIPSIS directives for inclusion in the book;
-look for DESCR_KINDS_DEMO2)
+    >>> obj.over_no_get  # doctest: +ELLIPSIS
+    <descriptorkinds.OverridingNoGet object at 0x...>
+    >>> Model.over_no_get   # doctest: +ELLIPSIS
+    <descriptorkinds.OverridingNoGet object at 0x...>
+    >>> obj.over_no_get = 7  # doctest: +ELLIPSIS
+    OverridingNoGet.__set__() invoked with args:
+        self     = <descriptorkinds.OverridingNoGet object at 0x...>
+        instance = <descriptorkinds.Model object at 0x...>
+        value    = 7
+    >>> obj.over_no_get  # doctest: +ELLIPSIS
+    <descriptorkinds.OverridingNoGet object at 0x...>
 
-    >>> obj.over_no_get  # doctest: +ELLIPSIS
-    <descriptorkinds.OverridingNoGet object at 0x...>
-    >>> Managed.over_no_get  # doctest: +ELLIPSIS
-    <descriptorkinds.OverridingNoGet object at 0x...>
-    >>> obj.over_no_get = 7
-    -> OverridingNoGet.__set__(<OverridingNoGet object>, <Managed object>, 7)
-    >>> obj.over_no_get  # doctest: +ELLIPSIS
-    <descriptorkinds.OverridingNoGet object at 0x...>
+
+Poking the attribute into the instance ``__dict__`` means you can read the new
+value for the attribute, but setting it still triggers ``__set__``:
+
     >>> obj.__dict__['over_no_get'] = 9
     >>> obj.over_no_get
     9
-    >>> obj.over_no_get = 7
-    -> OverridingNoGet.__set__(<OverridingNoGet object>, <Managed object>, 7)
+    >>> obj.over_no_get = 7  # doctest: +ELLIPSIS
+    OverridingNoGet.__set__() invoked with args:
+        self     = <descriptorkinds.OverridingNoGet object at 0x...>
+        instance = <descriptorkinds.Model object at 0x...>
+        value    = 7
     >>> obj.over_no_get
     9
 
+
 Non-overriding descriptor (a.k.a. non-data descriptor or shadowable descriptor):
 
+    >>> obj = Model()
+    >>> obj.non_over  # doctest: +ELLIPSIS
+    NonOverriding.__get__() invoked with args:
+        self     = <descriptorkinds.NonOverriding object at 0x...>
+        instance = <descriptorkinds.Model object at 0x...>
+        owner    = <class 'descriptorkinds.Model'>
+    >>> Model.non_over  # doctest: +ELLIPSIS
+    NonOverriding.__get__() invoked with args:
+        self     = <descriptorkinds.NonOverriding object at 0x...>
+        instance = None
+        owner    = <class 'descriptorkinds.Model'>
 
-    >>> obj = Managed()
-    >>> obj.non_over  # <1>
-    -> NonOverriding.__get__(<NonOverriding object>, <Managed object>, <class Managed>)
-    >>> obj.non_over = 7  # <2>
-    >>> obj.non_over  # <3>
+
+A non-overriding descriptor can be shadowed by assigning to an instance:
+
+    >>> obj.non_over = 7
+    >>> obj.non_over
     7
-    >>> Managed.non_over  # <4>
-    -> NonOverriding.__get__(<NonOverriding object>, None, <class Managed>)
-    >>> del obj.non_over  # <5>
-    >>> obj.non_over  # <6>
-    -> NonOverriding.__get__(<NonOverriding object>, <Managed object>, <class Managed>)
 
 
-No descriptor type survives being overwritten on the class itself:
-
-
-    >>> obj = Managed()  # <1>
-    >>> Managed.over = 1  # <2>
-    >>> Managed.over_no_get = 2
-    >>> Managed.non_over = 3
-    >>> obj.over, obj.over_no_get, obj.non_over  # <3>
-    (1, 2, 3)
-
-
-Methods are non-overriding descriptors:
+Methods are non-over descriptors:
 
     >>> obj.spam  # doctest: +ELLIPSIS
-    <bound method Managed.spam of <descriptorkinds.Managed object at 0x...>>
-    >>> Managed.spam  # doctest: +ELLIPSIS
-    <function Managed.spam at 0x...>
-    >>> obj.spam()
-    -> Managed.spam(<Managed object>)
-    >>> Managed.spam()
-    Traceback (most recent call last):
-      ...
-    TypeError: Managed.spam() missing 1 required positional argument: 'self'
-    >>> Managed.spam(obj)
-    -> Managed.spam(<Managed object>)
-    >>> Managed.spam.__get__(obj)  # doctest: +ELLIPSIS
-    <bound method Managed.spam of <descriptorkinds.Managed object at 0x...>>
-    >>> obj.spam.__func__ is Managed.spam
-    True
+    <bound method Model.spam of <descriptorkinds.Model object at 0x...>>
+    >>> Model.spam  # doctest: +ELLIPSIS
+    <function Model.spam at 0x...>
+    >>> obj.spam()  # doctest: +ELLIPSIS
+    Model.spam() invoked with arg:
+        self = <descriptorkinds.Model object at 0x...>
     >>> obj.spam = 7
     >>> obj.spam
     7
 
 
-"""
+No descriptor type survives being overwritten on the class itself:
 
-"""
-NOTE: These tests are here because I can't add callouts after +ELLIPSIS
-directives and if doctest runs them without +ELLIPSIS I get test failures.
-
-
-    >>> obj.over_no_get  # <1>
-    <__main__.OverridingNoGet object at 0x665bcc>
-    >>> Managed.over_no_get  # <2>
-    <__main__.OverridingNoGet object at 0x665bcc>
-    >>> obj.over_no_get = 7  # <3>
-    -> OverridingNoGet.__set__(<OverridingNoGet object>, <Managed object>, 7)
-    >>> obj.over_no_get  # <4>
-    <__main__.OverridingNoGet object at 0x665bcc>
-    >>> obj.__dict__['over_no_get'] = 9  # <5>
-    >>> obj.over_no_get  # <6>
-    9
-    >>> obj.over_no_get = 7  # <7>
-    -> OverridingNoGet.__set__(<OverridingNoGet object>, <Managed object>, 7)
-    >>> obj.over_no_get  # <8>
-    9
-
-
-Methods are non-overriding descriptors:
-
-
-    >>> obj = Managed()
-    >>> obj.spam  # <1>
-    <bound method Managed.spam of <descriptorkinds.Managed object at 0x74c80c>>
-    >>> Managed.spam  # <2>
-    <function Managed.spam at 0x734734>
-    >>> obj.spam = 7  # <3>
-    >>> obj.spam
+    >>> Model.over = 1
+    >>> obj.over
+    1
+    >>> Model.over_no_get = 2
+    >>> obj.over_no_get
+    2
+    >>> Model.non_over = 3
+    >>> obj.non_over
     7
 
-
 """
 
-""" auxiliary functions for display only """
+
+def print_args(name, *args):  # <1>
+    cls_name = args[0].__class__.__name__
+    arg_names = ['self', 'instance', 'owner']
+    if name == 'set':
+        arg_names[-1] = 'value'
+    print('{}.__{}__() invoked with args:'.format(cls_name, name))
+    for arg_name, value in zip(arg_names, args):
+        print('    {:8} = {}'.format(arg_name, value))
 
 
-def cls_name(obj_or_cls):
-    cls = type(obj_or_cls)
-    if cls is type:
-        cls = obj_or_cls
-    return cls.__name__.split('.')[-1]
-
-
-def display(obj):
-    cls = type(obj)
-    if cls is type:
-        return '<class {}>'.format(obj.__name__)
-    elif cls in [type(None), int]:
-        return repr(obj)
-    else:
-        return '<{} object>'.format(cls_name(obj))
-
-
-def print_args(name, *args):
-    pseudo_args = ', '.join(display(x) for x in args)
-    print('-> {}.__{}__({})'.format(cls_name(args[0]), name, pseudo_args))
-
-
-""" essential classes for this example """
-
-
-class Overriding:  # <1>
+class Overriding:  # <2>
     """a.k.a. data descriptor or enforced descriptor"""
 
     def __get__(self, instance, owner):
-        print_args('get', self, instance, owner)  # <2>
+        print_args('get', self, instance, owner)  # <3>
 
     def __set__(self, instance, value):
         print_args('set', self, instance, value)
 
 
-class OverridingNoGet:  # <3>
+class OverridingNoGet:  # <4>
     """an overriding descriptor without ``__get__``"""
 
     def __set__(self, instance, value):
         print_args('set', self, instance, value)
 
 
-class NonOverriding:  # <4>
+class NonOverriding:  # <5>
     """a.k.a. non-data or shadowable descriptor"""
 
     def __get__(self, instance, owner):
         print_args('get', self, instance, owner)
 
 
-class Managed:  # <5>
+class Model:  # <6>
     over = Overriding()
     over_no_get = OverridingNoGet()
     non_over = NonOverriding()
 
-    def spam(self):  # <6>
-        print('-> Managed.spam({})'.format(display(self)))
+    def spam(self):  # <7>
+        print('Model.spam() invoked with arg:')
+        print('    self =', self)
 ```
 
-- 实现`__set__`方法的描述符属于覆盖型描述符，因为虽然描述符是类属性，但是实现`__set__`方法的话，会覆盖对实例属性的赋值操作。特性也是覆盖型描述符，如果没有提供设置值的函数，`property`类中的`__set__`方法会抛出`AttributeError`错误，指明那个属性是只读的。
-- 有`__set__`方法但没有`__get__`方法的覆盖型描述符，只有写操作由描述符处理，而进行读操作时，实例属性会覆盖描述符。
-- 没有实现`__set__`方法的描述符属于非覆盖型描述符。如果设置了同名的实例属性，描述符会被遮盖，致使描述符无法处理那个实例的那个属性。
-- 不管描述符是不是覆盖型，为类属性赋值都能覆盖描述符（猴子补丁）
+### 覆盖型描述符
+
+实现`__set__`方法的描述符属于覆盖型描述符，因为虽然描述符是类属性，但是实现`__set__`方法的话，描述符将覆盖对实例属性的赋值操作。特性也是覆盖型描述符：如果没有提供设值函数，那么 property 类中的`__set__`方法就会抛出 AttributeError 异常，表明那个属性是只读的。
+
+特性和其他覆盖型描述符（例如 Django 模型字段）既实现`__set__`方法，也买现`__get__`方法，不过也可以只实现`__set__`方法。此时，只有写操作由描述符处理。通过实例读取描述符会返回描述符对象本身，因为没有处理读操作的`__get__`方法。如果直接通过实例的`__dict__`属性创建同名实例属性，那么以后再设置那个属性时，仍由`__set__`方法插手接管，但是读取那个属性的话，会直接从实例中返回新赋予的值，而不返回描述符对象。也就是说，实例属性会遮盖描述符，不过只有读操作是如此。
+
+### 非覆盖型描述符
+
+没有实现`__set__`方法的描述符是非覆盖型描述符。如果设置了同名的实例属性，那么描述符就会被遮盖，致使其无法处理那个实例的那个属性。所有方法和`＠functools.cached_property`是以非覆盖型描述符实现的。
+
+> 不管描述符是不是覆盖型，为类属性赋值都能覆盖描述符（猴子补丁）
 
 ## 方法是描述符
+
+在类中定义的函数，如果在实例上调用，就会变成绑定方法，因为用户定义的函数都有`__get__`方法，在依附到类上后，就相当于描述符。绑定方法对象还有`__call__`方法，用于处理实际调用过程。这个方法会调用`__func__`属性引用的原始函数，传入的第一个参数是方法的`__self__`属性。这就是形参 self 的隐式绑定方式。函数会变成绑定方法，这是 Python 语言底层使用描述符的最好例证。
 
 ```python
 """
@@ -562,12 +547,26 @@ class Text(collections.UserString):
         return self[::-1]
 ```
 
+## 描述符用法
+
+- 使用 property 以保持简单
+
+内置的 property 类创建的其实是实现了`__set__`方法和`__get__`方法的覆盖型描述符，即使没有定义设值方法。特性的`__set__`方法会默认抛出 AttributeError: can't set attribute，因此创建只读属性最简单的方式是使用特性，这能避免下一条所述的问题。
+
+- 只读描述符必须有`__set__`方法
+
+使用描述符类实现只读属性时要记住，`__get__`和`__set__`这两个方法必须都定义，否则，实例的同名属性会遮盖描述符。只读属性的`__set__`方法只需抛出 AttributeError 异常，并提供合适的错误消息。
+
 - 用于验证的描述符可以只有`__set__`方法
 
-  对于仅用于验证的描述符来说，`__set__`方法应该检查 value 参数获取值，如果有效，使用描述符实例的名称为键，直接在实例的`__dict__`属性中设置。这样，从实例中读取同名属性的速度很快，因为不用经过`__get__`方法处理。
+在仅用于验证的描述符中，`__set__`方法应该检查 value 参数获得的值，如果有效，就使用描述符实例的名称作为键，直接在实例的`__dict__`属性中设置。这样，从实例中读取同名属性的速度很快，因为不用经过`__get__`方法处理。
 
-- 仅有`__get__`方法的描述符可以实现高速缓存
+- 仅有`__get__`方法的描述符可以实现高效缓存
 
-  如果只编写了`__get__`方法，那么创建的是非覆盖型的描述符。这种描述符可以用于执行某些耗费资源的计算，然后为实例设置同名属性，缓存结果。同名实例属性会覆盖描述符，因此后续访问会直接从实例的`__dict__`属性中获取值，而不会再触发描述符的`__get__`方法。
+如果只编写了`__get__`方法，那么得到的是非覆盖型描述符。这种描述符可用于执行某些耗费资源的计算，然后为实例设置同名属性，缓存结果。同名实例属性会遮盖描述符，因此后续访问直接从实例的`__dict__`属性中获取值，不再触发描述符的`__get__`方法。`＠functools.cached_property` 装饰器创建的其实就是非覆盖型描述符。
 
-Last Modified 2022-08-09
+- 非特殊的方法可以被实例属性遮盖
+
+函数和方法只实现了`__get__`方法，属于非覆盖型描述符。像 my\*obj.the_method ＝ 7 这样简单赋值之后，后续通过该实例访问 the_method，得到的是数值 7 —— 但是不影响类或其他实例。然而，特殊方法不受这个问题的影响。解释器只在类中寻找特殊方法，也就是说， `repr(x)` 执行的其实是 `x.__class__.__repr__(x)`，因此 x 的`__repr__`属性对 `repr(x)`方法调用没有影响。出于同样的原因，实例的`__getattr__`属性不会破坏常规的属性访问规则。
+
+Last Modified 2023-06-18
