@@ -574,175 +574,208 @@ print('# evaldemo_meta module end')
 # evaldemo_meta module end
 ```
 
-## 元类属性的顺序
+## 元类实现检查
 
 ```python
-import abc
-import collections
+"""
+A ``Checked`` subclass definition requires that keyword arguments are
+used to create an instance, and provides a nice ``__repr__``::
 
 
-class AutoStorage:
-    __counter = 0
+    >>> class Movie(Checked):  # <1>
+    ...     title: str  # <2>
+    ...     year: int
+    ...     box_office: float
+    ...
+    >>> movie = Movie(title='The Godfather', year=1972, box_office=137)  # <3>
+    >>> movie.title
+    'The Godfather'
+    >>> movie  # <4>
+    Movie(title='The Godfather', year=1972, box_office=137.0)
 
-    def __init__(self):
-        cls = self.__class__
-        prefix = cls.__name__
-        index = cls.__counter
-        self.storage_name = '_{}#{}'.format(prefix, index)
-        cls.__counter += 1
 
-    def __get__(self, instance, owner):
-        if instance is None:
+The type of arguments is runtime checked during instantiation
+and when an attribute is set::
+
+
+    >>> blockbuster = Movie(title='Avatar', year=2009, box_office='billions')
+    Traceback (most recent call last):
+      ...
+    TypeError: 'billions' is not compatible with box_office:float
+    >>> movie.year = 'MCMLXXII'
+    Traceback (most recent call last):
+      ...
+    TypeError: 'MCMLXXII' is not compatible with year:int
+
+
+Attributes not passed as arguments to the constructor are initialized with
+default values::
+
+
+    >>> Movie(title='Life of Brian')
+    Movie(title='Life of Brian', year=0, box_office=0.0)
+
+
+Providing extra arguments to the constructor is not allowed::
+
+    >>> blockbuster = Movie(title='Avatar', year=2009, box_office=2000,
+    ...                     director='James Cameron')
+    Traceback (most recent call last):
+      ...
+    AttributeError: 'Movie' object has no attribute 'director'
+
+Creating new attributes at runtime is restricted as well::
+
+    >>> movie.director = 'Francis Ford Coppola'
+    Traceback (most recent call last):
+      ...
+    AttributeError: 'Movie' object has no attribute 'director'
+
+The `_asdict` instance method creates a `dict` from the attributes
+of a `Movie` object::
+
+    >>> movie._asdict()
+    {'title': 'The Godfather', 'year': 1972, 'box_office': 137.0}
+
+"""
+
+from collections.abc import Callable
+from typing import Any, NoReturn, get_type_hints
+
+class Field:
+    def __init__(self, name: str, constructor: Callable) -> None:
+        if not callable(constructor) or constructor is type(None):
+            raise TypeError(f'{name!r} type hint must be callable')
+        self.name = name
+        self.storage_name = '_' + name  # <1>
+        self.constructor = constructor
+
+    def __get__(self, instance, owner=None):
+        if instance is None:  # <2>
             return self
+        return getattr(instance, self.storage_name)  # <3>
+
+    def __set__(self, instance: Any, value: Any) -> None:
+        if value is ...:
+            value = self.constructor()
         else:
-            return getattr(instance, self.storage_name)
+            try:
+                value = self.constructor(value)
+            except (TypeError, ValueError) as e:
+                type_name = self.constructor.__name__
+                msg = f'{value!r} is not compatible with {self.name}:{type_name}'
+                raise TypeError(msg) from e
+        setattr(instance, self.storage_name, value)  # <4>
 
-    def __set__(self, instance, value):
-        setattr(instance, self.storage_name, value)
+class CheckedMeta(type):
 
+    def __new__(meta_cls, cls_name, bases, cls_dict):  # <1>
+        if '__slots__' not in cls_dict:  # <2>
+            slots = []
+            type_hints = cls_dict.get('__annotations__', {})  # <3>
+            for name, constructor in type_hints.items():   # <4>
+                field = Field(name, constructor)  # <5>
+                cls_dict[name] = field  # <6>
+                slots.append(field.storage_name)  # <7>
 
-class Validated(abc.ABC, AutoStorage):
+            cls_dict['__slots__'] = slots  # <8>
 
-    def __set__(self, instance, value):
-        value = self.validate(instance, value)
-        super().__set__(instance, value)
+        return super().__new__(
+                meta_cls, cls_name, bases, cls_dict)  # <9>
 
-    @abc.abstractmethod
-    def validate(self, instance, value):
-        """return validated value or raise ValueError"""
-
-
-class Quantity(Validated):
-    """a number greater than zero"""
-
-    def validate(self, instance, value):
-        if value <= 0:
-            raise ValueError('value must be > 0')
-        return value
-
-
-class NonBlank(Validated):
-    """a string with at least one non-space character"""
-
-    def validate(self, instance, value):
-        value = value.strip()
-        if len(value) == 0:
-            raise ValueError('value cannot be empty or blank')
-        return value
-
-
-class EntityMeta(type):
-    """Metaclass for business entities with validated fields"""
+class Checked(metaclass=CheckedMeta):
+    __slots__ = ()  # skip CheckedMeta.__new__ processing
 
     @classmethod
-    def __prepare__(cls, name, bases):
-        return collections.OrderedDict()  # <1>
+    def _fields(cls) -> dict[str, type]:
+        return get_type_hints(cls)
 
-    def __init__(cls, name, bases, attr_dict):
-        super().__init__(name, bases, attr_dict)
-        cls._field_names = []  # <2>
-        for key, attr in attr_dict.items():  # <3>
-            if isinstance(attr, Validated):
-                type_name = type(attr).__name__
-                attr.storage_name = '_{}#{}'.format(type_name, key)
-                cls._field_names.append(key)  # <4>
+    def __init__(self, **kwargs: Any) -> None:
+        for name in self._fields():
+            value = kwargs.pop(name, ...)
+            setattr(self, name, value)
+        if kwargs:
+            self.__flag_unknown_attrs(*kwargs)
 
+    def __flag_unknown_attrs(self, *names: str) -> NoReturn:
+        plural = 's' if len(names) > 1 else ''
+        extra = ', '.join(f'{name!r}' for name in names)
+        cls_name = repr(self.__class__.__name__)
+        raise AttributeError(f'{cls_name} object has no attribute{plural} {extra}')
 
-class Entity(metaclass=EntityMeta):
-    """Business entity with validated fields"""
+    def _asdict(self) -> dict[str, Any]:
+        return {
+            name: getattr(self, name)
+            for name, attr in self.__class__.__dict__.items()
+            if isinstance(attr, Field)
+        }
 
-    @classmethod
-    def field_names(cls):  # <5>
-        for name in cls._field_names:
-            yield name
+    def __repr__(self) -> str:
+        kwargs = ', '.join(
+            f'{key}={value!r}' for key, value in self._asdict().items()
+        )
+        return f'{self.__class__.__name__}({kwargs})'
+
 ```
 
 ```python
-"""
+import pytest
 
-A line item for a bulk food order has description, weight and price fields::
-
-    >>> raisins = LineItem('Golden raisins', 10, 6.95)
-    >>> raisins.weight, raisins.description, raisins.price
-    (10, 'Golden raisins', 6.95)
-
-A ``subtotal`` method gives the total price for that line item::
-
-    >>> raisins.subtotal()
-    69.5
-
-The weight of a ``LineItem`` must be greater than 0::
-
-    >>> raisins.weight = -20
-    Traceback (most recent call last):
-        ...
-    ValueError: value must be > 0
-
-No change was made::
-
-    >>> raisins.weight
-    10
-
-    >>> raisins = LineItem('Golden raisins', 10, 6.95)
-    >>> dir(raisins)[:3]
-    ['_NonBlank#description', '_Quantity#price', '_Quantity#weight']
-    >>> LineItem.description.storage_name
-    '_NonBlank#description'
-    >>> raisins.description
-    'Golden raisins'
-    >>> getattr(raisins, '_NonBlank#description')
-    'Golden raisins'
-
-If the descriptor is accessed in the class, the descriptor object is
-returned:
-
-    >>> LineItem.weight  # doctest: +ELLIPSIS
-    <model_v8.Quantity object at 0x...>
-    >>> LineItem.weight.storage_name
-    '_Quantity#weight'
+from checkedlib import Checked
 
 
-The `NonBlank` descriptor prevents empty or blank strings to be used
-for the description:
+def test_field_descriptor_validation_type_error():
+    class Cat(Checked):
+        name: str
+        weight: float
 
-    >>> br_nuts = LineItem('Brazil Nuts', 10, 34.95)
-    >>> br_nuts.description = ' '
-    Traceback (most recent call last):
-        ...
-    ValueError: value cannot be empty or blank
-    >>> void = LineItem('', 1, 1)
-    Traceback (most recent call last):
-        ...
-    ValueError: value cannot be empty or blank
+    with pytest.raises(TypeError) as e:
+        felix = Cat(name='Felix', weight=None)
+
+    assert str(e.value) == 'None is not compatible with weight:float'
 
 
-Fields can be retrieved in the order they were declared:
+def test_field_descriptor_validation_value_error():
+    class Cat(Checked):
+        name: str
+        weight: float
 
-    >>> for name in LineItem.field_names():
-    ...     print(name)
-    ...
-    description
-    weight
-    price
+    with pytest.raises(TypeError) as e:
+        felix = Cat(name='Felix', weight='half stone')
 
-
-"""
-
-import model_v8 as model
+    assert str(e.value) == "'half stone' is not compatible with weight:float"
 
 
-class LineItem(model.Entity):
-    description = model.NonBlank()
-    weight = model.Quantity()
-    price = model.Quantity()
+def test_constructor_attribute_error():
+    class Cat(Checked):
+        name: str
+        weight: float
 
-    def __init__(self, description, weight, price):
-        self.description = description
-        self.weight = weight
-        self.price = price
+    with pytest.raises(AttributeError) as e:
+        felix = Cat(name='Felix', weight=3.2, age=7)
 
-    def subtotal(self):
-        return self.weight * self.price
+    assert str(e.value) == "'Cat' object has no attribute 'age'"
+
+
+def test_assignment_attribute_error():
+    class Cat(Checked):
+        name: str
+        weight: float
+
+    felix = Cat(name='Felix', weight=3.2)
+    with pytest.raises(AttributeError) as e:
+        felix.color = 'tan'
+
+    assert str(e.value) == "'Cat' object has no attribute 'color'"
+
+
+def test_field_invalid_constructor():
+    with pytest.raises(TypeError) as e:
+        class Cat(Checked):
+            name: str
+            weight: None
+
+    assert str(e.value) == "'weight' type hint must be callable"
 ```
 
 > `__prepare__`方法只在元类中有用，而且必须声明为类方法（添加`@classmethod`装饰器）。解释器调用元类的`__new__`方法之前会先调用`__prepare__`方法，使用类定义体中的属性创建映射。`__prepare__`方法的第一个参数是元类，随后两个参数分别是要构建的类名称和基类组成的元组，返回值必须是映射。元类构建新类时，`__prepare__`方法返回的映射会传给`__new__`方法的最后一个参数，然后再传给`__init__`方法。
@@ -752,4 +785,4 @@ class LineItem(model.Entity):
 - `cls.__subclasses__()` 返回一个列表，包含类的直接子类。这个方法的实现使用弱引用，防止在超类和子类（子类在`__bases__`属性中存储指向超类的强引用）之间出现循环引用。这个方法返回的列表是内存中现存的子类
 - `cls.mro()` 构建类时，如果要获取存储在类属性`__mro__`中的超类元组，解释器会调用这个方法。元类可以覆盖这个方法，定制要构建的类解析方法的顺序。
 
-Last Modified 2023-06-18
+Last Modified 2023-06-19
