@@ -651,6 +651,7 @@ class Field:
         self.constructor = constructor
 
     def __get__(self, instance, owner=None):
+        # 如果得到的 instance 是 None 则返回自身（描述符从托管类自身中读取，而不是托管实例）
         if instance is None:  # <2>
             return self
         return getattr(instance, self.storage_name)  # <3>
@@ -665,26 +666,31 @@ class Field:
                 type_name = self.constructor.__name__
                 msg = f'{value!r} is not compatible with {self.name}:{type_name}'
                 raise TypeError(msg) from e
+        # 设置或更新托管属性的值
         setattr(instance, self.storage_name, value)  # <4>
 
 class CheckedMeta(type):
 
     def __new__(meta_cls, cls_name, bases, cls_dict):  # <1>
+        # 仅当类中不包含 __slots__ 才增强类的功能
         if '__slots__' not in cls_dict:  # <2>
             slots = []
             type_hints = cls_dict.get('__annotations__', {})  # <3>
+            # 为每个带有装饰器的属性创建一个 Field 实例
             for name, constructor in type_hints.items():   # <4>
                 field = Field(name, constructor)  # <5>
+                # 覆盖原来的属性
                 cls_dict[name] = field  # <6>
+                # 添加到列表中
                 slots.append(field.storage_name)  # <7>
-
+            # 填充到原来待构造类的命名空间中的 __slots__
             cls_dict['__slots__'] = slots  # <8>
 
         return super().__new__(
                 meta_cls, cls_name, bases, cls_dict)  # <9>
 
 class Checked(metaclass=CheckedMeta):
-    __slots__ = ()  # skip CheckedMeta.__new__ processing
+    __slots__ = ()  # 跳过 CheckedMeta.__new__ 处理
 
     @classmethod
     def _fields(cls) -> dict[str, type]:
@@ -715,7 +721,6 @@ class Checked(metaclass=CheckedMeta):
             f'{key}={value!r}' for key, value in self._asdict().items()
         )
         return f'{self.__class__.__name__}({kwargs})'
-
 ```
 
 ```python
@@ -778,11 +783,14 @@ def test_field_invalid_constructor():
     assert str(e.value) == "'weight' type hint must be callable"
 ```
 
-> `__prepare__`方法只在元类中有用，而且必须声明为类方法（添加`@classmethod`装饰器）。解释器调用元类的`__new__`方法之前会先调用`__prepare__`方法，使用类定义体中的属性创建映射。`__prepare__`方法的第一个参数是元类，随后两个参数分别是要构建的类名称和基类组成的元组，返回值必须是映射。元类构建新类时，`__prepare__`方法返回的映射会传给`__new__`方法的最后一个参数，然后再传给`__init__`方法。
+- `__set_name__` 无须自定义元类逻辑就能自动设置描述符的名称
+- `__init_subclass__` 提供一种自定义类创建过程的方式，对终端用户透明，而且比装饰器更简单，但是遇到复杂的类层次结构可能会产生冲突
+
+> 内置的 dict 保留键的插入顺序（Python >= 3.6）
 
 - `cls.__bases__` 由类的基类组成的元组
-- `cls.__qualname__` 获取类或函数的限定名称，即从全局模块的全局作用域到类的点分路径
-- `cls.__subclasses__()` 返回一个列表，包含类的直接子类。这个方法的实现使用弱引用，防止在超类和子类（子类在`__bases__`属性中存储指向超类的强引用）之间出现循环引用。这个方法返回的列表是内存中现存的子类
+- `cls.__qualname__` 获取类或函数的限定名称，即从全局模块的全局作用域到类的点分路径，在一个类中定义另一个类时会用到这个属性
+- `cls.__subclasses__()` 返回一个列表，包含类的直接子类。这个方法的实现使用弱引用，防止在超类和子类（子类在`__bases__`属性中存储指向超类的强引用）之间出现循环引用。这个方法返回的列表是内存中现存的子类，不含尚未导入的模块中的子类
 - `cls.mro()` 构建类时，如果要获取存储在类属性`__mro__`中的超类元组，解释器会调用这个方法。元类可以覆盖这个方法，定制要构建的类解析方法的顺序。
 
-Last Modified 2023-06-19
+Last Modified 2023-06-20
