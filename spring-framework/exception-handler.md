@@ -106,23 +106,18 @@ public class InnerExceptionHandler extends ResponseEntityExceptionHandler {
     @SuppressWarnings("NullableProblems")
     protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,
                                                              HttpStatusCode statusCode, WebRequest request) {
-        // 异常是否在预料之中
-        boolean isNotExpected = true;
         // 处理参数校验的错误，将校验的错误提示返回
         if (ex instanceof MethodArgumentNotValidException validException) {
             // 只取出第一个错误信息返回
             ObjectError objectError = validException.getAllErrors().get(0);
             body = new CodedMessage<>(statusCode.value(), objectError.getDefaultMessage(), null);
-            isNotExpected = false;
         }
         // 处理方法参数自定义注解校验的错误
-        if (ex instanceof ConstraintViolationException violationException) {
+        else if (ex instanceof ConstraintViolationException violationException) {
             // 只取出第一个错误信息返回
             Set<ConstraintViolation<?>> violationSet = violationException.getConstraintViolations();
             body = new CodedMessage<>(statusCode.value(), violationSet.iterator().next().getMessage(), null);
-            isNotExpected = false;
-        }
-        if (isNotExpected) {
+        } else {
             // 所有错误
             body = new CodedMessage<>(statusCode.value(), ex.getMessage(), null);
         }
@@ -150,7 +145,7 @@ public class InnerExceptionHandler extends ResponseEntityExceptionHandler {
         Throwable originalCause = ex;
         int depth = 1;
         // 循环获取原始错误，最大操作42次
-        while (Objects.nonNull(originalCause.getCause()) && depth <= 42) {
+        while (null != originalCause.getCause() && depth <= 42) {
             depth++;
             originalCause = originalCause.getCause();
         }
@@ -159,4 +154,4 @@ public class InnerExceptionHandler extends ResponseEntityExceptionHandler {
 }
 ```
 
-Last Modified 2023-03-16
+Last Modified 2023-06-21
