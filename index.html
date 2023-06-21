@@ -46,21 +46,36 @@
     <script src="/static/js/docsify.min.js"></script>
     <script src="/static/js/search.min.js"></script>
     <script src="/static/js/docsify-copy-code.min.js"></script>
-    <script async src="/static/js/prism-bash.min.js"></script>
-    <script async src="/static/js/prism-yaml.min.js"></script>
-    <script async src="/static/js/prism-nginx.min.js"></script>
-    <script async src="/static/js/prism-docker.min.js"></script>
-    <script async src="/static/js/prism-json.min.js"></script>
-    <script async src="/static/js/prism-json5.min.js"></script>
-    <script async src="/static/js/prism-python.min.js"></script>
-    <script async src="/static/js/prism-java.min.js"></script>
-    <script async src="/static/js/prism-batch.min.js"></script>
-    <script async src="/static/js/prism-c.min.js"></script>
-    <script async src="/static/js/prism-cpp.min.js"></script>
-    <script async src="/static/js/prism-sql.min.js"></script>
-    <script async src="/static/js/prism-cypher.min.js"></script>
-    <script async src="/static/js/prism-markdown.min.js"></script>
-    <script async src="/static/js/prism-groovy.min.js"></script>
-    <script async src="/static/js/prism-php.min.js"></script>
+    <script>
+      function loadScript() {
+        const scriptUrls = [
+          "/static/js/prism-bash.min.js",
+          "/static/js/prism-yaml.min.js",
+          "/static/js/prism-nginx.min.js",
+          "/static/js/prism-docker.min.js",
+          "/static/js/prism-json.min.js",
+          "/static/js/prism-json5.min.js",
+          "/static/js/prism-python.min.js",
+          "/static/js/prism-java.min.js",
+          "/static/js/prism-batch.min.js",
+          "/static/js/prism-c.min.js",
+          "/static/js/prism-cpp.min.js",
+          "/static/js/prism-sql.min.js",
+          "/static/js/prism-cypher.min.js",
+          "/static/js/prism-markdown.min.js",
+          "/static/js/prism-groovy.min.js",
+          "/static/js/prism-php.min.js",
+        ];
+        const doc = document;
+        const parent = doc.body;
+        scriptUrls.map((url) => {
+          const s = doc.createElement("script");
+          s.setAttribute("async", true);
+          s.setAttribute("src", url);
+          parent.appendChild(s);
+        });
+      }
+      window.addEventListener("load", loadScript);
+    </script>
   </body>
 </html>
