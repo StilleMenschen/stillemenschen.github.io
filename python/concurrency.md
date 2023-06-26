@@ -40,9 +40,9 @@
 
 1. Python 解释器的每个实例是一个进程。使用 multiprocessing 或 concurrent. futures 库可以启动额外的 Python 进程。 Python 的 subprocess 库用于启动运行外部程序（不管使用何种语言编写）的进程。
 
-2. Python 解释器仅使用一个线程运行用户的程序和内存垃圾回收程序。使用 threading 或 concurrent. futures 库可以启动外的 Python 线程。
+2. Python 解释器仅使用一个线程运行用户的程序和内存垃圾回收程序。使用 threading 或 concurrent.futures 库可以启动额外的 Python 线程。
 
-3. 对对象引用计数和解释器其他内部状态的访问受一个锁的控制，这个锁是“全局解释器商念讲锁”（Global Interpreter Lock，GIL）。任意时间点上只有一个 Python 线程可以持有 GIL。这意味着，任意时间点上只有一个线程能执行 Python 代码，与 CPU 核数量无关。
+3. 对对象引用计数和解释器其他内部状态的访问受一个锁的控制，这个锁是“全局解释器锁”（Global Interpreter Lock，GIL）。任意时间点上只有一个 Python 线程可以持有 GIL。这意味着，任意时间点上只有一个线程能执行 Python 代码，与 CPU 核数量无关。
 
 4. 为了防止一个 Python 线程无限期持有 GIL，Python 的字节码解释器默认每 5 毫秒暂停当前 Python 线程，释放 GIL。被暂停的线程可以再次尝试获得 GIL，但是如果有其他线程等待，那么操作系统调度程序可能会从中挑选一个线程开展工作。
 
@@ -216,4 +216,4 @@ python3 procs.py 6
 python3 procs.py 12
 ```
 
-Last Modified 2023-06-10
+Last Modified 2023-06-26
