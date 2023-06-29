@@ -793,4 +793,79 @@ def test_field_invalid_constructor():
 - `cls.__subclasses__()` 返回一个列表，包含类的直接子类。这个方法的实现使用弱引用，防止在超类和子类（子类在`__bases__`属性中存储指向超类的强引用）之间出现循环引用。这个方法返回的列表是内存中现存的子类，不含尚未导入的模块中的子类
 - `cls.mro()` 构建类时，如果要获取存储在类属性`__mro__`中的超类元组，解释器会调用这个方法。元类可以覆盖这个方法，定制要构建的类解析方法的顺序。
 
-Last Modified 2023-06-20
+## 自动默认属性
+
+```python
+"""
+Testing ``WilyDict``::
+
+    >>> wd = WilyDict()
+    >>> len(wd)
+    0
+    >>> wd['first']
+    0
+    >>> wd
+    {'first': 0}
+    >>> wd['second']
+    1
+    >>> wd['third']
+    2
+    >>> len(wd)
+    3
+    >>> wd
+    {'first': 0, 'second': 1, 'third': 2}
+    >>> wd['__magic__']
+    Traceback (most recent call last):
+      ...
+    KeyError: '__magic__'
+
+Testing ``AutoConst``::
+
+    >>> from autoconst import AutoConst
+
+    >>> class Flavor(AutoConst):
+    ...     banana
+    ...     coconut
+    ...     vanilla
+    ...
+    >>> Flavor.vanilla
+    2
+    >>> Flavor.banana, Flavor.coconut
+    (0, 1)
+
+
+"""
+
+
+class WilyDict(dict):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__next_value = 0
+
+    def __missing__(self, key):
+        if key.startswith('__') and key.endswith('__'):
+            raise KeyError(key)
+        self[key] = value = self.__next_value
+        self.__next_value += 1
+        return value
+
+
+class AutoConstMeta(type):
+    def __prepare__(name, bases, **kwargs):
+        return WilyDict()
+
+
+class AutoConst(metaclass=AutoConstMeta):
+    pass
+
+
+class Flavor(AutoConst):
+    banana
+    coconut
+    vanilla
+
+
+print('Flavor.vanilla ==', Flavor.vanilla)
+```
+
+Last Modified 2023-06-29
