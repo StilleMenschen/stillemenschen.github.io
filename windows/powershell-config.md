@@ -17,14 +17,13 @@ $PSHOME\Profile.ps1
 C:\Windows\System32\WindowsPowerShell\v1.0\Profile.ps1
 ```
 
-配置文件内容
+配置文件内容（需要管理员权限）
 
 ```powershell
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
-[System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-$OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding = [System.Console]::OutputEncoding = [System.Console]::InputEncoding = [System.Text.Encoding]::UTF8
 ```
 
 > 中文为`936`，西文为`437`
 
-Last Modified 2023-06-29
+Last Modified 2023-07-04
