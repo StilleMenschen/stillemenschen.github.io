@@ -17,13 +17,17 @@ $PSHOME\Profile.ps1
 C:\Windows\System32\WindowsPowerShell\v1.0\Profile.ps1
 ```
 
-配置文件内容（需要管理员权限）
+配置文件内容（修改需要管理员权限）
 
 ```powershell
 $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $OutputEncoding = [System.Console]::OutputEncoding = [System.Console]::InputEncoding = [System.Text.Encoding]::UTF8
+
+function prompt { "$PWD `n> " }
 ```
+
+如果希望 CMD 的命令提示有一个换行，可以添加一个环境变量`PROMPT=$P$G$_`
 
 > 中文为`936`，西文为`437`
 
-Last Modified 2023-07-04
+Last Modified 2023-07-21
