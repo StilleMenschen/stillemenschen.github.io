@@ -105,4 +105,12 @@ ss -tn | sort -k 5
 
 >可以通过阅读手册或使用`--help`选项获取更多使用说明
 
-Last Modified 2023-01-29
+## tr
+
+获取由数字字面组成的随机数据
+
+```bash
+tr -cd [:alnum:] </dev/urandom | head -c 100
+```
+
+Last Modified 2023-07-24
