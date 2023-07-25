@@ -15,6 +15,7 @@ NANOSECONDS_PER_DAYS = 24 * NANOSECONDS_PER_HOURS
 
 
 class TimeUnit(Enum):
+    __slots__ = ()
     """时间计算工具"""
     NANOSECONDS = 1
     MICROSECONDS = 2
@@ -66,10 +67,11 @@ class TimeUnit(Enum):
     @staticmethod
     def sleep(duration, time_unit):
         nanoseconds = TimeUnit.to_nanoseconds(duration, time_unit)
-        time.sleep(nanoseconds / TimeUnit.SECONDS.value)
+        time.sleep(nanoseconds / NANOSECONDS_PER_SECOND)
 
 
 class TimeWrapper:
+    __slots__ = ('base_unit',)
 
     def __init__(self, base_unit=TimeUnit.NANOSECONDS):
         self.base_unit = base_unit
@@ -97,6 +99,7 @@ class TimeWrapper:
 
 
 class DurationCalculator:
+    __slots__ = ()
     nanoseconds = TimeWrapper(TimeUnit.NANOSECONDS)
     microseconds = TimeWrapper(TimeUnit.MICROSECONDS)
     milliseconds = TimeWrapper(TimeUnit.MILLISECONDS)
