@@ -1,6 +1,6 @@
 # TimeUnit
 
-时间计算工具，没有考虑计算的数值溢出问题
+时间计算工具，未考虑计算数值溢出问题
 
 ```python
 import time
@@ -15,8 +15,10 @@ NANOSECONDS_PER_DAYS = 24 * NANOSECONDS_PER_HOURS
 
 
 class TimeUnit(Enum):
-    __slots__ = ()
     """时间计算工具"""
+
+    __slots__ = ()
+
     NANOSECONDS = 1
     MICROSECONDS = 2
     MILLISECONDS = 3
@@ -117,4 +119,4 @@ if __name__ == '__main__':
     print(dc.days.to_minutes(2.5))
 ```
 
-Last Modified 2023-07-25
+Last Modified 2023-07-26
