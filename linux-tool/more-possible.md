@@ -107,10 +107,10 @@ ss -tn | sort -k 5
 
 ## tr
 
-获取由数字字面组成的随机数据
+获取由数字和英文字母组成的随机数据
 
 ```bash
 tr -cd [:alnum:] </dev/urandom | head -c 100
 ```
 
-Last Modified 2023-07-24
+Last Modified 2023-07-31
