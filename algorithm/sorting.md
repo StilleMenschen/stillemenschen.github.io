@@ -442,7 +442,7 @@ def quick_sort_helper(array, start_idx, end_idx):
     right_idx = end_idx
     # 不停比较并移动左右指针
     while right_idx >= left_idx:
-        # 如果左指针的值比中枢值大且右指针的值, 说明左右指针的值需要做交换
+        # 如果左指针的值比中枢值和右指针值大, 说明左右指针的值需要做交换
         if array[left_idx] > array[pivot_idx] > array[right_idx]:
             swap(left_idx, right_idx, array)
         # 如果左指针的值小于等于中枢值, 说明左指针的值已经在正确的位置, 移动左指针
@@ -1262,4 +1262,4 @@ int main()
 }
 ```
 
-Last Modified 2022-08-11
+Last Modified 2023-08-10
