@@ -122,4 +122,74 @@ containers:
 
 如果容器镜像本身指定了环境变量（比如在 Dockerfile 中） ，则会被 Kubernetes env 的设置覆盖。在更改容器的默认设置时可以采用这种方法。
 
-Last Modified 2023-08-17
+## 容器安全
+
+在前面的介绍中，当我们使用 ps ax 命令查看容器中的进程列表时，所有进程都是以 root 用户身份运行的。在 Linux 以及其他 UNIX 派生的操作系统中，root 是超级用户，拥有读取任何数据、修改任何文件以及在系统上执行任何操作的特权。
+
+在完整的 Linux 系统上，有些进程需要以 root 的身份运行（例如负责管理所有其他进程的 init） ，但通常容器不需要。
+
+不建议在非必要的时候以 root 用户身份运行进程。因为这违反了最小权限原则（Principle of least privilege） 。该原则要求程序只能访问完成工作必需的信息和资源。
+
+凡是程序都有错误，因为程序都是人写的，而人都会犯错。有些错误会让恶意用户有机可乘，劫持程序读取机密数据或执行任意代码。为了缓解这种情况使用最小权限来运行容器很重要。
+
+首先，不要以 root 身份运行容器，应该为它们分配一个普通的用户，即一个没有特殊特权（例如读取其他用户的文件）的用户。
+
+攻击者还有可能利用容器运行时中的错误“逃离”容器，并在主机上获得与容器中相同的权限。
+
+## 以非 root 运行容器
+
+下面是一个容器规范的示例，该规范告诉 Kubernetes 以特定用户身份运行客器：
+
+```yaml
+containers:
+  - name: demo
+    image: cloudnatived/demo:hello
+    securityContext:
+    runAsUser: 1000
+```
+
+runAsUser 的值是 UID （用户数字标识符）。在许多 Linux 系统上，UID 1000 会被分配给系统上创建的第一个非 root 用户，因此通常容器中的 UID 造择 1000 或更高的值比较安全。容器中是否存在具有该 UID 的 UNIX 用户或者甚至容器中是否存在操作系统都没有关系，即便是空白的容器也可以过样指定。
+
+Docker 还允许在 Dockerfile 中指定一个用户来运行容器的进程，但是你不需要这样做。在 Kubernetes 规范中设置 runAsUser 字段更加容易和灵活。
+
+如果指定了 runAsUser UID，则它将覆盖容器镜像中配置的用户。如果没有 runAsUser，但容器指定了一个用户，则 Kubernetes 将以该用户身份来运行容器，如果清单和镜像中均未指定任何用户，则该容器将以 root 身份运行（不推荐这种做法）。
+
+为了获得最高安全性，应该为每个容器选择一个不同的 UID。如此一来，即某个容器遭到破坏，或意外覆盖数据，它也只能访问自己的数据，而无权访问其他容器。
+
+相反，如果希望两个或多个容器能够访问相同的数据（例如通过挂载卷），则应为它们分配相同的 UID。
+
+## 阻止 root 容器
+
+Kubernetes 可以禁止以 root 用户身份运行容器。
+
+只需设置 runAsNonRoot: true 即可：
+
+```yaml
+containers:
+  - name: demo
+    image: cloudnatived/demo:hello
+    securityContext:
+      runAsNonRoot: true
+```
+
+Kubernetes 在运行该容器时会检查该容器是否以 root 用户身份运行。如果以 root 用户身份运行，则拒绝启动。这种方式可以避免忘记在容器中设置非 root 用户，或运行以 root 用户身份运行的第三方容器。
+
+如果发生这种情况，Pod 状态会显示 CreateContainerConfigError，而通过 kubectl describe 查看该 Pod，则会看到如下错误：
+
+`Error: container has runAsNonRoot and image will run as root`
+
+## 配置只读的文件系统
+
+还有一个重要的安全上下文设置是 readOnlyRootFilesystem，这个设置可以防止容器写入自己的文件系统。你可以设想，如果容器利用了 Docker 或 Kubernetes 的一个错误，那么写入文件系统可能会影响宿主节点上的文件。如果容器的文件系统是只读的，则不会发生这种情况，容器会收到一个 IO 错误
+
+```yaml
+containers:
+  - name: demo
+    image: cloudnatived/demo:hello
+    securityContext:
+      readOnlyRootFilesystem: true
+```
+
+许多容器不需要向自己的文件系统写入任何内容，因此这个设置不会干扰它们。除非容器确实需要写入文件，否则最好设置 readOnlyRootFilesystem.
+
+Last Modified 2023-08-21
