@@ -952,7 +952,6 @@ int main()
 
 给出两个字符串，一个字符串较大（长度更长）一个字符串较小，在较大的字符串中找出可以构成小字符串的子字符串，这个子字符串的字符顺序可以和小字符串不一样，但是字符数量（包括重复的字符）必须一致，如大字符串`abcd$ef$axbdc$`中查找小字符串`d$abf`，可以在大字符串搜索到的匹配子字符串为`f$axbd`
 
-
 ```python
 # O(b + s) time | O(b + s) space - where b is the length of the big
 # input string and s is the length of the small input string
@@ -2662,4 +2661,107 @@ int main()
 }
 ```
 
-Last Modified 2023-08-19
+## 简单中缀表达式
+
+```javascript
+function compute(numStack, opStack) {
+  let b = numStack.pop();
+  let a = numStack.pop();
+  let op = opStack.pop();
+  let r;
+  switch (op) {
+    case "+":
+      r = a + b;
+      break;
+    case "-":
+      r = a - b;
+      break;
+    case "*":
+      r = a * b;
+      break;
+    case "/":
+      r = a / b;
+      break;
+  }
+  // 不考虑浮点数
+  numStack.push(Math.floor(r));
+}
+
+function priority(a, b) {
+  if (a == "(") {
+    return false;
+  } else if ((a == "+" || a == "-") && (b == "*" || b == "/")) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+function isdigit(ch) {
+  const code = ch.charCodeAt(0);
+  if (48 <= code && code <= 57) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+// O(n) time | O(n) space
+function main(expression) {
+  let numStack = [];
+  // 默认包裹在一个括号中
+  let opStack = ["("];
+  expression += ")";
+  // 起始为数字
+  let isOperater = false;
+  for (let i = 0, size = expression.length; i < size; i++) {
+    let ch = expression.charAt(i);
+    if (ch == "(") {
+      // 放入左括号
+      opStack.push(ch);
+    } else if (ch == ")") {
+      // 如果是右括号，则计算括号内的数值
+      while (opStack[opStack.length - 1] != "(") {
+        compute(numStack, opStack);
+      }
+      // 弹出左括号
+      opStack.pop();
+    } else if (isOperater) {
+      // 如果操作符的优先级符合条件，不是括号或者乘除，则计算目前已经记录的值
+      while (priority(opStack[opStack.length - 1], ch)) {
+        compute(numStack, opStack);
+      }
+      // 放入操作符
+      opStack.push(ch);
+      // 下一个是数字
+      isOperater = false;
+    } else {
+      let j = i;
+      // 正负符号
+      if (ch == "+" || ch == "-") {
+        i++;
+        ch = expression.charAt(i);
+      }
+      // 提取数字
+      while (isdigit(ch)) {
+        i++;
+        ch = expression.charAt(i);
+      }
+      const num = expression.slice(j, i);
+      numStack.push(Number(num));
+      // 把多移动的指针回拨1
+      i--;
+      // 下一个是操作符
+      isOperater = true;
+    }
+  }
+  return numStack[numStack.length - 1];
+}
+
+console.log("(5+2+(10-3))*40-5");
+console.log(main("(5+2+(10-3))*40-5"));
+console.log("-400-(5*-20)");
+console.log(main("-400-(5*-20)"));
+```
+
+Last Modified 2023-08-28
