@@ -143,4 +143,11 @@ dst 192.168.1.1/24:80
    ss -tn
    ```
 
-Last Modified 2023-06-14
+9. 查询特定地址和端口的 TCP 连接
+
+   ```bash
+   ss -tna '( sport = :5672 or sport = :3306 or sport = :8510 ) dst 192.168.3.0/24 or dst 192.168.9.0/24 or dst 192.168.80.0/23'
+   ss -tna 'dst 192.168.5.0/24 or dst 192.168.79.0/24 or dst 192.168.80.0/23' | sort -k 4
+   ```
+
+Last Modified 2023-12-11
