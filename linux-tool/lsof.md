@@ -180,13 +180,29 @@ table th:first-of-type {
    ```
 
 5. 列出使用 NFS 的文件：
+
    ```bash
    lsof -n /root
    ```
 
 6. 过滤除本机连接外的其它连接（这里判断了网卡的地址，不同的内网环境可能不一样
+
    ```bash
    lsof -i -Pln | grep -v "[0-9]->$(ifconfig | awk '/inet *192/{print $2}')" | egrep -v '\*:[0-9]+'
    ```
 
-Last Modified 2022-11-25
+7. 查看 Docker 容器的 TCP 连接
+
+   ```bash
+   lsof -p $(docker inspect --format="{{.State.Pid}}" mysql1) -a -i -Pln
+   ```
+
+8. 查看特定协议或端口的连接
+
+   ```bash
+   lsof -Pln -i 4tcp:22
+   lsof -Pln -i udp:323
+   lsof -Pln -i :27017
+   ```
+
+Last Modified 2023-12-11
