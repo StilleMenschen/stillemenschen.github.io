@@ -192,4 +192,61 @@ containers:
 
 许多容器不需要向自己的文件系统写入任何内容，因此这个设置不会干扰它们。除非容器确实需要写入文件，否则最好设置 readOnlyRootFilesystem.
 
-Last Modified 2023-08-21
+## 禁用权限提升
+
+通常 Linux 可执行文件在执行时获得的权限就是执行它们的用户的权限。但有一个例外，拥有 `setuid` 机制的可执行文件可以临时获得该可执行文的拥有者（通常是 root）权限。
+这对于容器来说是一个潜在问题，因为即使容器以常规用户身份运行（例如，UID 1000），如果它包含 `setuid` 的可执行文件，则默认情况下该执行文件仍然可以获得 root 权限。
+
+为了避免这种情况，要将容器的安全策略字段 allowPrivilegeEscalation 设置为 false
+
+```yaml
+containers:
+  - name: demo
+    image: cloudnatived/demo:hello
+    securityContext:
+      allowPrivilegeEscalation: false
+```
+
+现代 Linux 程序不需要 `setuid`，它们可以使用更灵活、更小粒度的特权机制来达到这个目的，即能力（capability）。
+
+## 能力
+
+一般 UNIX 程序拥有两个级别的权限：普通用户和超级用户。普通程序的权限不会超过执行它们的用户权限，而超级用户程序可以做任何事，可以绕过所有的内核安全检查。
+
+Linux 的能力（capability）机制改进了权限控制，它定义了多种特定操作，比如加载内核模块、执行直接的网络 I/O 操作、访问系统设备等。凡是有需要的程序都可以获得这些特定的权限，但无法获得其他权限。
+
+例如，监听端口 80 的 Web 服务器通常需要以 root 身份运行才能执行此操作。1024 以下的端口号都被视为特权系统端口。但是，我们可以将 NET_BIND_SERVICE 能力赋予程序，这样就可以将其绑定到任何端口，同时不会赋予其他特殊权限。
+
+Docker 容器默认提供了一套非常通用的能力。这是为了权衡实用性与安全性而做出的决定，如果默认不为容器提供如何能力，运维人员需要为大量的容器设置能力，它们才能运行。
+
+另一方面，最小权限原则表明，容器不应拥有不必要的能力。Kubernetes 的安全上下文允许删除默认设置中的能力，而且还可以根据需要添加能力
+
+```yaml
+containers:
+  - name: demo
+    image: cloudnatived/demo:hello
+    securityContext:
+      capabilities:
+        drop: ["CHOWN", "NET_RAW", "SETPCAP"]
+        add: ["NET_ADMIN"]
+```
+
+这个容器删除了 `CHOWN`、 `NET RAW` 和 `SETPCAP` 能力，并添加了 `NET_ADMIN` 能力。Docker 文档列出了默认情况下容器上设置的所有能力，以及可以根据需要添加的能力。
+
+> 地址：https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities
+
+如果需要最大安全性，则应该删除每个容器的所有能力，并仅添加所需的特定能力：
+
+```yaml
+containers:
+  - name: demo
+    image: cloudnatived/demo: hello
+    securityContext:
+      capabilities:
+      drop: ["all"]
+      add: ["NET_BIND_SERVICE"]
+```
+
+能力机制对容器内部的进程进行了硬性限制，即使它们以 root 身份运行也是如此。一旦容器删除了某一项能力，就无法重新再获得，即使是拥有最大特权的恶意进程也没办法。
+
+Last Modified 2024-01-09
