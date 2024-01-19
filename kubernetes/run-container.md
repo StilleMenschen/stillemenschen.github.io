@@ -249,4 +249,144 @@ containers:
 
 能力机制对容器内部的进程进行了硬性限制，即使它们以 root 身份运行也是如此。一旦容器删除了某一项能力，就无法重新再获得，即使是拥有最大特权的恶意进程也没办法。
 
-Last Modified 2024-01-09
+当然也可以为 Pod 级别设置安全上下文
+
+```yaml
+apiVersion: v1
+kind: Pod
+# ...
+spec:
+  securityContext:
+    runAsUser: 1000
+    runAsNonRoot: false
+    allowPrivilegeEscalation: false
+```
+
+这些设置将应用到 Pod 中所有的容器上，除非容器自身的安全上下文覆盖这些设置。可以在所有 Pod 和容器中均设置安全上下文。禁用权限升级，并禁止所有能力。只添加容器所需的特定能力。
+
+## Pod 安全策略
+
+如果不想单独为每个容器或 Pod 指定所有的安全设置你可以通过 PodSecurityPolicy 资源在集群级别上指定
+
+```yaml
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: example
+spec:
+  privileged: false
+  # The rest fills in some required fields.
+  selinux:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  runAsUser:
+    rule: RunAsAny
+  fsGroup:
+    rule: RunAsAny
+  volumes:
+    - *
+```
+
+这个简单的策略会阻止所有特权容器（securityContext 设置了 privileged 标志的容器，该标志会赋予容器在节点本地运行的进程拥有的所有能力），PodSecurityPolicy 的使用有点复杂，因为首先你必须创建策略，然后再将策略的访问权限通过 RBAC 赋给相关服务账号，然后还要启用集群中的 PodSecurityPolicy 准入控制器。但是，在面对大型的基础设施，或者无法直接控制各个 Pod 的安全性配置时，可以考虑 PodSecurityPolicy。
+
+## Pod 服务账号
+
+运行 Pod 需要使用命名空间默认服务账号的权限，除非另外指定。如果出于某种原因（例如查看其他命名空间中的 Pod），你需要授予额外的权限，则请为该应用创建专用的服务账号，然后将其绑定到所需的角色，再通过配置让 Pod 使用新的服务账号。
+为此，你需要将 Pod 规范中的 serviceAccountName 字段设置成服务账号的名称：
+
+```yaml
+apiVersion: v1
+kind: Pod
+# ...
+spec:
+  serviceAccountName: deploy-tool
+```
+
+## empty 卷
+
+每个容器都有自己的文件系统，而且这个文件系统只能由该容器自己访问，并且是暂时的：如果重新启动容器，所有不属于容器镜像的数据都将丢失。
+一般来说，这种方式没有问题。比如应用程序是无状态服务，不需要持久性的存储。它也不需要与任何其他容器共享文件。
+
+但是，较为复杂的应用程序可能既需要与同一个 Pod 中的其他容器共享数据，又要在重新启动时保持数据。Kubernetes 的卷（Volume）对象可以提供这两种功能。
+
+你可以将多个不同类型的卷挂载到 Pod。无论底层的存储介质是什么，挂载到 Pod 上的卷都可供 Pod 中的所有容器访问。需要通过共享文件进行通信的容器也可以选用任意一种卷。
+
+最简单的卷类型是 emptyDir。这是一种临时存储，刚开始的时候为空（因此命名），数据存储在节点上（内存或者节点的磁盘上）。只有 Pod 在该节点上运行时，它才能持久保存数据。
+
+如果你想为容器配置一些额外的存储，那么可以考虑 emptyDir，但是这种卷无法永久地保存数据，也无法随着容器一起调度到别的节点上。一些适合 emptyDir 的例子有：缓存下载文件或生成内容，或使用空白工作空间执行数据处理的作业。同样，如果你只想在 Pod 中的各个容器之间共享文件，而且不需要长时间保留数据，那么 emptyDir 卷是理想的选择。
+
+下面是一个 Pod 的示例，创建一个 emptyDir 卷并挂载到容器上：
+
+```yaml
+apiVersion: v1
+kind: Pod
+# ...
+spec:
+  volumes:
+    - name: cache-volume
+      emptyDir: {}
+  containers:
+    - name: demo
+      image: cloudnatived/demo:hello
+      volumeMounts:
+        - mountPath: /cache
+          name: cache-volume
+```
+
+容器不必执行任何特殊操作即可使用这个新存储，凡是写入路径 `/cache` 的数据都会被写入卷，而且同样挂载了该卷的其他容器也可以看到写入的数据，所有挂载了该卷的容器都可对其进行读写。
+
+Kubernetes 不会对磁盘写入执行任何锁定。如果两个容器尝试同时写入同一个文件，则可能导致数据损坏。
+为了避免这种情况，请实现自己的写入锁定机制，或者使用支持锁定的卷类型，例如 `nfs` 或 `glusterf`。
+
+## 持久卷
+
+尽管临时的 emptyDir 卷是共享缓存和临时文件的理想之选，但某些应用程序需要存储持久的数据，例如数据库。通常，我们不建议在 Kubernetes 中运行数据库。云服务可以为你提供更好的服务，例如，大多数云提供商都提供了关系数据库（比如 MySQL 和 PostgreSQL）以及键值存储（比如 NoSQL）的托管解决方案。
+
+Kubernetes 最擅长管理无状态应用程序，也就是没有持久的数据。存储持久性数据会大幅增加配置 Kubernetes 应用程序的复杂度，另外还需要使用额外的云资源，还需要进行备份。
+
+然而，如果你需要在 Kubernetes 上使用持久卷，那么可以考虑一下持久卷（Persistent Volume）资源。在 Kubernetes 中使用持久卷时，最灵活的方法是创建持久卷声明（Persistent Volume Claim）对象。该对象代表了特定类型、特定大小的持久卷请求，例如，请求一个 10GiB、高速、读写存储的卷。
+
+接下来，Pod 可以将这个持久卷声明当作卷添加进来，以供容器挂载和使用：
+
+```yaml
+volumes:
+  - name: data-volume
+    persistentVolumeClaim:
+    claimName: data-pvc
+```
+
+你可以在集群中创建一个持久卷池，然后让 Pod 通过这种方式声明持久卷池中的卷。或者，你也可以建立动态卷供应（Dynamic Volume Provisioning）；通过这种方式挂载持久卷声明会自动提供合适的存储，并连接到 Pod。
+
+## 重启策略
+
+每当 Pod 退出时，Kubernetes 就会重启该 Pod，除非你另有指示。默认的重启策略是 Always，但是你可以改为 OnFailure（当容器以非零状态退出时才重启）或 Never（不重启）:
+
+```yaml
+apiVersion: v1
+kind: Pod
+# ...
+spec:
+  restartPolicy: OnFailure
+```
+
+如果想在 Pod 运行完成后退出，而不需要重启，则可以使用作业（Job）资源来执行该操作
+
+## 镜像拉取机密
+
+Kubernetes 会从容器仓库下载指定的镜像（如果节点上没有该镜像的话）。但是，如果你使用的是私人仓库，该怎么办呢？如何为 Kubernetes 提供仓库身份验证的凭据呢？
+
+你可以通过 Pod 上的 imagePullSecrets 字段指定。首先，你需要将仓库凭据存储在 Secret 对象中。然后告诉 Kubernetes 在拉取 Pod 中的容器时使用该 Secret。比如 Secret 的名称为 `registry-creds`，则如下配置：
+
+```yaml
+apiVersion: v1
+kind: Pod
+# ...
+spec:
+  imagePullSecrets:
+    - name: registry-creds
+```
+
+也可以将 imagePullSecrets 附加到服务账号。凡是使用该服务账号创建的 Pod 都自动带有仓库凭据。
+
+Last Modified 2024-01-19
