@@ -136,18 +136,106 @@ spec:
             preference:
             matchExpressions:
                 - key: "failure-domain.beta.kubernetes.io/zone"
-                operator: In
-                values: ["us-central1-a"]
+                  operator: In
+                  values: ["us-central1-a"]
         - weight: 100
             preference:
             matchExpressions:
                 - key: "failure-domain.beta.kubernetes.io/zone"
-                operator: In
-                values: ["us-central1-b"]
+                  operator: In
+                  values: ["us-central1-b"]
 ```
 
 preferred 一词表明这是软亲和性： Kubernetes 可以将 Pod 调度到任何节点上，但是它会优先考虑与这些规则匹配的节点。
 
 你可以看到这两个规则拥有不同的 weight 值。第一个规则的权重为 10，但第二个规则的权重为 100。如果存在多个同时满足这两个规则的节点，则 Kubernetes 给予与第二个规则相匹配的节点（即位于 us-central1-b 区域的节点）的优先度是第一个规则的 10 倍。权重是表达偏好相对重要性的有效方法。
+
+## 将 Pod 调度到一起
+
+假设有一个应用程序，它的标签为 app:server，它运行还需要一个缓存服务，缓存服务的标签为 app:cache，可以通过下面的配置实现将应用调度到具有缓存服务的节点上
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: server
+  labels:
+    app: server
+# ...
+spec:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        labelSelector:
+          - matchExpressions:
+              - key: app
+                operator: In
+                values: ["cache"]
+        topologyKey: kubernetes.io/hostname
+```
+
+这个亲和性的整体效果是，如果有可能的话，将 server Pod 调度到一个正在运行带有 cache 标签 Pod 的节点上。如果没有这样的节点，或者匹配的节点没有足够的空闲资源来运行 Pod，则该 Pod 将无法运行。
+
+但实际上我们并不会这样做。如果两个 Pod 必须在一起，则请将两者的容器放入同一个 Pod 中。如果你只是希望它们位于同一个位置上，则请使用 Pod 软亲和性 preferredDuringSchedulingIgnoredDuringExecution
+
+## 分开 Pod
+
+下面，我们来谈谈反亲和性的示例：将某些 Pod 分开。我们可以将 podAffinity 换成 podAntiAffinity:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: server
+  labels:
+    app: server
+# ...
+spec:
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        labelSelector:
+          - matchExpressions:
+              - key: app
+                operator: In
+                values: ["server"]
+        topologyKey: kubernetes.io/hostname
+```
+
+这个例子与上一个非常相似，只不过这里指定的是 podAntiAffinity，因此表达的意思也是相反的，而且 match 表达式也不同。该表达式的意思是：app 标签的值必须是 server。
+
+这个亲和性的整体效果是，确保 Pod 不会被调度到任何与该规则匹配的节点上。换句话说，如果某个节点上已有标记了 app:server 的 Pod 正在运行，则被标记了 app:server 的 Pod 皆不可调度到该节点上。该亲和性可以强制将 server Pod 均匀地分布到整个集群中，而代价是可能无法达到所需的副本数。
+
+## 软反亲和性
+
+然而，通常我们更加关心的是否拥有足够数量的副本，而不是尽可能均匀地分布。因此，硬性规定并不是我们真正想要的。下面，我们将上述亲和性修改成软反亲和性：
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: server
+  labels:
+    app: server
+# ...
+spec:
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          podAntiAffinityTerm:
+            labelSelector:
+              - matchExpressions:
+                  - key: app
+                    operator: In
+                    values: ["server"]
+            topologyKey: kubernetes.io/hostname
+```
+
+请注意，现在这个规则是 preferred，而不是 required，因此这是一个软反亲和性。最好能够满足规则。如果不能满足，Kubernetes 也会调度 Pod。
+
+因为它是一种偏好，所以我们指定了 weight 值，就像软节点亲和性一样。如果使用了多个亲和性规则，Kubernetes 会根据你为每个规则分配的权重对它们进行优先级排序。
+
+就像节点亲和性一样，你应该将 Pod 亲和性作为处理特殊情况的微调强化功能。调度器能够妥当地安置 Pod，并确保集群的最佳性能和可用性。Pod 亲和性限制了调度器的自由度，以牺牲一个应用程序为代价成全了另一个应用程序。只有当你已经发现了生产环境中的某个问题，而且 Pod 亲和性是唯一的修复办法时，才应当予以考虑。
 
 Last Modified 2024-01-20
