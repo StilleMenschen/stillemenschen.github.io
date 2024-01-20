@@ -10,3 +10,4 @@
   - [Operations Management](kubernetes/cluster-operations-management.md)
   - [Tools](kubernetes/tools.md)
   - [Run Container](kubernetes/run-container.md)
+  - [Manage Pod](kubernetes/manage-pod.md)
