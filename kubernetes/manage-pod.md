@@ -238,4 +238,48 @@ spec:
 
 就像节点亲和性一样，你应该将 Pod 亲和性作为处理特殊情况的微调强化功能。调度器能够妥当地安置 Pod，并确保集群的最佳性能和可用性。Pod 亲和性限制了调度器的自由度，以牺牲一个应用程序为代价成全了另一个应用程序。只有当你已经发现了生产环境中的某个问题，而且 Pod 亲和性是唯一的修复办法时，才应当予以考虑。
 
-Last Modified 2024-01-20
+## 污点与容忍
+
+亲和性可以让节点亲近（或远离），污点允许节点根据节点的某些属性排斥一组 Pod。还可以使用污点创建专用节点，仅为特定种类的 Pod 保留节点
+
+我们可以使用 kubectl taint 命令，将污点添加到特定的节点上：
+
+```bash
+kubectl taint nodes docker-for-desktop dedicated=true:NoSchedule
+```
+
+该命令将在 docker-for-desktop 节点上添加一个名为 dedicated=true 的污点，其效果为 NoSchedule，意思是除非 Pod 拥有匹配的容忍，否则就不能调度到该节点上。
+
+如果想查看特定节点上设置的污点，请使用 `kubectl describe node ...` 如果想删除节点上的污点，也请使用 kubectl taint 命令，但污点名称后面必须加一个减号 `-`：
+
+```bash
+kubectl taint nodes docker-for-desktop dedicated:NoSchedule-
+```
+
+容忍是 Pod 的属性，描述了它们能够忍受的污点。如果 Pod 容忍污点 dedicated=true，则可以将其添加到 Pod 的规格中：
+
+```yaml
+apiVersion: v1
+kind: Pod
+# ...
+spec:
+  tolerations:
+    - key: "dedicated"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+```
+
+这相当于说：“允许该 Pod 在拥有 dedicated=true 污点且效果为 NoSchedule 节点上运行。”由于该容忍与污点匹配，所以该 Pod 可以调度到这个节点上。
+
+凡是没有这类容忍的 Pod 都不能在这个受污染的节点上运行。如果某个 Pod 由于受污染的节点而导致完全无法运行，则它将保持 Pending 状态，而且你将在 Pod 描述中看到以下消息：
+
+```
+Warning FailedScheduling 4s (x10 over 2m) default-scheduler 0/1 nodes are available: 1 node(s) had taints that the pod didn't tolerate.
+```
+
+除此之外，污点和容忍还可以用于标记带有专用硬件（比如 GPU）的节点，以及允许某些 Pod 容忍某些类型的节点问题等。
+
+比如某个节点掉线，Kubernetes 会自动添加污点 node.kubernetes.io/unreachable。通常，这会导致 kubelet 驱逐节点上的所有 Pod。但是，网络有可能在合理的期限内恢复正常，因此某些 Pod 应该仍然保持运行状态。为此，你可以在这些 Pod 中添加一个与 unreachable 污点相匹配的容忍。
+
+Last Modified 2024-01-21
