@@ -1,5 +1,9 @@
 # 加解密参考
 
+```bash
+pip install pycryptodome rsa
+```
+
 ```python
 import base64
 import hashlib
