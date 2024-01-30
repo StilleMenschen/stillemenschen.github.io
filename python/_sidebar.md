@@ -32,3 +32,4 @@
   - [TimeUnit](python/timeunit.md)
   - [Linux Compile Install](python/linux-compile-install.md)
   - [Python Virtual Machine](python/virtual-machine.md)
+  - [Python Encrypt](python/encrypt.md)
