@@ -282,4 +282,164 @@ Warning FailedScheduling 4s (x10 over 2m) default-scheduler 0/1 nodes are availa
 
 比如某个节点掉线，Kubernetes 会自动添加污点 node.kubernetes.io/unreachable。通常，这会导致 kubelet 驱逐节点上的所有 Pod。但是，网络有可能在合理的期限内恢复正常，因此某些 Pod 应该仍然保持运行状态。为此，你可以在这些 Pod 中添加一个与 unreachable 污点相匹配的容忍。
 
-Last Modified 2024-01-21
+## 守护进程集
+
+假设你想将所有应用程序的日志发送到中心化的日志服务器，例如 Elasticsearch-Logstash-Kibana（ELK）栈，或 SaaS 监视产品（比如 Datadog），那么实现方法有好几种。
+
+一种方式是在每个应用程序中加入一段代码，连接到日志记录服务、进行身份验证、写入日志等，但这会导致很多重复的代码，效率很低。
+
+还有一种方法，你可以在每个 Pod 中运行一个额外的容器，充当日志记录代理（这种方式又称为 Sidecar 模式）。这意味着每个应用程序不必知道如何与日志记录服务通信，但是意味着每个节点可能都需要运行日志记录代理的多个副本。
+
+由于日志记录代理所做的工作只是管理与日志记录服务的连接，并传递日志消息，因此实际上每个节点只需要一个日志记录代理的副本。这是一个很常见的要求，为此 Kubernetes 提供了一个特殊的控制器对象：守护进程集 （DaemonSet）。
+
+```yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd-elasticsearch
+#...
+spec:
+  template:
+    spec:
+      containers:
+        - name: fluentd-elasticsearch
+```
+
+当需要在集群中的每个节点上运行 Pod 的一个副本时，请使用守护进程集。如果对于正在运行的应用程序来说，维护一定数量的副本比控制 Pod 在哪个节点上更为重要，则请使用部署。
+
+## 状态集
+
+与部署或守护进程集类似，状态集（StatefulSet）也是一种 Pod 控制器。状态集增加的功能是可以按特定的顺序启动和停止 Pod。
+例如，部署可以按照随机的顺序启动和停止所有的 Pod。对于无状态服务，这种方式没问题，因为在无状态服务中，每个副本都是相同的，并且执行相同的工作。
+
+但有时候，你需要按照特定的编号顺序启动 Pod，而且还需要通过编号识别它们。例如，Redis、 MongoDB 或 Cassandra 之类的分布式应用程序会创建自己的集群，并且需要能够通过可预测的名称来标识集群领导者。
+
+在这种情况下，状态集是理想之选。例如，如果创建一个名为 redis 的状态集，则第一个启动的 Pod 将被命名为 redis-0，而且 Kubernetes 会等到该 Pod 准备好之后再启动下一个 Pod，即 redis-1。
+
+有些应用程序可以使用这个属性以可靠的方式将 Pod 组合成集群。例如，每个 Pod 运行一个启动脚本，检查自己是否在 redis-0 上运行。如果是，那么它就是集群领导者；如果不是，则需要通过联系 redis-0 加入集群。
+
+Kubernetes 会等到状态集中的每个副本都已运行且准备就绪，再启动下一个副本。类似地，当状态集终止时，副本将以相反的顺序关闭，等到每个 Pod 关闭后再继续关闭下一个副本。
+除了这些特殊的属性之外，状态集看起来与普通的部署非常相似：
+
+```yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+spec:
+  selector:
+    matchLabels:
+      app: redis
+  serviceName: "redis"
+  replicas: 3
+  template:
+  #...
+```
+
+为了通过可预测的 DNS 名称（例如 Iredis-1）访问各个 Pod，你需要创建一个服务，并将 clusterIP 类型设置为 None（称为无头服务，Headless Service）。
+
+非无头服务会获得一个 DNS 条目（例如 redis），它可以在所有后端 Pod 上实现负载均衡。无头服务也会获得一个服务的 DNS 名称，但是每个 Pod 还会单独获得一个带有编号的 DNS 条目，例如 redis-0、redis-1、redis-2 等。
+
+需要加入 Redis 集群的 Pod 可以专门联系 redis-0，但是只需要负载均衡的 Redis 服务的应用程序则可以通过 DNS 名称 Redis 与随机选择的 Redis Pod 对话。
+
+另外，状态集还可以利用卷声明模板对象（它会自动创建持久卷声明）来管理 Pod 的磁盘存储。
+
+## 作业
+
+Kubernetes 还有另外一个非常实用的 Pod 控制器：作业（Job）。部署会运行指定数量的 Pod，并不断重启它们，而作业只需运行一定的次数。之后，作业将会被视为已完成。
+
+例如，批处理任务或队列的工作 Pod 通常会启动、完成工作、然后再退出。因此非常适合由作业管理。
+
+控制作业执行的字段有两个：completions 和 parallelism。前者 completions 决定作业在被视为完成之前，需要成功地运行多少次指定 Pod。默认值为 1，表示 Pod 只需运行一次。
+parallelism 字段指定一次运行多少个 Pod。同样，默认值为 1，表示一次只能运行一个 Pod。
+
+例如，假设你需要运行队列的工作作业，目的是消耗队列中的工作项。你可以将 parallelism 设置为 10，不要设置 completions，那么就会启动 10 个 Pod，每个 Pod 都会消耗队列中的工作项，直到队列中的工作项消耗完，然后退出，此时该作业就完成了：
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: queue-worker
+spec:
+  completions: 10
+  template:
+    metadata:
+      name: queue-worker
+    spec:
+      containers:
+    # ...
+```
+
+或者，如果你想运行类似于批处理作业的操作，则可以让 completions 和 parallelism 都保持默认值 1，这样就会启动 Pod 的一个副本，并等待其成功完成。如果 Pod 崩溃、失败或以任何非成功的方式退出，则作业会重启 Pod，就像部署一样。只有成功退出才会计入 completions 指定的次数。
+
+你可以手动启动作业，方法是使用 kubectl 或 Helm 来应用作业清单。另外，作业也可以自动触发，例如通过持续部署流水线。
+
+但是，最常见的运行作业的方法是，在指定时间点或按照指定的时间间隔定期启动作业。为此，Kubernetes 提供了一种特殊的作业类型：定时作业 （Cronjob）.
+
+```yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: demo-cron
+spec:
+  schedule: "＊/1＊＊＊＊"
+  jobTemplate:
+    spec:
+    # ...
+```
+
+定时作业的清单中有两个重要的字段：spec.schedule 和 spec.jobTemplate。
+
+schedule 字段指定何时运行作业，与 Unix cron 程序的格式相同。jobTemplate 指定要运行的作业模板，与普通作业的清单完全相同。
+
+## Pod 水平自动伸缩
+
+部署控制器可以维护指定数量的 Pod 副本。如果一个副本失败，则启动另一个副本替换；如果出于某种原因 Pod 副本数过多，则部署会停止多余的 Pod，以保证目标数量的副本。
+
+所需副本数在部署清单中设置，如果请求量很大，则可以通过调整来增加 Pod 的数量；如果出现空闲的 Pod，则可以通过减少 Pod 数量来缩小部署的规模。
+
+Kubernetes 能够根据需求自动调整副本数，Pod 水平伸缩器。（水平伸缩指的是调整服务的副本数量，而垂直伸缩则指的是调整单个副本的大小。）
+
+Pod 水平伸缩器（Horizontal Pod Autoscaler，HPA）会监视指定的部署，并通过持续监控给定的指标来判断是否需要增加或减少副本的数量。
+
+最常见的自动伸缩指标之一是 CPU 利用率。Pod 可以请求一定数量的 CPU 资源，例如 500 毫核。在 Pod 运行期间，它使用的 CPU 会发生波动，这意味着无论在任何时刻 Pod 实际使用的 CPU 只是原本请求的一部分。
+
+你可以根据这个值自动扩展部署。例如，你可以创建一个 HPA，目标是 Pod 的 CPU 使用率为 80%。如果部署中所有 Pod 的 CPU 平均使用率仅为请求的 70%，则 HPA 会通过减少目标副本数来缩小规模。保证 Pod 计算资源可以得到充分利用，就不需要那么多的副本数量。
+
+另一方面，如果平均 CPU 利用率为 90%，超出了 80% 的目标，则我们需要添加更多副本，直到 CPU 平均使用率下降为止。HPA 将修改部署来增加目标副本数。
+
+每当 HPA 确定需要进行伸缩操作时，它都会根据实际指标值与目标值的比率，调整副本的数量。如果部署非常接近目标 CPU 利用率，则 HPA 只会添加或删除少量副本；但是如果差距过大，则 HPA 会进行大幅的调整。
+
+```yaml
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: demo-hpa
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: demo
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+```
+
+需要注意的字段包括：
+
+- `spec.scaleTargetRef` 指定要扩展的部署。
+- `spec.minReplicas` 和 `spec.maxReplicas` 指定伸缩的限制。
+- `spec.metrics` 伸的判断指标。
+
+尽管 CPU 使用率是最常见的伸缩指标，但你可以使用任何 Kubernetes 指标，包括系统内置的指标（比如 CPU 和内存使用率）以及应用程序特有的服务指标（你可以在应用程序中定义和导出这些指标）。
+
+比如可以根据应用程序错误率进行伸缩。更多有关自动伸缩器以及自定义指标的信息，请参阅 Kubernetes 文档，地址：`https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/`。
+
+Last Modified 2024-02-03
