@@ -11,3 +11,4 @@
   - [Tools](kubernetes/tools.md)
   - [Run Container](kubernetes/run-container.md)
   - [Manage Pod](kubernetes/manage-pod.md)
+  - [CRD](kubernetes/custom-resource-definition.md)
