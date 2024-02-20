@@ -32,5 +32,6 @@
 - Linux 编译安装
 - Python 虚拟机
 - AES 和 RSA 加密参考
+- Celery 任务参考
 
 > 此参考基于`Python 3`撰写
