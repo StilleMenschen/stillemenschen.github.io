@@ -17,3 +17,4 @@
   - [Snowflake](java/snowflake.md)
   - [Circular Iterator](java/circular-Iterator.md)
   - [String Variable Replacement](java/string-variable-replacement.md)
+  - [P6Spy](java/p6spy.md)
