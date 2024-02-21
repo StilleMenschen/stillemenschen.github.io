@@ -18,7 +18,10 @@ package com.example.config.p6spy;
 import com.p6spy.engine.spy.appender.MessageFormattingStrategy;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.regex.Pattern;
+
 public class P6SpyLogger implements MessageFormattingStrategy {
+    private static final Pattern lineBreakAndTwoSpacePattern = Pattern.compile("((\\r?\\n)+|(\\s{2,}))");
 
     /**
      * 重写日志格式方法
@@ -33,8 +36,8 @@ public class P6SpyLogger implements MessageFormattingStrategy {
     public String formatMessage(int connectionId, String now, long elapsed, String category, String prepared, String sql, String url) {
         if (StringUtils.isNotBlank(sql)) {
             return  now + " | elapsed "
-                    + elapsed + " ms | " + category + "-" + connectionId + "\n"
-                    + sql.replaceAll("(\\n|\\s{2,})", " ") + ";";
+                    + elapsed + " ms | " + category + "-" + connectionId + "\n "
+                    + lineBreakAndTwoSpacePattern.matcher(sql).replaceAll(" ") + ";";
         }
         return "";
     }
