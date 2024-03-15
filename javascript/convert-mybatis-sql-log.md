@@ -30,7 +30,7 @@
       const res = document.getElementById("res");
       function evalSQL(logText) {
         // 根据日志输出的日期年份来删掉多余的换行，其中 2024 可能在年份变化后需要修改
-        logText = logText.replace(/([ a-zA-Z0-9_,=-?)(><:'"*])\n(?!2024)/g, "$1");
+        logText = logText.replace(/(.)\n(?!2024)/g, "$1");
 
         console.log(logText);
         // 通过换行符拆分日志
