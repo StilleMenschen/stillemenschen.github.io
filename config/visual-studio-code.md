@@ -9,9 +9,9 @@ settings.json
   "window.restoreWindows": "none",
   "editor.renderWhitespace": "all",
   "emmet.triggerExpansionOnTab": true,
-  "php.validate.executablePath": "C:\\php\\php.exe",
-  "php.executablePath": "C:\\php\\php.exe",
-  "prettier.printWidth": 256,
+  "php.validate.executablePath": "D:\\php\\php.exe",
+  "php.executablePath": "D:\\php\\php.exe",
+  "prettier.printWidth": 120,
   "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
   "typescript.format.insertSpaceBeforeFunctionParenthesis": true,
   "eslint.options": {
@@ -64,8 +64,8 @@ settings.json
   },
   "files.trimTrailingWhitespace": true,
   "git.autofetch": "all",
-  "python.autoComplete.extraPaths": ["C:\\Python311\\Lib\\site-packages"],
-  "python.analysis.extraPaths": ["C:\\Python311\\Lib\\site-packages"],
+  "python.autoComplete.extraPaths": ["D:\\Python311\\Lib\\site-packages"],
+  "python.analysis.extraPaths": ["D:\\Python311\\Lib\\site-packages"],
   "terminal.integrated.defaultProfile.windows": "PowerShell",
   "security.workspace.trust.enabled": false,
   "editor.fontFamily": "Consolas, 'Microsoft Yahei', 'Courier New', monospace",
@@ -101,7 +101,7 @@ settings.json
   "[vue]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "conventionalCommits.scopes": ["kubernetes", "java", "spring", "algorithm", "python", "sql"],
+  "conventionalCommits.scopes": ["kubernetes", "java", "javascript", "spring", "algorithm", "python", "sql"],
   "[javascriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -111,11 +111,9 @@ settings.json
   "git.ignoreRebaseWarning": true,
   "workbench.colorTheme": "Monokai",
   "window.commandCenter": false,
-  "workbench.activityBar.location": "top",
-  "editor.minimap.enabled": false,
   "window.newWindowDimensions": "inherit",
   "autopep8.args": ["--max-line-length=256"]
 }
 ```
 
-Last Modified 2024-01-12
+Last Modified 2024-04-08
