@@ -29,4 +29,5 @@
   - [shell](linux-tool/shell.md)
   - [keyshot](linux-tool/keyboard-shortcuts.md)
   - [system log](linux-tool/system-log.md)
+  - [journalctl](linux-tool/journalctl.md)
   - [More Possible](linux-tool/more-possible.md)

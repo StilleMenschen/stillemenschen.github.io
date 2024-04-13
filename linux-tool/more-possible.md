@@ -1,19 +1,13 @@
 # 更多的命令
 
-## dig
+## dig/host/nslookup
 
 域名检测
 
 ```bash
 dig www.bing.com
-```
-
-## host
-
-域名解析
-
-```bash
-host bing.com
+host www.bing.com
+nslookup www.bing.com
 ```
 
 ## uptime
@@ -52,6 +46,22 @@ Transient hostname: local
       Architecture: x86-64
 ```
 
+## timedatectl
+
+日期时间时区管理
+
+```
+~ $ timedatectl
+      Local time: Saturday 2021-04-13 23:14:11 CST
+  Universal time: Saturday 2021-04-13 15:14:11 UTC
+        RTC time: Saturday 2021-04-13 15:14:11
+       Time zone: Asia/Shanghai (CST, +0800)
+     NTP enabled: yes
+NTP synchronized: yes
+ RTC in local TZ: no
+      DST active: n/a
+```
+
 ## head/tail
 
 查看文本前面或后面的几行，默认`10`行
@@ -60,7 +70,7 @@ Transient hostname: local
 
 同时查看一个或多个文本文件的内容
 
->`tac`为反转全部行,`rev`为反转每一行
+> `tac`为反转全部行,`rev`为反转每一行
 
 ## wc
 
@@ -70,7 +80,7 @@ Transient hostname: local
 
 使用手册（manuals），如`man lsof`、`man ls`、`man tail`，打开的手册页面可以按箭头上下滚动，`u`向上翻页，`d`向下翻页，按`q`键退出
 
->如果不清楚命令但想要找关键词,可以使用`man -k [KEYWORDS]`来搜索手册
+> 如果不清楚命令但想要找关键词,可以使用`man -k [KEYWORDS]`来搜索手册
 
 ## bc
 
@@ -83,11 +93,16 @@ Transient hostname: local
 ```bash
 ss -tn | sort -k 5
 (ls -l | sed 1d) | sort -nk5
+sort -V
 ```
 
 ## seq
 
 生成一个数字序列
+
+```bash
+seq 2 2 20
+```
 
 ## uniq
 
@@ -103,7 +118,7 @@ ss -tn | sort -k 5
            ls -l | sed 1d) | column -t
 ```
 
->可以通过阅读手册或使用`--help`选项获取更多使用说明
+> 可以通过阅读手册或使用`--help`选项获取更多使用说明
 
 ## tr
 
@@ -113,4 +128,8 @@ ss -tn | sort -k 5
 tr -cd [:alnum:] </dev/urandom | head -c 100
 ```
 
-Last Modified 2023-07-31
+## nmap
+
+扫描主机的可用端口
+
+Last Modified 2024-04-13

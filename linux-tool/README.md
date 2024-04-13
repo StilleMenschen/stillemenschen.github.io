@@ -28,4 +28,5 @@
 - ss socket 状态
 - shell 可执行脚本
 - system log 系统日志
+- journalctl systemd 日志
 - 更多的命令
