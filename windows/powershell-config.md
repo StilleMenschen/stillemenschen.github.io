@@ -24,10 +24,25 @@ $PSDefaultParameterValues['*:Encoding'] = 'utf8'
 $OutputEncoding = [System.Console]::OutputEncoding = [System.Console]::InputEncoding = [System.Text.Encoding]::UTF8
 
 function prompt { "$PWD `n> " }
+
+function time {
+    param (
+        [Parameter(Position = 0, Mandatory = $true, ValueFromRemainingArguments =$true)]
+        [string[]]$Cmds
+    )
+
+    $cmd = $Cmds -join " "
+    $t = $(Measure-Command { Invoke-Expression $cmd | Out-Default }).TotalSeconds
+    Write-Host "TotalSeconds $t"
+}
+
+Set-PSReadLineKeyHandler -Key Ctrl+w -Function BackwardDeleteWord
+Set-PSReadLineKeyHandler -Key Ctrl+u -Function BackwardDeleteLine
+Set-PSReadLineKeyHandler -Key Ctrl+k -Function DeleteToEnd
 ```
 
 如果希望 CMD 的命令提示有一个换行，可以添加一个环境变量`PROMPT=$P$G$_`
 
-> 中文为`936`，西文为`437`
+> 中文为`936`，西文为`437`，Unicode 为`65001`，但由于历史原因，Windows 的 UTF-8 编码会带有 BOM，复制粘贴终端里的字符时要留意
 
-Last Modified 2023-07-21
+Last Modified 2024-05-05

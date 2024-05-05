@@ -116,4 +116,26 @@ settings.json
 }
 ```
 
-Last Modified 2024-04-08
+keybindings.json
+
+```json
+[
+  {
+    "key": "alt+d",
+    "command": "editor.action.deleteLines",
+    "when": "textInputFocus && !editorReadonly"
+  },
+  {
+    "key": "ctrl+shift+k",
+    "command": "-editor.action.deleteLines",
+    "when": "textInputFocus && !editorReadonly"
+  },
+  {
+    "key": "ctrl+k",
+    "command": "deleteAllRight",
+    "when": "terminalEditorFocus || terminalFocus"
+  }
+]
+```
+
+Last Modified 2024-05-05
