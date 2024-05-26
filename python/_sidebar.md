@@ -34,3 +34,4 @@
   - [Python Virtual Machine](python/virtual-machine.md)
   - [Python Encrypt](python/encrypt.md)
   - [Celery Task](python/celery-task.md)
+  - [Pathlib](python/pathlib.md)

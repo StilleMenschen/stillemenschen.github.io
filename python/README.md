@@ -33,5 +33,6 @@
 - Python 虚拟机
 - AES 和 RSA 加密参考
 - Celery 任务参考
+- 面向对象的文件系统路径
 
 > 此参考基于`Python 3`撰写
