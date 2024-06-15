@@ -28,7 +28,8 @@ console_handler.setFormatter(log_format)
 file_handler = logging.FileHandler(filename='example.log')
 file_handler.setFormatter(log_format)
 
-rotating_file_handler = TimedRotatingFileHandler(filename='rotating-example.log', when='midnight')
+rotating_file_handler = TimedRotatingFileHandler(filename='rotating-example.log', when='midnight', backupCount=14, encoding='utf8')
+rotating_file_handler.setLevel(logging.DEBUG)
 rotating_file_handler.setFormatter(log_format)
 
 log.addHandler(console_handler)
@@ -47,4 +48,4 @@ log.critical('critical message')
 - 日志 HOW TO https://docs.python.org/zh-cn/2.7/howto/logging.html
 - 日志 HOW TO https://docs.python.org/zh-cn/3.7/howto/logging.html
 
-Last Modified 2022-01-08
+Last Modified 2024-06-15
