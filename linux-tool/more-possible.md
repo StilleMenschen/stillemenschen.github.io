@@ -128,8 +128,16 @@ seq 2 2 20
 tr -cd [:alnum:] </dev/urandom | head -c 100
 ```
 
+## shuf
+
+将输入内容打乱
+
+```bash
+tr -dc [:alpha:][:punct:] </dev/urandom | head -c 1000 | fold -w 50 | nl | shuf
+```
+
 ## nmap
 
 扫描主机的可用端口
 
-Last Modified 2024-04-13
+Last Modified 2024-06-16
