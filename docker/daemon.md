@@ -131,4 +131,57 @@ echo 'autoload -Uz compinit && compinit -u' >> ~/.zshrc
 
 > 使用此功能还需要先安装对应的支持程序，如`bash-completion`
 
-Last Modified 2023-06-11
+## 配置代理服务器
+
+### systemctl 方式
+
+```bash
+mkdir -p /etc/systemd/system/docker.service.d
+vim /etc/systemd/system/docker.service.d/http-proxy.conf
+```
+
+```
+[Service]
+Environment="HTTP_PROXY=http://proxy.example.com:3128"
+Environment="HTTPS_PROXY=https://proxy.example.com:3129"
+Environment="NO_PROXY=localhost,127.0.0.1,docker-registry.example.com,.corp"
+```
+
+```bash
+systemctl daemon-reload
+systemctl restart docker
+
+systemctl show --property=Environment docker
+```
+
+如果 systemctl 没有 root，部分命令和配置不同
+
+```bash
+mkdir -p ~/.config/systemd/user/docker.service.d
+vim ~/.config/systemd/user/docker.service.d/http-proxy.conf
+systemctl --user daemon-reload
+systemctl --user restart docker
+systemctl --user show --property=Environment docker
+```
+
+### 配置文件方式
+
+```bash
+vim /etc/docker/daemon.json
+```
+
+```json
+{
+  "proxies": {
+    "http-proxy": "http://proxy.example.com:3128",
+    "https-proxy": "https://proxy.example.com:3129",
+    "no-proxy": "*.test.example.com,.example.org,127.0.0.0/8"
+  }
+}
+```
+
+```bash
+systemctl restart docker
+```
+
+Last Modified 2024-07-08
