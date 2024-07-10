@@ -2,7 +2,7 @@
 
 Unix 系统`/etc/bashrc`（Redhat 内核），`/etc/bash.bashrc`（Debian 内核）
 
-```
+```sh
 # 终端的字符编码
 # export LANG=zh_CN.UTF-8
 # 花里胡哨的终端, Git Bash自带有
@@ -11,7 +11,8 @@ Unix 系统`/etc/bashrc`（Redhat 内核），`/etc/bash.bashrc`（Debian 内核
 alias ll='ls -AFlh --color=auto --time-style=long-iso'
 alias grep='grep --color=auto'
 alias less='less -gM'
-alias lsn='less -N'
+alias lese='less +G'
+alias lesf='less +F'
 alias dff='df -hT -t xfs -t ext4 --total'
 alias vir='vim -R'
 export HISTCONTROL=ignoreboth
@@ -21,4 +22,4 @@ if [ -f "/usr/share/bash-completion/completions/docker" ]; then
 fi
 ```
 
-Last Modified 2023-06-03
+Last Modified 2024-07-10
