@@ -8,7 +8,7 @@ prefix=/opt/nodejs/npm
 # 下载缓存
 cache=/opt/nodejs/cache
 # 国内Taobao镜像
-registry=https://registry.npm.taobao.org/
+registry=https://registry.npmmirror.com
 ```
 
 npm 的配置命令
@@ -16,7 +16,7 @@ npm 的配置命令
 ```
 npm config set prefix=/opt/nodejs/npm
 npm config set cache=/opt/nodejs/cache
-npm config set registry=https://registry.npm.taobao.org/
+npm config set registry https://registry.npmmirror.com
 ```
 
 yarn 的配置命令
@@ -25,7 +25,7 @@ yarn 的配置命令
 yarn config set prefix "/opt/nodejs/yarn"
 yarn config set global-folder "/opt/nodejs/yarn/global"
 yarn config set cache-folder "/opt/nodejs/cache"
-yarn config set registry https://registry.npm.taobao.org/
+yarn config set registry https://registry.npmmirror.com
 ```
 
-Last Modified 2022-08-17
+Last Modified 2024-08-12
