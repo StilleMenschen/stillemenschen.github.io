@@ -6,5 +6,6 @@
 - 为当前的 Windows 系统创建新引导
 - 将磁盘的 MBR 分区格式转为 GPT 格式
 - 修改远程桌面端口
-- Powershell配置
+- Powershell 配置
 - IExpress
+- Edge
