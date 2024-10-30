@@ -45,4 +45,24 @@ Set-PSReadLineKeyHandler -Key Ctrl+k -Function DeleteToEnd
 
 > 中文为`936`，西文为`437`，Unicode 为`65001`，但由于历史原因，Windows 的 UTF-8 编码会带有 BOM，复制粘贴终端里的字符时要留意
 
-Last Modified 2024-05-05
+## 增强
+
+安装 PSReadLine
+
+```powershell
+Install-Module -Name PSReadLine -AllowClobber -Force
+```
+
+配置 PSReadLine
+
+```powershell
+Set-PSReadLineOption -PredictionViewStyle ListView -PredictionSource History
+```
+
+查看 PSReadLine 的版本
+
+```powershell
+Get-Module PSReadLine | Select-Object Version
+```
+
+Last Modified 2024-10-31
