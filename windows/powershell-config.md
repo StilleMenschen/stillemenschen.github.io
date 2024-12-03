@@ -43,7 +43,7 @@ Set-PSReadLineKeyHandler -Key Ctrl+k -Function DeleteToEnd
 
 如果希望 CMD 的命令提示有一个换行，可以添加一个环境变量`PROMPT=$P$_$G$S`
 
-> 中文为`936`，西文为`437`，Unicode 为`65001`，但由于历史原因，Windows 的 UTF-8 编码会带有 BOM，复制粘贴终端里的字符时要留意
+> 中文为`936`，西文为`437`，Unicode 为`65001`，但由于历史原因，Windows 的 UTF-8 编码会带有 BOM，复制粘贴终端里的字符时要留意，如果不想在配置文件中设置字符集，建议升级到最新版本的 PowerShell 7.4 或更高版本，默认使用 UTF-8 编码，并且没有 BOM。
 
 ## 增强
 
@@ -72,4 +72,4 @@ Get-Module PSReadLine | Select-Object Version
 - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/prompt
 - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_prompts?view=powershell-7.4
 
-Last Modified 2024-11-14
+Last Modified 2024-12-03
