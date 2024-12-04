@@ -20,8 +20,8 @@ C:\Windows\System32\WindowsPowerShell\v1.0\Profile.ps1
 配置文件内容（修改需要管理员权限）
 
 ```powershell
-$PSDefaultParameterValues['*:Encoding'] = 'utf8'
-$OutputEncoding = [System.Console]::OutputEncoding = [System.Console]::InputEncoding = [System.Text.Encoding]::UTF8
+$PSDefaultParameterValues['*:Encoding'] = 'utf8NoBOM'
+$OutputEncoding = [System.Console]::OutputEncoding = [System.Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false)
 
 function prompt { "$PWD`n> " }
 
@@ -72,4 +72,4 @@ Get-Module PSReadLine | Select-Object Version
 - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/prompt
 - https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_prompts?view=powershell-7.4
 
-Last Modified 2024-12-03
+Last Modified 2024-12-04
