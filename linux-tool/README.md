@@ -18,6 +18,7 @@
 - top 查看实时进程
 - iotop 查看实时 I/O
 - iftop 查看实时网络流量
+- tcpdump 数据包分析
 - pidstat 查看内核管理的进程信息
 - useradd 新增用户
 - usermod 修改用户
