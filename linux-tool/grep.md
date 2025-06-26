@@ -38,6 +38,7 @@ table th:first-of-type {
 | --exclude-dir=DIR            | 递归搜索时，排除指定的目录，支持通配符                                                                                                                        |
 | --include=GLOB               | 包含指定的文件，支持通配符                                                                                                                                    |
 | -E, --extended-regexp        | 将 PATTERN 解释为扩展的正则表达式                                                                                                                             |
+| -P, --perl-regexp            | 将 PATTERN 解释为 Perl 的正则表达式                                                                                                                           |
 | -A NUM, --after-context=NUM  | 在匹配行后打印 NUM 行尾随上下文。 在连续的匹配组之间放置包含组分隔符（在 --group-separator 下描述）的行                                                       |
 | -B NUM, --before-context=NUM | 在匹配行之前打印前导上下文的 NUM 行。 在连续的匹配组之间放置包含组分隔符（在 --group-separator 下描述）的行                                                   |
 | -C NUM, -NUM, --context=NUM  | 打印 NUM 行输出上下文。 在连续的匹配组之间放置包含组分隔符（在 --group-separator 下描述）的行                                                                 |
@@ -49,15 +50,15 @@ table th:first-of-type {
 
 下面仅说明比较基本的用法，更加高级的用法自行搜索
 
->在基本正则表达式中，元字符`?`，`+`，`{`，`|`，`(`和`)`失去其特殊含义；而是使用反斜杠版
->本`\?`，`\+`，`\{`，`\|`，`\(`和`\)`
+> 在基本正则表达式中，元字符`?`，`+`，`{`，`|`，`(`和`)`失去其特殊含义；而是使用反斜杠版
+> 本`\?`，`\+`，`\{`，`\|`，`\(`和`\)`
 
 ### 字符列表
 
 在`[`和`]`包裹的字符表示可能出现的字符列表，支持连词表示，如`[a-e]`表示`[abcde]`，`\<`和`\>`表示单词开头和结尾，`\b`表示
 以空格分隔的单词开头或结尾，`\B`表示非空格分隔的单词开头或结尾，`\w`表示`[0-9A-Za-z]`，`\W`表示`[^0-9A-Za-z]`
 
->如果在`[`前面使用了`^`，则表示不包含，如`[^a-e]`表示不能包含字母`abcde`
+> 如果在`[`前面使用了`^`，则表示不包含，如`[^a-e]`表示不能包含字母`abcde`
 
 ### 开头结尾
 
@@ -77,7 +78,7 @@ table th:first-of-type {
 
 ## 命令示例
 
->当终端的字符编码为`UTF-8`的情况下，可以使用中文搜索
+> 当终端的字符编码为`UTF-8`的情况下，可以使用中文搜索
 
 1. 输出当前目录下包含`abc`字符串的以`test`开头的所有文件和`/etc/hosts`文件
 
@@ -88,25 +89,25 @@ table th:first-of-type {
 2. 输出当前目录下`test`开头的所有文件中匹配`abc`字符串行的数量
 
    ```bash
-   grep abc -c test*
+   grep -c abc test*
    ```
 
 3. 输出当前目录下`test`开头的所有文件中匹配`abc`字符串的行，并输出匹配行号
 
    ```bash
-   grep abc -n test*
+   grep -n abc test*
    ```
 
 4. 输出当前目录下所有以`test`开头的文件中不包含匹配`abc`字符串的所有行，且不显示文件名
 
    ```bash
-   grep abc -vh test*
+   grep -vh abc test*
    ```
 
 5. 递归搜索当前目录和子目录中以`test`开头的所有文件中包含匹配`abc`字符串的行
 
    ```bash
-   grep abc -r test*
+   grep -r abc test*
    ```
 
 6. 计算一个文件中的空行或非空的行的数量
@@ -114,19 +115,19 @@ table th:first-of-type {
    空行
 
    ```bash
-   grep ^$ -c test.txt
+   grep -c ^$ test.txt
    ```
 
    非空行
 
    ```bash
-   grep -v ^$ -c test.txt
+   grep -c -v ^$ test.txt
    ```
 
-7. 查找 log 文件中 2021 年 1 月到 3 月且 1 号到 19 号的`Error`级别的信息，同时忽略大小写
+7. 查找 log 文件中 2021 年 1 月到 3 月且 1 号到 19 号的`error`级别的信息，同时忽略大小写
 
    ```bash
-   grep -i '2021-0[1-3]-[01][0-9].* Error ' main.log
+   grep -i '2021-0[1-3]-[01][0-9].* error ' main.log
    ```
 
 8. 有时候只查找匹配的信息往往不够，可能还需要查找匹配行的前后几行
@@ -134,7 +135,7 @@ table th:first-of-type {
    ```bash
    ps -ef | grep -nA 1 [j]ava
    ps -ef | grep -nB 1 [j]ava
-   ps -ef | grep -n -1 [j]ava
+   grep -C 3 java app.log
    ```
 
 9. 输出所有匹配的文件名和匹配的数量
@@ -143,4 +144,4 @@ table th:first-of-type {
    grep -H -c *
    ```
 
-Last Modified 2023-05-18
+Last Modified 2025-06-26
