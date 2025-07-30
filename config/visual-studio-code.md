@@ -9,8 +9,7 @@ settings.json
   "window.restoreWindows": "none",
   "editor.renderWhitespace": "all",
   "emmet.triggerExpansionOnTab": true,
-  "php.validate.executablePath": "D:\\php\\php.exe",
-  "php.executablePath": "D:\\php\\php.exe",
+  "php.validate.executablePath": "C:\\php\\php.exe",
   "prettier.printWidth": 120,
   "javascript.format.insertSpaceBeforeFunctionParenthesis": true,
   "typescript.format.insertSpaceBeforeFunctionParenthesis": true,
@@ -64,8 +63,8 @@ settings.json
   },
   "files.trimTrailingWhitespace": true,
   "git.autofetch": "all",
-  "python.autoComplete.extraPaths": ["D:\\Python311\\Lib\\site-packages"],
-  "python.analysis.extraPaths": ["D:\\Python311\\Lib\\site-packages"],
+  "python.autoComplete.extraPaths": ["C:\\miniconda3\\Lib\\site-packages"],
+  "python.analysis.extraPaths": ["C:\\miniconda3\\Lib\\site-packages"],
   "terminal.integrated.defaultProfile.windows": "PowerShell",
   "security.workspace.trust.enabled": false,
   "editor.fontFamily": "Consolas, 'Microsoft Yahei', 'Courier New', monospace",
@@ -95,7 +94,7 @@ settings.json
   "rest-client.timeoutinmilliseconds": 6000,
   "terminal.integrated.persistentSessionReviveProcess": "onExitAndWindowClose",
   "[dockercompose]": {
-    "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+    "editor.defaultFormatter": "ms-azuretools.vscode-containers"
   },
   "cSpell.userWords": ["pageable", "vuex"],
   "[vue]": {
@@ -110,9 +109,29 @@ settings.json
   },
   "git.ignoreRebaseWarning": true,
   "workbench.colorTheme": "Monokai",
-  "window.commandCenter": false,
   "window.newWindowDimensions": "inherit",
-  "autopep8.args": ["--max-line-length=256"]
+  "autopep8.args": ["--max-line-length=256"],
+  "window.commandCenter": false,
+  "Codegeex.Privacy": false,
+  "Codegeex.License": "",
+  "gitlens.views.scm.grouped.views": {
+    "commits": false,
+    "branches": false,
+    "remotes": false,
+    "stashes": true,
+    "tags": true,
+    "worktrees": true,
+    "contributors": true,
+    "repositories": false,
+    "searchAndCompare": false,
+    "launchpad": false
+  },
+  "python-envs.defaultEnvManager": "ms-python.python:conda",
+  "python-envs.defaultPackageManager": "ms-python.python:conda",
+  "python.defaultInterpreterPath": "d:\\Programs\\miniconda3",
+  "chat.agent.enabled": false,
+  "chat.commandCenter.enabled": false,
+  "chat.notifyWindowOnConfirmation": false
 }
 ```
 
@@ -138,4 +157,4 @@ keybindings.json
 ]
 ```
 
-Last Modified 2024-05-05
+Last Modified 2025-07-30
