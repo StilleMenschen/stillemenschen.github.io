@@ -31,4 +31,5 @@
   - [keyshot](linux-tool/keyboard-shortcuts.md)
   - [system log](linux-tool/system-log.md)
   - [journalctl](linux-tool/journalctl.md)
+  - [scheduler](linux-tool/scheduler.md)
   - [More Possible](linux-tool/more-possible.md)
