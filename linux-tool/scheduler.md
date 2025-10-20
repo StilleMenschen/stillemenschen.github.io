@@ -43,8 +43,8 @@ at 命令支持多种时间格式：
 - noon - 中午（12:00）
 - teatime - 下午茶时间（16:00）
 - AM/PM - 上午/下午指示符
-- MMDDYY, MM/DD/YY, DD.MM.YY - 日期格式
-- now + count time-units - 相对时间（如 now + 5 minutes）
+- MMDD[CC]YY, MM/DD/[CC]YY, DD.MM.[CC]YY, [CC]YY-MM-DD - 日期格式
+- now + count time-units - 相对时间（如 now + 5 minutes，单位 minutes, hours, days, weeks）
 - today - 今天
 - tomorrow - 明天
 
@@ -56,6 +56,10 @@ at 命令支持多种时间格式：
    at 14:30
    at> echo "任务执行于 $(date)" >> /tmp/at_job.log
    at> <EOT> # 按Ctrl+D结束输入
+   ```
+
+   ```bash
+   echo "/usr/sbin/poweroff" | at 14:30 1980-01-12
    ```
 
 2. 从文件读取命令创建作业
@@ -219,4 +223,4 @@ crontab 文件包含每行一个作业，格式如下：
    * * * * * env > /tmp/cron_env.txt
    ```
 
-Last Modified 2023-09-01
+Last Modified 2025-10-20
