@@ -5,7 +5,7 @@ settings.json
 ```json
 {
   "files.autoSave": "onFocusChange",
-  "update.mode": "start",
+  "update.mode": "manual",
   "window.restoreWindows": "none",
   "editor.renderWhitespace": "all",
   "emmet.triggerExpansionOnTab": true,
@@ -58,9 +58,6 @@ settings.json
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit"
   },
-  "path-intellisense.mappings": {
-    "@": "${workspaceRoot}\\src"
-  },
   "files.trimTrailingWhitespace": true,
   "git.autofetch": "all",
   "python.autoComplete.extraPaths": ["C:\\miniconda3\\Lib\\site-packages"],
@@ -96,7 +93,6 @@ settings.json
   "[dockercompose]": {
     "editor.defaultFormatter": "ms-azuretools.vscode-containers"
   },
-  "cSpell.userWords": ["pageable", "vuex"],
   "[vue]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
@@ -109,11 +105,11 @@ settings.json
   },
   "git.ignoreRebaseWarning": true,
   "workbench.colorTheme": "Monokai",
+  "window.commandCenter": false,
   "window.newWindowDimensions": "inherit",
   "autopep8.args": ["--max-line-length=256"],
-  "window.commandCenter": false,
-  "Codegeex.Privacy": false,
-  "Codegeex.License": "",
+  "editor.unicodeHighlight.ambiguousCharacters": false,
+  "diffEditor.ignoreTrimWhitespace": true,
   "gitlens.views.scm.grouped.views": {
     "commits": false,
     "branches": false,
@@ -126,12 +122,15 @@ settings.json
     "searchAndCompare": false,
     "launchpad": false
   },
-  "python-envs.defaultEnvManager": "ms-python.python:conda",
-  "python-envs.defaultPackageManager": "ms-python.python:conda",
-  "python.defaultInterpreterPath": "d:\\Programs\\miniconda3",
-  "chat.agent.enabled": false,
   "chat.commandCenter.enabled": false,
-  "chat.notifyWindowOnConfirmation": false
+  "gitlens.views.scm.grouped.default": "remotes",
+  "trailing-spaces.syntaxIgnore": ["markdown"],
+  "diffEditor.hideUnchangedRegions.enabled": true,
+  "[nginx]": {
+    "editor.defaultFormatter": "raynigon.nginx-formatter"
+  },
+  "extensions.autoCheckUpdates": false,
+  "extensions.autoUpdate": false
 }
 ```
 
@@ -140,7 +139,7 @@ keybindings.json
 ```json
 [
   {
-    "key": "alt+d",
+    "key": "ctrl+y",
     "command": "editor.action.deleteLines",
     "when": "textInputFocus && !editorReadonly"
   },
@@ -157,4 +156,4 @@ keybindings.json
 ]
 ```
 
-Last Modified 2025-07-30
+Last Modified 2025-10-23
