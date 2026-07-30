@@ -46,6 +46,7 @@ table th:first-of-type {
 | -u                    | 配合`-lt`：按访问时间排序并显示；配合`-l`：显示访问时间并按名称排序；否则：按访问时间排序                                                           |
 | -X                    | 按条目扩展名的字母顺序排序                                                                                                                          |
 | -1                    | 每行列出一个文件                                                                                                                                    |
+| -d, --directory       | 列出目录本身，而不是其内容                                                                                                                          |
 
 ## 其他说明
 
@@ -117,4 +118,4 @@ ls 只有在连至终端时使用`--color=auto`选项，标准输出才会生成
    ls -Alhgo --sort=time --time-style=long-iso
    ```
 
-Last Modified 2023-03-29
+Last Modified 2026-07-30
